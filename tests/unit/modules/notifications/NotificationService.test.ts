@@ -4,7 +4,7 @@ import { NotificationSeverity } from "@modules/notifications";
 
 // Mock the infrastructure layer
 vi.mock("@infra/tauri/notifications", () => ({
-  sendTauriNotification: vi.fn(async (request) => ({
+  sendTauriNotification: vi.fn(async () => ({
     success: true,
     id: "123",
   })),

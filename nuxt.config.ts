@@ -34,7 +34,6 @@ export default defineNuxtConfig({
       },
     ],
     "@vee-validate/nuxt",
-    "nuxt-typed-router",
   ],
 
   devtools: {
@@ -49,5 +48,9 @@ export default defineNuxtConfig({
     server: {
       strictPort: true,
     },
+  },
+
+  experimental: {
+    typedPages: true,
   },
 });
