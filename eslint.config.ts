@@ -5,6 +5,7 @@ import vueParser from "vue-eslint-parser";
 import globals from "globals";
 import prettier from "eslint-config-prettier";
 import perfectionist from "eslint-plugin-perfectionist";
+import boundaries from "eslint-plugin-boundaries";
 
 export default tseslint.config(
   {
@@ -57,6 +58,54 @@ export default tseslint.config(
     plugins: {
       vue,
       perfectionist,
+      boundaries,
+    },
+
+    settings: {
+      "boundaries/elements": [
+        {
+          type: "module-public-api",
+          pattern: "index.ts",
+          mode: "file",
+          basePattern: "src/modules/*",
+          baseCapture: ["moduleName"],
+        },
+        {
+          type: "module-domain",
+          pattern: "domain/*",
+          basePattern: "src/modules/*",
+          baseCapture: ["moduleName"],
+        },
+        {
+          type: "module-application",
+          pattern: "application/*",
+          basePattern: "src/modules/*",
+          baseCapture: ["moduleName"],
+        },
+        {
+          type: "module-presentation",
+          pattern: "presentation/*",
+          basePattern: "src/modules/*",
+          baseCapture: ["moduleName"],
+        },
+        {
+          type: "module-internal",
+          pattern: "*",
+          mode: "file",
+          basePattern: "src/modules/*",
+          baseCapture: ["moduleName"],
+        },
+        {
+          type: "shared",
+          pattern: "src/shared/*",
+          mode: "full",
+        },
+        {
+          type: "infrastructure",
+          pattern: "src/infrastructure/*",
+          mode: "full",
+        },
+      ],
     },
 
     rules: {
@@ -164,29 +213,13 @@ export default tseslint.config(
 
             ["builtin", "external"],
 
-            "internal-type",
             "internal",
 
-            ["parent-type", "sibling-type", "index-type"],
-
             ["parent", "sibling", "index"],
-
-            "object",
 
             "unknown",
           ],
 
-          customGroups: {
-            value: {
-              vue: ["vue"],
-              nuxt: ["#app", "#imports"],
-              modules: ["@modules/**"],
-              shared: ["@shared/**"],
-              infra: ["@infra/**"],
-            },
-          },
-
-          internalPattern: ["@/**", "@modules/**", "@shared/**", "@infra/**"],
         },
       ],
 
@@ -203,6 +236,65 @@ export default tseslint.config(
         {
           type: "natural",
           order: "asc",
+        },
+      ],
+
+      /*
+       |--------------------------------------------------------------------------
+       | DDD and module boundaries
+       |--------------------------------------------------------------------------
+       */
+
+      "boundaries/dependencies": [
+        "error",
+        {
+          default: "allow",
+          message:
+            "Invalid DDD dependency: {{from.type}} cannot import {{to.type}} ({{dependency.source}})",
+          rules: [
+            {
+              from: { type: "module-domain" },
+              disallow: {
+                to: {
+                  type: [
+                    "module-application",
+                    "module-presentation",
+                    "infrastructure",
+                  ],
+                },
+              },
+              message:
+                "Domain layer must remain pure and cannot depend on application, presentation, or infrastructure.",
+            },
+            {
+              from: { type: "module-application" },
+              disallow: {
+                to: {
+                  type: ["module-presentation"],
+                },
+              },
+              message:
+                "Application layer cannot depend on presentation layer.",
+            },
+            {
+              from: { type: "module-internal" },
+              disallow: {
+                to: {
+                  type: [
+                    "module-domain",
+                    "module-application",
+                    "module-presentation",
+                    "module-internal",
+                  ],
+                  captured: {
+                    moduleName: "!{{from.captured.moduleName}}",
+                  },
+                },
+              },
+              message:
+                "Cross-module internals are forbidden. Import other modules through their public API (index.ts).",
+            },
+          ],
         },
       ],
 

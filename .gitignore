@@ -8,6 +8,7 @@ dist/
 
 # Logs
 *.log
+lint-results.json
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
