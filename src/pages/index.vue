@@ -1,7 +1,9 @@
 <script setup lang="ts">
   import { useNotification } from "@modules/notifications";
+  import { useUpdateChecker } from "@modules/updates";
 
   const { success, error, warning } = useNotification();
+  const { check, isChecking, lastResult } = useUpdateChecker();
 
   async function saveData() {
     try {
@@ -10,6 +12,10 @@
     } catch (err) {
       await error("Save Failed", "Could not save your data");
     }
+  }
+
+  async function checkForAppUpdates() {
+    await check();
   }
 </script>
 
@@ -31,7 +37,22 @@
         Device detection {{ $device.isMobile ? "Mobile" : "Desktop" }}
       </p>
 
-      <button @click="saveData">Save Data</button>
+      <div class="flex flex-wrap gap-3">
+        <button @click="saveData">Save Data</button>
+        <button :disabled="isChecking" @click="checkForAppUpdates">
+          {{ isChecking ? "Checking..." : "Check for Updates" }}
+        </button>
+      </div>
+
+      <p v-if="lastResult?.hasUpdate" class="text-sm text-emerald-300">
+        Update available: {{ lastResult.update?.version }}
+      </p>
+      <p v-else-if="lastResult?.error" class="text-sm text-rose-300">
+        Update check failed: {{ lastResult.error }}
+      </p>
+      <p v-else-if="lastResult && !lastResult.hasUpdate" class="text-sm text-slate-300">
+        You're up to date.
+      </p>
     </div>
   </main>
 </template>
