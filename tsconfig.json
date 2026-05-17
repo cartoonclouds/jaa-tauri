@@ -43,7 +43,8 @@
     "tests/**/*.ts",
     "tests/**/*.d.ts",
     "tests/**/*.tsx",
-    "tests/**/*.vue"
+    "tests/**/*.vue",
+    "nuxt.config.ts"
   ],
   "references": [
     { "path": "./tsconfig.node.json" }

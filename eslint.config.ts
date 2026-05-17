@@ -1,13 +1,14 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
-import vue from "eslint-plugin-vue";
-import vueParser from "vue-eslint-parser";
-import globals from "globals";
 import prettier from "eslint-config-prettier";
-import perfectionist from "eslint-plugin-perfectionist";
 import boundaries from "eslint-plugin-boundaries";
+import perfectionist from "eslint-plugin-perfectionist";
+import vue from "eslint-plugin-vue";
+import { defineConfig } from "eslint/config";
+import globals from "globals";
+import tseslint from "typescript-eslint";
+import vueParser from "vue-eslint-parser";
 
-export default tseslint.config(
+export default defineConfig(
   {
     ignores: [
       ".nuxt/**",
@@ -43,7 +44,7 @@ export default tseslint.config(
 
       parserOptions: {
         parser: tseslint.parser,
-        project: "./tsconfig.json",
+        project: "./tsconfig.eslint.json",
         extraFileExtensions: [".vue"],
         ecmaVersion: "latest",
         sourceType: "module",

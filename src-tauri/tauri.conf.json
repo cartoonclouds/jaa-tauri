@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "JAA",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.jaa.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://127.0.0.1:3000",

@@ -1,7 +1,7 @@
-import { defineNuxtConfig } from "nuxt/config";
+import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import tailwindcss from "@tailwindcss/vite";
+import { defineNuxtConfig } from "nuxt/config";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
@@ -14,6 +14,14 @@ export default defineNuxtConfig({
     "@shared": resolve(rootDir, "./src/shared"),
     "@modules": resolve(rootDir, "./src/modules"),
     "@infra": resolve(rootDir, "./src/infrastructure"),
+  },
+
+  imports: {
+    dirs: [
+      'domain/**/queries',
+      'domain/**/stores',
+      'services/**',
+    ],
   },
 
   modules: [
@@ -48,6 +56,10 @@ export default defineNuxtConfig({
     server: {
       strictPort: true,
     },
+  },
+
+  typescript: {
+    strict: true,
   },
 
   experimental: {
