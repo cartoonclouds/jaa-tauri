@@ -7,10 +7,6 @@
 
 export interface AppSettings {
   theme: "light" | "dark" | "auto";
-  windowWidth: number;
-  windowHeight: number;
-  windowX?: number;
-  windowY?: number;
   sidebarCollapsed: boolean;
   notificationsEnabled: boolean;
   developerMode: boolean;
@@ -20,13 +16,6 @@ export interface AppSettings {
 
 export interface ThemeSettings {
   theme: "light" | "dark" | "auto";
-}
-
-export interface WindowSettings {
-  windowWidth: number;
-  windowHeight: number;
-  windowX?: number;
-  windowY?: number;
 }
 
 export interface UiPreferences {

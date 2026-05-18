@@ -10,7 +10,7 @@ Updated: 2026-05-18.
 - **ui**: Shared presentational components.
 - **utils**: Pure utility helpers.
 - **types**: Shared TypeScript types.
-- **settings**: Lightweight app preferences (theme, window state, UI settings) using Tauri Store.
+- **settings**: Lightweight app preferences (theme and UI settings) using Tauri Store.
 
 ## Architecture Pattern
 
@@ -50,11 +50,12 @@ Query results and mutations with automatic caching:
 Lightweight user preferences stored outside SQLite:
 
 - Theme preference (light/dark/auto)
-- Window size and position
 - UI layout preferences (sidebar collapse, column visibility)
 - Notification settings
 - Developer mode flag
 - Recent searches
+
+Window size and position are managed by `@tauri-apps/plugin-window-state`.
 
 ## Example: Adding New Preferences
 

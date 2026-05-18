@@ -5,7 +5,16 @@
   import { Icon } from "#components";
 
   const { success, error, showWindowsDevToastNotice } = useNotification();
-  const { check, isChecking, lastResult } = useUpdateChecker();
+  const {
+    check,
+    install,
+    isChecking,
+    isInstalling,
+    installProgress,
+    hasUpdateReadyToInstall,
+    lastResult,
+    lastInstallResult,
+  } = useUpdateChecker();
 
   async function saveData() {
     try {
@@ -18,6 +27,10 @@
 
   async function checkForAppUpdates() {
     await check();
+  }
+
+  async function installAppUpdate() {
+    await install();
   }
 </script>
 
@@ -52,10 +65,28 @@
         <button :disabled="isChecking" @click="checkForAppUpdates">
           {{ isChecking ? "Checking..." : "Check for Updates" }}
         </button>
+        <button
+          :disabled="isInstalling || !hasUpdateReadyToInstall"
+          @click="installAppUpdate"
+        >
+          {{ isInstalling ? "Installing..." : "Install Update" }}
+        </button>
       </div>
 
       <p v-if="lastResult?.hasUpdate" class="text-sm text-emerald-300">
         Update available: {{ lastResult.update?.version }}
+      </p>
+      <p v-if="installProgress" class="text-sm text-slate-300">
+        Downloaded {{ installProgress.downloadedBytes }}
+        <template v-if="installProgress.contentLength">
+          of {{ installProgress.contentLength }} bytes
+        </template>
+      </p>
+      <p v-if="lastInstallResult?.success" class="text-sm text-emerald-300">
+        Update installed. Restart the app to use the new version.
+      </p>
+      <p v-else-if="lastInstallResult?.error" class="text-sm text-rose-300">
+        Update install failed: {{ lastInstallResult.error }}
       </p>
       <p v-else-if="lastResult?.error" class="text-sm text-rose-300">
         Update check failed: {{ lastResult.error }}

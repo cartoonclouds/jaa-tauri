@@ -26,6 +26,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": [
       "msi",
       "nsis",
@@ -42,6 +43,17 @@
     ]
   },
   "plugins": {
-    "notification": null
+    "updater": {
+      "pubkey": "untrusted comment: minisign public key: 4FD57CC6751933D7\nRWTXMxl1xnzVT9GcK2WN68lgcC0SfjXW9csqwHe5PXhadRzGkaMolDAa",
+      "endpoints": [
+        "https://example.com/jaa/releases/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    },
+    "notification": null,
+    "opener": null,
+    "fs": null
   }
 }

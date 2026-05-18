@@ -61,11 +61,12 @@ const theme = await settingsService.themeService.get();
 ✅ **Use Tauri Store for:**
 
 - User preferences (theme, layout)
-- Window state (size, position)
 - UI visibility preferences (sidebar collapse, table columns)
 - Notification settings
 - Developer mode flag
 - Recent searches
+
+Window state (size and position) is managed by `@tauri-apps/plugin-window-state`.
 
 ❌ **DO NOT use for:**
 

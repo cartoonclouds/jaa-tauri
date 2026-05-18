@@ -18,6 +18,7 @@ describe("settings.repository", () => {
   let mockStore: any;
 
   beforeEach(async () => {
+    vi.resetModules();
     vi.clearAllMocks();
 
     // Setup mock store
@@ -36,15 +37,20 @@ describe("settings.repository", () => {
     const { initializeSettingsStore } = await import("@shared/settings");
     await initializeSettingsStore();
 
-    expect(Store.load).toHaveBeenCalledWith("settings.json", {
-      autoSave: true,
-    });
+    expect(Store.load).toHaveBeenCalledWith(
+      "settings.json",
+      expect.objectContaining({
+        autoSave: true,
+      }),
+    );
   });
 
   it("should get settings with defaults", async () => {
     mockStore.get.mockResolvedValue(null);
 
-    const { getSettings } = await import("@shared/settings");
+    const { initializeSettingsStore, getSettings } =
+      await import("@shared/settings");
+    await initializeSettingsStore();
     const settings = await getSettings();
 
     expect(settings.theme).toBe("auto");
@@ -55,15 +61,15 @@ describe("settings.repository", () => {
     mockStore.get.mockResolvedValue({
       theme: "auto",
       sidebarCollapsed: false,
-      windowWidth: 1024,
-      windowHeight: 768,
       notificationsEnabled: true,
       developerMode: false,
       recentSearches: [],
       tableColumnVisibility: {},
     });
 
-    const { setSetting } = await import("@shared/settings");
+    const { initializeSettingsStore, setSetting } =
+      await import("@shared/settings");
+    await initializeSettingsStore();
     await setSetting("theme", "dark");
 
     expect(mockStore.set).toHaveBeenCalled();
@@ -73,15 +79,15 @@ describe("settings.repository", () => {
     mockStore.get.mockResolvedValue({
       theme: "auto",
       sidebarCollapsed: false,
-      windowWidth: 1024,
-      windowHeight: 768,
       notificationsEnabled: true,
       developerMode: false,
       recentSearches: [],
       tableColumnVisibility: {},
     });
 
-    const { addRecentSearch } = await import("@shared/settings");
+    const { initializeSettingsStore, addRecentSearch } =
+      await import("@shared/settings");
+    await initializeSettingsStore();
     await addRecentSearch("job applications");
 
     expect(mockStore.set).toHaveBeenCalled();
@@ -91,15 +97,15 @@ describe("settings.repository", () => {
     mockStore.get.mockResolvedValue({
       theme: "auto",
       sidebarCollapsed: false,
-      windowWidth: 1024,
-      windowHeight: 768,
       notificationsEnabled: true,
       developerMode: false,
       recentSearches: ["job applications"],
       tableColumnVisibility: {},
     });
 
-    const { addRecentSearch } = await import("@shared/settings");
+    const { initializeSettingsStore, addRecentSearch } =
+      await import("@shared/settings");
+    await initializeSettingsStore();
     await addRecentSearch("job applications");
 
     // Should only have one entry

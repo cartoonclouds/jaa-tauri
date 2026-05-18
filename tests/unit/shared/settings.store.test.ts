@@ -12,7 +12,6 @@ vi.mock("@shared/settings/settings.repository", () => ({
   initializeSettingsStore: vi.fn(),
   getSettings: vi.fn(),
   setThemeSettings: vi.fn(),
-  setWindowSettings: vi.fn(),
   setUiPreferences: vi.fn(),
   setNotificationSettings: vi.fn(),
 }));
@@ -38,8 +37,6 @@ describe("useSettingsStore", () => {
       sidebarCollapsed: false,
       notificationsEnabled: true,
       developerMode: false,
-      windowWidth: 1024,
-      windowHeight: 768,
       recentSearches: [],
       tableColumnVisibility: {},
     };
@@ -63,8 +60,6 @@ describe("useSettingsStore", () => {
       sidebarCollapsed: true,
       notificationsEnabled: false,
       developerMode: true,
-      windowWidth: 1024,
-      windowHeight: 768,
       recentSearches: [],
       tableColumnVisibility: {},
     };
@@ -90,8 +85,6 @@ describe("useSettingsStore", () => {
       sidebarCollapsed: false,
       notificationsEnabled: true,
       developerMode: false,
-      windowWidth: 1024,
-      windowHeight: 768,
       recentSearches: [],
       tableColumnVisibility: {},
     };
@@ -116,8 +109,6 @@ describe("useSettingsStore", () => {
       sidebarCollapsed: false,
       notificationsEnabled: true,
       developerMode: false,
-      windowWidth: 1024,
-      windowHeight: 768,
       recentSearches: [],
       tableColumnVisibility: {},
     };

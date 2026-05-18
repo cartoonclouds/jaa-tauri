@@ -49,7 +49,7 @@ fn discover_migrations() -> Vec<Migration> {
 ///
 /// Sections:
 /// - Build migration list from embedded SQL files.
-/// - Initialize Tauri plugins (storage, dialogs, fs, logging, shell, SQL, notifications).
+/// - Initialize Tauri plugins (storage, dialogs, fs, logging, shell, SQL, updater, notifications).
 /// - Configure system tray menu behavior.
 /// - Hide window to tray when minimized.
 /// - Start the Tauri event loop.
@@ -66,6 +66,7 @@ pub fn run() {
 
     // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         // Persistence and native capability plugins.
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
@@ -83,6 +84,8 @@ pub fn run() {
                 .add_migrations("sqlite:jaa.db", migrations)
                 .build(),
         )
+        // Application updater support.
+        .plugin(tauri_plugin_updater::Builder::new().build())
         // Desktop notifications.
         .plugin(tauri_plugin_notification::init())
         // 3) Configure tray icon and tray menu actions.

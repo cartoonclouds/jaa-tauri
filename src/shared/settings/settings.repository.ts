@@ -11,7 +11,6 @@ import type {
   NotificationSettings,
   ThemeSettings,
   UiPreferences,
-  WindowSettings,
 } from "./types";
 
 import { Store } from "@tauri-apps/plugin-store";
@@ -20,8 +19,6 @@ const STORE_KEY = "app-settings";
 
 const DEFAULT_SETTINGS: AppSettings = {
   theme: "auto",
-  windowWidth: 1024,
-  windowHeight: 768,
   sidebarCollapsed: false,
   notificationsEnabled: true,
   developerMode: false,
@@ -111,28 +108,6 @@ export async function getThemeSettings(): Promise<ThemeSettings> {
  */
 export async function setThemeSettings(settings: ThemeSettings): Promise<void> {
   await setSetting("theme", settings.theme);
-}
-
-/**
- * Get window settings.
- */
-export async function getWindowSettings(): Promise<WindowSettings> {
-  const settings = await getSettings();
-  return {
-    windowWidth: settings.windowWidth,
-    windowHeight: settings.windowHeight,
-    windowX: settings.windowX,
-    windowY: settings.windowY,
-  };
-}
-
-/**
- * Set window settings.
- */
-export async function setWindowSettings(
-  settings: WindowSettings,
-): Promise<void> {
-  await setSettings(settings);
 }
 
 /**

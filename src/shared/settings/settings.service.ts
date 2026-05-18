@@ -16,7 +16,6 @@ import {
   getTableColumnVisibility,
   getThemeSettings,
   getUiPreferences,
-  getWindowSettings,
   setDeveloperSettings,
   setNotificationSettings,
   setSetting,
@@ -24,7 +23,6 @@ import {
   setTableColumnVisibility,
   setThemeSettings,
   setUiPreferences,
-  setWindowSettings,
 } from "./settings.repository";
 
 /**
@@ -66,14 +64,6 @@ export const useSettingsService = () => {
   };
 
   /**
-   * Window state management.
-   */
-  const windowService = {
-    get: getWindowSettings,
-    set: setWindowSettings,
-  };
-
-  /**
    * UI preferences management.
    */
   const uiService = {
@@ -112,7 +102,6 @@ export const useSettingsService = () => {
     updateSettings,
     updateSetting,
     themeService,
-    windowService,
     uiService,
     notificationService,
     developerService,

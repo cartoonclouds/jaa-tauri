@@ -8,6 +8,20 @@ import type {
   NotificationResult,
 } from "@modules/notifications/domain/entities/Notification";
 
+async function ensureNotificationPermission(): Promise<boolean> {
+  const { isPermissionGranted, requestPermission } =
+    await import("@tauri-apps/plugin-notification");
+
+  let permissionGranted = await isPermissionGranted();
+
+  if (!permissionGranted) {
+    const permission = await requestPermission();
+    permissionGranted = permission === "granted";
+  }
+
+  return permissionGranted;
+}
+
 let hasWarnedWindowsDevToastLimit = false;
 
 export function isWindowsDevToastLimited(): boolean {
@@ -38,6 +52,11 @@ export async function sendTauriNotification(
   try {
     warnWindowsDevToastLimitOnce();
 
+    const permissionGranted = await ensureNotificationPermission();
+    if (!permissionGranted) {
+      return { success: false, error: "Notification permission not granted" };
+    }
+
     // Dynamically import to avoid SSR issues
     const { sendNotification } =
       await import("@tauri-apps/plugin-notification");
@@ -66,14 +85,7 @@ export async function isNotificationSupported(): Promise<boolean> {
   if (typeof window === "undefined") return false;
 
   try {
-    const { isPermissionGranted, requestPermission } =
-      await import("@tauri-apps/plugin-notification");
-
-    const granted = await isPermissionGranted();
-    if (!granted) {
-      await requestPermission();
-    }
-    return true;
+    return await ensureNotificationPermission();
   } catch {
     return false;
   }

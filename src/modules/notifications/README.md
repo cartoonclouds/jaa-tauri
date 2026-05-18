@@ -93,7 +93,13 @@ if (service.isSupported()) {
 
 ## Permissions
 
-Tauri will automatically request notification permissions when needed. Users must grant permission for notifications to work.
+This module follows the official Tauri notification flow:
+
+1. Check `isPermissionGranted()`.
+2. Request permission with `requestPermission()` when needed.
+3. Only call `sendNotification()` when permission is `"granted"`.
+
+If permission is denied, send calls return `{ success: false, error: "Notification permission not granted" }`.
 
 The Rust runtime now initializes `tauri-plugin-notification`, and capability permissions include `notification:default`.
 

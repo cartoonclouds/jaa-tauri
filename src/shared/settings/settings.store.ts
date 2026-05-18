@@ -17,7 +17,6 @@ import {
   setNotificationSettings,
   setThemeSettings,
   setUiPreferences,
-  setWindowSettings,
 } from "./settings.repository";
 
 export const useSettingsStore = defineStore("settings", () => {
@@ -70,30 +69,6 @@ export const useSettingsStore = defineStore("settings", () => {
       error.value =
         err instanceof Error ? err.message : "Failed to update theme";
       console.error("Theme update error:", err);
-    }
-  };
-
-  /**
-   * Update window state.
-   */
-  const updateWindowState = async (
-    width: number,
-    height: number,
-    x?: number,
-    y?: number,
-  ): Promise<void> => {
-    try {
-      await setWindowSettings({
-        windowWidth: width,
-        windowHeight: height,
-        windowX: x,
-        windowY: y,
-      });
-      await reload();
-    } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : "Failed to update window state";
-      console.error("Window state update error:", err);
     }
   };
 
@@ -151,7 +126,6 @@ export const useSettingsStore = defineStore("settings", () => {
     initialize,
     reload,
     updateTheme,
-    updateWindowState,
     toggleSidebar,
     toggleNotifications,
     theme,
