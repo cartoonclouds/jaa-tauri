@@ -4,6 +4,8 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": "./",
     "paths": {
+      "#imports": ["./.nuxt/imports"],
+      "#components": ["./.nuxt/components"],
       "@/*": ["src/*"],
       "~/*": ["src/*"],
 
@@ -40,6 +42,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
+    ".nuxt/**/*.d.ts",
     "tests/**/*.ts",
     "tests/**/*.d.ts",
     "tests/**/*.tsx",

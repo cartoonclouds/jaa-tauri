@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "nuxt dev --host 127.0.0.1 --port 3000 --strictPort",
+    "dev": "nuxt dev --host 127.0.0.1",
+    "dev:tauri": "nuxt dev --host 127.0.0.1 --port 3000 --strictPort",
     "generate": "nuxt generate",
     "tauri": "tauri",
     "build": "nuxt build",
@@ -46,7 +47,6 @@
     "nuxt": "4.4.5",
     "nuxt-security": "2.6.0",
     "pinia": "3.0.4",
-    "primeicons": "7.0.0",
     "primevue": "4.5.5",
     "tailwindcss": "4.3.0",
     "vee-validate": "4.15.1",

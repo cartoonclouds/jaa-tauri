@@ -8,7 +8,7 @@ const rootDir = fileURLToPath(new URL(".", import.meta.url));
 export default defineNuxtConfig({
   srcDir: "src/",
 
-  css: ["primeicons/primeicons.css", "~/assets/css/tailwind.css"],
+  css: ["~/assets/css/tailwind.css"],
 
   alias: {
     "@shared": resolve(rootDir, "./src/shared"),
@@ -18,9 +18,10 @@ export default defineNuxtConfig({
 
   imports: {
     dirs: [
-      'domain/**/queries',
-      'domain/**/stores',
-      'services/**',
+      "modules/**/queries",
+      "modules/**/stores",
+      "modules/**/services",
+      "services/**",
     ],
   },
 
@@ -53,9 +54,6 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     clearScreen: false,
-    server: {
-      strictPort: true,
-    },
   },
 
   typescript: {

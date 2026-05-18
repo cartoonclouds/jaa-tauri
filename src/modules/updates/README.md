@@ -2,6 +2,8 @@
 
 Checks for application updates via Tauri updater plugin and alerts users when a newer version exists.
 
+Updated: 2026-05-17.
+
 ## What it does
 
 - Calls the configured update server through `@tauri-apps/plugin-updater`.

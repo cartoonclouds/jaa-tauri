@@ -2,6 +2,8 @@
 
 Reusable presentational UI components.
 
+Updated: 2026-05-17.
+
 Guidelines:
 
 - Prefer stateless components.

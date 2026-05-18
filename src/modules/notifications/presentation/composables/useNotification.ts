@@ -2,23 +2,27 @@
  * Composable for sending desktop notifications in Vue components.
  */
 
-import { ref } from "vue";
 import type {
   NotificationRequest,
   NotificationResult,
 } from "../../domain/entities/Notification";
+
+import { isWindowsDevToastLimited } from "@infra/tauri/notifications";
+import { onMounted, ref, type Ref } from "vue";
+
 import { NotificationService } from "../../application/services/NotificationService";
 import {
-  sendNotification,
+  sendErrorNotification,
   sendInfoNotification,
+  sendNotification,
   sendSuccessNotification,
   sendWarningNotification,
-  sendErrorNotification,
 } from "../../application/use-cases/SendNotification";
 
 interface UseNotificationReturn {
-  isSupported: Readonly<import("vue").Ref<boolean>>;
-  isLoading: Readonly<import("vue").Ref<boolean>>;
+  isSupported: Readonly<Ref<boolean>>;
+  isLoading: Readonly<Ref<boolean>>;
+  showWindowsDevToastNotice: Readonly<Ref<boolean>>;
   send: (request: NotificationRequest) => Promise<NotificationResult>;
   info: (title: string, body: string) => Promise<NotificationResult>;
   success: (title: string, body: string) => Promise<NotificationResult>;
@@ -45,14 +49,25 @@ let initialized = false;
 export function useNotification(): UseNotificationReturn {
   const isSupported = ref(false);
   const isLoading = ref(false);
+  const showWindowsDevToastNotice = ref(false);
+
+  // Keep SSR and client pre-hydration markup identical.
+  onMounted(() => {
+    showWindowsDevToastNotice.value = isWindowsDevToastLimited();
+  });
 
   // Initialize on first use
   if (!initialized) {
     initialized = true;
     const service = NotificationService.getInstance();
-    service.initialize().then(() => {
-      isSupported.value = service.isSupported();
-    });
+    void service
+      .initialize()
+      .then(() => {
+        isSupported.value = service.isSupported();
+      })
+      .catch((error: unknown) => {
+        console.error("[Notifications] Failed to initialize service", error);
+      });
   }
 
   async function send(
@@ -117,6 +132,7 @@ export function useNotification(): UseNotificationReturn {
   return {
     isSupported: readonly(isSupported),
     isLoading: readonly(isLoading),
+    showWindowsDevToastNotice: readonly(showWindowsDevToastNotice),
     send,
     info,
     success,
@@ -128,8 +144,6 @@ export function useNotification(): UseNotificationReturn {
 /**
  * Vue readonly type - converts a Ref to readonly.
  */
-function readonly<T>(
-  ref: import("vue").Ref<T>,
-): Readonly<import("vue").Ref<T>> {
-  return ref as Readonly<import("vue").Ref<T>>;
+function readonly<T>(ref: Ref<T>): Readonly<Ref<T>> {
+  return ref;
 }

@@ -8,6 +8,26 @@ import type {
   NotificationResult,
 } from "@modules/notifications/domain/entities/Notification";
 
+let hasWarnedWindowsDevToastLimit = false;
+
+export function isWindowsDevToastLimited(): boolean {
+  if (!import.meta.env.DEV) return false;
+
+  return (
+    typeof navigator !== "undefined" && /windows/i.test(navigator.userAgent)
+  );
+}
+
+function warnWindowsDevToastLimitOnce(): void {
+  if (hasWarnedWindowsDevToastLimit) return;
+  if (!isWindowsDevToastLimited()) return;
+
+  hasWarnedWindowsDevToastLimit = true;
+  console.warn(
+    "[Notifications] Windows dev mode may show notifications only in Notification Center. Install a built app to validate native popup toasts.",
+  );
+}
+
 /**
  * Send a system notification using Tauri.
  * Gracefully handles cases where the notification plugin is unavailable.
@@ -16,11 +36,13 @@ export async function sendTauriNotification(
   request: NotificationRequest,
 ): Promise<NotificationResult> {
   try {
+    warnWindowsDevToastLimitOnce();
+
     // Dynamically import to avoid SSR issues
     const { sendNotification } =
       await import("@tauri-apps/plugin-notification");
 
-    await sendNotification({
+    sendNotification({
       title: request.title,
       body: request.body,
       icon: request.icon,
@@ -29,7 +51,7 @@ export async function sendTauriNotification(
       sound: request.sound,
     });
 
-    return { success: true, id: `${Date.now()}` };
+    return { success: true, id: String(Date.now()) };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[Notifications] Tauri notification failed:", message);

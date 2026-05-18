@@ -2,6 +2,8 @@
 
 Desktop notification system for the Nuxt/Tauri application using Tauri's notification plugin.
 
+Updated: 2026-05-17.
+
 ## Overview
 
 This module provides a DDD-structured notification system with:
@@ -92,6 +94,20 @@ if (service.isSupported()) {
 ## Permissions
 
 Tauri will automatically request notification permissions when needed. Users must grant permission for notifications to work.
+
+The Rust runtime now initializes `tauri-plugin-notification`, and capability permissions include `notification:default`.
+
+### Windows toast popup behavior
+
+On Windows, the native popup banner (toast) is only reliable for installed apps.
+When running with `npm run tauri dev`, notifications may appear only in Notification Center
+because the process is treated as a development executable.
+
+To validate real popup behavior:
+
+- Build and install the app (`npm run tauri build`, then install the generated MSI/EXE).
+- Open Windows notification settings for the installed app and ensure **Show notification banners** is enabled.
+- Ensure Focus Assist / Do Not Disturb is not suppressing banners.
 
 ## API Reference
 

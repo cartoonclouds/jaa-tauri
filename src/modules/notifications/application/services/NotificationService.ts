@@ -8,22 +8,24 @@ import type {
   NotificationResult,
   RichNotification,
 } from "../../domain/entities/Notification";
-import { NotificationSeverity } from "../../domain/entities/Notification";
+
 import {
-  sendTauriNotification,
   isNotificationSupported,
+  sendTauriNotification,
 } from "@infra/tauri/notifications";
 
-export class NotificationService {
-  private static instance: NotificationService;
-  private supported: boolean = false;
+import { NotificationSeverity } from "../../domain/entities/Notification";
 
-  private constructor() {}
+export class NotificationService {
+  private static instance: NotificationService | null = null;
+  private supported = false;
+
+  private constructor() {
+    this.supported = false;
+  }
 
   static getInstance(): NotificationService {
-    if (!NotificationService.instance) {
-      NotificationService.instance = new NotificationService();
-    }
+    NotificationService.instance ??= new NotificationService();
     return NotificationService.instance;
   }
 
@@ -73,7 +75,7 @@ export class NotificationService {
    */
   async sendInfo(title: string, body: string): Promise<NotificationResult> {
     return this.sendRich({
-      id: `${Date.now()}`,
+      id: String(Date.now()),
       title,
       body,
       severity: NotificationSeverity.INFO,
@@ -86,7 +88,7 @@ export class NotificationService {
    */
   async sendSuccess(title: string, body: string): Promise<NotificationResult> {
     return this.sendRich({
-      id: `${Date.now()}`,
+      id: String(Date.now()),
       title,
       body,
       severity: NotificationSeverity.SUCCESS,
@@ -99,7 +101,7 @@ export class NotificationService {
    */
   async sendWarning(title: string, body: string): Promise<NotificationResult> {
     return this.sendRich({
-      id: `${Date.now()}`,
+      id: String(Date.now()),
       title,
       body,
       severity: NotificationSeverity.WARNING,
@@ -112,7 +114,7 @@ export class NotificationService {
    */
   async sendError(title: string, body: string): Promise<NotificationResult> {
     return this.sendRich({
-      id: `${Date.now()}`,
+      id: String(Date.now()),
       title,
       body,
       severity: NotificationSeverity.ERROR,

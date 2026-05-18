@@ -2,6 +2,8 @@
 
 Test suites organized by scope.
 
+Updated: 2026-05-17.
+
 ## Folders
 
 - unit: Fast isolated tests.
@@ -10,3 +12,5 @@ Test suites organized by scope.
 - fixtures: Reusable test data.
 - mocks: Test doubles.
 - setup.ts: Shared test setup.
+
+Workspace settings run ESLint fixes and organize imports on save to keep test files consistent with lint rules.

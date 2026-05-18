@@ -2,14 +2,16 @@
   import { useNotification } from "@modules/notifications";
   import { useUpdateChecker } from "@modules/updates";
 
-  const { success, error, warning } = useNotification();
+  import { Icon } from "#components";
+
+  const { success, error, showWindowsDevToastNotice } = useNotification();
   const { check, isChecking, lastResult } = useUpdateChecker();
 
   async function saveData() {
     try {
       // ... save logic
       await success("Saved!", "Your data has been saved");
-    } catch (err) {
+    } catch {
       await error("Save Failed", "Could not save your data");
     }
   }
@@ -28,6 +30,14 @@
       </h1>
 
       <p class="text-slate-300">Nuxt + Tauri is running correctly.</p>
+
+      <p
+        v-if="showWindowsDevToastNotice"
+        class="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+      >
+        Windows dev mode may send notifications to Notification Center only.
+        Build and install the app to validate native popup toast banners.
+      </p>
 
       <p
         class="inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300"
@@ -50,7 +60,10 @@
       <p v-else-if="lastResult?.error" class="text-sm text-rose-300">
         Update check failed: {{ lastResult.error }}
       </p>
-      <p v-else-if="lastResult && !lastResult.hasUpdate" class="text-sm text-slate-300">
+      <p
+        v-else-if="lastResult && !lastResult.hasUpdate"
+        class="text-sm text-slate-300"
+      >
         You're up to date.
       </p>
     </div>

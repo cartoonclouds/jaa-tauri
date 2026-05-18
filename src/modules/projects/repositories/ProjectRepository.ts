@@ -1,11 +1,12 @@
-import type { DatabaseDriver } from '~/services/database/DatabaseDriver'
+import type { DatabaseDriver } from "~/services/database/DatabaseDriver";
 import type {
   CreateProjectInput,
   Project,
   ProjectRow,
   UpdateProjectInput,
-} from '../types'
-import { mapProjectRow } from './projectMapper'
+} from "../types";
+
+import { mapProjectRow } from "./projectMapper";
 
 export class ProjectRepository {
   constructor(private readonly db: DatabaseDriver) {}
@@ -17,9 +18,9 @@ export class ProjectRepository {
       FROM projects
       ORDER BY created_at DESC
       `,
-    )
+    );
 
-    return rows.map(mapProjectRow)
+    return rows.map(mapProjectRow);
   }
 
   async find(id: string): Promise<Project | null> {
@@ -31,14 +32,14 @@ export class ProjectRepository {
       LIMIT 1
       `,
       [id],
-    )
+    );
 
-    return rows[0] ? mapProjectRow(rows[0]) : null
+    return rows[0] ? mapProjectRow(rows[0]) : null;
   }
 
   async create(input: CreateProjectInput): Promise<Project> {
-    const id = crypto.randomUUID()
-    const now = new Date().toISOString()
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
 
     await this.db.execute(
       `
@@ -51,29 +52,23 @@ export class ProjectRepository {
       )
       VALUES ($1, $2, $3, $4, $5)
       `,
-      [
-        id,
-        input.name,
-        input.description ?? null,
-        now,
-        now,
-      ],
-    )
+      [id, input.name, input.description ?? null, now, now],
+    );
 
-    const project = await this.find(id)
+    const project = await this.find(id);
 
     if (!project) {
-      throw new Error(`Failed to create project ${id}`)
+      throw new Error(`Failed to create project ${id}`);
     }
 
-    return project
+    return project;
   }
 
   async update(input: UpdateProjectInput): Promise<Project> {
-    const existing = await this.find(input.id)
+    const existing = await this.find(input.id);
 
     if (!existing) {
-      throw new Error(`Project ${input.id} not found`)
+      throw new Error(`Project ${input.id} not found`);
     }
 
     await this.db.execute(
@@ -93,15 +88,15 @@ export class ProjectRepository {
         new Date().toISOString(),
         input.id,
       ],
-    )
+    );
 
-    const project = await this.find(input.id)
+    const project = await this.find(input.id);
 
     if (!project) {
-      throw new Error(`Project ${input.id} not found after update`)
+      throw new Error(`Project ${input.id} not found after update`);
     }
 
-    return project
+    return project;
   }
 
   async delete(id: string): Promise<void> {
@@ -111,6 +106,6 @@ export class ProjectRepository {
       WHERE id = $1
       `,
       [id],
-    )
+    );
   }
 }

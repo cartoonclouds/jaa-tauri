@@ -166,10 +166,13 @@ tests/
 Do:
 
 - Keep pages and components thin.
+- When needing icons, use a heroicons package and a NuxtIcon component.
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
 - Use project aliases (`@`, `@modules`, `@shared`, `@infra`) instead of deep relative imports.
 - Add or update tests when changing business logic.
-- Prefer explicit types for public function inputs/outputs.
+- Prefer explicit types for public function inputs/outputs. When creating a types file using the following filename convention: `types.d.ts` or `types/index.d.ts`, update the barrel export in the module's `index.ts` file and update any Typescript configuration if necessary.
+- When asked to install a Tauri plugin, check the official Tauri documentation for the latest recommended approach. Follow their guidance for installation, configuration, and usage. Ensure that any new Tauri plugin is properly integrated with the existing Tauri setup in `src-tauri` and that it does not introduce conflicts with current dependencies or configurations.
+  After any significant code change, run the test suite to ensure nothing is broken. If new functionality is added, write tests to cover it. If existing tests are affected, update them accordingly. Always maintain a green test suite after your changes. Also run `npm run tauri dev` to ensure the Tauri integration is working correctly with your changes.
 
 Don't:
 

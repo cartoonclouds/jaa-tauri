@@ -1,8 +1,19 @@
 use include_dir::{include_dir, Dir};
 use tauri_plugin_sql::{Migration, MigrationKind};
 
+/// Compile-time embedded SQL migrations folder.
+///
+/// Keeping migrations embedded ensures desktop builds always ship with
+/// the exact migration set used by the binary.
 static MIGRATIONS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/migrations");
 
+/// Discovers and builds SQL migrations from embedded files.
+///
+/// Expected filename format starts with a numeric version prefix, for example:
+/// `0001_create_projects.sql`.
+///
+/// The full filename is used as the migration description to preserve clear
+/// traceability between migration records and source files.
 fn discover_migrations() -> Vec<Migration> {
     let mut entries: Vec<(i64, &'static str, &'static str)> = MIGRATIONS_DIR
         .files()
@@ -34,6 +45,14 @@ fn discover_migrations() -> Vec<Migration> {
         .collect()
 }
 
+/// Application entry point for desktop/mobile Tauri runtime.
+///
+/// Sections:
+/// - Build migration list from embedded SQL files.
+/// - Initialize Tauri plugins (storage, dialogs, fs, logging, shell, SQL, notifications).
+/// - Configure system tray menu behavior.
+/// - Hide window to tray when minimized.
+/// - Start the Tauri event loop.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     use tauri::{
@@ -42,9 +61,12 @@ pub fn run() {
         Manager, WindowEvent,
     };
 
+    // 1) Discover embedded SQL migrations and pass them to the SQL plugin.
     let migrations = discover_migrations();
 
+    // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
+        // Persistence and native capability plugins.
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -55,12 +77,15 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
+        // SQL plugin with discovered migrations for schema evolution.
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations("sqlite:jaa.db", migrations)
                 .build(),
         )
+        // Desktop notifications.
         .plugin(tauri_plugin_notification::init())
+        // 3) Configure tray icon and tray menu actions.
         .setup(|app| {
             let show = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -100,16 +125,26 @@ pub fn run() {
                 })
                 .build(app)?;
 
+            // Open devtools in debug mode for easier development and debugging.
             app.manage(tray);
+
+            #[cfg(debug_assertions)]
+            {
+                let window = app.get_webview_window("main").unwrap();
+                window.open_devtools();
+            }
 
             Ok(())
         })
+        // 4) Minimize-to-tray behavior: hide window only when minimized.
         .on_window_event(|window, event| {
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                let _ = window.hide();
-                api.prevent_close();
+            if let WindowEvent::Resized(_) = event {
+                if let Ok(true) = window.is_minimized() {
+                    let _ = window.hide();
+                }
             }
         })
+        // 5) Start event loop.
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

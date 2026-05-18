@@ -1,13 +1,22 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "enables the default permissions",
+  "description": "enables the default permissions for all platforms",
   "windows": [
     "main"
   ],
+  "domains": [
+    "http://127.0.0.1",
+    "http://localhost"
+  ],
   "permissions": [
     "core:default",
+    "dialog:default",
+    "fs:default",
+    "store:default",
     "updater:default",
-    "notification:default"
+    "notification:default",
+    "shell:default",
+    "log:default"
   ]
 }

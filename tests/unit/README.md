@@ -2,6 +2,8 @@
 
 Unit tests by architecture area.
 
+Updated: 2026-05-17.
+
 ## Folders
 
 - shared
@@ -9,3 +11,5 @@ Unit tests by architecture area.
 - infrastructure
 
 Keep tests deterministic and side-effect free.
+
+Feature unit tests should target module-first paths such as `src/modules/projects`.

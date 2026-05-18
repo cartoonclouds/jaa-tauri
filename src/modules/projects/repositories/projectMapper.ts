@@ -1,4 +1,4 @@
-import type { Project, ProjectRow } from '../types'
+import type { Project, ProjectRow } from "../types";
 
 export function mapProjectRow(row: ProjectRow): Project {
   return {
@@ -7,5 +7,5 @@ export function mapProjectRow(row: ProjectRow): Project {
     description: row.description,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-  }
+  };
 }

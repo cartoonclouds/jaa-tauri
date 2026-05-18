@@ -31,6 +31,10 @@ At the moment, the repository already includes feature modules and infrastructur
 - PrimeVue, Nuxt UI utilities, and Tailwind CSS 4 for UI composition
 - Vitest and Vue Test Utils for testing
 
+## Platform Support
+
+This application is built to run on **Windows**, **macOS**, and **Linux** with feature parity across all platforms. The Tauri 2 runtime provides desktop capabilities including SQLite persistence, native notifications, system tray integration, and shell access on all supported platforms.
+
 ## Development commands
 
 Install dependencies:
@@ -87,23 +91,122 @@ Generate coverage:
 npm run test:coverage
 ```
 
+## Cross-Platform Build Instructions
+
+### Prerequisites
+
+All platforms require:
+
+- Node.js 18+ and npm
+- Rust 1.77.2 or later (for Tauri compilation)
+- Git
+
+**Windows:**
+
+- Microsoft Visual C++ build tools or Visual Studio 2022 with C++ support
+
+**macOS:**
+
+- Xcode Command Line Tools: `xcode-select --install`
+- Apple Developer account (for notarization in production)
+
+**Linux:**
+
+- Build essentials and development libraries:
+
+  ```bash
+  # Ubuntu/Debian
+  sudo apt-get install build-essential libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+  # Fedora
+  sudo dnf install gcc gcc-c++ openssl-devel gtk3-devel libappindicator-gtk3-devel librsvg2-devel
+
+  # Arch
+  sudo pacman -S base-devel gtk3 libayatana-appindicator openssl
+  ```
+
+### Building for Your Platform
+
+To build the app for your current platform:
+
+```bash
+npm run tauri build
+```
+
+This will:
+
+1. Build the Nuxt frontend to `.output/public`
+2. Compile the Rust backend
+3. Create platform-specific installers in `src-tauri/target/release/bundle/`
+
+### Building for Specific Platforms
+
+**Windows (MSI/NSIS installers):**
+
+```bash
+npm run tauri build -- --target x86_64-pc-windows-msvc
+```
+
+**macOS (DMG and App bundle):**
+
+```bash
+npm run tauri build -- --target aarch64-apple-darwin  # Apple Silicon
+npm run tauri build -- --target x86_64-apple-darwin   # Intel
+```
+
+**Linux (AppImage, deb package):**
+
+```bash
+npm run tauri build -- --target x86_64-unknown-linux-gnu
+```
+
+Output bundles will be available in:
+
+- Windows: `src-tauri/target/release/bundle/msi/` and `src-tauri/target/release/bundle/nsis/`
+- macOS: `src-tauri/target/release/bundle/dmg/` and `src-tauri/target/release/bundle/macos/`
+- Linux: `src-tauri/target/release/bundle/deb/` and `src-tauri/target/release/bundle/appimage/`
+
+### Development on Different Platforms
+
+The development experience is consistent across all platforms. Simply run:
+
+```bash
+npm run tauri dev
+```
+
+This starts both the Nuxt dev server and the Tauri app in development mode. Hot module reloading works the same on Windows, macOS, and Linux.
+
 ## Project structure
 
 Top-level areas you will work in most often:
 
 - `src/`: Nuxt application source
 - `src/modules/`: feature-oriented modules and business logic
-- `src/infrastructure/`: adapters for config, Tauri APIs, persistence, logging, and HTTP
+- `src/infrastructure/`: adapters for config, Tauri APIs, persistence, logging, and HTTP (all cross-platform compatible)
 - `src/shared/`: shared domain, types, UI helpers, and utilities
-- `src-tauri/`: Rust-side desktop runtime and Tauri configuration
+- `src-tauri/`: Rust-based desktop runtime and Tauri configuration (supports Windows, macOS, Linux)
 - `tests/`: unit, component, integration, mocks, and fixtures
 
-Architecture notes by area:
+All code is platform-agnostic. Platform-specific differences (like native notification presentation) are abstracted by Tauri plugins and automatically handled at runtime.
+
+## Data Persistence Architecture
+
+The application uses a layered approach to data storage:
+
+- **SQLite** - Real application data (job applications, companies, projects)
+- **Tauri Store** - Lightweight user preferences (theme, window state, UI settings)
+- **Pinia** - Reactive UI state (session-only, not persisted)
+- **Pinia Colada** - Query cache and async state management
+
+See [PERSISTENCE_ARCHITECTURE.md](PERSISTENCE_ARCHITECTURE.md) for detailed guidelines on when to use each layer.
+
+## Architecture notes by area:
 
 - [src/README.md](src/README.md)
 - [src/modules/README.md](src/modules/README.md)
 - [src/modules/customers/README.md](src/modules/customers/README.md)
 - [src/shared/README.md](src/shared/README.md)
+- [src/shared/settings/README.md](src/shared/settings/README.md)
 - [src/infrastructure/README.md](src/infrastructure/README.md)
 - [src/server/README.md](src/server/README.md)
 - [src/pages/README.md](src/pages/README.md)
@@ -130,7 +233,7 @@ The application enables the following Nuxt modules in `nuxt.config.ts`:
 Additional frontend configuration:
 
 - Tailwind CSS 4 is connected through Vite with `@tailwindcss/vite`.
-- PrimeIcons is loaded globally for icon fonts.
+- Icons are rendered with `@nuxt/icon` using the Heroicons Iconify collection.
 - Typed pages are enabled through Nuxt experimental support.
 
 ## NPM packages
@@ -165,7 +268,6 @@ Additional frontend configuration:
 | `nuxt`                            | Application framework.                          |
 | `nuxt-security`                   | Security module for Nuxt.                       |
 | `pinia`                           | State management for Vue and Nuxt.              |
-| `primeicons`                      | Prime icon font set.                            |
 | `primevue`                        | UI component library.                           |
 | `tailwindcss`                     | Utility-first CSS framework.                    |
 | `vee-validate`                    | Form validation library.                        |
@@ -207,15 +309,16 @@ Additional frontend configuration:
 
 The desktop runtime currently wires these plugins in `src-tauri/src/lib.rs`:
 
-| Plugin                | Purpose                          |
-| --------------------- | -------------------------------- |
-| `tauri-plugin-store`  | Local structured storage.        |
-| `tauri-plugin-dialog` | Native dialogs.                  |
-| `tauri-plugin-fs`     | File-system access.              |
-| `tauri-plugin-log`    | Native-side logging.             |
-| `tauri-plugin-opener` | Opening files and external URLs. |
-| `tauri-plugin-shell`  | Shell integration.               |
-| `tauri-plugin-sql`    | SQL database access.             |
+| Plugin                      | Purpose                          |
+| --------------------------- | -------------------------------- |
+| `tauri-plugin-store`        | Local structured storage.        |
+| `tauri-plugin-dialog`       | Native dialogs.                  |
+| `tauri-plugin-fs`           | File-system access.              |
+| `tauri-plugin-log`          | Native-side logging.             |
+| `tauri-plugin-notification` | Native desktop notifications.    |
+| `tauri-plugin-opener`       | Opening files and external URLs. |
+| `tauri-plugin-shell`        | Shell integration.               |
+| `tauri-plugin-sql`          | SQL database access.             |
 
 ### Tauri plugins declared in Rust dependencies
 
@@ -255,7 +358,15 @@ The native shell currently adds:
 | --------------- | -------------------------------------------------------------------- |
 | `customers`     | Placeholder customer-focused domain and application structure.       |
 | `notifications` | Notification entities, service layer, use cases, and Vue composable. |
+| `projects`      | Project CRUD queries, repositories, services, and UI store.          |
 | `updates`       | Update checking use cases and presentation composables.              |
+
+## Recent updates
+
+- Project feature code now lives in `src/modules/projects` (not `src/domain/projects`).
+- Tauri SQL migrations are auto-discovered from `src-tauri/migrations` at compile time.
+- Migration descriptions are now the migration filenames.
+- Workspace save behavior runs ESLint fixes and organize imports on save.
 
 ## Notes on current status
 

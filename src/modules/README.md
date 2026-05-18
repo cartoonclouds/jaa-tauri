@@ -2,6 +2,8 @@
 
 Feature-first modules.
 
+Updated: 2026-05-17.
+
 ## Convention
 
 Each feature folder should contain:
@@ -10,3 +12,10 @@ Each feature folder should contain:
 - application: Use cases and orchestration.
 - presentation: UI-facing adapters/components/composables.
 - index.ts: Barrel exports.
+
+## Current modules
+
+- customers
+- notifications
+- projects
+- updates

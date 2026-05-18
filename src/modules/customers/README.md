@@ -2,6 +2,8 @@
 
 Customer feature module.
 
+Updated: 2026-05-17.
+
 ## Structure
 
 - domain/entities: Customer entities and value objects.
