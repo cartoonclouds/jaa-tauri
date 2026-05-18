@@ -10,3 +10,8 @@ Updated: 2026-05-18.
 - application/use-cases: Customer use cases.
 - presentation: Customer UI wiring.
 - index.ts: Public exports for external consumers.
+
+## Status
+
+This module currently acts as a scaffold/example feature and is not part of the
+current job-application MVP domain set.

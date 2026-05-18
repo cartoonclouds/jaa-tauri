@@ -19,3 +19,19 @@ Each feature folder should contain:
 - notifications
 - projects
 - updates
+
+## Planned domains
+
+As product scope expands, this folder should grow around feature domains such as:
+
+- applications
+- companies
+- contacts
+- events
+- interviews
+- documents
+- communications
+- offers
+- analytics
+- profile
+- settings

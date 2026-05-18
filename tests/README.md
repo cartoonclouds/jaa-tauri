@@ -14,3 +14,8 @@ Updated: 2026-05-18.
 - setup.ts: Shared test setup.
 
 Workspace settings run ESLint fixes and organize imports on save to keep test files consistent with lint rules.
+
+## Test Data
+
+Deterministic table factories are available in `src-tauri/factories` and can be used
+to build repeatable datasets for integration and component tests.

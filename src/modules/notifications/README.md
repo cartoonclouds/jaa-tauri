@@ -13,6 +13,18 @@ This module provides a DDD-structured notification system with:
 - **Presentation Layer**: Vue composable for components
 - **Infrastructure Layer**: Tauri integration
 
+High-value scenarios in this app:
+
+- Interview reminders
+- Follow-up reminders
+- Recruiter response reminders
+- Offer deadline alerts
+- Stale application reminders
+- Background sync completion and offline-restored notifications
+
+Typical domain events feeding notifications include `ApplicationCreated`,
+`InterviewScheduled`, `ReminderDue`, `OfferReceived`, and `FollowUpNeeded`.
+
 ## Usage
 
 ### In Vue Components

@@ -10,6 +10,7 @@ Updated: 2026-05-18.
   - `main.rs`: Entry point (handles Windows console suppression conditionally)
   - `lib.rs`: Tauri application initialization and configuration
 - **migrations/**: SQL migration files for database schema
+- **factories/**: Deterministic table factories and a seed runner for local/test data
 - **capabilities/**: Permission definitions for the Tauri application
 - **icons/**: Application icons in various formats for all platforms
 - **tauri.conf.json**: Tauri configuration (build, app, bundling)
@@ -79,6 +80,15 @@ This command:
 1. Starts the Nuxt dev server at `http://127.0.0.1:3000`
 2. Compiles the Rust runtime
 3. Launches the desktop window with hot reload
+
+To seed local SQLite data from deterministic factories:
+
+```bash
+cd .. && npm run db:seed
+```
+
+The seed runner reads SQL migrations from `migrations/`, clears data in FK-safe order,
+then inserts mock rows in FK-safe order into `sqlite:jaa.db`.
 
 To build for release:
 

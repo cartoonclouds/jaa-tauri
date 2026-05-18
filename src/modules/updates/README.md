@@ -18,6 +18,9 @@ The module follows the documented updater flow from Tauri v2 docs:
 2. If present, call `downloadAndInstall()` on the returned update instance.
 3. Restart can be deferred; immediate relaunch is optional.
 
+This module can be used alongside notification workflows to surface update
+availability and install outcomes in the desktop UI.
+
 ## Usage
 
 ```ts

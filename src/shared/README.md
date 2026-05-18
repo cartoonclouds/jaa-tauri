@@ -23,6 +23,8 @@ Real business data stored in SQLite database:
 - Job applications
 - Company entities
 - Projects and tasks
+- Applications, contacts, and timeline events
+- Reminders and linked documents
 - Activity logs
 - Search indexes
 
@@ -30,7 +32,7 @@ Real business data stored in SQLite database:
 
 Reactive UI state for immediate user interactions:
 
-- Selected project ID
+- Selected application/project ID
 - Sidebar visibility
 - Form drafts
 - Current filter selections

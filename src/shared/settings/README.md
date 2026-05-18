@@ -67,6 +67,7 @@ const theme = await settingsService.themeService.get();
 - Notification settings
 - Developer mode flag
 - Recent searches
+- Lightweight persisted UI state (for example selected tab or split-pane size)
 
 Window state (size and position) is managed by `@tauri-apps/plugin-window-state`.
 

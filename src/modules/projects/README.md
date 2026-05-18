@@ -17,3 +17,5 @@ Updated: 2026-05-18.
 
 - Keep database access behind repository and service boundaries.
 - Keep route/page components thin and consume queries/stores from this module.
+- Use `src-tauri/factories/projects.factory.ts` and `src-tauri/factories/tasks.factory.ts`
+  when generating deterministic mock project data for tests/dev.

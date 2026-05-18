@@ -14,8 +14,17 @@ Updated: 2026-05-18.
 - components: Reusable UI components.
 - modules: Feature modules (domain + application + presentation).
 - modules/projects: Project feature module (queries, repositories, services, stores).
+- modules/notifications: Notification feature module.
+- modules/updates: Update-check feature module.
 - shared: Shared domain/ui/utils/types.
 - infrastructure: Integrations (HTTP, Tauri, persistence, logging, config).
 - server: Server-only handlers and logic.
 - services/database: Database driver abstractions and concrete client adapters.
 - composables, stores, utils, types, assets: App-level support code.
+
+## State boundaries
+
+- SQLite: persistent business records and timeline data.
+- Pinia: ephemeral UI state such as active selection, view mode, and layout.
+- Pinia Colada: async query/mutation cache.
+- Tauri Store: lightweight user preferences.

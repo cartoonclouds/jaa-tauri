@@ -6,3 +6,4 @@ Updated: 2026-05-18.
 
 Place API handlers and server utilities here.
 Do not import client-only dependencies in this folder.
+Prefer delegating business rules to feature modules and shared services.

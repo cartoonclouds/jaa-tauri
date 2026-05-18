@@ -27,3 +27,13 @@ All infrastructure components are platform-agnostic:
 ## Migrations
 
 SQL migrations are discovered from `src-tauri/migrations` at compile time in the Rust runtime. The same migrations run identically on all platforms since SQLite has consistent SQL syntax across platforms.
+
+## Seed workflow
+
+Deterministic seed factories live in `src-tauri/factories` and can be executed with:
+
+```bash
+npm run db:seed
+```
+
+Use this for local development fixtures and repeatable test datasets.

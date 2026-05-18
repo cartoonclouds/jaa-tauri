@@ -83,7 +83,9 @@ Migration {
 
 11. Do not create a down migration unless this project already has a clear down-migration convention.
 
-12. After generating the migration, show:
+12. Create one migration per file. Do not combine multiple changes into a single migration.
+
+13. After generating the migration, show:
     - created file path
     - migration version
     - table name inferred, if any
