@@ -3,6 +3,7 @@
   import { useUpdateChecker } from "@modules/updates";
 
   import { Icon } from "#components";
+  import ApplicationDataTable from "@/modules/applications/presentation/ApplicationDataTable.vue";
 
   const { success, error, showWindowsDevToastNotice } = useNotification();
   const {
@@ -36,11 +37,13 @@
 
 <template>
   <main class="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-    <div class="mx-auto max-w-3xl space-y-6">
+    <div class="mx-auto space-y-6">
       <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
         <Icon name="heroicons:briefcase" class="text-emerald-400" />
         Job Application Auditor
       </h1>
+
+      <ApplicationDataTable />
 
       <p class="text-slate-300">Nuxt + Tauri is running correctly.</p>
 

@@ -11,6 +11,7 @@ import type {
   NotificationSettings,
   ThemeSettings,
   UiPreferences,
+  UserProfile,
 } from "./types";
 
 import { Store } from "@tauri-apps/plugin-store";
@@ -24,6 +25,22 @@ const DEFAULT_SETTINGS: AppSettings = {
   developerMode: false,
   recentSearches: [],
   tableColumnVisibility: {},
+  onboardingCompleted: false,
+  userProfile: {
+    fullName: "",
+    email: "",
+    targetRole: "",
+    desiredSalary: null,
+    salaryCurrency: "USD",
+    preferredLocations: [],
+    remotePreference: "flexible",
+    skills: [],
+    linkedInUrl: "",
+    githubUrl: "",
+    workEligibility: "",
+    noticePeriodDays: null,
+    interviewAvailability: "",
+  },
 };
 
 let store: Store | null = null;
@@ -194,6 +211,34 @@ export async function getTableColumnVisibility(): Promise<
   Record<string, boolean>
 > {
   return await getSetting("tableColumnVisibility");
+}
+
+/**
+ * Get onboarding completion status.
+ */
+export async function getOnboardingCompleted(): Promise<boolean> {
+  return await getSetting("onboardingCompleted");
+}
+
+/**
+ * Set onboarding completion status.
+ */
+export async function setOnboardingCompleted(value: boolean): Promise<void> {
+  await setSetting("onboardingCompleted", value);
+}
+
+/**
+ * Get user profile.
+ */
+export async function getUserProfile(): Promise<UserProfile> {
+  return await getSetting("userProfile");
+}
+
+/**
+ * Set user profile.
+ */
+export async function setUserProfile(profile: UserProfile): Promise<void> {
+  await setSetting("userProfile", profile);
 }
 
 /**

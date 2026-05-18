@@ -15,6 +15,7 @@ Each feature folder should contain:
 
 ## Current modules
 
+- applications
 - customers
 - notifications
 - projects

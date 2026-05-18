@@ -286,3 +286,48 @@ tests/              # Unit/component/integration tests + fixtures/mocks
 - [src-tauri/README.md](src-tauri/README.md)
 - [tests/README.md](tests/README.md)
 - [tests/unit/README.md](tests/unit/README.md)
+
+## Application Interaction Diagram
+
+```mermaid
+graph TD
+    subgraph Frontend
+        A[Nuxt 4 + Vue 3 App]
+        B[PrimeVue Components]
+        C[Pinia State Management]
+        D[VueUse Composables]
+    end
+
+    subgraph Backend
+        E[Tauri 2 Runtime]
+        F[SQLite Database]
+        G[Custom Rust Commands]
+    end
+
+    subgraph Modules
+        H[Applications Module]
+        I[Companies Module]
+        J[Contacts Module]
+        K[Events Module]
+        L[Tasks Module]
+    end
+
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+    E --> F
+    E --> G
+    C --> H
+    C --> I
+    C --> J
+    C --> K
+    C --> L
+    H --> F
+    I --> F
+    J --> F
+    K --> F
+    L --> F
+```
+
+This diagram illustrates the interaction between the frontend, backend, and core modules of the application.
