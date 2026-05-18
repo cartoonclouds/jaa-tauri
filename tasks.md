@@ -4,7 +4,6 @@ Create a layout spliting the window vertically into two sides. Add a vertical ba
 
 Create a feature/domain using a datatable to list all job application, use pagination (https://primevue.org/paginator/) and https://primevue.org/datatable/
 
-When clicking a row in the job application datatable, show a the clicked job application to open up sliding in from the right, shrinkg the lefthand side.
 
 TODO:
 

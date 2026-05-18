@@ -7,7 +7,7 @@ Updated: 2026-05-18.
 ## Structure
 
 - domain/entities: Customer entities and value objects.
-- application/use-cases: Customer use cases.
+- application/actions: Customer actions.
 - presentation: Customer UI wiring.
 - index.ts: Public exports for external consumers.
 

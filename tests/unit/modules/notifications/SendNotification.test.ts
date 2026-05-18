@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  sendNotification,
+  sendErrorNotification,
   sendInfoNotification,
+  sendNotification,
   sendSuccessNotification,
   sendWarningNotification,
-  sendErrorNotification,
-} from "@modules/notifications/application/use-cases/SendNotification";
+} from "@modules/notifications/application/actions/SendNotification";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the service
 vi.mock(

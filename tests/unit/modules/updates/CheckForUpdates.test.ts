@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   checkForUpdates,
   checkForUpdatesSilently,
-} from "@modules/updates/application/use-cases/CheckForUpdates";
+} from "@modules/updates/application/actions/CheckForUpdates";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const checkForUpdatesMock = vi.fn();
 

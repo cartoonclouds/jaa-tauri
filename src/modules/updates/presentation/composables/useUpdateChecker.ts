@@ -8,23 +8,23 @@ import type {
   UpdateInstallResult,
 } from "../../domain/entities/UpdateCheck";
 
-import { ref } from "vue";
+import { readonly, ref, type Ref } from "vue";
 
 import {
   checkForUpdates,
   checkForUpdatesSilently,
   hasPendingUpdate,
   installPendingUpdate,
-} from "../../application/use-cases/CheckForUpdates";
+} from "../../application/actions/CheckForUpdates";
 
 interface UseUpdateCheckerReturn {
-  isChecking: Readonly<import("vue").Ref<boolean>>;
-  isInstalling: Readonly<import("vue").Ref<boolean>>;
-  hasUpdateReadyToInstall: Readonly<import("vue").Ref<boolean>>;
-  installProgress: Readonly<import("vue").Ref<UpdateInstallProgress | null>>;
-  lastCheckedAt: Readonly<import("vue").Ref<Date | null>>;
-  lastResult: Readonly<import("vue").Ref<UpdateCheckResult | null>>;
-  lastInstallResult: Readonly<import("vue").Ref<UpdateInstallResult | null>>;
+  isChecking: Readonly<Ref<boolean>>;
+  isInstalling: Readonly<Ref<boolean>>;
+  hasUpdateReadyToInstall: Readonly<Ref<boolean>>;
+  installProgress: Readonly<Ref<UpdateInstallProgress | null>>;
+  lastCheckedAt: Readonly<Ref<Date | null>>;
+  lastResult: Readonly<Ref<UpdateCheckResult | null>>;
+  lastInstallResult: Readonly<Ref<UpdateInstallResult | null>>;
   check: () => Promise<UpdateCheckResult>;
   checkSilently: () => Promise<UpdateCheckResult>;
   install: () => Promise<UpdateInstallResult>;
@@ -93,13 +93,4 @@ export function useUpdateChecker(): UseUpdateCheckerReturn {
     checkSilently,
     install,
   };
-}
-
-/**
- * Vue readonly type helper.
- */
-function readonly<T>(
-  value: import("vue").Ref<T>,
-): Readonly<import("vue").Ref<T>> {
-  return value;
 }

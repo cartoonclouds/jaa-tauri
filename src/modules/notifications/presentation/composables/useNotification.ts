@@ -10,14 +10,14 @@ import type {
 import { isWindowsDevToastLimited } from "@infra/tauri/notifications";
 import { onMounted, ref, type Ref } from "vue";
 
-import { NotificationService } from "../../application/services/NotificationService";
 import {
   sendErrorNotification,
   sendInfoNotification,
   sendNotification,
   sendSuccessNotification,
   sendWarningNotification,
-} from "../../application/use-cases/SendNotification";
+} from "../../application/actions/SendNotification";
+import { NotificationService } from "../../application/services/NotificationService";
 
 interface UseNotificationReturn {
   isSupported: Readonly<Ref<boolean>>;

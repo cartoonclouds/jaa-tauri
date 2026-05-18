@@ -14,8 +14,10 @@ src/modules/notifications/
 ├── application/
 │   ├── services/
 │   │   └── NotificationService.ts   # Main service (singleton)
-│   └── use-cases/
-│       └── SendNotification.ts       # Use cases for sending notifications
+│   └── actions/
+│       └── SendNotification.ts       # Actions for sending notifications
+├── application/actions
+│       └── NotificationActions.ts    # Notification actions
 ├── presentation/
 │   └── composables/
 │       └── useNotification.ts        # Vue composable

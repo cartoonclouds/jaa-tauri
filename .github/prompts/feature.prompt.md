@@ -7,7 +7,7 @@ Create a new feature module in the DDD architecture for a Nuxt 4 + Tauri 2 deskt
 - Generate boilerplate for CRUD actions (Create, Read, Update, Delete).
 - Include:
   - Domain entity and type definition
-  - Application use-cases for each CRUD action
+  - Application actions for each CRUD action
   - Presentation layer (composables, minimal page/component)
   - Store (Pinia) for state management
   - Service or repository for infrastructure/data access
@@ -31,7 +31,7 @@ src/
         types/
           <Feature>Type.ts
       application/
-        use-cases/
+        actions/
           Create<Feature>.ts
           Get<Feature>.ts
           Update<Feature>.ts

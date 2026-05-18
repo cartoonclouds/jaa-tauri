@@ -2,15 +2,15 @@
  * Updates module exports.
  */
 
-// Application
-export { UpdateService } from "./application/services/UpdateService";
-
 export {
   checkForUpdates,
   checkForUpdatesSilently,
   hasPendingUpdate,
   installPendingUpdate,
-} from "./application/use-cases/CheckForUpdates";
+} from "./application/actions/CheckForUpdates";
+
+// Application
+export { UpdateService } from "./application/services/UpdateService";
 // Domain
 export type {
   AvailableUpdate,
