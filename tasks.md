@@ -1,5 +1,3 @@
-Update all readme files with latest changes
-
 Create a layout spliting the window vertically into two sides. Add a vertical bar to allow each side to be resized. Use https://primevue.org/splitter/
 
 Stepper on first load to enter user profile details, use https://primevue.org/stepper/. Save the data using the Tauri package https://v2.tauri.app/plugin/store/ - install and configure this new package.

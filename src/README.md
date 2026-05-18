@@ -2,7 +2,7 @@
 
 Nuxt application source.
 
-Updated: 2026-05-17.
+Updated: 2026-05-18.
 
 ## High-level layout
 
@@ -17,4 +17,5 @@ Updated: 2026-05-17.
 - shared: Shared domain/ui/utils/types.
 - infrastructure: Integrations (HTTP, Tauri, persistence, logging, config).
 - server: Server-only handlers and logic.
+- services/database: Database driver abstractions and concrete client adapters.
 - composables, stores, utils, types, assets: App-level support code.

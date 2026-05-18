@@ -2,6 +2,8 @@
 
 Project management feature module.
 
+Updated: 2026-05-18.
+
 ## Structure
 
 - queries: Pinia Colada query and mutation composables.
@@ -10,3 +12,8 @@ Project management feature module.
 - stores: UI-only project state.
 - types.ts: Shared project input and entity types for this module.
 - index.ts: Public exports for external consumers.
+
+## Notes
+
+- Keep database access behind repository and service boundaries.
+- Keep route/page components thin and consume queries/stores from this module.

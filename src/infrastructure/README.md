@@ -21,6 +21,8 @@ All infrastructure components are platform-agnostic:
 - **File System**: Abstracts platform differences through Tauri's file plugin
 - **Shell**: Native shell commands via Tauri plugin (cmd.exe on Windows, sh on Unix-like systems)
 - **Dialogs**: Platform-native file/message dialogs via Tauri plugin
+- **Updater**: Cross-platform update checks and install flow through Tauri updater plugin
+- **Window State**: Persist and restore window geometry through Tauri window-state plugin
 
 ## Migrations
 

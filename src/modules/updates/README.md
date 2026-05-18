@@ -2,7 +2,7 @@
 
 Checks for application updates via Tauri updater plugin and supports downloading/installing a discovered update.
 
-Updated: 2026-05-17.
+Updated: 2026-05-18.
 
 ## What it does
 

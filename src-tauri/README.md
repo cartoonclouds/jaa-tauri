@@ -2,6 +2,8 @@
 
 This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the Job Application Auditor desktop application.
 
+Updated: 2026-05-18.
+
 ## Structure
 
 - **src/**: Rust source code for the desktop runtime
@@ -105,6 +107,7 @@ Key Tauri plugins in `Cargo.toml`:
 - `tauri-plugin-fs`: File system operations
 - `tauri-plugin-shell`: Shell command execution
 - `tauri-plugin-store`: Persistent key-value storage
+- `tauri-plugin-window-state`: Persist and restore window state
 - `tauri-plugin-updater`: Application update checks
 - `tauri-plugin-opener`: Open URLs and files with default applications
 

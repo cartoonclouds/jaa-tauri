@@ -2,6 +2,8 @@
 
 Lightweight application preferences and settings stored using Tauri's Store plugin.
 
+Updated: 2026-05-18.
+
 ## Structure
 
 - **types.d.ts**: Type definitions for all settings

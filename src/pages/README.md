@@ -2,7 +2,7 @@
 
 Nuxt route components.
 
-Updated: 2026-05-17.
+Updated: 2026-05-18.
 
 Keep pages thin.
 Move business logic into modules/application or composables.

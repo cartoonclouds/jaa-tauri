@@ -4,6 +4,8 @@ Job Application Auditor is a desktop application for recording, organizing, and 
 
 The project is built as a Nuxt 4 application running inside a Tauri 2 desktop shell. The frontend uses Vue 3 and TypeScript, while Tauri provides desktop capabilities such as dialogs, file-system access, logging, SQL storage (using SQLite migrations, a typed database driver abstraction, repositories, services), native shell integration, and a system tray.
 
+Last updated: 2026-05-18.
+
 ## What the application is for
 
 This codebase is intended to support workflows such as:
@@ -309,40 +311,35 @@ Additional frontend configuration:
 
 The desktop runtime currently wires these plugins in `src-tauri/src/lib.rs`:
 
-| Plugin                      | Purpose                          |
-| --------------------------- | -------------------------------- |
-| `tauri-plugin-store`        | Local structured storage.        |
-| `tauri-plugin-dialog`       | Native dialogs.                  |
-| `tauri-plugin-fs`           | File-system access.              |
-| `tauri-plugin-log`          | Native-side logging.             |
-| `tauri-plugin-notification` | Native desktop notifications.    |
-| `tauri-plugin-opener`       | Opening files and external URLs. |
-| `tauri-plugin-shell`        | Shell integration.               |
-| `tauri-plugin-sql`          | SQL database access.             |
-
-### Tauri plugins declared in Rust dependencies
-
-The Rust manifest also includes:
-
-| Plugin                 | Status                                                                  | Purpose                      |
-| ---------------------- | ----------------------------------------------------------------------- | ---------------------------- |
-| `tauri-plugin-updater` | Declared in Cargo, not currently initialized in `src-tauri/src/lib.rs`. | Application update delivery. |
+| Plugin                      | Purpose                                |
+| --------------------------- | -------------------------------------- |
+| `tauri-plugin-window-state` | Persist and restore window state.      |
+| `tauri-plugin-store`        | Local structured storage.              |
+| `tauri-plugin-dialog`       | Native dialogs.                        |
+| `tauri-plugin-fs`           | File-system access.                    |
+| `tauri-plugin-log`          | Native-side logging.                   |
+| `tauri-plugin-notification` | Native desktop notifications.          |
+| `tauri-plugin-opener`       | Opening files and external URLs.       |
+| `tauri-plugin-shell`        | Shell integration.                     |
+| `tauri-plugin-sql`          | SQL database access.                   |
+| `tauri-plugin-updater`      | Application update checks and install. |
 
 ### Tauri plugins installed on the frontend
 
 The JavaScript package list includes:
 
-| Package                           | Status                                                                                      | Purpose                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------ |
-| `@tauri-apps/plugin-dialog`       | Installed and initialized.                                                                  | Dialog APIs.             |
-| `@tauri-apps/plugin-fs`           | Installed and initialized.                                                                  | File-system APIs.        |
-| `@tauri-apps/plugin-log`          | Installed and initialized.                                                                  | Logging APIs.            |
-| `@tauri-apps/plugin-notification` | Installed for frontend use.                                                                 | Native notifications.    |
-| `@tauri-apps/plugin-opener`       | Installed and initialized.                                                                  | Open files and URLs.     |
-| `@tauri-apps/plugin-shell`        | Installed and initialized.                                                                  | Shell integration.       |
-| `@tauri-apps/plugin-sql`          | Installed and initialized.                                                                  | SQL access.              |
-| `@tauri-apps/plugin-store`        | Installed and initialized.                                                                  | Local key-value storage. |
-| `@tauri-apps/plugin-updater`      | Installed on the frontend; Rust-side plugin setup is still needed for full runtime support. | App updates.             |
+| Package                           | Status                                                                  | Purpose                  |
+| --------------------------------- | ----------------------------------------------------------------------- | ------------------------ |
+| `@tauri-apps/plugin-dialog`       | Installed and initialized.                                              | Dialog APIs.             |
+| `@tauri-apps/plugin-fs`           | Installed and initialized.                                              | File-system APIs.        |
+| `@tauri-apps/plugin-log`          | Installed and initialized.                                              | Logging APIs.            |
+| `@tauri-apps/plugin-notification` | Installed for frontend use.                                             | Native notifications.    |
+| `@tauri-apps/plugin-opener`       | Installed and initialized.                                              | Open files and URLs.     |
+| `@tauri-apps/plugin-shell`        | Installed and initialized.                                              | Shell integration.       |
+| `@tauri-apps/plugin-sql`          | Installed and initialized.                                              | SQL access.              |
+| `@tauri-apps/plugin-store`        | Installed and initialized.                                              | Local key-value storage. |
+| `@tauri-apps/plugin-updater`      | Installed and active with Rust-side updater plugin initialization.      | App updates.             |
+| `@tauri-apps/plugin-window-state` | Installed and active with Rust-side window-state plugin initialization. | Persist window geometry. |
 
 ### Other Tauri app behavior
 
@@ -366,12 +363,14 @@ The native shell currently adds:
 - Project feature code now lives in `src/modules/projects` (not `src/domain/projects`).
 - Tauri SQL migrations are auto-discovered from `src-tauri/migrations` at compile time.
 - Migration descriptions are now the migration filenames.
+- Updater plugin is initialized in `src-tauri/src/lib.rs` and exposed through `src/modules/updates`.
+- Window state persistence is enabled through `tauri-plugin-window-state`.
 - Workspace save behavior runs ESLint fixes and organize imports on save.
 
 ## Notes on current status
 
 - The repository is already positioned as a job application tracking desktop app, but parts of the implementation still look like scaffold or demo code.
-- Notification and update-related frontend modules exist, though their Tauri runtime setup is not fully symmetrical yet.
+- Notification and update modules are wired with matching frontend and Rust plugin initialization.
 - The root README previously described the starter template only; this document is intended to be the actual project entry point.
 
 ## Recommended local tooling

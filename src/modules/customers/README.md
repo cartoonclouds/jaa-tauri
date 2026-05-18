@@ -2,7 +2,7 @@
 
 Customer feature module.
 
-Updated: 2026-05-17.
+Updated: 2026-05-18.
 
 ## Structure
 

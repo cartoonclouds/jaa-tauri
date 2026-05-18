@@ -55,7 +55,7 @@ Lightweight user preferences stored outside SQLite:
 - Developer mode flag
 - Recent searches
 
-Window size and position are managed by `@tauri-apps/plugin-window-state`.
+Window size and position are managed by `@tauri-apps/plugin-window-state` initialized in the Rust runtime.
 
 ## Example: Adding New Preferences
 
