@@ -5,11 +5,14 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
+    "src-tauri/**/*.ts",
+    "src-tauri/**/*.d.ts",
     "tests/**/*.ts",
     "tests/**/*.d.ts",
     "tests/**/*.tsx",
     "tests/**/*.vue",
     "nuxt.config.ts",
+    "vitest.config.ts",
     "eslint.config.ts"
   ]
 }

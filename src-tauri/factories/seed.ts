@@ -1,7 +1,6 @@
+import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
-
-import Database from "better-sqlite3";
 
 import { createApplicationDocumentRows } from "./application_documents.factory";
 import { createApplicationEventRows } from "./application_events.factory";
@@ -154,9 +153,17 @@ function main(): void {
       tags: insertMany(db, "tags", tags),
       documents: insertMany(db, "documents", documents),
       application_tags: insertMany(db, "application_tags", applicationTags),
-      application_events: insertMany(db, "application_events", applicationEvents),
+      application_events: insertMany(
+        db,
+        "application_events",
+        applicationEvents,
+      ),
       application_tasks: insertMany(db, "application_tasks", applicationTasks),
-      application_documents: insertMany(db, "application_documents", applicationDocuments),
+      application_documents: insertMany(
+        db,
+        "application_documents",
+        applicationDocuments,
+      ),
     };
 
     return counts;
