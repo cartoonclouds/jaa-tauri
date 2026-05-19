@@ -44,6 +44,8 @@ This project uses:
 
 Respect the configured aliases and source layout. The current package list, aliases, and Tauri setup are reflected in the uploaded project files. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
 
+When creating new modules or features, follow the existing project structure and conventions. Do not introduce new architectural patterns or directory layouts without a clear justification. Follow the instructions defined in `../prompts/feature.prompt.md` for feature creation.
+
 ## Engineering standards
 
 Follow strong software engineering conventions:
@@ -173,6 +175,7 @@ Do:
 - Prefer explicit types for public function inputs/outputs. When creating a types file using the following filename convention: `types.d.ts` or `types/index.d.ts`, update the barrel export in the module's `index.ts` file and update any Typescript configuration if necessary.
 - When asked to install a Tauri plugin, check the official Tauri documentation for the latest recommended approach. Follow their guidance for installation, configuration, and usage. Ensure that any new Tauri plugin is properly integrated with the existing Tauri setup in `src-tauri` and that it does not introduce conflicts with current dependencies or configurations.
   After any significant code change, run the test suite to ensure nothing is broken. If new functionality is added, write tests to cover it. If existing tests are affected, update them accordingly. Always maintain a green test suite after your changes. Also run `npm run tauri dev` to ensure the Tauri integration is working correctly with your changes.
+- Don't ever use inline imports such as ` import("@tauri-apps/plugin-notification")`, import the files and needed properties.
 
 Don't:
 

@@ -19,7 +19,7 @@ Create a new feature module in the DDD architecture for a Nuxt 4 + Tauri 2 deskt
   - Barrel file (`index.ts`) for the module
 - Use TypeScript strictly, no `any`.
 - Add minimal test stubs in `tests/unit/modules/<feature>/`.
-- Follow the conventions in copilot-instructions.md.
+- Follow the conventions in `copilot-instructions.md`.
 - Update boundary files like `nuxt.config.ts` and module `index.ts` as needed for imports/exports to enforce DDD boundaries and best practices.
 
 ---
