@@ -2,12 +2,13 @@
  * Settings store (Pinia).
  *
  * Optional reactive store for UI bindings to app settings.
- * Persistence is handled by settings.repository (Tauri Store).
+ * Persistence is handled by settings.repository (DatabaseDriver).
  * This store provides reactive state for Vue components.
  */
 
 import type { AppSettings } from "./types";
 
+import { useNuxtApp } from "nuxt/app";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -32,7 +33,8 @@ export const useSettingsStore = defineStore("settings", () => {
     error.value = null;
 
     try {
-      await initializeSettingsStore();
+      const { $database } = useNuxtApp();
+      await initializeSettingsStore($database);
       settings.value = await getSettings();
     } catch (err) {
       error.value =

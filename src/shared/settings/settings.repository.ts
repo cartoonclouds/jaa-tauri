@@ -1,7 +1,7 @@
 /**
  * Settings repository.
  *
- * Typed persistence layer for Tauri Store.
+ * Typed persistence layer over the configured DatabaseDriver.
  * Handles all low-level get/set operations with type safety.
  */
 
@@ -13,8 +13,9 @@ import type {
   UiPreferences,
   UserProfile,
 } from "./types";
+import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
-import { Store } from "@tauri-apps/plugin-store";
+import { useNuxtApp } from "nuxt/app";
 
 const STORE_KEY = "app-settings";
 
@@ -43,22 +44,290 @@ const DEFAULT_SETTINGS: AppSettings = {
   },
 };
 
-let store: Store | null = null;
+type SettingsRow = Record<string, unknown>;
 
-/**
- * Initialize the settings store.
- * Must be called once at app startup.
- */
-export async function initializeSettingsStore(): Promise<void> {
-  if (store) return;
+let database: DatabaseDriver | null = null;
+let linkedProfileId: string | null = null;
+
+function toInt(value: boolean): number {
+  return value ? 1 : 0;
+}
+
+function parseStringArray(value: unknown, fallback: string[]): string[] {
+  if (typeof value !== "string") {
+    return fallback;
+  }
 
   try {
-    store = await Store.load("settings.json", {
-      autoSave: true,
-      defaults: DEFAULT_SETTINGS as unknown as Record<string, unknown>,
-    });
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return fallback;
+    }
+
+    return parsed.filter((item): item is string => typeof item === "string");
+  } catch {
+    return fallback;
+  }
+}
+
+function parseBooleanRecord(
+  value: unknown,
+  fallback: Record<string, boolean>,
+): Record<string, boolean> {
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return fallback;
+    }
+
+    return Object.entries(parsed).reduce<Record<string, boolean>>(
+      (accumulator, [key, recordValue]) => {
+        accumulator[key] = Boolean(recordValue);
+        return accumulator;
+      },
+      {},
+    );
+  } catch {
+    return fallback;
+  }
+}
+
+function mapRowToUserProfile(row: SettingsRow): UserProfile {
+  const preferredLocations =
+    typeof row.profile_location_text === "string"
+      ? row.profile_location_text
+          .split(",")
+          .map((part) => part.trim())
+          .filter((part) => part.length > 0)
+      : DEFAULT_SETTINGS.userProfile.preferredLocations;
+
+  return {
+    ...DEFAULT_SETTINGS.userProfile,
+    fullName:
+      typeof row.profile_full_name === "string"
+        ? row.profile_full_name
+        : DEFAULT_SETTINGS.userProfile.fullName,
+    email:
+      typeof row.profile_email === "string"
+        ? row.profile_email
+        : DEFAULT_SETTINGS.userProfile.email,
+    targetRole:
+      typeof row.profile_headline === "string"
+        ? row.profile_headline
+        : DEFAULT_SETTINGS.userProfile.targetRole,
+    linkedInUrl:
+      typeof row.profile_linkedin_url === "string"
+        ? row.profile_linkedin_url
+        : DEFAULT_SETTINGS.userProfile.linkedInUrl,
+    preferredLocations,
+  };
+}
+
+function normalizeTheme(value: unknown): AppSettings["theme"] {
+  if (value === "light" || value === "dark" || value === "auto") {
+    return value;
+  }
+
+  if (value === "system") {
+    return "auto";
+  }
+
+  return DEFAULT_SETTINGS.theme;
+}
+
+function mapRowToSettings(row: SettingsRow): AppSettings {
+  linkedProfileId =
+    typeof row.profile_id === "string" && row.profile_id.length > 0
+      ? row.profile_id
+      : null;
+
+  return {
+    theme: normalizeTheme(row.theme),
+    sidebarCollapsed:
+      Number(
+        row.sidebar_collapsed ?? Number(DEFAULT_SETTINGS.sidebarCollapsed),
+      ) === 1,
+    notificationsEnabled:
+      Number(
+        row.notifications_enabled ??
+          Number(DEFAULT_SETTINGS.notificationsEnabled),
+      ) === 1,
+    developerMode:
+      Number(row.developer_mode ?? Number(DEFAULT_SETTINGS.developerMode)) ===
+      1,
+    recentSearches: parseStringArray(
+      row.recent_searches,
+      DEFAULT_SETTINGS.recentSearches,
+    ),
+    tableColumnVisibility: parseBooleanRecord(
+      row.table_column_visibility,
+      DEFAULT_SETTINGS.tableColumnVisibility,
+    ),
+    onboardingCompleted:
+      Number(
+        row.onboarding_completed ??
+          Number(DEFAULT_SETTINGS.onboardingCompleted),
+      ) === 1,
+    userProfile: mapRowToUserProfile(row),
+  };
+}
+
+async function getDatabase(): Promise<DatabaseDriver> {
+  if (database) {
+    return database;
+  }
+
+  const { $database } = useNuxtApp();
+  database = $database;
+
+  return database;
+}
+
+async function upsertSettingsRow(
+  db: DatabaseDriver,
+  settings: AppSettings,
+  profileId: string | null,
+): Promise<void> {
+  await db.execute(
+    `
+    INSERT INTO settings (
+      id,
+      theme,
+      locale,
+      notifications_enabled,
+      developer_mode,
+      sidebar_collapsed,
+      recent_searches,
+      table_column_visibility,
+      onboarding_completed,
+      profile_id,
+      created_at,
+      updated_at
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(id) DO UPDATE SET
+      theme = excluded.theme,
+      notifications_enabled = excluded.notifications_enabled,
+      developer_mode = excluded.developer_mode,
+      sidebar_collapsed = excluded.sidebar_collapsed,
+      recent_searches = excluded.recent_searches,
+      table_column_visibility = excluded.table_column_visibility,
+      onboarding_completed = excluded.onboarding_completed,
+      profile_id = excluded.profile_id,
+      updated_at = CURRENT_TIMESTAMP
+    `,
+    [
+      STORE_KEY,
+      settings.theme,
+      "en-GB",
+      toInt(settings.notificationsEnabled),
+      toInt(settings.developerMode),
+      toInt(settings.sidebarCollapsed),
+      JSON.stringify(settings.recentSearches),
+      JSON.stringify(settings.tableColumnVisibility),
+      toInt(settings.onboardingCompleted),
+      profileId,
+    ],
+  );
+}
+
+async function upsertProfileRow(
+  db: DatabaseDriver,
+  profile: UserProfile,
+  profileId: string | null,
+): Promise<string> {
+  const id = profileId ?? crypto.randomUUID();
+
+  await db.execute(
+    `
+    INSERT INTO profiles (
+      id,
+      full_name,
+      email,
+      phone,
+      linkedin_url,
+      portfolio_url,
+      headline,
+      summary,
+      location_text,
+      created_at,
+      updated_at
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(id) DO UPDATE SET
+      full_name = excluded.full_name,
+      email = excluded.email,
+      linkedin_url = excluded.linkedin_url,
+      headline = excluded.headline,
+      location_text = excluded.location_text,
+      updated_at = CURRENT_TIMESTAMP
+    `,
+    [
+      id,
+      profile.fullName,
+      profile.email || null,
+      null,
+      profile.linkedInUrl || null,
+      null,
+      profile.targetRole || null,
+      null,
+      profile.preferredLocations.join(", "),
+    ],
+  );
+
+  linkedProfileId = id;
+  return id;
+}
+
+async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
+  const rows = await db.select<SettingsRow>(
+    `
+    SELECT
+      s.*,
+      p.id AS profile_id,
+      p.full_name AS profile_full_name,
+      p.email AS profile_email,
+      p.linkedin_url AS profile_linkedin_url,
+      p.headline AS profile_headline,
+      p.location_text AS profile_location_text
+    FROM settings s
+    LEFT JOIN profiles p ON p.id = s.profile_id
+    WHERE s.id = $1
+    LIMIT 1
+    `,
+    [STORE_KEY],
+  );
+  const row = rows[0];
+
+  if (!row) {
+    await upsertSettingsRow(db, DEFAULT_SETTINGS, null);
+    return DEFAULT_SETTINGS;
+  }
+
+  return mapRowToSettings(row);
+}
+
+/**
+ * Initialize shared settings persistence.
+ * Must be called once at app startup.
+ */
+export async function initializeSettingsStore(
+  driver?: DatabaseDriver,
+): Promise<void> {
+  if (driver) {
+    database = driver;
+  }
+
+  const db = await getDatabase();
+
+  try {
+    await readSettingsRow(db);
   } catch (error) {
-    console.error("Failed to initialize settings store:", error);
+    console.error("Failed to initialize settings persistence:", error);
     throw error;
   }
 }
@@ -67,10 +336,8 @@ export async function initializeSettingsStore(): Promise<void> {
  * Get all application settings.
  */
 export async function getSettings(): Promise<AppSettings> {
-  if (!store) throw new Error("Settings store not initialized");
-
-  const stored = await store.get<AppSettings>(STORE_KEY);
-  return stored ?? DEFAULT_SETTINGS;
+  const db = await getDatabase();
+  return await readSettingsRow(db);
 }
 
 /**
@@ -79,11 +346,20 @@ export async function getSettings(): Promise<AppSettings> {
 export async function setSettings(
   settings: Partial<AppSettings>,
 ): Promise<void> {
-  if (!store) throw new Error("Settings store not initialized");
-
+  const db = await getDatabase();
   const current = await getSettings();
   const updated = { ...current, ...settings };
-  await store.set(STORE_KEY, updated);
+
+  let profileId = linkedProfileId;
+  if (settings.userProfile) {
+    profileId = await upsertProfileRow(
+      db,
+      settings.userProfile,
+      linkedProfileId,
+    );
+  }
+
+  await upsertSettingsRow(db, updated, profileId);
 }
 
 /**
@@ -92,8 +368,6 @@ export async function setSettings(
 export async function getSetting<K extends keyof AppSettings>(
   key: K,
 ): Promise<AppSettings[K]> {
-  if (!store) throw new Error("Settings store not initialized");
-
   const settings = await getSettings();
   return settings[key];
 }
@@ -105,11 +379,20 @@ export async function setSetting<K extends keyof AppSettings>(
   key: K,
   value: AppSettings[K],
 ): Promise<void> {
-  if (!store) throw new Error("Settings store not initialized");
-
   const current = await getSettings();
   current[key] = value;
-  await store.set(STORE_KEY, current);
+  const db = await getDatabase();
+
+  let profileId = linkedProfileId;
+  if (key === "userProfile") {
+    profileId = await upsertProfileRow(
+      db,
+      value as UserProfile,
+      linkedProfileId,
+    );
+  }
+
+  await upsertSettingsRow(db, current, profileId);
 }
 
 /**
@@ -245,9 +528,8 @@ export async function setUserProfile(profile: UserProfile): Promise<void> {
  * Reset all settings to defaults.
  */
 export async function resetSettings(): Promise<void> {
-  if (!store) throw new Error("Settings store not initialized");
-
-  await store.set(STORE_KEY, DEFAULT_SETTINGS);
+  const db = await getDatabase();
+  await upsertSettingsRow(db, DEFAULT_SETTINGS, linkedProfileId);
 }
 
 export { DEFAULT_SETTINGS };

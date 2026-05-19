@@ -1,8 +1,8 @@
 /**
  * Application settings and preferences.
  *
- * These are lightweight user preferences stored in Tauri Store, not SQLite.
- * Use for theme, window state, UI preferences, etc.
+ * These preferences are persisted through the app's configured DatabaseDriver.
+ * Use for theme, UI preferences, and onboarding profile data.
  */
 
 export interface AppSettings {

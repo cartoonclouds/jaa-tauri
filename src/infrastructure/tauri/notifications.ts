@@ -3,6 +3,12 @@
  * Provides low-level integration with Tauri's notification plugin.
  */
 
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from "@tauri-apps/plugin-notification";
+
 export interface NotificationRequest {
   title: string;
   body: string;
@@ -17,9 +23,6 @@ export interface NotificationResult {
 }
 
 async function ensureNotificationPermission(): Promise<boolean> {
-  const { isPermissionGranted, requestPermission } =
-    await import("@tauri-apps/plugin-notification");
-
   let permissionGranted = await isPermissionGranted();
 
   if (!permissionGranted) {
@@ -65,10 +68,6 @@ export async function sendTauriNotification(
     if (!permissionGranted) {
       return { success: false, error: "Notification permission not granted" };
     }
-
-    // Dynamically import to avoid SSR issues
-    const { sendNotification } =
-      await import("@tauri-apps/plugin-notification");
 
     sendNotification({
       title: request.title,

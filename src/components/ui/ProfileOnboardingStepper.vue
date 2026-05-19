@@ -1,7 +1,11 @@
 <script setup lang="ts">
-  import type { AppSettings, UserProfile } from "@shared/settings/types";
+  import type { UserProfile } from "@shared/settings/types";
 
-  import { LazyStore } from "@tauri-apps/plugin-store";
+  import {
+    getSettings,
+    setOnboardingCompleted,
+    setUserProfile,
+  } from "@shared/settings";
   import { ref } from "vue";
 
   import {
@@ -115,16 +119,10 @@
         addLocations();
       }
 
-      const store = new LazyStore("settings.json");
-      const current =
-        (await store.get<Partial<AppSettings>>("app-settings")) ?? {};
-
-      await store.set("app-settings", {
-        ...current,
-        userProfile: profile.value,
-        onboardingCompleted: true,
-      });
-      await store.save();
+      // Ensure settings row exists before updating onboarding-specific fields.
+      await getSettings();
+      await setUserProfile(profile.value);
+      await setOnboardingCompleted(true);
 
       emit("completed");
     } catch (error) {

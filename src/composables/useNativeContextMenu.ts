@@ -10,7 +10,11 @@ import { message } from "@tauri-apps/plugin-dialog";
 export async function setupNativeContextMenu(): Promise<
   () => void | Promise<void>
 > {
-  if (!import.meta.client || !isTauri()) {
+  if (!import.meta.client) {
+    return () => undefined;
+  }
+
+  if (!isTauri()) {
     return () => undefined;
   }
 

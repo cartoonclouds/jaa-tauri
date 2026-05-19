@@ -27,6 +27,16 @@ Application schema
 
 Create a feature/module which will display all interactions a job finder has had with regards to a job application. Use https://primevue.org/tree/. Allow each entry to be editable on double-click (in a modal). The depths can be of any length
 
+Make sure all modules use the repository pattern, if it doesn't exist create them and update references to use them. Create an interface for the repositories.
+
+When validating payloads, use Zod.
+
+Add the implementation of the InMemoryDriver for use as a database
+
+Rename and update any uses of presentation composables without the suffix "curd". For example, not `useApplicationCrud` but instead `useApplication`
+
+Create an .env file to store application configuration. Add keys used to set the number of each entries into the database when seeding. Also add common application configuration keys. Include a key for dev mode and update any configuration to check this is true such as in nuxt.config.ts devtools.enabled. Also add database driver key and database name and update to check which database file/driver to use. Update any places where these should be used.
+
 ---
 
 Update all readme files with latest changes
