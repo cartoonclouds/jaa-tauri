@@ -11,12 +11,19 @@ export default defineNuxtConfig({
   css: ["~/assets/css/tailwind.css"],
 
   alias: {
+    "@modules": resolve(rootDir, "./src/modules"),
     "@shared": resolve(rootDir, "./src/shared"),
     "@infra": resolve(rootDir, "./src/infrastructure"),
   },
 
   imports: {
-    dirs: ["services/**"],
+    dirs: [
+      "modules/**/application/actions",
+      "modules/**/application/services",
+      "modules/**/presentation/composables",
+      "modules/**/stores",
+      "services/**",
+    ],
   },
 
   modules: [

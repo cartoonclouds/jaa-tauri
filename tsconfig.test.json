@@ -1,6 +1,14 @@
 {
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@modules/*": ["src/modules/*"],
+      "@shared/*": ["src/shared/*"],
+      "@infra/*": ["src/infrastructure/*"]
+    },
     "types": ["vitest/globals", "node"],
     "noEmit": true
   },

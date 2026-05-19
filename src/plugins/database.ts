@@ -1,32 +1,23 @@
-import type { DatabaseDriver } from '~/services/database/DatabaseDriver'
+import { defineNuxtPlugin } from "nuxt/app";
 
-import { defineNuxtPlugin } from 'nuxt/app'
+import { InMemoryDriver } from "@/services/database/InMemoryDriver";
 
-// Example SQLite driver implementation (replace with real one as needed)
-class SQLiteDriver implements DatabaseDriver {
-  readonly name = 'sqlite'
-
-  async select<T = unknown>(_: string, __?: unknown[]): Promise<T[]> {
-    await Promise.resolve(); // silence async/await warning
-    return []
+export default defineNuxtPlugin(async () => {
+  if (import.meta.server) {
+    return {
+      provide: {
+        database: new InMemoryDriver(),
+      },
+    };
   }
 
-  async execute(_: string, __?: unknown[]): Promise<{ rowsAffected: number; lastInsertId?: number }> {
-    await Promise.resolve();
-    return { rowsAffected: 0 }
-  }
-
-  async transaction<T>(callback: (tx: DatabaseDriver) => Promise<T>): Promise<T> {
-    return callback(this)
-  }
-}
-
-export default defineNuxtPlugin(() => {
-  const driver = new SQLiteDriver()
+  const { TauriSqliteDriver } =
+    await import("@/services/database/TauriSqliteDriver.client");
+  const database = await TauriSqliteDriver.connect("sqlite:jaa.db");
 
   return {
     provide: {
-      database: driver,
+      database,
     },
-  }
-})
+  };
+});

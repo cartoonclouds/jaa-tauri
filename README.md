@@ -337,3 +337,17 @@ graph TD
 ```
 
 This diagram illustrates the interaction between the frontend, backend, and core domains of the application.
+
+## Development Commands
+
+Use this from the project root in PowerShell:
+
+```bash
+cargo clean --manifest-path Cargo.toml
+```
+
+For a fuller clean (Rust + Nuxt/Vite cache), run:
+
+```bash
+Remove-Item -Recurse -Force .\src-tauri\target, ..nuxt, .output -ErrorAction SilentlyContinue
+```

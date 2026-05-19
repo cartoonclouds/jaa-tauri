@@ -29,14 +29,14 @@ The application uses a layered persistence architecture that separates concerns 
      │                         │
      ▼                         ▼
 ┌──────────────┐        ┌──────────────┐
-│   SQLite     │        │ Tauri Store  │
+│  SQLite      │        │ Tauri Store  │
 │ (Business    │        │ (Lightweight │
 │  Data)       │        │  Prefs)      │
 └──────────────┘        └──────────────┘
      │                         │
      ├─ Job Applications       ├─ Theme
      ├─ Companies             ├─ Window State
-     ├─ Projects              ├─ Sidebar State
+     ├─ Application           ├─ Sidebar State
      ├─ Tasks                 ├─ Notification Prefs
      ├─ Activity Logs         ├─ Dev Mode Flag
      └─ Large Datasets        └─ Recent Searches

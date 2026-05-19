@@ -1,18 +1,19 @@
 import Database from "better-sqlite3";
-import fs from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import { createApplicationContactRows } from "./application_contacts.factory";
 import { createApplicationDocumentRows } from "./application_documents.factory";
-import { createApplicationEventRows } from "./application_events.factory";
 import { createApplicationTagRows } from "./application_tags.factory";
-import { createApplicationTaskRows } from "./application_tasks.factory";
 import { createApplicationRows } from "./applications.factory";
 import { createCompanyRows } from "./companies.factory";
-import { createCompanyContactRows } from "./company_contacts.factory";
+import { createContactRows } from "./contacts.factory";
 import { createDocumentRows } from "./documents.factory";
-import { createJobSourceRows } from "./job_sources.factory";
+import { createEventRows } from "./events.factory";
+import { createNotificationRows } from "./notifications.factory";
+import { createProfileRow } from "./profiles.factory";
+import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
-import { createTaskRows } from "./tasks.factory";
 
 type Row = Record<string, unknown>;
 
@@ -34,13 +35,12 @@ function resolveSqliteFile(databaseUrl: string): string {
 }
 
 function runMigrations(db: Database.Database, migrationsDir: string): void {
-  const files = fs
-    .readdirSync(migrationsDir)
+  const files = readdirSync(migrationsDir)
     .filter((name) => name.endsWith(".sql"))
     .sort();
 
   for (const file of files) {
-    const sql = fs.readFileSync(path.join(migrationsDir, file), "utf8");
+    const sql = readFileSync(path.join(migrationsDir, file), "utf8");
     db.exec(sql);
   }
 }
@@ -67,15 +67,16 @@ function insertMany(db: Database.Database, table: string, rows: Row[]): number {
 function deleteAllInFkSafeOrder(db: Database.Database): void {
   const tables = [
     "application_documents",
-    "application_tasks",
-    "application_events",
+    "application_contacts",
+    "notifications",
+    "events",
     "application_tags",
+    "profiles",
+    "settings",
     "documents",
     "applications",
-    "company_contacts",
+    "contacts",
     "tags",
-    "job_sources",
-    "tasks",
     "companies",
   ];
 
@@ -96,73 +97,82 @@ function main(): void {
 
   const seed = Number(process.env.SEED ?? 20260518);
 
-  const seedTx = db.transaction(() => {
+  const seedTx = db.transaction((): Record<string, number> => {
     deleteAllInFkSafeOrder(db);
 
-    const jobSources = createJobSourceRows(seed + 30);
     const companies = createCompanyRows(12, seed + 40);
-    const contacts = createCompanyContactRows(
+    const contacts = createContactRows(
       companies.map((c) => c.id),
       2,
       seed + 50,
     );
 
     const applications = createApplicationRows(
-      companies.map((c) => ({ id: c.id, name: c.name })),
-      jobSources.map((s) => s.id),
+      companies.map((c) => c.id),
       2,
       seed + 60,
     );
 
     const tags = createTagRows(seed + 70);
     const documents = createDocumentRows(24, seed + 80);
+    const settings = createSettingRow(seed + 90);
+    const profile = createProfileRow(seed + 100);
 
     const applicationTags = createApplicationTagRows(
       applications.map((a) => a.id),
       tags.map((t) => t.id),
       2,
-      seed + 90,
+      seed + 110,
     );
 
-    const applicationEvents = createApplicationEventRows(
+    const events = createEventRows(
       applications.map((a) => a.id),
       contacts.map((c) => c.id),
       3,
-      seed + 100,
+      seed + 120,
     );
 
-    const applicationTasks = createApplicationTaskRows(
+    const notifications = createNotificationRows(
       applications.map((a) => a.id),
-      2,
-      seed + 110,
+      events.map((e) => e.id),
+      1,
+      seed + 130,
     );
 
     const applicationDocuments = createApplicationDocumentRows(
       applications.map((a) => a.id),
       documents.map((d) => d.id),
       2,
-      seed + 120,
+      seed + 140,
+    );
+
+    const applicationContacts = createApplicationContactRows(
+      applications.map((a) => a.id),
+      contacts.map((c) => c.id),
+      1,
+      seed + 150,
     );
 
     const counts = {
-      tasks: insertMany(db, "tasks", projectTasks),
-      job_sources: insertMany(db, "job_sources", jobSources),
       companies: insertMany(db, "companies", companies),
-      company_contacts: insertMany(db, "company_contacts", contacts),
+      contacts: insertMany(db, "contacts", contacts),
       applications: insertMany(db, "applications", applications),
       tags: insertMany(db, "tags", tags),
       documents: insertMany(db, "documents", documents),
+      settings: insertMany(db, "settings", [settings]),
+      profiles: insertMany(db, "profiles", [profile]),
       application_tags: insertMany(db, "application_tags", applicationTags),
-      application_events: insertMany(
-        db,
-        "application_events",
-        applicationEvents,
-      ),
-      application_tasks: insertMany(db, "application_tasks", applicationTasks),
+      events: insertMany(db, "events", events),
+      notifications: insertMany(db, "notifications", notifications),
       application_documents: insertMany(
         db,
         "application_documents",
         applicationDocuments,
+      ),
+      application_contacts: insertMany(
+        db,
+        "application_contacts",
+        applicationContacts,
       ),
     };
 

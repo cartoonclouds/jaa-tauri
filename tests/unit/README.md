@@ -8,6 +8,7 @@ Updated: 2026-05-19.
 
 - shared
 - infrastructure
+- modules
 
 Keep tests deterministic and side-effect free.
 

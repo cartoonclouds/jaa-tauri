@@ -11,8 +11,57 @@
       </h1>
 
       <p class="text-slate-300">
-        Clean starter page. Feature modules have been removed.
+        Feature modules are wired with repository, service, query composable,
+        and CRUD pages.
       </p>
+
+      <nav class="grid gap-2 text-sm sm:grid-cols-2">
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/applications"
+          >Applications</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/companies"
+          >Companies</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/contacts"
+          >Contacts</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/tags"
+          >Tags</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/documents"
+          >Documents</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/events"
+          >Events</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/notifications"
+          >Notifications</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/settings"
+          >Settings</NuxtLink
+        >
+        <NuxtLink
+          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
+          to="/profile"
+          >Profile</NuxtLink
+        >
+      </nav>
 
       <p
         class="inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300"

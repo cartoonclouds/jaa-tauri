@@ -70,7 +70,7 @@ export async function getSettings(): Promise<AppSettings> {
   if (!store) throw new Error("Settings store not initialized");
 
   const stored = await store.get<AppSettings>(STORE_KEY);
-  return stored || DEFAULT_SETTINGS;
+  return stored ?? DEFAULT_SETTINGS;
 }
 
 /**

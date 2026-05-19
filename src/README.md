@@ -12,6 +12,7 @@ Updated: 2026-05-19.
 - middleware: Route middleware.
 - plugins: Nuxt plugins.
 - components: Reusable UI components.
+- modules: Feature modules (domain entities + application actions).
 - shared: Shared domain/ui/utils/types.
 - infrastructure: Integrations (HTTP, Tauri, persistence, logging, config).
 - server: Server-only handlers and logic.
