@@ -2,7 +2,7 @@
 
 Desktop-first job application tracking built with Nuxt 4 + Vue 3 + TypeScript inside a Tauri 2 runtime.
 
-Last updated: 2026-05-18.
+Last updated: 2026-05-19.
 
 ## Product Goal
 
@@ -152,7 +152,6 @@ Use Tauri Store for lightweight preferences/settings, not core business records.
 Use Rust-managed Tauri state for backend/native process state and long-running services:
 
 - database handles
-- migration runner
 - notification scheduler
 - background sync services
 - search index worker
@@ -170,7 +169,7 @@ Use Pinia for frontend interaction state and UI composition.
 
 ## Current Database Implementation
 
-Migrations live in `src-tauri/migrations` and are auto-discovered by Rust at runtime.
+Schema management is external to this repository. The app connects to `sqlite:jaa.db` through the Tauri SQL plugin.
 
 Current tables include:
 
@@ -179,7 +178,6 @@ Current tables include:
 - job_sources
 - companies
 - company_contacts
-- applications
 - tags
 - application_tags
 - application_events
@@ -247,6 +245,19 @@ npm run test:coverage
 npm run db:seed
 ```
 
+## Nuxt Dev Stability
+
+To reduce page reloads during development, Vite dependency pre-bundling is configured in `nuxt.config.ts`.
+
+Current pre-bundled packages:
+
+- `@tauri-apps/api/core`
+- `@tauri-apps/api/dpi`
+- `@tauri-apps/api/menu`
+- `@tauri-apps/plugin-dialog`
+- `@vue/devtools-core`
+- `@vue/devtools-kit`
+
 ## Project Structure
 
 ```txt
@@ -254,7 +265,7 @@ src/                # Nuxt app source
 src/shared/         # Shared domain/types/ui/utils/settings
 src/infrastructure/ # Integrations and adapters
 src/services/       # App-level services (including DB client abstractions)
-src-tauri/          # Rust runtime, migrations, capabilities, factories
+src-tauri/          # Rust runtime, capabilities, factories
 tests/              # Unit/component/integration tests + fixtures/mocks
 ```
 
@@ -299,12 +310,12 @@ graph TD
         G[Custom Rust Commands]
     end
 
-    subgraph Modules
-        H[Applications Module]
-        I[Companies Module]
-        J[Contacts Module]
-        K[Events Module]
-        L[Tasks Module]
+    subgraph Domains
+        H[Applications Domain]
+        I[Companies Domain]
+        J[Contacts Domain]
+        K[Events Domain]
+        L[Tasks Domain]
     end
 
     A --> B
@@ -325,4 +336,4 @@ graph TD
     L --> F
 ```
 
-This diagram illustrates the interaction between the frontend, backend, and core modules of the application.
+This diagram illustrates the interaction between the frontend, backend, and core domains of the application.

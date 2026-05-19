@@ -48,6 +48,16 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     clearScreen: false,
+    optimizeDeps: {
+      include: [
+        "@tauri-apps/api/core",
+        "@tauri-apps/api/dpi",
+        "@tauri-apps/api/menu",
+        "@tauri-apps/plugin-dialog",
+        "@vue/devtools-core",
+        "@vue/devtools-kit",
+      ],
+    },
   },
 
   typescript: {

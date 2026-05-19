@@ -12,7 +12,6 @@ import { createCompanyRows } from "./companies.factory";
 import { createCompanyContactRows } from "./company_contacts.factory";
 import { createDocumentRows } from "./documents.factory";
 import { createJobSourceRows } from "./job_sources.factory";
-import { createProjectRows } from "./projects.factory";
 import { createTagRows } from "./tags.factory";
 import { createTaskRows } from "./tasks.factory";
 
@@ -79,7 +78,6 @@ function deleteAllInFkSafeOrder(db: Database.Database): void {
     "job_sources",
     "tasks",
     "companies",
-    "projects",
   ];
 
   for (const table of tables) {
@@ -101,13 +99,6 @@ function main(): void {
 
   const seedTx = db.transaction(() => {
     deleteAllInFkSafeOrder(db);
-
-    const projects = createProjectRows(8, seed + 10);
-    const projectTasks = createTaskRows(
-      projects.map((p) => p.id),
-      3,
-      seed + 20,
-    );
 
     const jobSources = createJobSourceRows(seed + 30);
     const companies = createCompanyRows(12, seed + 40);
@@ -155,7 +146,6 @@ function main(): void {
     );
 
     const counts = {
-      projects: insertMany(db, "projects", projects),
       tasks: insertMany(db, "tasks", projectTasks),
       job_sources: insertMany(db, "job_sources", jobSources),
       companies: insertMany(db, "companies", companies),

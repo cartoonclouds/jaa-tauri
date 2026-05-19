@@ -2,7 +2,7 @@
 
 Lightweight application preferences and settings stored using Tauri's Store plugin.
 
-Updated: 2026-05-18.
+Updated: 2026-05-19.
 
 ## Structure
 

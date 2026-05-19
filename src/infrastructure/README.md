@@ -2,7 +2,7 @@
 
 External integrations and technical adapters. All components are designed for cross-platform compatibility on Windows, macOS, and Linux.
 
-Updated: 2026-05-18.
+Updated: 2026-05-19.
 
 ## Folders
 
@@ -23,10 +23,6 @@ All infrastructure components are platform-agnostic:
 - **Dialogs**: Platform-native file/message dialogs via Tauri plugin
 - **Updater**: Cross-platform update checks and install flow through Tauri updater plugin
 - **Window State**: Persist and restore window geometry through Tauri window-state plugin
-
-## Migrations
-
-SQL migrations are discovered from `src-tauri/migrations` at compile time in the Rust runtime. The same migrations run identically on all platforms since SQLite has consistent SQL syntax across platforms.
 
 ## Seed workflow
 

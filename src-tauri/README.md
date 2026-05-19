@@ -2,7 +2,7 @@
 
 This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the Job Application Auditor desktop application.
 
-Updated: 2026-05-18.
+Updated: 2026-05-19.
 
 ## Structure
 
@@ -61,7 +61,7 @@ The configuration in `tauri.conf.json` includes:
 SQL migrations are located in the `migrations/` folder and are compiled into the binary at build time via `src/lib.rs`. The migration discovery process:
 
 1. Scans the `migrations/` folder for `.sql` files
-2. Extracts version numbers from filenames (e.g., `0001_create_projects.sql`)
+2. Extracts version numbers from filenames (e.g., `0001_create_applications.sql`)
 3. Registers migrations in order
 4. Runs them on startup via the `tauri-plugin-sql` SQLite adapter
 
@@ -77,7 +77,7 @@ cd .. && npm run tauri dev
 
 This command:
 
-1. Starts the Nuxt dev server at `http://127.0.0.1:3000`
+1. Starts the Nuxt dev server at the configured local URL (typically `http://127.0.0.1:3000`)
 2. Compiles the Rust runtime
 3. Launches the desktop window with hot reload
 

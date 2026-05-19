@@ -2,7 +2,7 @@
 
 Cross-feature shared code.
 
-Updated: 2026-05-18.
+Updated: 2026-05-19.
 
 ## Folders
 
@@ -32,7 +32,7 @@ Real business data stored in SQLite database:
 
 Reactive UI state for immediate user interactions:
 
-- Selected application/project ID
+- Selected application ID
 - Sidebar visibility
 - Form drafts
 - Current filter selections
@@ -43,7 +43,7 @@ Reactive UI state for immediate user interactions:
 Query results and mutations with automatic caching:
 
 - Fetched applications
-- Project lists
+- Entity lists
 - Search results
 - API responses
 

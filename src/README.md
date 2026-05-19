@@ -2,7 +2,7 @@
 
 Nuxt application source.
 
-Updated: 2026-05-18.
+Updated: 2026-05-19.
 
 ## High-level layout
 
@@ -24,3 +24,7 @@ Updated: 2026-05-18.
 - Pinia: ephemeral UI state such as active selection, view mode, and layout.
 - Pinia Colada: async query/mutation cache.
 - Tauri Store: lightweight user preferences.
+
+## Nuxt Vite Notes
+
+`nuxt.config.ts` defines `vite.optimizeDeps.include` to pre-bundle frequently discovered runtime dependencies (Tauri APIs and Vue devtools packages) and reduce dev-time full page reloads.
