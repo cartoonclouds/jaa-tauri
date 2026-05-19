@@ -9,7 +9,7 @@ Generate a new SQLite migration similar to Laravel's `php artisan make:migration
 Migration name:
 
 ```txt
-${input:migrationName:Example: create_projects_table}
+${input:migrationName:Example: create_applications_table}
 ```
 
 ## Requirements

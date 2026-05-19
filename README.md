@@ -174,7 +174,8 @@ Migrations live in `src-tauri/migrations` and are auto-discovered by Rust at run
 
 Current tables include:
 
-- projects, tasks
+- applications
+- tasks
 - job_sources
 - companies
 - company_contacts
@@ -250,7 +251,6 @@ npm run db:seed
 
 ```txt
 src/                # Nuxt app source
-src/modules/        # Feature-first modules
 src/shared/         # Shared domain/types/ui/utils/settings
 src/infrastructure/ # Integrations and adapters
 src/services/       # App-level services (including DB client abstractions)
@@ -272,11 +272,6 @@ tests/              # Unit/component/integration tests + fixtures/mocks
 ## Architecture Notes by Area
 
 - [src/README.md](src/README.md)
-- [src/modules/README.md](src/modules/README.md)
-- [src/modules/customers/README.md](src/modules/customers/README.md)
-- [src/modules/projects/README.md](src/modules/projects/README.md)
-- [src/modules/notifications/README.md](src/modules/notifications/README.md)
-- [src/modules/updates/README.md](src/modules/updates/README.md)
 - [src/shared/README.md](src/shared/README.md)
 - [src/shared/settings/README.md](src/shared/settings/README.md)
 - [src/infrastructure/README.md](src/infrastructure/README.md)

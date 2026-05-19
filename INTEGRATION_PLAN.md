@@ -38,7 +38,7 @@ src-tauri/migrations/*.sql
 src-tauri/src/lib.rs
 app/services/database/*
 app/types/nuxt.d.ts
-app/domain/projects/**
+app/domain/applications/**
 .github/prompts/make-tauri-sqlite-migration.prompt.md
 ```
 
@@ -65,16 +65,13 @@ Also copy the `migrations` vector and `use tauri_plugin_sql::{Migration, Migrati
 Do not overwrite your existing `nuxt.config.ts`. Use `nuxt.config.patch.ts` as a reference and merge these parts:
 
 ```ts
-modules: [
-  '@pinia/nuxt',
-  '@pinia/colada-nuxt',
-]
+modules: ["@pinia/nuxt", "@pinia/colada-nuxt"];
 ```
 
 For Tauri desktop usage, prefer:
 
 ```ts
-ssr: false
+ssr: false;
 ```
 
 Add auto-import directories if useful:
@@ -110,17 +107,17 @@ Expected result:
 Use the generated hooks:
 
 ```ts
-const { data: projects } = useProjectsQuery()
-const createProject = useCreateProjectMutation()
+const { data: applications } = useApplicationsQuery();
+const createApplication = useCreateApplicationtMutation();
 ```
 
 Call:
 
 ```ts
-await createProject.mutateAsync({ name: 'My first project' })
+await createProject.mutateAsync({ name: "My first application" });
 ```
 
-The `projects` query should invalidate and refresh after creation.
+The `applications` query should invalidate and refresh after creation.
 
 ## 7. Add new migrations with Copilot
 
@@ -155,7 +152,7 @@ Copilot should:
 Domain repositories should depend on:
 
 ```ts
-DatabaseDriver
+DatabaseDriver;
 ```
 
 They should not import:

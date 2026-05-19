@@ -12,17 +12,11 @@ export default defineNuxtConfig({
 
   alias: {
     "@shared": resolve(rootDir, "./src/shared"),
-    "@modules": resolve(rootDir, "./src/modules"),
     "@infra": resolve(rootDir, "./src/infrastructure"),
   },
 
   imports: {
-    dirs: [
-      "modules/**/queries",
-      "modules/**/stores",
-      "modules/**/services",
-      "services/**",
-    ],
+    dirs: ["services/**"],
   },
 
   modules: [

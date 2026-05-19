@@ -34,7 +34,6 @@ export default defineVitestConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      '@modules': resolve(__dirname, './src/modules'),
       '@shared': resolve(__dirname, './src/shared'),
       '@infra': resolve(__dirname, './src/infrastructure'),
     },

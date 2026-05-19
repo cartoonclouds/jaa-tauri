@@ -22,7 +22,7 @@ Real business data stored in SQLite database:
 
 - Job applications
 - Company entities
-- Projects and tasks
+- Tasks
 - Applications, contacts, and timeline events
 - Reminders and linked documents
 - Activity logs

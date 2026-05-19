@@ -1,6 +1,5 @@
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
-import boundaries from "eslint-plugin-boundaries";
 import perfectionist from "eslint-plugin-perfectionist";
 import vue from "eslint-plugin-vue";
 import { defineConfig } from "eslint/config";
@@ -59,54 +58,6 @@ export default defineConfig(
     plugins: {
       vue,
       perfectionist,
-      boundaries,
-    },
-
-    settings: {
-      "boundaries/elements": [
-        {
-          type: "module-public-api",
-          pattern: "index.ts",
-          mode: "file",
-          basePattern: "src/modules/*",
-          baseCapture: ["moduleName"],
-        },
-        {
-          type: "module-domain",
-          pattern: "domain/*",
-          basePattern: "src/modules/*",
-          baseCapture: ["moduleName"],
-        },
-        {
-          type: "module-application",
-          pattern: "application/*",
-          basePattern: "src/modules/*",
-          baseCapture: ["moduleName"],
-        },
-        {
-          type: "module-presentation",
-          pattern: "presentation/*",
-          basePattern: "src/modules/*",
-          baseCapture: ["moduleName"],
-        },
-        {
-          type: "module-internal",
-          pattern: "*",
-          mode: "file",
-          basePattern: "src/modules/*",
-          baseCapture: ["moduleName"],
-        },
-        {
-          type: "shared",
-          pattern: "src/shared/*",
-          mode: "full",
-        },
-        {
-          type: "infrastructure",
-          pattern: "src/infrastructure/*",
-          mode: "full",
-        },
-      ],
     },
 
     rules: {
@@ -237,65 +188,6 @@ export default defineConfig(
         {
           type: "natural",
           order: "asc",
-        },
-      ],
-
-      /*
-       |--------------------------------------------------------------------------
-       | DDD and module boundaries
-       |--------------------------------------------------------------------------
-       */
-
-      "boundaries/dependencies": [
-        "error",
-        {
-          default: "allow",
-          message:
-            "Invalid DDD dependency: {{from.type}} cannot import {{to.type}} ({{dependency.source}})",
-          rules: [
-            {
-              from: { type: "module-domain" },
-              disallow: {
-                to: {
-                  type: [
-                    "module-application",
-                    "module-presentation",
-                    "infrastructure",
-                  ],
-                },
-              },
-              message:
-                "Domain layer must remain pure and cannot depend on application, presentation, or infrastructure.",
-            },
-            {
-              from: { type: "module-application" },
-              disallow: {
-                to: {
-                  type: ["module-presentation"],
-                },
-              },
-              message:
-                "Application layer cannot depend on presentation layer.",
-            },
-            {
-              from: { type: "module-internal" },
-              disallow: {
-                to: {
-                  type: [
-                    "module-domain",
-                    "module-application",
-                    "module-presentation",
-                    "module-internal",
-                  ],
-                  captured: {
-                    moduleName: "!{{from.captured.moduleName}}",
-                  },
-                },
-              },
-              message:
-                "Cross-module internals are forbidden. Import other modules through their public API (index.ts).",
-            },
-          ],
         },
       ],
 

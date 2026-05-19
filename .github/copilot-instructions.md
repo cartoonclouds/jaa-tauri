@@ -120,7 +120,7 @@ Example:
 
 ```txt
 pages/
-  customers/
+  applications/
     [id].vue
 ```
 
@@ -130,7 +130,7 @@ Prefer feature-oriented modules:
 
 ```txt
 modules/
-  customers/
+  applications/
     domain/
     application/
     presentation/
@@ -140,8 +140,8 @@ modules/
 Typical `index.ts` exports:
 
 ```ts
-export * from "./domain/entities/Customer";
-export * from "./application/actions/CreateCustomer";
+export * from "./domain/entities/Application";
+export * from "./application/actions/CreateApplication";
 ```
 
 ## Test structure guidance

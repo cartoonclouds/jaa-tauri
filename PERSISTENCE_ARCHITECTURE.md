@@ -52,7 +52,7 @@ The application uses a layered persistence architecture that separates concerns 
 
 - Job applications and their metadata
 - Company details
-- Projects and tasks
+- Tasks
 - Activity logs and history
 - Search indexes
 - Large datasets
@@ -61,7 +61,7 @@ The application uses a layered persistence architecture that separates concerns 
 **Technology**: Tauri SQL plugin with SQLite
 **Persistence**: Automatic, file-based database
 **Access**: Through repositories and services
-**Location**: `src/modules/*/repositories` and `src/services/database`
+**Location**: `src/services/database` and `src/infrastructure/persistence`
 
 **Example:**
 
@@ -117,7 +117,7 @@ await service.updateTheme("dark");
 **Technology**: Pinia store (Vue reactivity)
 **Persistence**: None (session-only)
 **Re-initialization**: Empty on app restart
-**Location**: `src/modules/*/stores` and `src/composables`
+**Location**: `src/stores` and `src/composables`
 
 **Example:**
 
@@ -142,7 +142,7 @@ export const useProjectUiStore = defineStore("project-ui", () => {
 **Technology**: @pinia/colada
 **Persistence**: None (cache-only, refetches on demand)
 **Invalidation**: Automatic on mutations
-**Location**: `src/modules/*/queries` and `src/modules/*/services`
+**Location**: `src/composables` and `src/services`
 
 **Example:**
 

@@ -10,7 +10,6 @@
       "~/*": ["src/*"],
 
       "@shared/*": ["src/shared/*"],
-      "@modules/*": ["src/modules/*"],
       "@infra/*": ["src/infrastructure/*"]
     },
     "types": [
@@ -46,8 +45,7 @@
     "tests/**/*.ts",
     "tests/**/*.d.ts",
     "tests/**/*.tsx",
-    "tests/**/*.vue",
-    "nuxt.config.ts"
+    "tests/**/*.vue"
   ],
   "references": [
     { "path": "./tsconfig.node.json" }

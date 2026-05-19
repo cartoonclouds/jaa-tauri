@@ -3,10 +3,18 @@
  * Provides low-level integration with Tauri's notification plugin.
  */
 
-import type {
-  NotificationRequest,
-  NotificationResult,
-} from "@modules/notifications/domain/entities/Notification";
+export interface NotificationRequest {
+  title: string;
+  body: string;
+  icon?: string;
+  sound?: string;
+}
+
+export interface NotificationResult {
+  success: boolean;
+  id?: string;
+  error?: string;
+}
 
 async function ensureNotificationPermission(): Promise<boolean> {
   const { isPermissionGranted, requestPermission } =
@@ -25,11 +33,12 @@ async function ensureNotificationPermission(): Promise<boolean> {
 let hasWarnedWindowsDevToastLimit = false;
 
 export function isWindowsDevToastLimited(): boolean {
-  if (!import.meta.env.DEV) return false;
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
 
-  return (
-    typeof navigator !== "undefined" && /windows/i.test(navigator.userAgent)
-  );
+  const isTauriProtocol = window.location.protocol === "tauri:";
+  return !isTauriProtocol && /windows/i.test(navigator.userAgent);
 }
 
 function warnWindowsDevToastLimitOnce(): void {
