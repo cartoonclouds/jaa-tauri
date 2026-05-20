@@ -1,5 +1,7 @@
 import type { Setting } from "@modules/settings/domain/entities/Setting";
 
+import { toDate } from "@shared/utils/toDate";
+
 export function mapSettingRowToEntity(row: Record<string, unknown>): Setting {
   return {
     id: String(row.id),
@@ -7,7 +9,7 @@ export function mapSettingRowToEntity(row: Record<string, unknown>): Setting {
     locale: String(row.locale),
     notificationsEnabled: Number(row.notifications_enabled ?? 1) === 1,
     developerMode: Number(row.developer_mode ?? 0) === 1,
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 }

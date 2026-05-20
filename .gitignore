@@ -33,6 +33,7 @@ Thumbs.db
 
 # Tauri / Rust
 src-tauri/target/
+src-tauri/target_check_temp/
 
 # Rust backup files
 **/*.rs.bk

@@ -2,6 +2,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Application } from "@modules/applications/domain/entities/Application";
 import type { IRepository } from "@shared/types/repository";
 
+import { toDate, toNullableDate } from "@shared/utils/toDate";
+
 export interface ApplicationCreatePayload {
   companyId?: string | null;
   title: string;
@@ -40,7 +42,7 @@ export class ApplicationRepository implements IApplicationRepository {
       title: String(row.title),
       status: String(row.status),
       sourceUrl: (row.source_url as string | null) ?? null,
-      appliedAt: (row.applied_at as string | null) ?? null,
+      appliedAt: toNullableDate(row.applied_at),
       locationText: (row.location_text as string | null) ?? null,
       locationLat: (row.location_lat as number | null) ?? null,
       locationLng: (row.location_lng as number | null) ?? null,
@@ -57,8 +59,8 @@ export class ApplicationRepository implements IApplicationRepository {
       priority: Number(row.priority ?? 3),
       isArchived: Number(row.is_archived ?? 0) === 1,
       isDeleted: Number(row.is_deleted ?? 0) === 1,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
   }
 

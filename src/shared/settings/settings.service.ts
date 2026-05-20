@@ -17,7 +17,6 @@ import {
   getTableColumnVisibility,
   getThemeSettings,
   getUiPreferences,
-  getUserProfile,
   setDeveloperSettings,
   setNotificationSettings,
   setOnboardingCompleted,
@@ -26,7 +25,6 @@ import {
   setTableColumnVisibility,
   setThemeSettings,
   setUiPreferences,
-  setUserProfile,
 } from "./settings.repository";
 
 /**
@@ -101,16 +99,6 @@ export const useSettingsService = () => {
     clear: clearRecentSearches,
   };
 
-  /**
-   * User profile onboarding management.
-   */
-  const profileService = {
-    get: getUserProfile,
-    set: setUserProfile,
-    getOnboardingCompleted,
-    setOnboardingCompleted,
-  };
-
   return {
     fetchSettings,
     updateSettings,
@@ -120,7 +108,8 @@ export const useSettingsService = () => {
     notificationService,
     developerService,
     recentSearchService,
-    profileService,
+    getOnboardingCompleted,
+    setOnboardingCompleted,
   };
 };
 

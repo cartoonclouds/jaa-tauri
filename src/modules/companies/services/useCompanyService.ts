@@ -1,5 +1,3 @@
-import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
-
 import { CompanyRepository } from "@modules/companies/repositories/CompanyRepository";
 import { CompanyService } from "@modules/companies/services/CompanyService";
 import { useNuxtApp } from "nuxt/app";

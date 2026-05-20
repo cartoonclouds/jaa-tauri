@@ -51,7 +51,7 @@ class MockDatabaseDriver implements DatabaseDriver {
 
     return {
       rowsAffected: 1,
-      lastInsertId: null,
+      lastInsertId: 0,
     };
   }
 

@@ -2,6 +2,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
 import type { IRepository } from "@shared/types/repository";
 
+import { toDate } from "@shared/utils/toDate";
+
 export type ContactCreatePayload = Pick<
   Contact,
   | "companyId"
@@ -38,8 +40,8 @@ export class ContactRepository implements IContactRepository {
       linkedinUrl: (row.linkedin_url as string | null) ?? null,
       type: row.type as Contact["type"],
       notes: (row.notes as string | null) ?? null,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
   }
 

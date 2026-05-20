@@ -6,8 +6,8 @@ export interface Document {
   mimeType: string | null;
   sizeBytes: number | null;
   checksum: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateDocumentInput {

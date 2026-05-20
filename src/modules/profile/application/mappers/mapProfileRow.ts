@@ -1,7 +1,7 @@
 import type { Profile } from "@modules/profile/domain/entities/Profile";
 
-import { ProfileSchema } from "@shared/domain/zod/profile.schema";
 import { parseStringArray } from "@shared/utils/parse";
+import { toDate } from "@shared/utils/toDate";
 
 export function mapProfileRowToEntity(
   row: Record<string, unknown>,
@@ -37,14 +37,10 @@ export function mapProfileRowToEntity(
         ? row.notice_period_days
         : null,
     interviewAvailability: (row.interview_availability as string | null) ?? "",
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 
-  const parsed = ProfileSchema.safeParse(mapped);
-  if (!parsed.success) {
-    throw new Error(`${errorPrefix}: ${JSON.stringify(parsed.error.format())}`);
-  }
-
-  return parsed.data as Profile;
+  void errorPrefix;
+  return mapped as Profile;
 }

@@ -2,6 +2,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Tag } from "@modules/tags/domain/entities/Tag";
 import type { IRepository } from "@shared/types/repository";
 
+import { toDate } from "@shared/utils/toDate";
+
 export type TagCreatePayload = Pick<Tag, "name" | "color">;
 export type TagUpdatePayload = Partial<TagCreatePayload> & { id: string };
 
@@ -22,8 +24,8 @@ export class TagRepository implements ITagRepository {
       id: String(row.id),
       name: String(row.name),
       color: (row.color as string | null) ?? null,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
   }
 

@@ -2,7 +2,6 @@
   import { useProfileService } from "@modules/profile";
   import {
     getOnboardingCompleted,
-    getUserProfile,
     setOnboardingCompleted,
   } from "@shared/settings";
   import { onMounted } from "vue";
@@ -15,13 +14,13 @@
 
   onMounted(async () => {
     try {
-      const [onboardingCompleted, profile] = await Promise.all([
+      const [onboardingCompleted, profiles] = await Promise.all([
         getOnboardingCompleted(),
-        getUserProfile(),
+        profileService.list(),
       ]);
-      const profileExists = !!profile;
+      const profileExists = profiles.length > 0;
 
-      console.error("Onboarding state loaded:", onboardingCompleted, profile);
+      console.error("Onboarding state loaded:", onboardingCompleted, profiles);
 
       if (!onboardingCompleted && profileExists) {
         await setOnboardingCompleted(true);
@@ -35,14 +34,6 @@
       if (!import.meta.client) {
         return;
       }
-
-      const profile2 = await profileService.list();
-
-      console.debug("Opening onboarding modal...", {
-        onboardingCompleted,
-        profile,
-        profile2,
-      });
 
       await openChildWebviewWindow({
         label: "onboarding-modal",

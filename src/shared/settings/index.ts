@@ -22,8 +22,6 @@ export {
   getTableColumnVisibility,
   getOnboardingCompleted,
   setOnboardingCompleted,
-  getUserProfile,
-  setUserProfile,
   resetSettings,
   DEFAULT_SETTINGS,
 } from "./settings.repository";

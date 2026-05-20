@@ -2,6 +2,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
 import type { IRepository } from "@shared/types/repository";
 
+import { toDate, toNullableDate } from "@shared/utils/toDate";
+
 export type NotificationCreatePayload = Pick<
   Notification,
   | "applicationId"
@@ -38,10 +40,10 @@ export class NotificationRepository implements INotificationRepository {
       title: String(row.title),
       body: String(row.body),
       isRead: Number(row.is_read ?? 0) === 1,
-      scheduledFor: (row.scheduled_for as string | null) ?? null,
-      sentAt: (row.sent_at as string | null) ?? null,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
+      scheduledFor: toNullableDate(row.scheduled_for),
+      sentAt: toNullableDate(row.sent_at),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
   }
 
@@ -57,8 +59,8 @@ export class NotificationRepository implements INotificationRepository {
         payload.title,
         payload.body,
         payload.isRead ? 1 : 0,
-        payload.scheduledFor ?? null,
-        payload.sentAt ?? null,
+        payload.scheduledFor ? payload.scheduledFor.toISOString() : null,
+        payload.sentAt ? payload.sentAt.toISOString() : null,
       ],
     );
     return id;
@@ -80,8 +82,8 @@ export class NotificationRepository implements INotificationRepository {
         payload.title ?? null,
         payload.body ?? null,
         payload.isRead === undefined ? null : payload.isRead ? 1 : 0,
-        payload.scheduledFor ?? null,
-        payload.sentAt ?? null,
+        payload.scheduledFor ? payload.scheduledFor.toISOString() : null,
+        payload.sentAt ? payload.sentAt.toISOString() : null,
         payload.id,
       ],
     );

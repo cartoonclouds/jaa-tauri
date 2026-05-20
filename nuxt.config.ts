@@ -16,7 +16,7 @@ function readBoolean(
   return ["1", "true", "yes", "on"].includes(value.toLowerCase());
 }
 
-const appName = process.env.APP_NAME ?? "JAA";
+const appName = process.env.APP_NAME ?? "Apply-Flow";
 const appEnv = process.env.APP_ENV ?? "development";
 const appDevMode = readBoolean(process.env.APP_DEV_MODE, true);
 const appLogLevel = process.env.APP_LOG_LEVEL ?? "info";

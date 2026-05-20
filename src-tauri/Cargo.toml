@@ -25,6 +25,7 @@ include_dir = "0.7"
 pdf-extract = "0.7"
 regex = "1.12"
 zip = "2.2"
+dotenvy = "0.15"
 
 tauri = { version = "2.11.2", features = ["tray-icon"] }
 

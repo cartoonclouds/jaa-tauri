@@ -9,8 +9,8 @@ export interface Contact {
   linkedinUrl: string | null;
   type: ContactType;
   notes: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateContactInput {

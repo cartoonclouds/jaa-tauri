@@ -17,8 +17,8 @@ export interface Profile {
   workEligibility: string;
   noticePeriodDays: number | null;
   interviewAvailability: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateProfileInput {

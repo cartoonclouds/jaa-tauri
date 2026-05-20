@@ -4,8 +4,8 @@ export interface Setting {
   locale: string;
   notificationsEnabled: boolean;
   developerMode: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface UpsertSettingInput {

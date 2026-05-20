@@ -47,8 +47,8 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 
 **Should be in its own module**
 
-Remove profile details from the settings module, when doing anything with the profiles it should use the profiles module
-
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
 
-When fetching details from the database, if the type is a DateTime/Date, create it as a javascript Date object.
+Create a splashscreen following the documentation in the docs https://v2.tauri.app/learn/splashscreen/. Use the image located at src/assets/images/splash-screen.png
+
+Recreate this same icon as an

@@ -2,7 +2,7 @@
  * Application settings and preferences.
  *
  * These preferences are persisted through the app's configured DatabaseDriver.
- * Use for theme, UI preferences, and onboarding profile data.
+ * Use for theme, UI preferences, and other lightweight app state.
  */
 
 export interface AppSettings {
@@ -13,23 +13,6 @@ export interface AppSettings {
   recentSearches: string[];
   tableColumnVisibility: Record<string, boolean>;
   onboardingCompleted: boolean;
-  userProfile: UserProfile;
-}
-
-export interface UserProfile {
-  fullName: string;
-  email: string;
-  targetRole: string;
-  desiredSalary: number | null;
-  salaryCurrency: string;
-  preferredLocations: string[];
-  remotePreference: "remote" | "hybrid" | "onsite" | "flexible";
-  skills: string[];
-  linkedInUrl: string;
-  githubUrl: string;
-  workEligibility: string;
-  noticePeriodDays: number | null;
-  interviewAvailability: string;
 }
 
 export interface ThemeSettings {

@@ -1,5 +1,7 @@
 import type { Company } from "@modules/companies/domain/entities/Company";
 
+import { toDate } from "@shared/utils/toDate";
+
 export function mapCompanyRowToEntity(row: Record<string, unknown>): Company {
   return {
     id: String(row.id),
@@ -12,7 +14,7 @@ export function mapCompanyRowToEntity(row: Record<string, unknown>): Company {
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
     notes: (row.notes as string | null) ?? null,
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 }

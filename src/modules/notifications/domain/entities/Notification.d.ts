@@ -6,10 +6,10 @@ export interface Notification {
   title: string;
   body: string;
   isRead: boolean;
-  scheduledFor: string | null;
-  sentAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  scheduledFor: Date | null;
+  sentAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateNotificationInput {

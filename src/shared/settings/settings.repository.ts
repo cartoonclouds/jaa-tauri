@@ -11,28 +11,11 @@ import type {
   NotificationSettings,
   ThemeSettings,
   UiPreferences,
-  UserProfile,
 } from "./types";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { parseStringArray } from "@shared/utils/parse";
 import { z } from "zod";
-
-const UserProfileInputSchema = z.object({
-  fullName: z.string(),
-  email: z.string(),
-  targetRole: z.string(),
-  desiredSalary: z.number().int().nullable(),
-  salaryCurrency: z.string(),
-  preferredLocations: z.array(z.string()),
-  remotePreference: z.enum(["remote", "hybrid", "onsite", "flexible"]),
-  skills: z.array(z.string()),
-  linkedInUrl: z.string(),
-  githubUrl: z.string(),
-  workEligibility: z.string(),
-  noticePeriodDays: z.number().int().nullable(),
-  interviewAvailability: z.string(),
-});
 
 const SettingsInputSchema = z.object({
   theme: z.enum(["light", "dark", "auto"]),
@@ -42,7 +25,6 @@ const SettingsInputSchema = z.object({
   recentSearches: z.array(z.string()),
   tableColumnVisibility: z.record(z.boolean()),
   onboardingCompleted: z.boolean(),
-  userProfile: UserProfileInputSchema,
 });
 
 import { useNuxtApp } from "nuxt/app";
@@ -56,42 +38,17 @@ const DEFAULT_SETTINGS: AppSettings = {
   recentSearches: [],
   tableColumnVisibility: {},
   onboardingCompleted: false,
-  userProfile: {
-    fullName: "",
-    email: "",
-    targetRole: "",
-    desiredSalary: null,
-    salaryCurrency: "USD",
-    preferredLocations: [],
-    remotePreference: "flexible",
-    skills: [],
-    linkedInUrl: "",
-    githubUrl: "",
-    workEligibility: "",
-    noticePeriodDays: null,
-    interviewAvailability: "",
-  },
 };
 
 type SettingsRow = Record<string, unknown>;
 
 let database: DatabaseDriver | null = null;
-let linkedProfileId: string | null = null;
-
-function cloneUserProfile(profile: UserProfile): UserProfile {
-  return {
-    ...profile,
-    preferredLocations: [...profile.preferredLocations],
-    skills: [...profile.skills],
-  };
-}
 
 function cloneSettings(settings: AppSettings): AppSettings {
   return {
     ...settings,
     recentSearches: [...settings.recentSearches],
     tableColumnVisibility: { ...settings.tableColumnVisibility },
-    userProfile: cloneUserProfile(settings.userProfile),
   };
 }
 
@@ -125,83 +82,6 @@ function parseBooleanRecord(
   }
 }
 
-function mapRowToUserProfile(row: SettingsRow): UserProfile {
-  const defaultUserProfile = cloneUserProfile(DEFAULT_SETTINGS.userProfile);
-
-  const preferredLocations =
-    typeof row.profile_preferred_locations === "string"
-      ? parseStringArray(
-          row.profile_preferred_locations,
-          defaultUserProfile.preferredLocations,
-        )
-      : typeof row.profile_location_text === "string"
-        ? row.profile_location_text
-            .split(",")
-            .map((part) => part.trim())
-            .filter((part) => part.length > 0)
-        : defaultUserProfile.preferredLocations;
-
-  const skills =
-    typeof row.profile_skills === "string"
-      ? parseStringArray(row.profile_skills, defaultUserProfile.skills)
-      : defaultUserProfile.skills;
-
-  return {
-    ...defaultUserProfile,
-    fullName:
-      typeof row.profile_full_name === "string"
-        ? row.profile_full_name
-        : defaultUserProfile.fullName,
-    email:
-      typeof row.profile_email === "string"
-        ? row.profile_email
-        : defaultUserProfile.email,
-    targetRole:
-      typeof row.profile_headline === "string"
-        ? row.profile_headline
-        : defaultUserProfile.targetRole,
-    desiredSalary:
-      typeof row.profile_desired_salary === "number"
-        ? row.profile_desired_salary
-        : defaultUserProfile.desiredSalary,
-    salaryCurrency:
-      typeof row.profile_salary_currency === "string"
-        ? row.profile_salary_currency
-        : defaultUserProfile.salaryCurrency,
-    linkedInUrl:
-      typeof row.profile_linkedin_url === "string"
-        ? row.profile_linkedin_url
-        : defaultUserProfile.linkedInUrl,
-    githubUrl:
-      typeof row.profile_github_url === "string"
-        ? row.profile_github_url
-        : typeof row.profile_portfolio_url === "string"
-          ? row.profile_portfolio_url
-          : defaultUserProfile.githubUrl,
-    preferredLocations,
-    remotePreference:
-      row.profile_remote_preference === "remote" ||
-      row.profile_remote_preference === "hybrid" ||
-      row.profile_remote_preference === "onsite" ||
-      row.profile_remote_preference === "flexible"
-        ? row.profile_remote_preference
-        : defaultUserProfile.remotePreference,
-    skills,
-    workEligibility:
-      typeof row.profile_work_eligibility === "string"
-        ? row.profile_work_eligibility
-        : defaultUserProfile.workEligibility,
-    noticePeriodDays:
-      typeof row.profile_notice_period_days === "number"
-        ? row.profile_notice_period_days
-        : defaultUserProfile.noticePeriodDays,
-    interviewAvailability:
-      typeof row.profile_interview_availability === "string"
-        ? row.profile_interview_availability
-        : defaultUserProfile.interviewAvailability,
-  };
-}
-
 function normalizeTheme(value: unknown): AppSettings["theme"] {
   if (value === "light" || value === "dark" || value === "auto") {
     return value;
@@ -215,11 +95,6 @@ function normalizeTheme(value: unknown): AppSettings["theme"] {
 }
 
 function mapRowToSettings(row: SettingsRow): AppSettings {
-  linkedProfileId =
-    typeof row.profile_id === "string" && row.profile_id.length > 0
-      ? row.profile_id
-      : null;
-
   return {
     theme: normalizeTheme(row.theme),
     sidebarCollapsed:
@@ -247,7 +122,6 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
         row.onboarding_completed ??
           Number(DEFAULT_SETTINGS.onboardingCompleted),
       ) === 1,
-    userProfile: mapRowToUserProfile(row),
   };
 }
 
@@ -265,7 +139,6 @@ function getDatabase(): DatabaseDriver {
 async function upsertSettingsRow(
   db: DatabaseDriver,
   settings: AppSettings,
-  profileId: string | null,
 ): Promise<void> {
   await db.execute(
     `
@@ -279,11 +152,10 @@ async function upsertSettingsRow(
       recent_searches,
       table_column_visibility,
       onboarding_completed,
-      profile_id,
       created_at,
       updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(id) DO UPDATE SET
       theme = excluded.theme,
       notifications_enabled = excluded.notifications_enabled,
@@ -292,7 +164,6 @@ async function upsertSettingsRow(
       recent_searches = excluded.recent_searches,
       table_column_visibility = excluded.table_column_visibility,
       onboarding_completed = excluded.onboarding_completed,
-      profile_id = excluded.profile_id,
       updated_at = CURRENT_TIMESTAMP
     `,
     [
@@ -305,121 +176,17 @@ async function upsertSettingsRow(
       JSON.stringify(settings.recentSearches),
       JSON.stringify(settings.tableColumnVisibility),
       toInt(settings.onboardingCompleted),
-      profileId,
     ],
   );
-}
-
-async function upsertProfileRow(
-  db: DatabaseDriver,
-  profile: UserProfile,
-  profileId: string | null,
-): Promise<string> {
-  const id = profileId ?? crypto.randomUUID();
-
-  await db.execute(
-    `
-    INSERT INTO profiles (
-      id,
-      full_name,
-      email,
-      phone,
-      linkedin_url,
-      github_url,
-      portfolio_url,
-      headline,
-      summary,
-      location_text,
-      desired_salary,
-      salary_currency,
-      preferred_locations,
-      remote_preference,
-      skills,
-      work_eligibility,
-      notice_period_days,
-      interview_availability,
-      created_at,
-      updated_at
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    ON CONFLICT(id) DO UPDATE SET
-      full_name = excluded.full_name,
-      email = excluded.email,
-      phone = excluded.phone,
-      linkedin_url = excluded.linkedin_url,
-      github_url = excluded.github_url,
-      portfolio_url = excluded.portfolio_url,
-      headline = excluded.headline,
-      summary = excluded.summary,
-      location_text = excluded.location_text,
-      desired_salary = excluded.desired_salary,
-      salary_currency = excluded.salary_currency,
-      preferred_locations = excluded.preferred_locations,
-      remote_preference = excluded.remote_preference,
-      skills = excluded.skills,
-      work_eligibility = excluded.work_eligibility,
-      notice_period_days = excluded.notice_period_days,
-      interview_availability = excluded.interview_availability,
-      updated_at = CURRENT_TIMESTAMP
-    `,
-    [
-      id,
-      profile.fullName,
-      profile.email || null,
-      null,
-      profile.linkedInUrl || null,
-      profile.githubUrl || null,
-      null,
-      profile.targetRole || null,
-      null,
-      profile.preferredLocations.join(", "),
-      profile.desiredSalary ?? null,
-      profile.salaryCurrency,
-      JSON.stringify(profile.preferredLocations),
-      profile.remotePreference,
-      JSON.stringify(profile.skills),
-      profile.workEligibility,
-      profile.noticePeriodDays ?? null,
-      profile.interviewAvailability,
-    ],
-  );
-
-  linkedProfileId = id;
-  return id;
 }
 
 async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
   const rows = await db.select<SettingsRow>(
     `
     SELECT
-      s.*,
-      COALESCE(s.profile_id, p.id) AS profile_id,
-      p.full_name AS profile_full_name,
-      p.email AS profile_email,
-      p.desired_salary AS profile_desired_salary,
-      p.salary_currency AS profile_salary_currency,
-      p.preferred_locations AS profile_preferred_locations,
-      p.remote_preference AS profile_remote_preference,
-      p.skills AS profile_skills,
-      p.linkedin_url AS profile_linkedin_url,
-      p.github_url AS profile_github_url,
-      p.portfolio_url AS profile_portfolio_url,
-      p.headline AS profile_headline,
-      p.work_eligibility AS profile_work_eligibility,
-      p.notice_period_days AS profile_notice_period_days,
-      p.interview_availability AS profile_interview_availability,
-      p.location_text AS profile_location_text
-    FROM settings s
-    LEFT JOIN profiles p ON p.id = COALESCE(
-      s.profile_id,
-      (
-        SELECT id
-        FROM profiles
-        ORDER BY updated_at DESC, created_at DESC
-        LIMIT 1
-      )
-    )
-    WHERE s.id = $1
+      *
+    FROM settings
+    WHERE id = $1
     LIMIT 1
     `,
     [STORE_KEY],
@@ -428,7 +195,7 @@ async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
 
   if (!row) {
     const defaults = cloneSettings(DEFAULT_SETTINGS);
-    await upsertSettingsRow(db, defaults, null);
+    await upsertSettingsRow(db, defaults);
     return defaults;
   }
 
@@ -481,19 +248,7 @@ export async function setSettings(
     );
   }
 
-  let profileId = linkedProfileId;
-  if (settings.userProfile) {
-    const profileParse = UserProfileInputSchema.safeParse(settings.userProfile);
-    if (!profileParse.success) {
-      throw new Error(
-        "UserProfile validation failed: " +
-          JSON.stringify(profileParse.error.format()),
-      );
-    }
-    profileId = await upsertProfileRow(db, profileParse.data, linkedProfileId);
-  }
-
-  await upsertSettingsRow(db, updated, profileId);
+  await upsertSettingsRow(db, updated);
 }
 
 /**
@@ -525,19 +280,7 @@ export async function setSetting<K extends keyof AppSettings>(
     );
   }
 
-  let profileId = linkedProfileId;
-  if (key === "userProfile") {
-    const profileParse = UserProfileInputSchema.safeParse(value);
-    if (!profileParse.success) {
-      throw new Error(
-        "UserProfile validation failed: " +
-          JSON.stringify(profileParse.error.format()),
-      );
-    }
-    profileId = await upsertProfileRow(db, profileParse.data, linkedProfileId);
-  }
-
-  await upsertSettingsRow(db, updated, profileId);
+  await upsertSettingsRow(db, updated);
 }
 
 /**
@@ -656,25 +399,11 @@ export async function setOnboardingCompleted(value: boolean): Promise<void> {
 }
 
 /**
- * Get user profile.
- */
-export async function getUserProfile(): Promise<UserProfile | null> {
-  return await getSetting("userProfile");
-}
-
-/**
- * Set user profile.
- */
-export async function setUserProfile(profile: UserProfile): Promise<void> {
-  await setSetting("userProfile", profile);
-}
-
-/**
  * Reset all settings to defaults.
  */
 export async function resetSettings(): Promise<void> {
   const db = getDatabase();
-  await upsertSettingsRow(db, cloneSettings(DEFAULT_SETTINGS), linkedProfileId);
+  await upsertSettingsRow(db, cloneSettings(DEFAULT_SETTINGS));
 }
 
 export { DEFAULT_SETTINGS };

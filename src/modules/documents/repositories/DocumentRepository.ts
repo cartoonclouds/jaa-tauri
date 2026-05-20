@@ -2,6 +2,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Document } from "@modules/documents/domain/entities/Document";
 import type { IRepository } from "@shared/types/repository";
 
+import { toDate } from "@shared/utils/toDate";
+
 export type DocumentCreatePayload = Pick<
   Document,
   "title" | "kind" | "filePath" | "mimeType" | "sizeBytes" | "checksum"
@@ -31,8 +33,8 @@ export class DocumentRepository implements IDocumentRepository {
       mimeType: (row.mime_type as string | null) ?? null,
       sizeBytes: (row.size_bytes as number | null) ?? null,
       checksum: (row.checksum as string | null) ?? null,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
   }
 

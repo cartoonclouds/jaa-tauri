@@ -1,5 +1,5 @@
 import type { ParsedResume } from "@modules/onboarding/domain/entities/ParsedResume";
-import type { UserProfile } from "@shared/settings/types";
+import type { Profile, UserProfile } from "@modules/profile";
 
 import { useDocumentService } from "@modules/documents";
 import { completeOnboarding } from "@modules/onboarding/application/actions/CompleteOnboarding";
@@ -7,7 +7,7 @@ import {
   isSupportedResumePath,
   mergeCommaSeparated,
 } from "@modules/onboarding/application/actions/onboardingHelpers";
-import { getUserProfile } from "@shared/settings";
+import { useProfileService } from "@modules/profile";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useStepper } from "@vueuse/core";
@@ -37,6 +37,24 @@ function defaultProfile(): UserProfile {
   };
 }
 
+function mapProfileToUserProfile(profile: Profile): UserProfile {
+  return {
+    fullName: profile.fullName,
+    email: profile.email ?? "",
+    targetRole: profile.headline ?? "",
+    desiredSalary: profile.desiredSalary ?? null,
+    salaryCurrency: profile.salaryCurrency,
+    preferredLocations: [...profile.preferredLocations],
+    remotePreference: profile.remotePreference,
+    skills: [...profile.skills],
+    linkedInUrl: profile.linkedinUrl ?? "",
+    githubUrl: profile.githubUrl ?? "",
+    workEligibility: profile.workEligibility ?? "",
+    noticePeriodDays: profile.noticePeriodDays ?? null,
+    interviewAvailability: profile.interviewAvailability ?? "",
+  };
+}
+
 function normalizeSelectedPath(
   selectedPath: string | string[] | null,
 ): string | null {
@@ -54,6 +72,7 @@ function normalizeSelectedPath(
 export function useOnboardingFlow() {
   const stepper = useStepper(stepOrder);
   const documentService = useDocumentService();
+  const profileService = useProfileService();
 
   const profile = ref<UserProfile>(defaultProfile());
   const saving = ref(false);
@@ -78,17 +97,16 @@ export function useOnboardingFlow() {
     try {
       hydrating.value = true;
 
-      const [existingProfile, documents] = await Promise.all([
-        getUserProfile(),
+      const [profiles, documents] = await Promise.all([
+        profileService.list(),
         documentService.list(),
       ]);
 
-      profile.value = {
-        ...defaultProfile(),
-        ...(existingProfile ?? {}),
-        preferredLocations: [...(existingProfile?.preferredLocations ?? [])],
-        skills: [...(existingProfile?.skills ?? [])],
-      };
+      const existingProfile = profiles[0] ?? null;
+
+      profile.value = existingProfile
+        ? mapProfileToUserProfile(existingProfile)
+        : defaultProfile();
 
       const latestResume = documents.find(
         (document) => document.kind === "resume",

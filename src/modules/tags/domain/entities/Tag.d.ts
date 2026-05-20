@@ -2,8 +2,8 @@ export interface Tag {
   id: string;
   name: string;
   color: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateTagInput {

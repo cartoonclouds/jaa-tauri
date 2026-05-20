@@ -1,5 +1,7 @@
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
+import { toDate, toNullableDate } from "@shared/utils/toDate";
+
 export function mapNotificationRowToEntity(
   row: Record<string, unknown>,
 ): Notification {
@@ -11,9 +13,9 @@ export function mapNotificationRowToEntity(
     title: String(row.title),
     body: String(row.body),
     isRead: Number(row.is_read ?? 0) === 1,
-    scheduledFor: (row.scheduled_for as string | null) ?? null,
-    sentAt: (row.sent_at as string | null) ?? null,
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
+    scheduledFor: toNullableDate(row.scheduled_for),
+    sentAt: toNullableDate(row.sent_at),
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 }

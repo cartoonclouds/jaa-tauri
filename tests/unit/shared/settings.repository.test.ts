@@ -111,7 +111,7 @@ class MockDatabaseDriver implements DatabaseDriver {
 
     return {
       rowsAffected: 1,
-      lastInsertId: null,
+      lastInsertId: 0,
     };
   }
 
@@ -135,10 +135,10 @@ describe("settings.repository", () => {
 
     expect(settings.theme).toBe("auto");
     expect(settings.sidebarCollapsed).toBe(false);
-    expect(settings.userProfile.fullName).toBe("");
+    expect(settings.onboardingCompleted).toBe(false);
   });
 
-  it("persists settings updates and profile references", async () => {
+  it("persists settings updates without profile data", async () => {
     vi.resetModules();
 
     const { initializeSettingsStore, setSettings, getSettings } =
@@ -148,27 +148,12 @@ describe("settings.repository", () => {
     await initializeSettingsStore(db);
     await setSettings({
       theme: "dark",
-      userProfile: {
-        fullName: "Jane Doe",
-        email: "jane@example.com",
-        targetRole: "Frontend Engineer",
-        desiredSalary: 120000,
-        salaryCurrency: "USD",
-        preferredLocations: ["Berlin"],
-        remotePreference: "flexible",
-        skills: ["Vue", "TypeScript"],
-        linkedInUrl: "https://linkedin.com/in/janedoe",
-        githubUrl: "https://github.com/janedoe",
-        workEligibility: "EU",
-        noticePeriodDays: 30,
-        interviewAvailability: "Weekdays",
-      },
+      onboardingCompleted: true,
     });
 
     const settings = await getSettings();
 
     expect(settings.theme).toBe("dark");
-    expect(settings.userProfile.fullName).toBe("Jane Doe");
-    expect(settings.userProfile.githubUrl).toBe("https://github.com/janedoe");
+    expect(settings.onboardingCompleted).toBe(true);
   });
 });

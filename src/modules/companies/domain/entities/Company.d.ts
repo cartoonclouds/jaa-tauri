@@ -9,8 +9,8 @@ export interface Company {
   locationLat: number | null;
   locationLng: number | null;
   notes: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateCompanyInput {

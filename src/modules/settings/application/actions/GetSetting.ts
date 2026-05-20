@@ -1,6 +1,8 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Setting } from "@modules/settings/domain/entities/Setting";
 
+import { toDate } from "@shared/utils/toDate";
+
 export async function getSetting(
   db: DatabaseDriver,
   id = "app",
@@ -21,7 +23,7 @@ export async function getSetting(
     locale: String(row.locale ?? "en-GB"),
     notificationsEnabled: Number(row.notifications_enabled ?? 1) === 1,
     developerMode: Number(row.developer_mode ?? 0) === 1,
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 }

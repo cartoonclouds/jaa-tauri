@@ -16,7 +16,6 @@ import { createProfileRow } from "./profiles.factory";
 import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
 
-type Row = Record<string, unknown>;
 type SqlValue = string | number | bigint | Uint8Array | null;
 
 interface SqliteStatement {
@@ -32,7 +31,7 @@ interface SqliteDatabaseLike {
 }
 
 type BetterSqliteCtor = new (filename: string) => SqliteDatabaseLike;
-const DatabaseCtor = Database as unknown as BetterSqliteCtor;
+const DatabaseCtor = Database;
 
 type AppSeedEnv = Record<string, string>;
 
@@ -145,23 +144,25 @@ function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {
   }
 }
 
-function insertMany(
+function insertMany<T extends object>(
   db: SqliteDatabaseLike,
   table: string,
-  rows: Row[],
+  rows: T[],
 ): number {
   if (rows.length === 0) {
     return 0;
   }
 
-  const columns = Object.keys(rows[0]);
+  const firstRow = rows[0] as Record<string, unknown>;
+  const columns = Object.keys(firstRow);
   const placeholders = columns.map(() => "?").join(", ");
   const sql = `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`;
   const stmt = db.prepare(sql);
 
   let inserted = 0;
   for (const row of rows) {
-    stmt.run(...columns.map((column) => (row[column] as SqlValue) ?? null));
+    const record = row as Record<string, unknown>;
+    stmt.run(...columns.map((column) => (record[column] as SqlValue) ?? null));
     inserted += 1;
   }
 

@@ -2,6 +2,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Event } from "@modules/events/domain/entities/Event";
 import type { IRepository } from "@shared/types/repository";
 
+import { toDate, toNullableDate } from "@shared/utils/toDate";
+
 export type EventCreatePayload = Pick<
   Event,
   "applicationId" | "contactId" | "type" | "title" | "description" | "eventAt"
@@ -28,9 +30,9 @@ export class EventRepository implements IEventRepository {
       type: String(row.type),
       title: String(row.title),
       description: (row.description as string | null) ?? null,
-      eventAt: (row.event_at as string | null) ?? null,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
+      eventAt: toNullableDate(row.event_at),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
   }
 
@@ -45,7 +47,7 @@ export class EventRepository implements IEventRepository {
         payload.type,
         payload.title,
         payload.description ?? null,
-        payload.eventAt ?? null,
+        payload.eventAt ? payload.eventAt.toISOString() : null,
       ],
     );
     return id;
@@ -64,7 +66,7 @@ export class EventRepository implements IEventRepository {
         payload.type ?? null,
         payload.title ?? null,
         payload.description ?? null,
-        payload.eventAt ?? null,
+        payload.eventAt ? payload.eventAt.toISOString() : null,
         payload.id,
       ],
     );

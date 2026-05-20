@@ -1,5 +1,7 @@
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
+import { toDate } from "@shared/utils/toDate";
+
 export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
   return {
     id: String(row.id),
@@ -10,7 +12,7 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
     linkedinUrl: (row.linkedin_url as string | null) ?? null,
     type: row.type === "recruiter" ? "recruiter" : "business",
     notes: (row.notes as string | null) ?? null,
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 }

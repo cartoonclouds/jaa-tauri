@@ -5,9 +5,9 @@ export interface Event {
   type: string;
   title: string;
   description: string | null;
-  eventAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  eventAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateEventInput {

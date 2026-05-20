@@ -4,7 +4,7 @@ export interface Application {
   title: string;
   status: string;
   sourceUrl: string | null;
-  appliedAt: string | null;
+  appliedAt: Date | null;
   locationText: string | null;
   locationLat: number | null;
   locationLng: number | null;
@@ -25,8 +25,8 @@ export interface Application {
   priority: number;
   isArchived: boolean;
   isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateApplicationInput {
