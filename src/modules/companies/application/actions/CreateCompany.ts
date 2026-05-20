@@ -1,12 +1,25 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateCompanyInput } from "@modules/companies/domain/entities/Company";
 
+import { z } from "zod";
+
+const CreateCompanyInputSchema = z.object({
+  name: z.string(),
+  locationText: z.string().nullable().optional(),
+  locationLat: z.number().nullable().optional(),
+  locationLng: z.number().nullable().optional(),
+});
+
 export async function createCompany(
   db: DatabaseDriver,
   input: CreateCompanyInput,
 ): Promise<string> {
-  const name = input.name.trim();
+  const parseResult = CreateCompanyInputSchema.safeParse(input);
+  if (!parseResult.success) {
+    throw new Error("Company name is required");
+  }
 
+  const name = parseResult.data.name.trim();
   if (!name) {
     throw new Error("Company name is required");
   }

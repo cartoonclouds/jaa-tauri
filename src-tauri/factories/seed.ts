@@ -62,7 +62,7 @@ function resolveDatabaseUrlFromEnv(env: AppSeedEnv): string {
   }
 
   const driver = env.APP_DATABASE_DRIVER ?? "sqlite";
-  const name = env.APP_DATABASE_NAME ?? "jaa.db";
+  const name = env.APP_DATABASE_NAME ?? "applyflow.db";
 
   if (driver === "memory" || driver === "in-memory") {
     return ":memory:";
@@ -125,7 +125,7 @@ function resolveSqliteFile(databaseUrl: string): string {
   if (databaseUrl.startsWith("sqlite:")) {
     const file = databaseUrl.slice("sqlite:".length);
     if (!file) {
-      throw new Error("Invalid sqlite URL. Example: sqlite:jaa.db");
+      throw new Error("Invalid sqlite URL. Example: sqlite:applyflow.db");
     }
 
     return path.resolve(process.cwd(), file);
@@ -225,8 +225,8 @@ function main(): void {
 
     const tags = createTagRows(seedConfig.tagCount, seed + 70);
     const documents = createDocumentRows(seedConfig.documentCount, seed + 80);
-    const settings = createSettingRow(seed + 90);
     const profile = createProfileRow(seed + 100);
+    const settings = createSettingRow(profile.id, seed + 90);
 
     const applicationTags = createApplicationTagRows(
       applications.map((a) => a.id),
@@ -236,29 +236,44 @@ function main(): void {
     );
 
     const events = createEventRows(
-      applications.map((a) => a.id),
-      contacts.map((c) => c.id),
+      applications.map((application) => ({
+        id: application.id,
+        company_id: application.company_id,
+      })),
+      contacts.map((contact) => ({
+        id: contact.id,
+        company_id: contact.company_id,
+      })),
       seedConfig.eventsPerApplication,
       seed + 120,
     );
 
     const notifications = createNotificationRows(
-      applications.map((a) => a.id),
-      events.map((e) => e.id),
+      applications.map((application) => ({ id: application.id })),
+      events.map((event) => ({
+        id: event.id,
+        application_id: event.application_id,
+      })),
       seedConfig.notificationsPerApplication,
       seed + 130,
     );
 
     const applicationDocuments = createApplicationDocumentRows(
       applications.map((a) => a.id),
-      documents.map((d) => d.id),
+      documents.map((document) => ({ id: document.id, kind: document.kind })),
       seedConfig.documentsPerApplication,
       seed + 140,
     );
 
     const applicationContacts = createApplicationContactRows(
-      applications.map((a) => a.id),
-      contacts.map((c) => c.id),
+      applications.map((application) => ({
+        id: application.id,
+        company_id: application.company_id,
+      })),
+      contacts.map((contact) => ({
+        id: contact.id,
+        company_id: contact.company_id,
+      })),
       seedConfig.contactsPerApplication,
       seed + 150,
     );
@@ -269,8 +284,8 @@ function main(): void {
       applications: insertMany(db, "applications", applications),
       tags: insertMany(db, "tags", tags),
       documents: insertMany(db, "documents", documents),
-      settings: insertMany(db, "settings", [settings]),
       profiles: insertMany(db, "profiles", [profile]),
+      settings: insertMany(db, "settings", [settings]),
       application_tags: insertMany(db, "application_tags", applicationTags),
       events: insertMany(db, "events", events),
       notifications: insertMany(db, "notifications", notifications),

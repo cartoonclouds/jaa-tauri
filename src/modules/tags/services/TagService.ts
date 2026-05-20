@@ -1,11 +1,11 @@
 import {
+  type ITagRepository,
   type TagCreatePayload,
-  type TagRepository,
   type TagUpdatePayload,
 } from "@modules/tags/repositories/TagRepository";
 
 export class TagService {
-  constructor(private readonly repository: TagRepository) {}
+  constructor(private readonly repository: ITagRepository) {}
 
   list() {
     return this.repository.list();

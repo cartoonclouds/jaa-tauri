@@ -21,7 +21,7 @@ const appEnv = process.env.APP_ENV ?? "development";
 const appDevMode = readBoolean(process.env.APP_DEV_MODE, true);
 const appLogLevel = process.env.APP_LOG_LEVEL ?? "info";
 const appDatabaseDriver = process.env.APP_DATABASE_DRIVER ?? "sqlite";
-const appDatabaseName = process.env.APP_DATABASE_NAME ?? "jaa.db";
+const appDatabaseName = process.env.APP_DATABASE_NAME ?? "applyflow.db";
 const appDatabaseUrl =
   process.env.APP_DATABASE_URL ?? `${appDatabaseDriver}:${appDatabaseName}`;
 

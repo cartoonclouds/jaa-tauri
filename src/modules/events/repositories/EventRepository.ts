@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Event } from "@modules/events/domain/entities/Event";
+import type { IRepository } from "@shared/types/repository";
 
 export type EventCreatePayload = Pick<
   Event,
@@ -7,7 +8,13 @@ export type EventCreatePayload = Pick<
 >;
 export type EventUpdatePayload = Partial<EventCreatePayload> & { id: string };
 
-export class EventRepository {
+export type IEventRepository = IRepository<
+  Event,
+  EventCreatePayload,
+  EventUpdatePayload
+>;
+
+export class EventRepository implements IEventRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Event[]> {

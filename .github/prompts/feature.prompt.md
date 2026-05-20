@@ -59,3 +59,5 @@ tests/
 ---
 
 Replace `<FeatureName>` and `<feature>` with your actual feature name. This prompt will guide Copilot to generate a DDD-aligned, CRUD-ready feature module.
+
+Also use the CoPilot instructions in `copilot-instructions.md` to ensure the generated code follows the project’s conventions and best practices.

@@ -1,10 +1,10 @@
 import {
-  type SettingRepository,
+  type ISettingRepository,
   type SettingUpsertPayload,
 } from "@modules/settings/repositories/SettingRepository";
 
 export class SettingService {
-  constructor(private readonly repository: SettingRepository) {}
+  constructor(private readonly repository: ISettingRepository) {}
 
   list() {
     return this.repository.list();

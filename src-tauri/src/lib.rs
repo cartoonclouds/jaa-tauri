@@ -1,11 +1,8 @@
-use include_dir::{include_dir, Dir};
-use tauri_plugin_sql::{Migration, MigrationKind};
+mod migrations;
+mod resume_parsing;
 
-/// Compile-time embedded SQL migrations folder.
-///
-/// Keeping migrations embedded ensures desktop builds always ship with
-/// the exact migration set used by the binary.
-static MIGRATIONS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/migrations");
+use migrations::discover_migrations;
+use resume_parsing::parse_resume_for_ats;
 
 fn parse_bool(value: &str) -> bool {
     matches!(
@@ -22,7 +19,7 @@ fn resolve_database_url() -> String {
     }
 
     let driver = std::env::var("APP_DATABASE_DRIVER").unwrap_or_else(|_| "sqlite".to_string());
-    let name = std::env::var("APP_DATABASE_NAME").unwrap_or_else(|_| "jaa.db".to_string());
+    let name = std::env::var("APP_DATABASE_NAME").unwrap_or_else(|_| "applyflow.db".to_string());
 
     if driver == "memory" || driver == "in-memory" {
         ":memory:".to_string()
@@ -37,44 +34,6 @@ fn resolve_dev_mode() -> bool {
     }
 
     cfg!(debug_assertions)
-}
-
-/// Discovers and builds SQL migrations from embedded files.
-///
-/// Expected filename format starts with a numeric version prefix, for example:
-/// `0001_create_projects.sql`.
-///
-/// The full filename is used as the migration description to preserve clear
-/// traceability between migration records and source files.
-fn discover_migrations() -> Vec<Migration> {
-    let mut entries: Vec<(i64, &'static str, &'static str)> = MIGRATIONS_DIR
-        .files()
-        .filter_map(|file| {
-            let file_name = file.path().file_name()?.to_str()?;
-            let sql = file.contents_utf8()?;
-
-            if !file_name.ends_with(".sql") {
-                return None;
-            }
-
-            let version_str = file_name.split(['_', '.']).next()?;
-            let version = version_str.parse::<i64>().ok()?;
-
-            Some((version, file_name, sql))
-        })
-        .collect();
-
-    entries.sort_by_key(|(version, name, _)| (*version, *name));
-
-    entries
-        .into_iter()
-        .map(|(version, file_name, sql)| Migration {
-            version,
-            description: file_name,
-            sql,
-            kind: MigrationKind::Up,
-        })
-        .collect()
 }
 
 /// Application entry point for desktop/mobile Tauri runtime.
@@ -99,6 +58,7 @@ pub fn run() {
 
     // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![parse_resume_for_ats])
         .plugin(tauri_plugin_window_state::Builder::new().build())
         // Persistence and native capability plugins.
         .plugin(tauri_plugin_store::Builder::default().build())

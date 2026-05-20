@@ -1,6 +1,6 @@
 # Tauri Desktop Runtime
 
-This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the Job Application Auditor desktop application.
+This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the Apply-Flow desktop application.
 
 Updated: 2026-05-19.
 
@@ -88,7 +88,7 @@ cd .. && npm run db:seed
 ```
 
 The seed runner reads SQL migrations from `migrations/`, clears data in FK-safe order,
-then inserts mock rows in FK-safe order into `sqlite:jaa.db`.
+then inserts mock rows in FK-safe order into `sqlite:applyflow.db`.
 
 To build for release:
 

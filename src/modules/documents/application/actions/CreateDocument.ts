@@ -1,14 +1,26 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateDocumentInput } from "@modules/documents/domain/entities/Document";
 
+import { z } from "zod";
+
+const CreateDocumentInputSchema = z.object({
+  title: z.string(),
+  kind: z.string(),
+  filePath: z.string(),
+});
+
 export async function createDocument(
   db: DatabaseDriver,
   input: CreateDocumentInput,
 ): Promise<string> {
-  const title = input.title.trim();
-  const kind = input.kind.trim();
-  const filePath = input.filePath.trim();
+  const parseResult = CreateDocumentInputSchema.safeParse(input);
+  if (!parseResult.success) {
+    throw new Error("Document title, kind, and file path are required");
+  }
 
+  const title = parseResult.data.title.trim();
+  const kind = parseResult.data.kind.trim();
+  const filePath = parseResult.data.filePath.trim();
   if (!title || !kind || !filePath) {
     throw new Error("Document title, kind, and file path are required");
   }

@@ -1,11 +1,11 @@
 import {
   type CompanyCreatePayload,
-  type CompanyRepository,
   type CompanyUpdatePayload,
+  type ICompanyRepository,
 } from "@modules/companies/repositories/CompanyRepository";
 
 export class CompanyService {
-  constructor(private readonly repository: CompanyRepository) {}
+  constructor(private readonly repository: ICompanyRepository) {}
 
   list() {
     return this.repository.list();

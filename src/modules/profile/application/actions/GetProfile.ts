@@ -1,6 +1,8 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Profile } from "@modules/profile/domain/entities/Profile";
 
+import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
+
 export async function getProfile(
   db: DatabaseDriver,
   id: string,
@@ -15,17 +17,5 @@ export async function getProfile(
     return null;
   }
 
-  return {
-    id: String(row.id),
-    fullName: String(row.full_name),
-    email: (row.email as string | null) ?? null,
-    phone: (row.phone as string | null) ?? null,
-    linkedinUrl: (row.linkedin_url as string | null) ?? null,
-    portfolioUrl: (row.portfolio_url as string | null) ?? null,
-    headline: (row.headline as string | null) ?? null,
-    summary: (row.summary as string | null) ?? null,
-    locationText: (row.location_text as string | null) ?? null,
-    createdAt: String(row.created_at),
-    updatedAt: String(row.updated_at),
-  };
+  return mapProfileRowToEntity(row, "Profile read validation failed");
 }

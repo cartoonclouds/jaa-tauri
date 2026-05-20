@@ -1,11 +1,11 @@
 import {
   type EventCreatePayload,
-  type EventRepository,
   type EventUpdatePayload,
+  type IEventRepository,
 } from "@modules/events/repositories/EventRepository";
 
 export class EventService {
-  constructor(private readonly repository: EventRepository) {}
+  constructor(private readonly repository: IEventRepository) {}
 
   list() {
     return this.repository.list();

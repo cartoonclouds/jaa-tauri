@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
+import type { IRepository } from "@shared/types/repository";
 
 export type NotificationCreatePayload = Pick<
   Notification,
@@ -16,7 +17,13 @@ export type NotificationUpdatePayload = Partial<NotificationCreatePayload> & {
   id: string;
 };
 
-export class NotificationRepository {
+export type INotificationRepository = IRepository<
+  Notification,
+  NotificationCreatePayload,
+  NotificationUpdatePayload
+>;
+
+export class NotificationRepository implements INotificationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Notification[]> {

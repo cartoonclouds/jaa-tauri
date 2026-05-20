@@ -1,5 +1,8 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Setting } from "@modules/settings/domain/entities/Setting";
+import type { IRepository } from "@shared/types/repository";
+
+import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
 
 export interface SettingUpsertPayload {
   id?: string;
@@ -9,22 +12,25 @@ export interface SettingUpsertPayload {
   developerMode?: boolean;
 }
 
-export class SettingRepository {
+export type SettingCreatePayload = SettingUpsertPayload;
+export type SettingUpdatePayload = SettingUpsertPayload & { id: string };
+
+export interface ISettingRepository extends IRepository<
+  Setting,
+  SettingCreatePayload,
+  SettingUpdatePayload
+> {
+  upsert(payload: SettingUpsertPayload): Promise<string>;
+}
+
+export class SettingRepository implements ISettingRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Setting[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM settings ORDER BY created_at DESC",
     );
-    return rows.map((row) => ({
-      id: String(row.id),
-      theme: row.theme as Setting["theme"],
-      locale: String(row.locale),
-      notificationsEnabled: Number(row.notifications_enabled ?? 1) === 1,
-      developerMode: Number(row.developer_mode ?? 0) === 1,
-      createdAt: String(row.created_at),
-      updatedAt: String(row.updated_at),
-    }));
+    return rows.map((row) => mapSettingRowToEntity(row));
   }
 
   async upsert(payload: SettingUpsertPayload): Promise<string> {
@@ -47,6 +53,14 @@ export class SettingRepository {
       ],
     );
     return id;
+  }
+
+  async create(payload: SettingCreatePayload): Promise<string> {
+    return this.upsert(payload);
+  }
+
+  async update(payload: SettingUpdatePayload): Promise<void> {
+    await this.upsert(payload);
   }
 
   async delete(id: string): Promise<void> {

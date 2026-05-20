@@ -10,7 +10,9 @@ export class TauriSqliteDriver implements DatabaseDriver {
 
   constructor(private readonly db: TauriDatabase) {}
 
-  static async connect(path = "sqlite:jaa.db"): Promise<TauriSqliteDriver> {
+  static async connect(
+    path = "sqlite:applyflow.db",
+  ): Promise<TauriSqliteDriver> {
     if (path === ":memory:") {
       throw new Error(
         "In-memory SQLite is not supported by the Tauri SQL plugin URL format.",

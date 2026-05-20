@@ -1,16 +1,27 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
-import type {
-  CreateNotificationInput,
-  Notification,
-} from "@modules/notifications/domain/entities/Notification";
+import type { CreateNotificationInput } from "@modules/notifications/domain/entities/Notification";
+
+import { z } from "zod";
+
+const CreateNotificationInputSchema = z.object({
+  applicationId: z.string().nullable().optional(),
+  eventId: z.string().nullable().optional(),
+  severity: z.enum(["info", "warning", "success", "error"]).optional(),
+  title: z.string(),
+  body: z.string(),
+});
 
 export async function createNotification(
   db: DatabaseDriver,
   input: CreateNotificationInput,
 ): Promise<string> {
-  const title = input.title.trim();
-  const body = input.body.trim();
+  const parseResult = CreateNotificationInputSchema.safeParse(input);
+  if (!parseResult.success) {
+    throw new Error("Notification title and body are required");
+  }
 
+  const title = parseResult.data.title.trim();
+  const body = parseResult.data.body.trim();
   if (!title || !body) {
     throw new Error("Notification title and body are required");
   }
@@ -33,9 +44,9 @@ export async function createNotification(
     `,
     [
       id,
-      input.applicationId ?? null,
-      input.eventId ?? null,
-      input.severity ?? ("info" as Notification["severity"]),
+      parseResult.data.applicationId ?? null,
+      parseResult.data.eventId ?? null,
+      parseResult.data.severity ?? "info",
       title,
       body,
     ],

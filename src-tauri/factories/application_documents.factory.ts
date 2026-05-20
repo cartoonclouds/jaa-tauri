@@ -7,9 +7,14 @@ export interface ApplicationDocumentRow {
   created_at: string;
 }
 
+interface ApplicationDocumentInput {
+  id: string;
+  kind: string;
+}
+
 export function createApplicationDocumentRows(
   applicationIds: string[],
-  documentIds: string[],
+  documents: ApplicationDocumentInput[],
   docsPerApplication = 2,
   seed = 2000,
 ): ApplicationDocumentRow[] {
@@ -19,11 +24,19 @@ export function createApplicationDocumentRows(
   return applicationIds.flatMap((applicationId, applicationIndex) =>
     Array.from({ length: docsPerApplication }, (_, index) => {
       faker.seed(seed + applicationIndex * 100 + index);
+      const document = documents[(applicationIndex + index) % documents.length];
+
+      const relationType =
+        document.kind === "resume"
+          ? "cv"
+          : document.kind === "cover-letter"
+            ? "cover-letter"
+            : "attachment";
 
       return {
         application_id: applicationId,
-        document_id: documentIds[(applicationIndex + index) % documentIds.length],
-        relation_type: faker.helpers.arrayElement(["attachment", "cv", "cover-letter"]),
+        document_id: document.id,
+        relation_type: relationType,
         created_at: faker.date.recent({ days: 30 }).toISOString(),
       };
     }),

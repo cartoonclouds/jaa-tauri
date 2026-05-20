@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "JAA",
+  "productName": "ApplyFlow",
   "version": "0.1.0",
-  "identifier": "com.jaa.app",
+  "identifier": "com.apply-flow.app",
   "build": {
     "beforeDevCommand": "npm run dev:tauri",
     "devUrl": "http://127.0.0.1:3000",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Job Application Auditor",
+        "title": "Apply-Flow",
         "width": 1024,
         "height": 768,
         "resizable": true,
@@ -46,7 +46,7 @@
     "updater": {
       "pubkey": "untrusted comment: minisign public key: 4FD57CC6751933D7\nRWTXMxl1xnzVT9GcK2WN68lgcC0SfjXW9csqwHe5PXhadRzGkaMolDAa",
       "endpoints": [
-        "https://example.com/jaa/releases/latest.json"
+        "https://example.com/applyflow/releases/latest.json"
       ],
       "windows": {
         "installMode": "passive"

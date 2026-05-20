@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Document } from "@modules/documents/domain/entities/Document";
+import type { IRepository } from "@shared/types/repository";
 
 export type DocumentCreatePayload = Pick<
   Document,
@@ -9,7 +10,13 @@ export type DocumentUpdatePayload = Partial<DocumentCreatePayload> & {
   id: string;
 };
 
-export class DocumentRepository {
+export type IDocumentRepository = IRepository<
+  Document,
+  DocumentCreatePayload,
+  DocumentUpdatePayload
+>;
+
+export class DocumentRepository implements IDocumentRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Document[]> {

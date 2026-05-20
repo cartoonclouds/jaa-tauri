@@ -3,7 +3,8 @@
   "identifier": "default",
   "description": "enables the default permissions for all platforms",
   "windows": [
-    "main"
+    "main",
+    "onboarding-modal"
   ],
   "domains": [
     "http://127.0.0.1",
@@ -11,6 +12,9 @@
   ],
   "permissions": [
     "core:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-set-enabled",
+    "core:window:allow-set-focus",
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",

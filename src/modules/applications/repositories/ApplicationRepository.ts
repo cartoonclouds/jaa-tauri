@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Application } from "@modules/applications/domain/entities/Application";
+import type { IRepository } from "@shared/types/repository";
 
 export interface ApplicationCreatePayload {
   companyId?: string | null;
@@ -19,7 +20,13 @@ export interface ApplicationUpdatePayload {
   locationLng?: number | null;
 }
 
-export class ApplicationRepository {
+export type IApplicationRepository = IRepository<
+  Application,
+  ApplicationCreatePayload,
+  ApplicationUpdatePayload
+>;
+
+export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Application[]> {

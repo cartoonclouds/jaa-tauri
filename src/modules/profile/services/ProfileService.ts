@@ -1,11 +1,11 @@
 import {
+  type IProfileRepository,
   type ProfileCreatePayload,
-  type ProfileRepository,
   type ProfileUpdatePayload,
 } from "@modules/profile/repositories/ProfileRepository";
 
 export class ProfileService {
-  constructor(private readonly repository: ProfileRepository) {}
+  constructor(private readonly repository: IProfileRepository) {}
 
   list() {
     return this.repository.list();

@@ -1,11 +1,11 @@
 import {
   type ContactCreatePayload,
-  type ContactRepository,
   type ContactUpdatePayload,
+  type IContactRepository,
 } from "@modules/contacts/repositories/ContactRepository";
 
 export class ContactService {
-  constructor(private readonly repository: ContactRepository) {}
+  constructor(private readonly repository: IContactRepository) {}
 
   list() {
     return this.repository.list();

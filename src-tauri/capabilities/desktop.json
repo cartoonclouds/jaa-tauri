@@ -6,14 +6,31 @@
     "linux"
   ],
   "windows": [
-    "main"
+    "main",
+    "onboarding-modal"
   ],
   "permissions": [
     "window-state:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-set-enabled",
+    "core:window:allow-set-focus",
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",
     "sql:allow-select",
-    "sql:allow-close"
+    "sql:allow-close",
+    "fs:default",
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "$APPDATA/*" }]
+    },
+    {
+      "identifier": "fs:allow-read",
+      "allow": [{ "path": "$APPDATA/*" }]
+    },
+    {
+      "identifier": "fs:allow-write",
+      "allow": [{ "path": "$APPDATA/*" }]
+    }
   ]
 }

@@ -8,7 +8,6 @@
 
 import type { AppSettings } from "./types";
 
-import { useNuxtApp } from "nuxt/app";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -33,8 +32,7 @@ export const useSettingsStore = defineStore("settings", () => {
     error.value = null;
 
     try {
-      const { $database } = useNuxtApp();
-      await initializeSettingsStore($database);
+      await initializeSettingsStore();
       settings.value = await getSettings();
     } catch (err) {
       error.value =

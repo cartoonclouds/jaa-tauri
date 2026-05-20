@@ -1,5 +1,6 @@
 {
-  "name": "jaa",
+  "name": "apply-flow",
+  "description": "A desktop application for managing and tracking job applications.",
   "private": true,
   "version": "0.1.0",
   "type": "module",

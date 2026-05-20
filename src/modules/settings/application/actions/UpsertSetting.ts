@@ -1,11 +1,30 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { UpsertSettingInput } from "@modules/settings/domain/entities/Setting";
 
+import { z } from "zod";
+
+const UpsertSettingSchema = z.object({
+  id: z.string().min(1).optional(),
+  theme: z.enum(["system", "light", "dark"]).optional(),
+  locale: z.string().min(1).optional(),
+  notificationsEnabled: z.boolean().optional(),
+  developerMode: z.boolean().optional(),
+});
+
 export async function upsertSetting(
   db: DatabaseDriver,
   input: UpsertSettingInput,
 ): Promise<void> {
-  const id = input.id ?? "app";
+  const parseResult = UpsertSettingSchema.safeParse(input);
+  if (!parseResult.success) {
+    throw new Error(
+      "Setting validation failed: " +
+        JSON.stringify(parseResult.error.format()),
+    );
+  }
+
+  const validated = parseResult.data;
+  const id = validated.id ?? "app";
 
   await db.execute(
     `
@@ -28,10 +47,10 @@ export async function upsertSetting(
     `,
     [
       id,
-      input.theme ?? "system",
-      input.locale ?? "en-GB",
-      input.notificationsEnabled === false ? 0 : 1,
-      input.developerMode === true ? 1 : 0,
+      validated.theme ?? "system",
+      validated.locale ?? "en-GB",
+      validated.notificationsEnabled === false ? 0 : 1,
+      validated.developerMode === true ? 1 : 0,
     ],
   );
 }

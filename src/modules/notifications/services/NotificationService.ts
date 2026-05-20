@@ -1,11 +1,11 @@
 import {
+  type INotificationRepository,
   type NotificationCreatePayload,
-  type NotificationRepository,
   type NotificationUpdatePayload,
 } from "@modules/notifications/repositories/NotificationRepository";
 
 export class NotificationService {
-  constructor(private readonly repository: NotificationRepository) {}
+  constructor(private readonly repository: INotificationRepository) {}
 
   list() {
     return this.repository.list();

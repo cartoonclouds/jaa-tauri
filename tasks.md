@@ -1,8 +1,6 @@
 TODO:
 
-- Onboarding stepper ATS CV parsing https://chatgpt.com/share/6a0c8be1-c9b0-8393-8285-856aff2a7ae3
-
-- Create a layout spliting the window vertically into two sides. Add a vertical bar to allow each side to be resized. Use https://primevue.org/splitter/
+-
 
 - Create a feature/domain using a datatable to list all job application, use pagination (https://primevue.org/paginator/) and https://primevue.org/datatable/
 
@@ -29,13 +27,11 @@ Create a feature/module which will display all interactions a job finder has had
 
 Make sure all modules use the repository pattern, if it doesn't exist create them and update references to use them. Create an interface for the repositories.
 
-When validating payloads, use Zod.
+When validating payloads or object structure, use Zod.
 
 Add the implementation of the InMemoryDriver for use as a database
 
 Rename and update any uses of presentation composables without the suffix "curd". For example, not `useApplicationCrud` but instead `useApplication`
-
-Create an .env file to store application configuration. Add keys used to set the number of each entries into the database when seeding. Also add common application configuration keys. Include a key for dev mode and update any configuration to check this is true such as in nuxt.config.ts devtools.enabled. Also add database driver key and database name and update to check which database file/driver to use. Update any places where these should be used.
 
 ---
 
@@ -49,6 +45,10 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 
 `tauri-apps/plugins-workspace`
 
-Stepper on first load to enter user profile details, use https://primevue.org/stepper/. Save the data using the Tauri package https://v2.tauri.app/plugin/store/ - install and configure this new package.
-
 **Should be in its own module**
+
+Remove profile details from the settings module, when doing anything with the profiles it should use the profiles module
+
+Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
+
+When fetching details from the database, if the type is a DateTime/Date, create it as a javascript Date object.

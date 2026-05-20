@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
+import type { IRepository } from "@shared/types/repository";
 
 export type ContactCreatePayload = Pick<
   Contact,
@@ -15,7 +16,13 @@ export type ContactUpdatePayload = Partial<ContactCreatePayload> & {
   id: string;
 };
 
-export class ContactRepository {
+export type IContactRepository = IRepository<
+  Contact,
+  ContactCreatePayload,
+  ContactUpdatePayload
+>;
+
+export class ContactRepository implements IContactRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Contact[]> {

@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Company } from "@modules/companies/domain/entities/Company";
+import type { IRepository } from "@shared/types/repository";
 
 export interface CompanyCreatePayload {
   name: string;
@@ -26,7 +27,13 @@ export interface CompanyUpdatePayload {
   notes?: string | null;
 }
 
-export class CompanyRepository {
+export type ICompanyRepository = IRepository<
+  Company,
+  CompanyCreatePayload,
+  CompanyUpdatePayload
+>;
+
+export class CompanyRepository implements ICompanyRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Company[]> {

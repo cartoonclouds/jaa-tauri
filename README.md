@@ -1,4 +1,4 @@
-# Job Application Auditor
+# Apply-Flow
 
 Desktop-first job application tracking built with Nuxt 4 + Vue 3 + TypeScript inside a Tauri 2 runtime.
 
@@ -169,7 +169,7 @@ Use Pinia for frontend interaction state and UI composition.
 
 ## Current Database Implementation
 
-Schema management is external to this repository. The app connects to `sqlite:jaa.db` through the Tauri SQL plugin.
+Schema management is external to this repository. The app connects to `sqlite:applyflow.db` through the Tauri SQL plugin.
 
 Current tables include:
 
@@ -192,7 +192,7 @@ Deterministic factories (one file per table) are in `src-tauri/factories`.
 - mock data generation uses `@faker-js/faker`
 - seed runner uses `better-sqlite3`
 - rows are deleted and inserted in FK-safe order
-- default target database URL: `sqlite:jaa.db`
+- default target database URL: `sqlite:applyflow.db`
 
 Run seed script:
 
@@ -203,7 +203,7 @@ npm run db:seed
 Optional overrides:
 
 ```bash
-DATABASE_URL=sqlite:jaa.db SEED=20260518 npm run db:seed
+DATABASE_URL=sqlite:applyflow.db SEED=20260518 npm run db:seed
 ```
 
 ## Stack

@@ -15,8 +15,37 @@ import type {
 } from "./types";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
-import { useNuxtApp } from "nuxt/app";
+import { parseStringArray } from "@shared/utils/parse";
+import { z } from "zod";
 
+const UserProfileInputSchema = z.object({
+  fullName: z.string(),
+  email: z.string(),
+  targetRole: z.string(),
+  desiredSalary: z.number().int().nullable(),
+  salaryCurrency: z.string(),
+  preferredLocations: z.array(z.string()),
+  remotePreference: z.enum(["remote", "hybrid", "onsite", "flexible"]),
+  skills: z.array(z.string()),
+  linkedInUrl: z.string(),
+  githubUrl: z.string(),
+  workEligibility: z.string(),
+  noticePeriodDays: z.number().int().nullable(),
+  interviewAvailability: z.string(),
+});
+
+const SettingsInputSchema = z.object({
+  theme: z.enum(["light", "dark", "auto"]),
+  sidebarCollapsed: z.boolean(),
+  notificationsEnabled: z.boolean(),
+  developerMode: z.boolean(),
+  recentSearches: z.array(z.string()),
+  tableColumnVisibility: z.record(z.boolean()),
+  onboardingCompleted: z.boolean(),
+  userProfile: UserProfileInputSchema,
+});
+
+import { useNuxtApp } from "nuxt/app";
 const STORE_KEY = "app-settings";
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -49,25 +78,25 @@ type SettingsRow = Record<string, unknown>;
 let database: DatabaseDriver | null = null;
 let linkedProfileId: string | null = null;
 
-function toInt(value: boolean): number {
-  return value ? 1 : 0;
+function cloneUserProfile(profile: UserProfile): UserProfile {
+  return {
+    ...profile,
+    preferredLocations: [...profile.preferredLocations],
+    skills: [...profile.skills],
+  };
 }
 
-function parseStringArray(value: unknown, fallback: string[]): string[] {
-  if (typeof value !== "string") {
-    return fallback;
-  }
+function cloneSettings(settings: AppSettings): AppSettings {
+  return {
+    ...settings,
+    recentSearches: [...settings.recentSearches],
+    tableColumnVisibility: { ...settings.tableColumnVisibility },
+    userProfile: cloneUserProfile(settings.userProfile),
+  };
+}
 
-  try {
-    const parsed: unknown = JSON.parse(value);
-    if (!Array.isArray(parsed)) {
-      return fallback;
-    }
-
-    return parsed.filter((item): item is string => typeof item === "string");
-  } catch {
-    return fallback;
-  }
+function toInt(value: boolean): number {
+  return value ? 1 : 0;
 }
 
 function parseBooleanRecord(
@@ -75,13 +104,13 @@ function parseBooleanRecord(
   fallback: Record<string, boolean>,
 ): Record<string, boolean> {
   if (typeof value !== "string") {
-    return fallback;
+    return { ...fallback };
   }
 
   try {
     const parsed: unknown = JSON.parse(value);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return fallback;
+      return { ...fallback };
     }
 
     return Object.entries(parsed).reduce<Record<string, boolean>>(
@@ -92,38 +121,84 @@ function parseBooleanRecord(
       {},
     );
   } catch {
-    return fallback;
+    return { ...fallback };
   }
 }
 
 function mapRowToUserProfile(row: SettingsRow): UserProfile {
+  const defaultUserProfile = cloneUserProfile(DEFAULT_SETTINGS.userProfile);
+
   const preferredLocations =
-    typeof row.profile_location_text === "string"
-      ? row.profile_location_text
-          .split(",")
-          .map((part) => part.trim())
-          .filter((part) => part.length > 0)
-      : DEFAULT_SETTINGS.userProfile.preferredLocations;
+    typeof row.profile_preferred_locations === "string"
+      ? parseStringArray(
+          row.profile_preferred_locations,
+          defaultUserProfile.preferredLocations,
+        )
+      : typeof row.profile_location_text === "string"
+        ? row.profile_location_text
+            .split(",")
+            .map((part) => part.trim())
+            .filter((part) => part.length > 0)
+        : defaultUserProfile.preferredLocations;
+
+  const skills =
+    typeof row.profile_skills === "string"
+      ? parseStringArray(row.profile_skills, defaultUserProfile.skills)
+      : defaultUserProfile.skills;
 
   return {
-    ...DEFAULT_SETTINGS.userProfile,
+    ...defaultUserProfile,
     fullName:
       typeof row.profile_full_name === "string"
         ? row.profile_full_name
-        : DEFAULT_SETTINGS.userProfile.fullName,
+        : defaultUserProfile.fullName,
     email:
       typeof row.profile_email === "string"
         ? row.profile_email
-        : DEFAULT_SETTINGS.userProfile.email,
+        : defaultUserProfile.email,
     targetRole:
       typeof row.profile_headline === "string"
         ? row.profile_headline
-        : DEFAULT_SETTINGS.userProfile.targetRole,
+        : defaultUserProfile.targetRole,
+    desiredSalary:
+      typeof row.profile_desired_salary === "number"
+        ? row.profile_desired_salary
+        : defaultUserProfile.desiredSalary,
+    salaryCurrency:
+      typeof row.profile_salary_currency === "string"
+        ? row.profile_salary_currency
+        : defaultUserProfile.salaryCurrency,
     linkedInUrl:
       typeof row.profile_linkedin_url === "string"
         ? row.profile_linkedin_url
-        : DEFAULT_SETTINGS.userProfile.linkedInUrl,
+        : defaultUserProfile.linkedInUrl,
+    githubUrl:
+      typeof row.profile_github_url === "string"
+        ? row.profile_github_url
+        : typeof row.profile_portfolio_url === "string"
+          ? row.profile_portfolio_url
+          : defaultUserProfile.githubUrl,
     preferredLocations,
+    remotePreference:
+      row.profile_remote_preference === "remote" ||
+      row.profile_remote_preference === "hybrid" ||
+      row.profile_remote_preference === "onsite" ||
+      row.profile_remote_preference === "flexible"
+        ? row.profile_remote_preference
+        : defaultUserProfile.remotePreference,
+    skills,
+    workEligibility:
+      typeof row.profile_work_eligibility === "string"
+        ? row.profile_work_eligibility
+        : defaultUserProfile.workEligibility,
+    noticePeriodDays:
+      typeof row.profile_notice_period_days === "number"
+        ? row.profile_notice_period_days
+        : defaultUserProfile.noticePeriodDays,
+    interviewAvailability:
+      typeof row.profile_interview_availability === "string"
+        ? row.profile_interview_availability
+        : defaultUserProfile.interviewAvailability,
   };
 }
 
@@ -176,7 +251,7 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
   };
 }
 
-async function getDatabase(): Promise<DatabaseDriver> {
+function getDatabase(): DatabaseDriver {
   if (database) {
     return database;
   }
@@ -250,20 +325,41 @@ async function upsertProfileRow(
       email,
       phone,
       linkedin_url,
+      github_url,
       portfolio_url,
       headline,
       summary,
       location_text,
+      desired_salary,
+      salary_currency,
+      preferred_locations,
+      remote_preference,
+      skills,
+      work_eligibility,
+      notice_period_days,
+      interview_availability,
       created_at,
       updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(id) DO UPDATE SET
       full_name = excluded.full_name,
       email = excluded.email,
+      phone = excluded.phone,
       linkedin_url = excluded.linkedin_url,
+      github_url = excluded.github_url,
+      portfolio_url = excluded.portfolio_url,
       headline = excluded.headline,
+      summary = excluded.summary,
       location_text = excluded.location_text,
+      desired_salary = excluded.desired_salary,
+      salary_currency = excluded.salary_currency,
+      preferred_locations = excluded.preferred_locations,
+      remote_preference = excluded.remote_preference,
+      skills = excluded.skills,
+      work_eligibility = excluded.work_eligibility,
+      notice_period_days = excluded.notice_period_days,
+      interview_availability = excluded.interview_availability,
       updated_at = CURRENT_TIMESTAMP
     `,
     [
@@ -272,10 +368,19 @@ async function upsertProfileRow(
       profile.email || null,
       null,
       profile.linkedInUrl || null,
+      profile.githubUrl || null,
       null,
       profile.targetRole || null,
       null,
       profile.preferredLocations.join(", "),
+      profile.desiredSalary ?? null,
+      profile.salaryCurrency,
+      JSON.stringify(profile.preferredLocations),
+      profile.remotePreference,
+      JSON.stringify(profile.skills),
+      profile.workEligibility,
+      profile.noticePeriodDays ?? null,
+      profile.interviewAvailability,
     ],
   );
 
@@ -288,14 +393,32 @@ async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
     `
     SELECT
       s.*,
-      p.id AS profile_id,
+      COALESCE(s.profile_id, p.id) AS profile_id,
       p.full_name AS profile_full_name,
       p.email AS profile_email,
+      p.desired_salary AS profile_desired_salary,
+      p.salary_currency AS profile_salary_currency,
+      p.preferred_locations AS profile_preferred_locations,
+      p.remote_preference AS profile_remote_preference,
+      p.skills AS profile_skills,
       p.linkedin_url AS profile_linkedin_url,
+      p.github_url AS profile_github_url,
+      p.portfolio_url AS profile_portfolio_url,
       p.headline AS profile_headline,
+      p.work_eligibility AS profile_work_eligibility,
+      p.notice_period_days AS profile_notice_period_days,
+      p.interview_availability AS profile_interview_availability,
       p.location_text AS profile_location_text
     FROM settings s
-    LEFT JOIN profiles p ON p.id = s.profile_id
+    LEFT JOIN profiles p ON p.id = COALESCE(
+      s.profile_id,
+      (
+        SELECT id
+        FROM profiles
+        ORDER BY updated_at DESC, created_at DESC
+        LIMIT 1
+      )
+    )
     WHERE s.id = $1
     LIMIT 1
     `,
@@ -304,8 +427,9 @@ async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
   const row = rows[0];
 
   if (!row) {
-    await upsertSettingsRow(db, DEFAULT_SETTINGS, null);
-    return DEFAULT_SETTINGS;
+    const defaults = cloneSettings(DEFAULT_SETTINGS);
+    await upsertSettingsRow(db, defaults, null);
+    return defaults;
   }
 
   return mapRowToSettings(row);
@@ -321,8 +445,7 @@ export async function initializeSettingsStore(
   if (driver) {
     database = driver;
   }
-
-  const db = await getDatabase();
+  const db = getDatabase();
 
   try {
     await readSettingsRow(db);
@@ -336,7 +459,7 @@ export async function initializeSettingsStore(
  * Get all application settings.
  */
 export async function getSettings(): Promise<AppSettings> {
-  const db = await getDatabase();
+  const db = getDatabase();
   return await readSettingsRow(db);
 }
 
@@ -346,17 +469,28 @@ export async function getSettings(): Promise<AppSettings> {
 export async function setSettings(
   settings: Partial<AppSettings>,
 ): Promise<void> {
-  const db = await getDatabase();
+  const db = getDatabase();
   const current = await getSettings();
   const updated = { ...current, ...settings };
 
+  const parseResult = SettingsInputSchema.safeParse(updated);
+  if (!parseResult.success) {
+    throw new Error(
+      "Settings validation failed: " +
+        JSON.stringify(parseResult.error.format()),
+    );
+  }
+
   let profileId = linkedProfileId;
   if (settings.userProfile) {
-    profileId = await upsertProfileRow(
-      db,
-      settings.userProfile,
-      linkedProfileId,
-    );
+    const profileParse = UserProfileInputSchema.safeParse(settings.userProfile);
+    if (!profileParse.success) {
+      throw new Error(
+        "UserProfile validation failed: " +
+          JSON.stringify(profileParse.error.format()),
+      );
+    }
+    profileId = await upsertProfileRow(db, profileParse.data, linkedProfileId);
   }
 
   await upsertSettingsRow(db, updated, profileId);
@@ -380,19 +514,30 @@ export async function setSetting<K extends keyof AppSettings>(
   value: AppSettings[K],
 ): Promise<void> {
   const current = await getSettings();
-  current[key] = value;
-  const db = await getDatabase();
+  const updated = { ...current, [key]: value };
+  const db = getDatabase();
 
-  let profileId = linkedProfileId;
-  if (key === "userProfile") {
-    profileId = await upsertProfileRow(
-      db,
-      value as UserProfile,
-      linkedProfileId,
+  const settingsParse = SettingsInputSchema.safeParse(updated);
+  if (!settingsParse.success) {
+    throw new Error(
+      "Settings validation failed: " +
+        JSON.stringify(settingsParse.error.format()),
     );
   }
 
-  await upsertSettingsRow(db, current, profileId);
+  let profileId = linkedProfileId;
+  if (key === "userProfile") {
+    const profileParse = UserProfileInputSchema.safeParse(value);
+    if (!profileParse.success) {
+      throw new Error(
+        "UserProfile validation failed: " +
+          JSON.stringify(profileParse.error.format()),
+      );
+    }
+    profileId = await upsertProfileRow(db, profileParse.data, linkedProfileId);
+  }
+
+  await upsertSettingsRow(db, updated, profileId);
 }
 
 /**
@@ -513,7 +658,7 @@ export async function setOnboardingCompleted(value: boolean): Promise<void> {
 /**
  * Get user profile.
  */
-export async function getUserProfile(): Promise<UserProfile> {
+export async function getUserProfile(): Promise<UserProfile | null> {
   return await getSetting("userProfile");
 }
 
@@ -528,8 +673,8 @@ export async function setUserProfile(profile: UserProfile): Promise<void> {
  * Reset all settings to defaults.
  */
 export async function resetSettings(): Promise<void> {
-  const db = await getDatabase();
-  await upsertSettingsRow(db, DEFAULT_SETTINGS, linkedProfileId);
+  const db = getDatabase();
+  await upsertSettingsRow(db, cloneSettings(DEFAULT_SETTINGS), linkedProfileId);
 }
 
 export { DEFAULT_SETTINGS };

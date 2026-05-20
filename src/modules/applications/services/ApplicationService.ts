@@ -1,11 +1,11 @@
 import {
   type ApplicationCreatePayload,
-  type ApplicationRepository,
   type ApplicationUpdatePayload,
+  type IApplicationRepository,
 } from "@modules/applications/repositories/ApplicationRepository";
 
 export class ApplicationService {
-  constructor(private readonly repository: ApplicationRepository) {}
+  constructor(private readonly repository: IApplicationRepository) {}
 
   list() {
     return this.repository.list();

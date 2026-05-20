@@ -1,11 +1,11 @@
 import {
   type DocumentCreatePayload,
-  type DocumentRepository,
   type DocumentUpdatePayload,
+  type IDocumentRepository,
 } from "@modules/documents/repositories/DocumentRepository";
 
 export class DocumentService {
-  constructor(private readonly repository: DocumentRepository) {}
+  constructor(private readonly repository: IDocumentRepository) {}
 
   list() {
     return this.repository.list();

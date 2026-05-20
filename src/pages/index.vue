@@ -10,7 +10,7 @@
     <div class="mx-auto max-w-3xl space-y-6">
       <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
         <Icon name="heroicons:briefcase" class="text-emerald-400" />
-        Job Application Auditor
+        Apply-Flow
       </h1>
 
       <p class="text-slate-300">

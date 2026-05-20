@@ -1,10 +1,17 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Tag } from "@modules/tags/domain/entities/Tag";
+import type { IRepository } from "@shared/types/repository";
 
 export type TagCreatePayload = Pick<Tag, "name" | "color">;
 export type TagUpdatePayload = Partial<TagCreatePayload> & { id: string };
 
-export class TagRepository {
+export type ITagRepository = IRepository<
+  Tag,
+  TagCreatePayload,
+  TagUpdatePayload
+>;
+
+export class TagRepository implements ITagRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
   async list(): Promise<Tag[]> {
