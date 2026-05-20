@@ -7,6 +7,38 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 /// the exact migration set used by the binary.
 static MIGRATIONS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/migrations");
 
+fn parse_bool(value: &str) -> bool {
+    matches!(
+        value.trim().to_ascii_lowercase().as_str(),
+        "1" | "true" | "yes" | "on"
+    )
+}
+
+fn resolve_database_url() -> String {
+    if let Ok(explicit_url) = std::env::var("APP_DATABASE_URL") {
+        if !explicit_url.trim().is_empty() {
+            return explicit_url;
+        }
+    }
+
+    let driver = std::env::var("APP_DATABASE_DRIVER").unwrap_or_else(|_| "sqlite".to_string());
+    let name = std::env::var("APP_DATABASE_NAME").unwrap_or_else(|_| "jaa.db".to_string());
+
+    if driver == "memory" || driver == "in-memory" {
+        ":memory:".to_string()
+    } else {
+        format!("{}:{}", driver, name)
+    }
+}
+
+fn resolve_dev_mode() -> bool {
+    if let Ok(value) = std::env::var("APP_DEV_MODE") {
+        return parse_bool(&value);
+    }
+
+    cfg!(debug_assertions)
+}
+
 /// Discovers and builds SQL migrations from embedded files.
 ///
 /// Expected filename format starts with a numeric version prefix, for example:
@@ -63,6 +95,7 @@ pub fn run() {
 
     // 1) Discover embedded SQL migrations and pass them to the SQL plugin.
     let migrations = discover_migrations();
+    let database_url = resolve_database_url();
 
     // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
@@ -81,7 +114,7 @@ pub fn run() {
         // SQL plugin with discovered migrations for schema evolution.
         .plugin(
             tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:jaa.db", migrations)
+                .add_migrations(database_url.as_str(), migrations)
                 .build(),
         )
         // Application updater support.
@@ -131,8 +164,7 @@ pub fn run() {
             // Open devtools in debug mode for easier development and debugging.
             app.manage(tray);
 
-            #[cfg(debug_assertions)]
-            {
+            if resolve_dev_mode() {
                 let window = app.get_webview_window("main").unwrap();
                 window.open_devtools();
             }

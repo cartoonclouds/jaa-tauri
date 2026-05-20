@@ -4,6 +4,10 @@
   import { useNotificationCrud } from "@modules/notifications/presentation/composables/useNotificationCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, create, update, remove } = useNotificationCrud();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });

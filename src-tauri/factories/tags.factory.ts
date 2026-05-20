@@ -8,7 +8,7 @@ export interface TagRow {
   updated_at: string;
 }
 
-export function createTagRows(seed = 1300): TagRow[] {
+export function createTagRows(count = 8, seed = 1300): TagRow[] {
   faker.seed(seed);
   faker.setDefaultRefDate("2026-01-01T00:00:00.000Z");
 
@@ -23,7 +23,18 @@ export function createTagRows(seed = 1300): TagRow[] {
     "follow-up",
   ];
 
-  return names.map((name, index) => {
+  const resolvedNames =
+    count <= names.length
+      ? names.slice(0, count)
+      : [
+          ...names,
+          ...Array.from(
+            { length: count - names.length },
+            (_, index) => `tag-${index + 1}`,
+          ),
+        ];
+
+  return resolvedNames.map((name, index) => {
     faker.seed(seed + index);
     const createdAt = faker.date.recent({ days: 90 }).toISOString();
 

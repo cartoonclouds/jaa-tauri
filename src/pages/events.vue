@@ -4,6 +4,10 @@
   import { useEventCrud } from "@modules/events/presentation/composables/useEventCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, create, update, remove } = useEventCrud();
   const editingId = ref<string | null>(null);
   const form = reactive({ applicationId: "", type: "note", title: "" });

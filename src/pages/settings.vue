@@ -4,6 +4,10 @@
   import { useSettingCrud } from "@modules/settings/presentation/composables/useSettingCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, upsert, remove } = useSettingCrud();
   const editingId = ref<string | null>(null);
   const form = reactive({ theme: "system", locale: "en-GB" });

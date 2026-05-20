@@ -4,6 +4,10 @@
   import { useProfileCrud } from "@modules/profile/presentation/composables/useProfileCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, create, update, remove } = useProfileCrud();
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", email: "", headline: "" });

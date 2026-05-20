@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { loadEnv } from "vite";
 
 import { createApplicationContactRows } from "./application_contacts.factory";
 import { createApplicationDocumentRows } from "./application_documents.factory";
@@ -16,6 +17,105 @@ import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
 
 type Row = Record<string, unknown>;
+type SqlValue = string | number | bigint | Uint8Array | null;
+
+interface SqliteStatement {
+  run(...params: SqlValue[]): unknown;
+}
+
+interface SqliteDatabaseLike {
+  exec(sql: string): unknown;
+  prepare(sql: string): SqliteStatement;
+  pragma(sql: string): unknown;
+  transaction<T>(callback: () => T): () => T;
+  close(): void;
+}
+
+type BetterSqliteCtor = new (filename: string) => SqliteDatabaseLike;
+const DatabaseCtor = Database as unknown as BetterSqliteCtor;
+
+type AppSeedEnv = Record<string, string>;
+
+function readNumber(
+  env: AppSeedEnv,
+  key: string,
+  defaultValue: number,
+  min = 0,
+): number {
+  const value = env[key];
+  if (value === undefined || value.trim().length === 0) {
+    return defaultValue;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return defaultValue;
+  }
+
+  return Math.max(min, Math.floor(parsed));
+}
+
+function resolveDatabaseUrlFromEnv(env: AppSeedEnv): string {
+  const explicitUrl = env.APP_DATABASE_URL;
+  if (explicitUrl && explicitUrl.trim().length > 0) {
+    return explicitUrl;
+  }
+
+  const driver = env.APP_DATABASE_DRIVER ?? "sqlite";
+  const name = env.APP_DATABASE_NAME ?? "jaa.db";
+
+  if (driver === "memory" || driver === "in-memory") {
+    return ":memory:";
+  }
+
+  return `${driver}:${name}`;
+}
+
+interface SeedConfig {
+  seed: number;
+  companyCount: number;
+  contactsPerCompany: number;
+  applicationsPerCompany: number;
+  tagCount: number;
+  documentCount: number;
+  tagsPerApplication: number;
+  eventsPerApplication: number;
+  notificationsPerApplication: number;
+  documentsPerApplication: number;
+  contactsPerApplication: number;
+}
+
+function readSeedConfig(env: AppSeedEnv): SeedConfig {
+  return {
+    seed: readNumber(env, "APP_SEED_BASE", 20260518),
+    companyCount: readNumber(env, "APP_SEED_COMPANIES_COUNT", 12),
+    contactsPerCompany: readNumber(env, "APP_SEED_CONTACTS_PER_COMPANY", 2),
+    applicationsPerCompany: readNumber(
+      env,
+      "APP_SEED_APPLICATIONS_PER_COMPANY",
+      2,
+    ),
+    tagCount: readNumber(env, "APP_SEED_TAGS_COUNT", 8),
+    documentCount: readNumber(env, "APP_SEED_DOCUMENTS_COUNT", 24),
+    tagsPerApplication: readNumber(env, "APP_SEED_TAGS_PER_APPLICATION", 2),
+    eventsPerApplication: readNumber(env, "APP_SEED_EVENTS_PER_APPLICATION", 3),
+    notificationsPerApplication: readNumber(
+      env,
+      "APP_SEED_NOTIFICATIONS_PER_APPLICATION",
+      1,
+    ),
+    documentsPerApplication: readNumber(
+      env,
+      "APP_SEED_DOCUMENTS_PER_APPLICATION",
+      2,
+    ),
+    contactsPerApplication: readNumber(
+      env,
+      "APP_SEED_CONTACTS_PER_APPLICATION",
+      1,
+    ),
+  };
+}
 
 function resolveSqliteFile(databaseUrl: string): string {
   if (databaseUrl === ":memory:") {
@@ -34,7 +134,7 @@ function resolveSqliteFile(databaseUrl: string): string {
   return path.resolve(process.cwd(), databaseUrl);
 }
 
-function runMigrations(db: Database.Database, migrationsDir: string): void {
+function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {
   const files = readdirSync(migrationsDir)
     .filter((name) => name.endsWith(".sql"))
     .sort();
@@ -45,7 +145,11 @@ function runMigrations(db: Database.Database, migrationsDir: string): void {
   }
 }
 
-function insertMany(db: Database.Database, table: string, rows: Row[]): number {
+function insertMany(
+  db: SqliteDatabaseLike,
+  table: string,
+  rows: Row[],
+): number {
   if (rows.length === 0) {
     return 0;
   }
@@ -57,14 +161,14 @@ function insertMany(db: Database.Database, table: string, rows: Row[]): number {
 
   let inserted = 0;
   for (const row of rows) {
-    stmt.run(...columns.map((column) => row[column]));
+    stmt.run(...columns.map((column) => (row[column] as SqlValue) ?? null));
     inserted += 1;
   }
 
   return inserted;
 }
 
-function deleteAllInFkSafeOrder(db: Database.Database): void {
+function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
   const tables = [
     "application_documents",
     "application_contacts",
@@ -86,70 +190,76 @@ function deleteAllInFkSafeOrder(db: Database.Database): void {
 }
 
 function main(): void {
-  const databaseUrl = process.env.DATABASE_URL ?? "sqlite:jaa.db";
+  const env = loadEnv("", process.cwd(), "");
+
+  const databaseUrl =
+    env.DATABASE_URL && env.DATABASE_URL.trim().length > 0
+      ? env.DATABASE_URL
+      : resolveDatabaseUrlFromEnv(env);
   const databaseFile = resolveSqliteFile(databaseUrl);
 
-  const db = new Database(databaseFile);
+  const db = new DatabaseCtor(databaseFile);
   db.pragma("foreign_keys = ON");
 
   const migrationsDir = path.resolve(process.cwd(), "src-tauri", "migrations");
   runMigrations(db, migrationsDir);
 
-  const seed = Number(process.env.SEED ?? 20260518);
+  const seedConfig = readSeedConfig(env);
+  const seed = seedConfig.seed;
 
   const seedTx = db.transaction((): Record<string, number> => {
     deleteAllInFkSafeOrder(db);
 
-    const companies = createCompanyRows(12, seed + 40);
+    const companies = createCompanyRows(seedConfig.companyCount, seed + 40);
     const contacts = createContactRows(
       companies.map((c) => c.id),
-      2,
+      seedConfig.contactsPerCompany,
       seed + 50,
     );
 
     const applications = createApplicationRows(
       companies.map((c) => c.id),
-      2,
+      seedConfig.applicationsPerCompany,
       seed + 60,
     );
 
-    const tags = createTagRows(seed + 70);
-    const documents = createDocumentRows(24, seed + 80);
+    const tags = createTagRows(seedConfig.tagCount, seed + 70);
+    const documents = createDocumentRows(seedConfig.documentCount, seed + 80);
     const settings = createSettingRow(seed + 90);
     const profile = createProfileRow(seed + 100);
 
     const applicationTags = createApplicationTagRows(
       applications.map((a) => a.id),
       tags.map((t) => t.id),
-      2,
+      seedConfig.tagsPerApplication,
       seed + 110,
     );
 
     const events = createEventRows(
       applications.map((a) => a.id),
       contacts.map((c) => c.id),
-      3,
+      seedConfig.eventsPerApplication,
       seed + 120,
     );
 
     const notifications = createNotificationRows(
       applications.map((a) => a.id),
       events.map((e) => e.id),
-      1,
+      seedConfig.notificationsPerApplication,
       seed + 130,
     );
 
     const applicationDocuments = createApplicationDocumentRows(
       applications.map((a) => a.id),
       documents.map((d) => d.id),
-      2,
+      seedConfig.documentsPerApplication,
       seed + 140,
     );
 
     const applicationContacts = createApplicationContactRows(
       applications.map((a) => a.id),
       contacts.map((c) => c.id),
-      1,
+      seedConfig.contactsPerApplication,
       seed + 150,
     );
 
@@ -181,10 +291,10 @@ function main(): void {
 
   const counts = seedTx();
 
-  console.log("Seed complete");
-  console.table(counts);
-  console.log(`Database: ${databaseFile}`);
-  console.log(`Seed: ${seed}`);
+  process.stdout.write("Seed complete\n");
+  process.stdout.write(`${JSON.stringify(counts, null, 2)}\n`);
+  process.stdout.write(`Database: ${databaseFile}\n`);
+  process.stdout.write(`Seed: ${String(seed)}\n`);
 
   db.close();
 }

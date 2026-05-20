@@ -4,6 +4,10 @@
   import { useApplicationCrud } from "@modules/applications/presentation/composables/useApplicationCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, create, update, remove } = useApplicationCrud();
 
   const editingId = ref<string | null>(null);

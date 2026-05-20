@@ -5,6 +5,26 @@ import { defineNuxtConfig } from "nuxt/config";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
+function readBoolean(
+  value: string | undefined,
+  defaultValue: boolean,
+): boolean {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  return ["1", "true", "yes", "on"].includes(value.toLowerCase());
+}
+
+const appName = process.env.APP_NAME ?? "JAA";
+const appEnv = process.env.APP_ENV ?? "development";
+const appDevMode = readBoolean(process.env.APP_DEV_MODE, true);
+const appLogLevel = process.env.APP_LOG_LEVEL ?? "info";
+const appDatabaseDriver = process.env.APP_DATABASE_DRIVER ?? "sqlite";
+const appDatabaseName = process.env.APP_DATABASE_NAME ?? "jaa.db";
+const appDatabaseUrl =
+  process.env.APP_DATABASE_URL ?? `${appDatabaseDriver}:${appDatabaseName}`;
+
 export default defineNuxtConfig({
   srcDir: "src/",
 
@@ -47,7 +67,19 @@ export default defineNuxtConfig({
   ],
 
   devtools: {
-    enabled: true,
+    enabled: appDevMode,
+  },
+
+  runtimeConfig: {
+    public: {
+      appName,
+      appEnv,
+      appDevMode,
+      appLogLevel,
+      appDatabaseDriver,
+      appDatabaseName,
+      appDatabaseUrl,
+    },
   },
 
   compatibilityDate: "2026-05-17",

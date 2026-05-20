@@ -4,6 +4,10 @@
   import { useCompanyCrud } from "@modules/companies/presentation/composables/useCompanyCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, create, update, remove } = useCompanyCrud();
 
   const editingId = ref<string | null>(null);

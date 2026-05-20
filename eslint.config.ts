@@ -145,7 +145,13 @@ export default defineConfig(
       "vue/no-undef-components": [
         "error",
         {
-          ignorePatterns: ["NuxtLink", "NuxtPage", "ClientOnly"],
+          // Nuxt and PrimeVue register PascalCase components globally.
+          ignorePatterns: [
+            "NuxtLink",
+            "NuxtPage",
+            "ClientOnly",
+            "^[A-Z][A-Za-z0-9]*$",
+          ],
         },
       ],
 
@@ -171,7 +177,6 @@ export default defineConfig(
 
             "unknown",
           ],
-
         },
       ],
 

@@ -2,7 +2,10 @@
   import type { Tag } from "@modules/tags/domain/entities/Tag";
 
   import { useTagCrud } from "@modules/tags/presentation/composables/useTagCrud";
+  import { definePageMeta } from "nuxt/dist/pages/runtime";
   import { reactive, ref } from "vue";
+
+  definePageMeta({ ssr: false });
 
   const { items, isLoading, create, update, remove } = useTagCrud();
   const editingId = ref<string | null>(null);

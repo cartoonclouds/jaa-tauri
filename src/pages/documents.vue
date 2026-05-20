@@ -4,6 +4,10 @@
   import { useDocumentCrud } from "@modules/documents/presentation/composables/useDocumentCrud";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+
+  definePageMeta({ ssr: false });
+
   const { items, isLoading, create, update, remove } = useDocumentCrud();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", kind: "resume", filePath: "" });
