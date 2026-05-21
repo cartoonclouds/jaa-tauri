@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#141C30"/>
+<stop offset="100%" stop-color="#244080"/>
+</linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)"/>
+<circle cx="512" cy="400" r="170" fill="#40C4FF"/>
+<circle cx="512" cy="400" r="95" fill="none" stroke="white" stroke-width="20"/>
+<line x1="590" y1="478" x2="710" y2="598" stroke="white" stroke-width="20"/>
+<text x="512" y="720" text-anchor="middle" font-size="84" fill="white" font-family="Arial" font-weight="bold">ApplyFlow</text>
+<text x="512" y="790" text-anchor="middle" font-size="32" fill="#DCE4F0" font-family="Arial">Track every application with confidence</text>
+</svg>

@@ -49,6 +49,6 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
 
-Create a splashscreen following the documentation in the docs https://v2.tauri.app/learn/splashscreen/. Use the image located at src/assets/images/splash-screen.png
+Create a splashscreen following the documentation in the docs https://v2.tauri.app/learn/splashscreen/. Use the images located in `\src\assets\images\splash`
 
 Recreate this same icon as an
