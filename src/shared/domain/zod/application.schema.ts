@@ -28,18 +28,18 @@ export const ApplicationSchema = z.object({
   locationLng: NullableLongitudeSchema,
   attendanceType: z
     .enum([
-      ApplicationAttendanceType.Remote,
-      ApplicationAttendanceType.Hybrid,
-      ApplicationAttendanceType.OnSite,
+      ApplicationAttendanceType.Remote.value,
+      ApplicationAttendanceType.Hybrid.value,
+      ApplicationAttendanceType.OnSite.value,
     ])
     .nullable(),
   employmentType: z
     .enum([
-      ApplicationEmploymentType.PartTime,
-      ApplicationEmploymentType.Contract,
-      ApplicationEmploymentType.Internship,
-      ApplicationEmploymentType.FullTime,
-      ApplicationEmploymentType.Volunteer,
+      ApplicationEmploymentType.PartTime.value,
+      ApplicationEmploymentType.Contract.value,
+      ApplicationEmploymentType.Internship.value,
+      ApplicationEmploymentType.FullTime.value,
+      ApplicationEmploymentType.Volunteer.value,
     ])
     .nullable(),
   salaryMin: NullableNumberSchema,
@@ -95,18 +95,18 @@ export const ApplicationFormSchema = z
     locationLng: NullableLongitudeSchema,
     attendanceType: z
       .enum([
-        ApplicationAttendanceType.Remote,
-        ApplicationAttendanceType.Hybrid,
-        ApplicationAttendanceType.OnSite,
+        ApplicationAttendanceType.Remote.value,
+        ApplicationAttendanceType.Hybrid.value,
+        ApplicationAttendanceType.OnSite.value,
       ])
       .nullable(),
     employmentType: z
       .enum([
-        ApplicationEmploymentType.PartTime,
-        ApplicationEmploymentType.Contract,
-        ApplicationEmploymentType.Internship,
-        ApplicationEmploymentType.FullTime,
-        ApplicationEmploymentType.Volunteer,
+        ApplicationEmploymentType.PartTime.value,
+        ApplicationEmploymentType.Contract.value,
+        ApplicationEmploymentType.Internship.value,
+        ApplicationEmploymentType.FullTime.value,
+        ApplicationEmploymentType.Volunteer.value,
       ])
       .nullable(),
     salaryMin: z
