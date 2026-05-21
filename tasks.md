@@ -1,9 +1,5 @@
 TODO:
 
--
-
-- Create a feature/domain using a datatable to list all job application, use pagination (https://primevue.org/paginator/) and https://primevue.org/datatable/
-
 - Stats card
 
 - Applications
@@ -17,11 +13,7 @@ Application schema
 - Description
 - Interview process - what stage
 - Benefits
-- Salary range
 - Location (Add googlemaps to show pins of applied. colour based of stage)
-- Attendance type: hybrid, on-site, remote
-- Enviroment type - part-time, contract, internship, full-time, volunteer
--
 
 Create a feature/module which will display all events a job finder has had with regards to a job application. Use https://primevue.org/tree/. Allow each entry to be editable on double-click (in a modal). The depths can be of any length
 

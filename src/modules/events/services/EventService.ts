@@ -3,6 +3,7 @@ import {
   type EventUpdatePayload,
   type IEventRepository,
 } from "@modules/events/repositories/EventRepository";
+import { EventSchema } from "@shared/domain/zod/event.schema";
 
 export class EventService {
   constructor(private readonly repository: IEventRepository) {}
@@ -12,20 +13,28 @@ export class EventService {
   }
 
   create(payload: EventCreatePayload) {
-    if (!payload.applicationId.trim()) {
-      throw new Error("Event applicationId is required");
+    const result = EventSchema.pick({
+      applicationId: true,
+      type: true,
+      title: true,
+    }).safeParse(payload);
+    if (!result.success) {
+      throw new Error(`Validation failed: ${result.error.message}`);
     }
-    if (!payload.title.trim()) {
-      throw new Error("Event title is required");
-    }
-    return this.repository.create({ ...payload, title: payload.title.trim() });
+    return this.repository.create(payload);
   }
 
   update(payload: EventUpdatePayload) {
-    if (payload.title !== undefined && !payload.title.trim()) {
-      throw new Error("Event title cannot be empty");
+    if (payload.type !== undefined || payload.title !== undefined) {
+      const validatePayload = { type: payload.type, title: payload.title };
+      const result = EventSchema.pick({ type: true, title: true })
+        .partial()
+        .safeParse(validatePayload);
+      if (!result.success) {
+        throw new Error(`Validation failed: ${result.error.message}`);
+      }
     }
-    return this.repository.update({ ...payload, title: payload.title?.trim() });
+    return this.repository.update(payload);
   }
 
   delete(id: string) {

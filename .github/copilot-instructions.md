@@ -163,6 +163,63 @@ tests/
   setup.ts
 ```
 
+## Validation with Zod
+
+Always use Zod for validating payloads and object structures. This ensures type safety at runtime.
+
+**Zod Schema Location & Naming:**
+
+- Centralized entity schemas in `src/shared/domain/zod/[entity].schema.ts`
+- Export schema with consistent naming: `[Entity]Schema`
+- Example: `src/shared/domain/zod/application.schema.ts` exports `ApplicationSchema`
+
+**Usage Pattern:**
+
+1. **Action Layer** — Validate incoming payloads:
+
+```ts
+import { ApplicationSchema } from "@shared/domain/zod/application.schema";
+
+export async function CreateApplication(
+  payload: unknown,
+): Promise<Application> {
+  const result = ApplicationSchema.safeParse(payload);
+  if (!result.success) {
+    throw new Error(`Validation failed: ${result.error.message}`);
+  }
+  const validated = result.data;
+  // Use validated data
+}
+```
+
+2. **Service Layer** — Use `.pick()` for subsets:
+
+```ts
+import { ApplicationSchema } from "@shared/domain/zod/application.schema";
+
+const UpdatePayloadSchema = ApplicationSchema.pick({
+  title: true,
+  status: true,
+});
+const result = UpdatePayloadSchema.safeParse(payload);
+if (!result.success) throw new Error("Invalid update payload");
+```
+
+3. **Repository Layer** — Use `.pick()` for database operations:
+
+```ts
+const InsertSchema = ApplicationSchema.omit({ id: true, createdAt: true });
+const validated = InsertSchema.parse(data); // throw on failure
+```
+
+**Key Rules:**
+
+- Use `safeParse()` + explicit error handling in action/service layers
+- Use `.parse()` (throws) only for internal trusted operations
+- Use `.pick()` or `.omit()` to validate subsets of payloads
+- Never rely on TypeScript interfaces alone for runtime validation
+- Avoid manual trim/typeof checks when Zod can enforce schema
+
 ## Do and Don't
 
 Do:
@@ -172,6 +229,7 @@ Do:
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
 - Use project aliases (`@`, `@modules`, `@shared`, `@infra`) instead of deep relative imports.
 - Add or update tests when changing business logic.
+- **Validate all payloads and object structures with Zod** — use centralized schemas from `src/shared/domain/zod/`, never rely on TypeScript interfaces alone for runtime validation.
 - Prefer explicit types for public function inputs/outputs. When creating a types file using the following filename convention: `types.d.ts` or `types/index.d.ts`, update the barrel export in the module's `index.ts` file and update any Typescript configuration if necessary.
 - When asked to install a Tauri plugin, check the official Tauri documentation for the latest recommended approach. Follow their guidance for installation, configuration, and usage. Ensure that any new Tauri plugin is properly integrated with the existing Tauri setup in `src-tauri` and that it does not introduce conflicts with current dependencies or configurations.
   After any significant code change, run the test suite to ensure nothing is broken. If new functionality is added, write tests to cover it. If existing tests are affected, update them accordingly. Always maintain a green test suite after your changes. Also run `npm run tauri dev` to ensure the Tauri integration is working correctly with your changes.

@@ -3,6 +3,9 @@ import {
   type TagCreatePayload,
   type TagUpdatePayload,
 } from "@modules/tags/repositories/TagRepository";
+import { TagSchema } from "@shared/domain/zod/tag.schema";
+
+const TagNameSchema = TagSchema.pick({ name: true });
 
 export class TagService {
   constructor(private readonly repository: ITagRepository) {}
@@ -12,17 +15,39 @@ export class TagService {
   }
 
   create(payload: TagCreatePayload) {
-    if (!payload.name.trim()) {
-      throw new Error("Tag name is required");
+    const parsedName = TagNameSchema.safeParse({
+      name: payload.name.trim(),
+    });
+
+    if (!parsedName.success) {
+      throw new Error(parsedName.error.issues[0]?.message ?? "Invalid tag name");
     }
-    return this.repository.create({ ...payload, name: payload.name.trim() });
+
+    return this.repository.create({
+      ...payload,
+      name: parsedName.data.name,
+    });
   }
 
   update(payload: TagUpdatePayload) {
-    if (payload.name !== undefined && !payload.name.trim()) {
-      throw new Error("Tag name cannot be empty");
+    let name = payload.name;
+
+    if (name !== undefined) {
+      const parsedName = TagNameSchema.safeParse({
+        name: name.trim(),
+      });
+
+      if (!parsedName.success) {
+        throw new Error(parsedName.error.issues[0]?.message ?? "Invalid tag name");
+      }
+
+      name = parsedName.data.name;
     }
-    return this.repository.update({ ...payload, name: payload.name?.trim() });
+
+    return this.repository.update({
+      ...payload,
+      name,
+    });
   }
 
   delete(id: string) {

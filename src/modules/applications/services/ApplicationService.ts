@@ -3,6 +3,7 @@ import {
   type ApplicationUpdatePayload,
   type IApplicationRepository,
 } from "@modules/applications/repositories/ApplicationRepository";
+import { ApplicationSchema } from "@shared/domain/zod/application.schema";
 
 export class ApplicationService {
   constructor(private readonly repository: IApplicationRepository) {}
@@ -12,23 +13,25 @@ export class ApplicationService {
   }
 
   create(payload: ApplicationCreatePayload) {
-    const title = payload.title.trim();
-    if (!title) {
-      throw new Error("Application title is required");
+    const result = ApplicationSchema.pick({ title: true }).safeParse(payload);
+    if (!result.success) {
+      throw new Error(`Validation failed: ${result.error.message}`);
     }
 
-    return this.repository.create({ ...payload, title });
+    return this.repository.create(payload);
   }
 
   update(payload: ApplicationUpdatePayload) {
-    if (payload.title !== undefined && !payload.title.trim()) {
-      throw new Error("Application title cannot be empty");
+    if (payload.title !== undefined) {
+      const result = ApplicationSchema.pick({ title: true }).safeParse({
+        title: payload.title,
+      });
+      if (!result.success) {
+        throw new Error(`Validation failed: ${result.error.message}`);
+      }
     }
 
-    return this.repository.update({
-      ...payload,
-      title: payload.title?.trim(),
-    });
+    return this.repository.update(payload);
   }
 
   delete(id: string) {

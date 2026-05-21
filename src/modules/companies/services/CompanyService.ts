@@ -3,6 +3,7 @@ import {
   type CompanyUpdatePayload,
   type ICompanyRepository,
 } from "@modules/companies/repositories/CompanyRepository";
+import { CompanySchema } from "@shared/domain/zod/company.schema";
 
 export class CompanyService {
   constructor(private readonly repository: ICompanyRepository) {}
@@ -12,23 +13,25 @@ export class CompanyService {
   }
 
   create(payload: CompanyCreatePayload) {
-    const name = payload.name.trim();
-    if (!name) {
-      throw new Error("Company name is required");
+    const result = CompanySchema.pick({ name: true }).safeParse(payload);
+    if (!result.success) {
+      throw new Error(`Validation failed: ${result.error.message}`);
     }
 
-    return this.repository.create({ ...payload, name });
+    return this.repository.create(payload);
   }
 
   update(payload: CompanyUpdatePayload) {
-    if (payload.name !== undefined && !payload.name.trim()) {
-      throw new Error("Company name cannot be empty");
+    if (payload.name !== undefined) {
+      const result = CompanySchema.pick({ name: true }).safeParse({
+        name: payload.name,
+      });
+      if (!result.success) {
+        throw new Error(`Validation failed: ${result.error.message}`);
+      }
     }
 
-    return this.repository.update({
-      ...payload,
-      name: payload.name?.trim(),
-    });
+    return this.repository.update(payload);
   }
 
   delete(id: string) {

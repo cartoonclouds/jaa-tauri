@@ -3,6 +3,7 @@ import {
   type DocumentUpdatePayload,
   type IDocumentRepository,
 } from "@modules/documents/repositories/DocumentRepository";
+import { DocumentSchema } from "@shared/domain/zod/document.schema";
 
 export class DocumentService {
   constructor(private readonly repository: IDocumentRepository) {}
@@ -12,26 +13,34 @@ export class DocumentService {
   }
 
   create(payload: DocumentCreatePayload) {
-    if (!payload.title.trim()) {
-      throw new Error("Document title is required");
-    }
-    if (!payload.filePath.trim()) {
-      throw new Error("Document file path is required");
+    const result = DocumentSchema.pick({
+      title: true,
+      kind: true,
+      filePath: true,
+      mimeType: true,
+    }).safeParse(payload);
+    if (!result.success) {
+      throw new Error(`Validation failed: ${result.error.message}`);
     }
 
-    return this.repository.create({
-      ...payload,
-      title: payload.title.trim(),
-      filePath: payload.filePath.trim(),
-    });
+    return this.repository.create(payload);
   }
 
   update(payload: DocumentUpdatePayload) {
-    return this.repository.update({
-      ...payload,
-      title: payload.title?.trim(),
-      filePath: payload.filePath?.trim(),
-    });
+    if (payload.title !== undefined || payload.filePath !== undefined) {
+      const validatePayload = {
+        title: payload.title,
+        filePath: payload.filePath,
+      };
+      const result = DocumentSchema.pick({ title: true, filePath: true })
+        .partial()
+        .safeParse(validatePayload);
+      if (!result.success) {
+        throw new Error(`Validation failed: ${result.error.message}`);
+      }
+    }
+
+    return this.repository.update(payload);
   }
 
   delete(id: string) {
