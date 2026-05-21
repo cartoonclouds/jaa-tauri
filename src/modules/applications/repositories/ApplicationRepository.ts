@@ -33,9 +33,11 @@ export class ApplicationRepository implements IApplicationRepository {
       locationLat: (row.location_lat as number | null) ?? null,
       locationLng: (row.location_lng as number | null) ?? null,
       attendanceType:
-        (row.attendance_type as Application["attendanceType"]) ?? null,
+        (row.attendance_type as import("../types/enums").ApplicationAttendanceType) ??
+        null,
       employmentType:
-        (row.employment_type as Application["employmentType"]) ?? null,
+        (row.employment_type as import("../types/enums").ApplicationEmploymentType) ??
+        null,
       salaryMin: (row.salary_min as number | null) ?? null,
       salaryMax: (row.salary_max as number | null) ?? null,
       currency: (row.currency as string | null) ?? null,

@@ -1,5 +1,10 @@
 import { faker } from "@faker-js/faker";
 
+import {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "../../src/modules/applications/types/enums";
+
 export interface ApplicationRow {
   id: string;
   company_id: string;
@@ -10,13 +15,8 @@ export interface ApplicationRow {
   location_text: string;
   location_lat: number;
   location_lng: number;
-  attendance_type: "remote" | "hybrid" | "on-site";
-  employment_type:
-    | "part-time"
-    | "contract"
-    | "internship"
-    | "full-time"
-    | "volunteer";
+  attendance_type: ApplicationAttendanceType;
+  employment_type: ApplicationEmploymentType;
   salary_min: number;
   salary_max: number;
   currency: string;
@@ -126,16 +126,16 @@ export function createApplicationRows(
         location_lat: faker.location.latitude(),
         location_lng: faker.location.longitude(),
         attendance_type: faker.helpers.arrayElement([
-          "remote",
-          "hybrid",
-          "on-site",
+          ApplicationAttendanceType.Remote,
+          ApplicationAttendanceType.Hybrid,
+          ApplicationAttendanceType.OnSite,
         ]),
         employment_type: faker.helpers.arrayElement([
-          "part-time",
-          "contract",
-          "internship",
-          "full-time",
-          "volunteer",
+          ApplicationEmploymentType.PartTime,
+          ApplicationEmploymentType.Contract,
+          ApplicationEmploymentType.Internship,
+          ApplicationEmploymentType.FullTime,
+          ApplicationEmploymentType.Volunteer,
         ]),
         salary_min: salaryMin,
         salary_max: salaryMax,

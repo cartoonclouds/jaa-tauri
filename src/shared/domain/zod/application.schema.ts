@@ -1,3 +1,7 @@
+import {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "@modules/applications/types/enums";
 import { z } from "zod";
 
 import {
@@ -22,9 +26,21 @@ export const ApplicationSchema = z.object({
   locationText: NullableStringSchema,
   locationLat: NullableLatitudeSchema,
   locationLng: NullableLongitudeSchema,
-  attendanceType: z.enum(["remote", "hybrid", "on-site"]).nullable(),
+  attendanceType: z
+    .enum([
+      ApplicationAttendanceType.Remote,
+      ApplicationAttendanceType.Hybrid,
+      ApplicationAttendanceType.OnSite,
+    ])
+    .nullable(),
   employmentType: z
-    .enum(["part-time", "contract", "internship", "full-time", "volunteer"])
+    .enum([
+      ApplicationEmploymentType.PartTime,
+      ApplicationEmploymentType.Contract,
+      ApplicationEmploymentType.Internship,
+      ApplicationEmploymentType.FullTime,
+      ApplicationEmploymentType.Volunteer,
+    ])
     .nullable(),
   salaryMin: NullableNumberSchema,
   salaryMax: NullableNumberSchema,
@@ -77,9 +93,21 @@ export const ApplicationFormSchema = z
     locationText: z.string().nullable().or(z.literal("")),
     locationLat: NullableLatitudeSchema,
     locationLng: NullableLongitudeSchema,
-    attendanceType: z.enum(["remote", "hybrid", "on-site"]).nullable(),
+    attendanceType: z
+      .enum([
+        ApplicationAttendanceType.Remote,
+        ApplicationAttendanceType.Hybrid,
+        ApplicationAttendanceType.OnSite,
+      ])
+      .nullable(),
     employmentType: z
-      .enum(["part-time", "contract", "internship", "full-time", "volunteer"])
+      .enum([
+        ApplicationEmploymentType.PartTime,
+        ApplicationEmploymentType.Contract,
+        ApplicationEmploymentType.Internship,
+        ApplicationEmploymentType.FullTime,
+        ApplicationEmploymentType.Volunteer,
+      ])
       .nullable(),
     salaryMin: z
       .number()

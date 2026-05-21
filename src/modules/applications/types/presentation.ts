@@ -1,4 +1,4 @@
-import type { ApplicationUpdatePayload } from "@modules/applications/types/payloads";
+import type { ApplicationBasePayload } from "@modules/applications/types/payloads";
 
 export type ApplicationDrawerMode = "create" | "view" | "edit";
 
@@ -7,28 +7,8 @@ export interface ApplicationSelectOption {
   value: string;
 }
 
-export interface ApplicationFormValues {
-  companyId: string | null;
-  title: string;
-  status: string;
-  sourceUrl: string;
-  appliedAt: string;
-  locationText: string;
-  locationLat: number | null;
-  locationLng: number | null;
-  attendanceType: ApplicationUpdatePayload["attendanceType"];
-  employmentType: ApplicationUpdatePayload["employmentType"];
-  salaryMin: number | null;
-  salaryMax: number | null;
-  currency: string;
-  description: string;
-  interviewProcess: string;
-  benefits: string;
-  priority: number;
-  isArchived: boolean;
-}
-
-export type ApplicationFormSubmitPayload = Omit<ApplicationUpdatePayload, "id">;
+export type ApplicationFormValues = ApplicationBasePayload;
+export type ApplicationFormSubmitPayload = Omit<ApplicationBasePayload, "id">;
 
 export function createEmptyApplicationFormValues(): ApplicationFormValues {
   return {

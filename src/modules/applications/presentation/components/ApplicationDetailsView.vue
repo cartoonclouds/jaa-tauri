@@ -129,6 +129,7 @@
         </template>
         <template #content>
           <p class="text-sm">{{ application.attendanceType ?? "-" }}</p>
+          <!-- enum, but display as string -->
         </template>
       </Card>
       <Card :pt="{ root: 'p-3' }">
@@ -139,6 +140,7 @@
         </template>
         <template #content>
           <p class="text-sm">{{ application.employmentType ?? "-" }}</p>
+          <!-- enum, but display as string -->
         </template>
       </Card>
     </div>

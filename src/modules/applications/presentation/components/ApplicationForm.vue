@@ -95,10 +95,10 @@
       locationLat: values.locationLat as number | null,
       locationLng: values.locationLng as number | null,
       attendanceType: values.attendanceType as
-        | ApplicationFormSubmitPayload["attendanceType"]
+        | import("../../types/enums").ApplicationAttendanceType
         | null,
       employmentType: values.employmentType as
-        | ApplicationFormSubmitPayload["employmentType"]
+        | import("../../types/enums").ApplicationEmploymentType
         | null,
       salaryMin: values.salaryMin as number | null,
       salaryMax: values.salaryMax as number | null,

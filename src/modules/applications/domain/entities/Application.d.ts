@@ -1,3 +1,8 @@
+import type {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "../../types/enums";
+
 export interface Application {
   id: string;
   companyId: string | null;
@@ -8,14 +13,8 @@ export interface Application {
   locationText: string | null;
   locationLat: number | null;
   locationLng: number | null;
-  attendanceType: "remote" | "hybrid" | "on-site" | null;
-  employmentType:
-    | "part-time"
-    | "contract"
-    | "internship"
-    | "full-time"
-    | "volunteer"
-    | null;
+  attendanceType: ApplicationAttendanceType | null;
+  employmentType: ApplicationEmploymentType | null;
   salaryMin: number | null;
   salaryMax: number | null;
   currency: string | null;

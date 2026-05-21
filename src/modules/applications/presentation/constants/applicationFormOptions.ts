@@ -1,5 +1,10 @@
 import type { ApplicationSelectOption } from "@modules/applications/types/presentation";
 
+import {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "@modules/applications/types/enums";
+
 export const APPLICATION_STATUS_OPTIONS: ApplicationSelectOption[] = [
   { label: "Saved", value: "saved" },
   { label: "Applied", value: "applied" },
@@ -9,15 +14,15 @@ export const APPLICATION_STATUS_OPTIONS: ApplicationSelectOption[] = [
 ];
 
 export const APPLICATION_ATTENDANCE_OPTIONS: ApplicationSelectOption[] = [
-  { label: "Remote", value: "remote" },
-  { label: "Hybrid", value: "hybrid" },
-  { label: "On-site", value: "on-site" },
+  { label: "Remote", value: ApplicationAttendanceType.Remote },
+  { label: "Hybrid", value: ApplicationAttendanceType.Hybrid },
+  { label: "On-site", value: ApplicationAttendanceType.OnSite },
 ];
 
 export const APPLICATION_EMPLOYMENT_OPTIONS: ApplicationSelectOption[] = [
-  { label: "Full-time", value: "full-time" },
-  { label: "Part-time", value: "part-time" },
-  { label: "Contract", value: "contract" },
-  { label: "Internship", value: "internship" },
-  { label: "Volunteer", value: "volunteer" },
+  { label: "Full-time", value: ApplicationEmploymentType.FullTime },
+  { label: "Part-time", value: ApplicationEmploymentType.PartTime },
+  { label: "Contract", value: ApplicationEmploymentType.Contract },
+  { label: "Internship", value: ApplicationEmploymentType.Internship },
+  { label: "Volunteer", value: ApplicationEmploymentType.Volunteer },
 ];

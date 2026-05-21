@@ -43,8 +43,10 @@
       locationText: application.locationText ?? "",
       locationLat: application.locationLat,
       locationLng: application.locationLng,
-      attendanceType: application.attendanceType,
-      employmentType: application.employmentType,
+      attendanceType:
+        application.attendanceType as import("../../types/enums").ApplicationAttendanceType,
+      employmentType:
+        application.employmentType as import("../../types/enums").ApplicationEmploymentType,
       salaryMin: application.salaryMin,
       salaryMax: application.salaryMax,
       currency: application.currency ?? "",
@@ -105,8 +107,8 @@
           locationText: payload.locationText,
           locationLat: payload.locationLat,
           locationLng: payload.locationLng,
-          attendanceType: payload.attendanceType,
-          employmentType: payload.employmentType,
+          attendanceType: payload.attendanceType!,
+          employmentType: payload.employmentType!,
           salaryMin: payload.salaryMin,
           salaryMax: payload.salaryMax,
           currency: payload.currency,
