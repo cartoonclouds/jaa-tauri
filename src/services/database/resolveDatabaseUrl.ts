@@ -1,3 +1,6 @@
+/**
+ * Resolve the final database URL from the configured driver, name, and override.
+ */
 export function resolveDatabaseUrl(
   driver: string,
   name: string,

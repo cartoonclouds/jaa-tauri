@@ -19,6 +19,9 @@ type OnboardingStep = (typeof stepOrder)[number];
 
 type StepErrors = Partial<Record<OnboardingStep, string>>;
 
+/**
+ * Create default profile values for onboarding.
+ */
 function defaultProfile(): UserProfile {
   return {
     fullName: "",
@@ -37,6 +40,9 @@ function defaultProfile(): UserProfile {
   };
 }
 
+/**
+ * Map persisted profile data into the onboarding form shape.
+ */
 function mapProfileToUserProfile(profile: Profile): UserProfile {
   return {
     fullName: profile.fullName,
@@ -55,6 +61,9 @@ function mapProfileToUserProfile(profile: Profile): UserProfile {
   };
 }
 
+/**
+ * Normalize the Tauri dialog selection into a single file path.
+ */
 function normalizeSelectedPath(
   selectedPath: string | string[] | null,
 ): string | null {
@@ -69,6 +78,9 @@ function normalizeSelectedPath(
   return null;
 }
 
+/**
+ * Orchestrate onboarding form state, validation, resume parsing, and submission.
+ */
 export function useOnboardingFlow() {
   const stepper = useStepper(stepOrder);
   const documentService = useDocumentService();

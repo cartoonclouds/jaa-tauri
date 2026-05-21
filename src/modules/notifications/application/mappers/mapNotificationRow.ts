@@ -2,6 +2,9 @@ import type { Notification } from "@modules/notifications/domain/entities/Notifi
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed notification entity.
+ */
 export function mapNotificationRowToEntity(
   row: Record<string, unknown>,
 ): Notification {

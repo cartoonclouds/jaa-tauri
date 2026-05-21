@@ -3,6 +3,9 @@ import type { Profile } from "@modules/profile/domain/entities/Profile";
 import { parseStringArray } from "@shared/utils/parse";
 import { toDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed profile entity.
+ */
 export function mapProfileRowToEntity(
   row: Record<string, unknown>,
   errorPrefix = "Profile row validation failed",

@@ -9,6 +9,9 @@
 class ApplicationAttendanceTypeEnum {
   private constructor(public readonly value: string) {}
 
+  /**
+   * Convert the enum value into a human-readable label.
+   */
   toLabel(): string {
     switch (this.value) {
       case "remote":
@@ -22,14 +25,21 @@ class ApplicationAttendanceTypeEnum {
     }
   }
 
+  /**
+   * Serialize the enum value as its raw string representation.
+   */
   toString() {
     return this.value;
   }
 
+  /** Remote attendance. */
   static readonly Remote = new ApplicationAttendanceTypeEnum("remote");
+  /** Hybrid attendance. */
   static readonly Hybrid = new ApplicationAttendanceTypeEnum("hybrid");
+  /** On-site attendance. */
   static readonly OnSite = new ApplicationAttendanceTypeEnum("on-site");
 
+  /** List every attendance type value. */
   static values(): ApplicationAttendanceTypeEnum[] {
     return [this.Remote, this.Hybrid, this.OnSite];
   }
@@ -37,6 +47,9 @@ class ApplicationAttendanceTypeEnum {
 
 export const ApplicationAttendanceType = ApplicationAttendanceTypeEnum;
 
+/**
+ * Union type of all application attendance enum values.
+ */
 export type ApplicationAttendanceType = ReturnType<
   typeof ApplicationAttendanceTypeEnum.values
 >[number];
@@ -52,6 +65,9 @@ export type ApplicationAttendanceType = ReturnType<
 class ApplicationEmploymentTypeEnum {
   private constructor(public readonly value: string) {}
 
+  /**
+   * Convert the enum value into a human-readable label.
+   */
   toLabel(): string {
     switch (this.value) {
       case "full-time":
@@ -69,16 +85,25 @@ class ApplicationEmploymentTypeEnum {
     }
   }
 
+  /**
+   * Serialize the enum value as its raw string representation.
+   */
   toString() {
     return this.value;
   }
 
+  /** Full-time employment. */
   static readonly FullTime = new ApplicationEmploymentTypeEnum("full-time");
+  /** Part-time employment. */
   static readonly PartTime = new ApplicationEmploymentTypeEnum("part-time");
+  /** Contract employment. */
   static readonly Contract = new ApplicationEmploymentTypeEnum("contract");
+  /** Internship employment. */
   static readonly Internship = new ApplicationEmploymentTypeEnum("internship");
+  /** Volunteer engagement. */
   static readonly Volunteer = new ApplicationEmploymentTypeEnum("volunteer");
 
+  /** List every employment type value. */
   static values(): ApplicationEmploymentTypeEnum[] {
     return [
       this.FullTime,
@@ -92,6 +117,9 @@ class ApplicationEmploymentTypeEnum {
 
 export const ApplicationEmploymentType = ApplicationEmploymentTypeEnum;
 
+/**
+ * Union type of all application employment enum values.
+ */
 export type ApplicationEmploymentType = ReturnType<
   typeof ApplicationEmploymentTypeEnum.values
 >[number];

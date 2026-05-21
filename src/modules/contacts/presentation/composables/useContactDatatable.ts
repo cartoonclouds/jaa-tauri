@@ -4,6 +4,9 @@ import { useContactService } from "@modules/contacts/services/useContactService"
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
+/**
+ * Create server-backed datatable state for contacts.
+ */
 export function useContactDatatable() {
   const service = useContactService();
 

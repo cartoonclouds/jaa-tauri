@@ -4,6 +4,9 @@ import { useNotificationService } from "@modules/notifications/services/useNotif
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
+/**
+ * Create server-backed datatable state for notifications.
+ */
 export function useNotificationDatatable() {
   const service = useNotificationService();
 

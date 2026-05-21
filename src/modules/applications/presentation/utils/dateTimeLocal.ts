@@ -1,3 +1,6 @@
+/**
+ * Format a Date for use with an HTML datetime-local input.
+ */
 export function formatDateTimeLocalValue(value: Date | null): string {
   if (!value) {
     return "";
@@ -12,6 +15,11 @@ export function formatDateTimeLocalValue(value: Date | null): string {
   return `${year}-${month}-${day}T${hour}:${minute}`;
 }
 
+/**
+ * Parse a datetime-local input value into a Date.
+ *
+ * Returns null when the input is empty or not a valid local date-time string.
+ */
 export function parseDateTimeLocalValue(value: string): Date | null {
   if (!value) {
     return null;

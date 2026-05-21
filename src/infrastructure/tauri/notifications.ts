@@ -9,16 +9,29 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification";
 
+/**
+ * Payload required to emit a notification.
+ */
 export interface NotificationRequest {
+  /** Notification title. */
   title: string;
+  /** Notification body text. */
   body: string;
+  /** Optional notification icon path or asset reference. */
   icon?: string;
+  /** Optional notification sound identifier. */
   sound?: string;
 }
 
+/**
+ * Result returned by the notification adapter.
+ */
 export interface NotificationResult {
+  /** Whether the notification request succeeded. */
   success: boolean;
+  /** Stable identifier assigned to the emitted notification, when available. */
   id?: string;
+  /** Human-readable error message when the notification request fails. */
   error?: string;
 }
 
@@ -35,6 +48,9 @@ async function ensureNotificationPermission(): Promise<boolean> {
 
 let hasWarnedWindowsDevToastLimit = false;
 
+/**
+ * Detect whether the current environment is subject to the Windows dev toast limitation.
+ */
 export function isWindowsDevToastLimited(): boolean {
   if (typeof window === "undefined" || typeof navigator === "undefined") {
     return false;

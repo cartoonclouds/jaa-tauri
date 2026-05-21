@@ -7,6 +7,9 @@ import type {
 import { useCompanyService } from "@modules/companies/services/useCompanyService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Create CRUD state and handlers for companies.
+ */
 export function useCompany() {
   const service = useCompanyService();
   return createCrudComposable<

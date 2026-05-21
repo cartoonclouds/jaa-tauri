@@ -2,6 +2,9 @@ import type { Event } from "@modules/events/domain/entities/Event";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed event entity.
+ */
 export function mapEventRowToEntity(row: Record<string, unknown>): Event {
   return {
     id: String(row.id),

@@ -1,22 +1,41 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+/**
+ * Options used to configure a child webview window.
+ */
 export interface ChildWebviewWindowOptions {
+  /** Unique window label used for reuse checks. */
   label: string;
+  /** Initial URL loaded inside the child window. */
   url: string;
+  /** Window title displayed by the OS. */
   title: string;
+  /** Optional window width. */
   width?: number;
+  /** Optional window height. */
   height?: number;
+  /** Center the window on creation. */
   center?: boolean;
+  /** Focus the window after creation. */
   focus?: boolean;
+  /** Allow resizing. */
   resizable?: boolean;
+  /** Allow minimization. */
   minimizable?: boolean;
+  /** Allow maximization. */
   maximizable?: boolean;
+  /** Allow closing. */
   closable?: boolean;
+  /** Hide the window from the taskbar. */
   skipTaskbar?: boolean;
+  /** Keep the window above other windows. */
   alwaysOnTop?: boolean;
 }
 
+/**
+ * Create helpers for opening and reusing child webview windows.
+ */
 export function useChildWebviewWindow() {
   async function openChildWebviewWindow(
     options: ChildWebviewWindowOptions,

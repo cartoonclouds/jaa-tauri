@@ -2,21 +2,39 @@ import type { DatatablePageQuery, DatatablePageResult } from "@shared/types";
 
 import { onBeforeUnmount, onMounted, ref } from "vue";
 
+/**
+ * Configuration for the server-backed datatable composable.
+ */
 interface UseServerDatatableOptions<TItem> {
+  /** Function used to fetch a single page of data from the server. */
   fetchPage: (query: DatatablePageQuery) => Promise<DatatablePageResult<TItem>>;
+  /** Initial value applied to the global filter. */
   initialGlobalFilter?: string;
+  /** Initial page size. */
   rows?: number;
+  /** Available page size options. */
   rowsPerPageOptions?: number[];
+  /** PrimeVue paginator template string. */
   paginatorTemplate?: string;
+  /** PrimeVue page report template string. */
   currentPageReportTemplate?: string;
+  /** Debounce delay applied to global search input. */
   searchDebounceMs?: number;
 }
 
+/**
+ * Page change payload emitted by the datatable component.
+ */
 interface DatatablePageEvent {
+  /** Zero-based page index. */
   page?: number;
+  /** Rows requested for the page. */
   rows?: number;
 }
 
+/**
+ * Create datatable state that fetches pages from the server.
+ */
 export function useServerDatatable<TItem>(
   options: UseServerDatatableOptions<TItem>,
 ) {

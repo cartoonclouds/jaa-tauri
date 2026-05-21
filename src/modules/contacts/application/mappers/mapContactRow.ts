@@ -2,6 +2,9 @@ import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
 import { toDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed contact entity.
+ */
 export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
   return {
     id: String(row.id),

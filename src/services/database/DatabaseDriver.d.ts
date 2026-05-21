@@ -1,19 +1,18 @@
-import type { QueryBindings, QueryResult } from './QueryBindings'
+import type { QueryBindings, QueryResult } from "./QueryBindings";
 
+/**
+ * Abstraction over the database driver used by the app.
+ */
 export interface DatabaseDriver {
-  readonly name: string
+  /** Human-readable driver name. */
+  readonly name: string;
 
-  select<T = unknown>(
-    sql: string,
-    bindings?: QueryBindings,
-  ): Promise<T[]>
+  /** Execute a SELECT query and return typed rows. */
+  select<T = unknown>(sql: string, bindings?: QueryBindings): Promise<T[]>;
 
-  execute(
-    sql: string,
-    bindings?: QueryBindings,
-  ): Promise<QueryResult>
+  /** Execute a write query and return metadata about the change. */
+  execute(sql: string, bindings?: QueryBindings): Promise<QueryResult>;
 
-  transaction<T>(
-    callback: (tx: DatabaseDriver) => Promise<T>,
-  ): Promise<T>
+  /** Execute a transaction with a transaction-scoped driver instance. */
+  transaction<T>(callback: (tx: DatabaseDriver) => Promise<T>): Promise<T>;
 }

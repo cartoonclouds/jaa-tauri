@@ -1,3 +1,9 @@
+/**
+ * Parse a stringified array into a string array.
+ *
+ * Returns the fallback when the input is not a string, not valid JSON,
+ * or does not contain an array of strings.
+ */
 export function parseStringArray(
   value: unknown,
   fallback: string[] = [],

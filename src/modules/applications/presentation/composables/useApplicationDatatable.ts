@@ -4,6 +4,9 @@ import { useApplicationService } from "@modules/applications/services/useApplica
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
+/**
+ * Create server-backed datatable state for applications.
+ */
 export function useApplicationDatatable() {
   const service = useApplicationService();
 

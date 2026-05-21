@@ -1,15 +1,27 @@
 import { FilterMatchMode } from "@primevue/core/api";
 import { ref } from "vue";
 
+/**
+ * Configuration for the client-side datatable composable.
+ */
 interface UseDatatableOptions {
+  /** Fields used by the global text filter. */
   globalFilterFields: string[];
+  /** Initial value applied to the global filter. */
   initialGlobalFilter?: string;
+  /** Initial page size. */
   rows?: number;
+  /** Available page size options. */
   rowsPerPageOptions?: number[];
+  /** PrimeVue paginator template string. */
   paginatorTemplate?: string;
+  /** PrimeVue page report template string. */
   currentPageReportTemplate?: string;
 }
 
+/**
+ * Create a local datatable state bundle with client-side filtering helpers.
+ */
 export function useDatatable(options: UseDatatableOptions) {
   const globalFilter = ref(options.initialGlobalFilter ?? "");
   const filters = ref({

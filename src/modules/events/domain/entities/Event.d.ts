@@ -1,18 +1,37 @@
+/**
+ * Event entity used to track application interactions.
+ */
 export interface Event {
+  /** Unique event identifier. */
   id: string;
+  /** Related application identifier. */
   applicationId: string;
+  /** Related contact identifier, when available. */
   contactId: string | null;
+  /** Event type identifier. */
   type: string;
+  /** Event title. */
   title: string;
+  /** Free-form event description. */
   description: string | null;
+  /** Scheduled or recorded event time, when available. */
   eventAt: Date | null;
+  /** Creation timestamp. */
   createdAt: Date;
+  /** Last update timestamp. */
   updatedAt: Date;
 }
 
+/**
+ * Input required to create an event.
+ */
 export interface CreateEventInput {
+  /** Related application identifier. */
   applicationId: string;
+  /** Related contact identifier, when available. */
   contactId?: string | null;
+  /** Event type identifier. */
   type: string;
+  /** Event title. */
   title: string;
 }

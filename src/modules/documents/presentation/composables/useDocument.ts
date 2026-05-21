@@ -7,6 +7,9 @@ import type {
 import { useDocumentService } from "@modules/documents/services/useDocumentService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Create CRUD state and handlers for documents.
+ */
 export function useDocument() {
   const service = useDocumentService();
   return createCrudComposable<

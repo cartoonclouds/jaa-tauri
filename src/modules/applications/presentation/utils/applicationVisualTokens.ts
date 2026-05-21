@@ -1,3 +1,6 @@
+/**
+ * Resolve the Tailwind classes used to render an application status badge.
+ */
 export function getApplicationStatusClass(
   status: string | undefined | null,
 ): string {
@@ -25,6 +28,9 @@ export function getApplicationStatusClass(
   return "bg-slate-100 text-slate-800 ring-slate-200";
 }
 
+/**
+ * Format a raw status value into a display label.
+ */
 export function formatApplicationStatusLabel(
   status: string | undefined | null,
 ): string {
@@ -39,6 +45,9 @@ export function formatApplicationStatusLabel(
   return trimmedStatus.charAt(0).toUpperCase() + trimmedStatus.slice(1);
 }
 
+/**
+ * Resolve the Tailwind classes used to render application priority.
+ */
 export function getApplicationPriorityClass(priority: number): string {
   if (priority >= 5) {
     return "bg-rose-100 text-rose-800 ring-rose-200";
@@ -55,6 +64,9 @@ export function getApplicationPriorityClass(priority: number): string {
   return "bg-slate-100 text-slate-800 ring-slate-200";
 }
 
+/**
+ * Resolve the Tailwind classes used to render the archived state.
+ */
 export function getApplicationArchivedClass(isArchived: boolean): string {
   if (isArchived) {
     return "bg-zinc-200 text-zinc-800 ring-zinc-300";

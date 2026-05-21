@@ -4,6 +4,9 @@ import type { SettingUpsertPayload } from "@modules/settings/repositories/Settin
 import { useSettingService } from "@modules/settings/services/useSettingService";
 import { createUpsertCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Create upsert-style state and handlers for settings.
+ */
 export function useSetting() {
   const service = useSettingService();
   return createUpsertCrudComposable<Setting, SettingUpsertPayload>(service);

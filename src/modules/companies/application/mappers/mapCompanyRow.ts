@@ -2,6 +2,9 @@ import type { Company } from "@modules/companies/domain/entities/Company";
 
 import { toDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed company entity.
+ */
 export function mapCompanyRowToEntity(row: Record<string, unknown>): Company {
   return {
     id: String(row.id),

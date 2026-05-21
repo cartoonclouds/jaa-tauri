@@ -7,6 +7,9 @@ import type {
 import { useContactService } from "@modules/contacts/services/useContactService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Create CRUD state and handlers for contacts.
+ */
 export function useContact() {
   const service = useContactService();
   return createCrudComposable<

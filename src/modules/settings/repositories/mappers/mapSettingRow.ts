@@ -2,6 +2,9 @@ import type { Setting } from "@modules/settings/domain/entities/Setting";
 
 import { toDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed setting entity.
+ */
 export function mapSettingRowToEntity(row: Record<string, unknown>): Setting {
   return {
     id: String(row.id),

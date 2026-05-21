@@ -4,6 +4,9 @@ import { useSettingService } from "@modules/settings/services/useSettingService"
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
+/**
+ * Create server-backed datatable state for settings.
+ */
 export function useSettingDatatable() {
   const service = useSettingService();
 

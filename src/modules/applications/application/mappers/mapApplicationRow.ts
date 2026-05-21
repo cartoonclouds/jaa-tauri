@@ -2,6 +2,9 @@ import type { Application } from "@modules/applications/domain/entities/Applicat
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed application entity.
+ */
 export function mapApplicationRowToEntity(
   row: Record<string, unknown>,
 ): Application {

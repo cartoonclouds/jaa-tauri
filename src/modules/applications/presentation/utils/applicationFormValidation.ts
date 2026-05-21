@@ -1,3 +1,6 @@
+/**
+ * Validate the application title field.
+ */
 export function validateApplicationTitle(value: string): string {
   if (!value.trim()) {
     return "Title is required.";
@@ -6,6 +9,9 @@ export function validateApplicationTitle(value: string): string {
   return "";
 }
 
+/**
+ * Validate the optional source URL field.
+ */
 export function validateApplicationSourceUrl(value: string): string {
   const trimmedValue = value.trim();
   if (!trimmedValue) {
@@ -24,6 +30,9 @@ export function validateApplicationSourceUrl(value: string): string {
   return "";
 }
 
+/**
+ * Validate the relationship between minimum and maximum salary values.
+ */
 export function validateApplicationSalaryRange(
   salaryMin: number | null,
   salaryMax: number | null,
@@ -35,6 +44,9 @@ export function validateApplicationSalaryRange(
   return "";
 }
 
+/**
+ * Validate latitude values used by the application form.
+ */
 export function validateApplicationLatitude(value: number | null): string {
   if (value !== null && (value < -90 || value > 90)) {
     return "Latitude must be between -90 and 90.";
@@ -43,6 +55,9 @@ export function validateApplicationLatitude(value: number | null): string {
   return "";
 }
 
+/**
+ * Validate longitude values used by the application form.
+ */
 export function validateApplicationLongitude(value: number | null): string {
   if (value !== null && (value < -180 || value > 180)) {
     return "Longitude must be between -180 and 180.";

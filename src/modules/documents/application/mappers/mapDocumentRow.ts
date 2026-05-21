@@ -2,6 +2,9 @@ import type { Document } from "@modules/documents/domain/entities/Document";
 
 import { toDate } from "@shared/utils/toDate";
 
+/**
+ * Map a raw database row into a typed document entity.
+ */
 export function mapDocumentRowToEntity(row: Record<string, unknown>): Document {
   return {
     id: String(row.id),

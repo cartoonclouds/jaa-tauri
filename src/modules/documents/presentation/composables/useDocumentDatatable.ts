@@ -4,6 +4,9 @@ import { useDocumentService } from "@modules/documents/services/useDocumentServi
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
+/**
+ * Create server-backed datatable state for documents.
+ */
 export function useDocumentDatatable() {
   const service = useDocumentService();
 
