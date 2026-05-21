@@ -74,6 +74,76 @@ Follow strong software engineering conventions:
 - Do not place business rules directly inside components unless trivial.
 - For date or date-time picking in forms, use PrimeVue `DatePicker` instead of raw text inputs or `InputText type="datetime-local"`.
 
+## Form management with PrimeVue Forms
+
+Use the PrimeVue Forms library (`@primevue/forms`) for all form implementations. This provides centralized form state management, validation, and error handling integrated seamlessly with PrimeVue components.
+
+**Key patterns:**
+
+1. **Form wrapper** — Use the `<Form>` component with `v-slot="$form"` to manage form state:
+
+   ```vue
+   <Form
+     v-slot="$form"
+     :initialValues="formData"
+     :resolver="zodResolver(MySchema)"
+     @submit="onSubmit"
+   >
+     <!-- form fields go here -->
+     <Button type="submit" label="Submit" />
+   </Form>
+   ```
+
+2. **Form fields** — Use the `name` property (not `v-model`) to bind fields to form state:
+
+   ```vue
+   <InputText name="username" placeholder="Username" fluid />
+   <Message v-if="$form.username?.invalid" severity="error" size="small">
+     {{ $form.username.error?.message }}
+   </Message>
+   ```
+
+3. **Validation** — Use the `resolver` prop with Zod schemas (already in your stack):
+
+   ```ts
+   import { zodResolver } from "@primevue/forms/resolvers/zod";
+   import { MySchema } from "@shared/domain/zod/my.schema";
+
+   // In component:
+   // :resolver="zodResolver(MySchema)"
+   ```
+
+4. **Form state tracking** — Access field state via `$form.fieldName`:
+   - `$form.fieldName.value` — Current field value
+   - `$form.fieldName.invalid` — Validation error state
+   - `$form.fieldName.error.message` — Error message from resolver
+   - `$form.fieldName.touched` — Whether field has been interacted with
+   - `$form.fieldName.dirty` — Whether value has changed
+
+5. **Submit handler** — The `@submit` callback receives form state and values:
+
+   ```ts
+   function onFormSubmit(event: FormSubmitEvent) {
+     if (!event.valid) return;
+     const formData = event.value; // validated, typed data
+     // process form data
+   }
+   ```
+
+6. **Supported PrimeVue components** — All these work natively with Form:
+   - Input: `InputText`, `InputNumber`, `Textarea`, `Password`, `DatePicker`
+   - Selection: `Select`, `MultiSelect`, `Checkbox`, `RadioButton`, `ToggleSwitch`
+   - Advanced: `FileUpload`, `Editor`, `ColorPicker`, `Rating`
+
+**Benefits over v-model binding:**
+
+- Centralized validation with clear error messages
+- Unified form state tracking
+- Automatic field dependency handling
+- Built-in resolver support for Zod, Yup, Joi, Valibot
+
+For forms with custom/non-PrimeVue components, use the optional `<FormField>` wrapper for state management.
+
 ## Project directory structure
 
 Use this project shape when creating or suggesting files:

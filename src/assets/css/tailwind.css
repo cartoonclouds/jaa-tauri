@@ -1,1 +1,535 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --color-flow-bg: #050814;
+  --color-flow-bg-soft: #070d1f;
+  --color-flow-surface: #0b1328;
+  --color-flow-surface-2: #111a35;
+  --color-flow-border: #26345f;
+
+  --color-flow-text: #f8fafc;
+  --color-flow-muted: #a4acc6;
+  --color-flow-subtle: #6f7897;
+
+  --color-flow-blue: #0978ff;
+  --color-flow-cyan: #18c8ff;
+  --color-flow-violet: #7c3cff;
+  --color-flow-lilac: #b68cff;
+  --color-flow-pink: #d2a2ff;
+
+  --color-flow-success: #8b7dff;
+  --color-flow-warning: #f5b95f;
+  --color-flow-danger: #ff6b8a;
+
+  --shadow-flow-card: 0 24px 80px rgb(0 0 0 / 0.45);
+  --shadow-flow-glow: 0 0 48px rgb(124 60 255 / 0.35);
+  --shadow-flow-blue: 0 0 36px rgb(9 120 255 / 0.35);
+
+  --radius-flow-sm: 0.75rem;
+  --radius-flow-md: 1rem;
+  --radius-flow-lg: 1.5rem;
+  --radius-flow-xl: 2rem;
+  --radius-flow-xs: 0.5rem;
+
+  --animate-flow-pulse: flow-pulse 3s ease-in-out infinite;
+  --animate-flow-float: flow-float 6s ease-in-out infinite;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply min-h-screen bg-flow-bg text-flow-text antialiased;
+    background:
+      radial-gradient(
+        circle at 50% 0%,
+        rgb(18 42 112 / 0.42),
+        transparent 34rem
+      ),
+      radial-gradient(
+        circle at 92% 72%,
+        rgb(124 60 255 / 0.34),
+        transparent 28rem
+      ),
+      linear-gradient(180deg, #02040d 0%, #050814 46%, #080b1d 100%);
+  }
+
+  ::selection {
+    @apply bg-flow-violet/40 text-white;
+  }
+}
+
+@layer components {
+  .flow-shell {
+    @apply min-h-screen bg-flow-bg text-flow-text;
+  }
+
+  .flow-card {
+    @apply rounded-flow-lg border border-flow-border/70 bg-flow-surface/80 shadow-flow-card backdrop-blur-xl;
+  }
+
+  .flow-panel {
+    @apply rounded-flow-xl border border-flow-border/60 bg-flow-bg-soft/75 shadow-flow-card backdrop-blur-2xl;
+  }
+
+  .flow-input {
+    @apply rounded-flow-md border border-flow-border bg-flow-surface px-4 py-2.5 text-flow-text outline-none transition;
+    @apply placeholder:text-flow-subtle focus:border-flow-lilac focus:ring-2 focus:ring-flow-violet/30;
+  }
+
+  .flow-button-primary {
+    @apply rounded-flow-md bg-gradient-to-r from-flow-blue via-flow-violet to-flow-lilac px-4 py-2.5 font-semibold text-white shadow-flow-glow transition;
+    @apply hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .flow-button-secondary {
+    @apply rounded-flow-md border border-flow-border bg-flow-surface-2 px-4 py-2.5 font-medium text-flow-text transition;
+    @apply hover:border-flow-lilac hover:bg-flow-surface;
+  }
+
+  .flow-gradient-text {
+    @apply bg-gradient-to-r from-white via-flow-cyan to-flow-violet bg-clip-text text-transparent;
+  }
+
+  .flow-divider {
+    @apply border-flow-border/70;
+  }
+
+  .flow-glow-line {
+    @apply h-px bg-gradient-to-r from-transparent via-flow-violet to-transparent;
+  }
+
+  .flow-orb {
+    @apply pointer-events-none absolute rounded-full blur-3xl;
+    background: radial-gradient(
+      circle,
+      rgb(124 60 255 / 0.45),
+      transparent 65%
+    );
+  }
+
+  .flow-hero-bg {
+    background:
+      radial-gradient(
+        circle at 50% 25%,
+        rgb(9 120 255 / 0.22),
+        transparent 18rem
+      ),
+      radial-gradient(
+        circle at 88% 68%,
+        rgb(124 60 255 / 0.36),
+        transparent 24rem
+      ),
+      linear-gradient(180deg, #070b1f 0%, #050814 100%);
+  }
+
+  .flow-wave-bg {
+    background-image:
+      radial-gradient(
+        circle at 50% 105%,
+        rgb(124 60 255 / 0.28),
+        transparent 28rem
+      ),
+      linear-gradient(
+        115deg,
+        transparent 0 45%,
+        rgb(9 120 255 / 0.16) 50%,
+        transparent 55%
+      ),
+      linear-gradient(180deg, #050814, #080b1d);
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | PrimeVue Root
+   |--------------------------------------------------------------------------
+   */
+
+  .p-component {
+    @apply font-sans text-flow-text;
+  }
+
+  .p-disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Cards / Panels
+   |--------------------------------------------------------------------------
+   */
+
+  .p-card,
+  .p-panel,
+  .p-dialog,
+  .p-overlaypanel,
+  .p-popover,
+  .p-sidebar,
+  .p-menu,
+  .p-tieredmenu,
+  .p-contextmenu,
+  .p-megamenu,
+  .p-drawer {
+    @apply border border-flow-border/70 bg-flow-surface/90 text-flow-text shadow-flow-card backdrop-blur-2xl;
+    border-radius: var(--radius-flow-lg);
+  }
+
+  .p-card .p-card-title,
+  .p-panel .p-panel-title,
+  .p-dialog .p-dialog-title {
+    @apply font-semibold tracking-tight text-white;
+  }
+
+  .p-card .p-card-subtitle {
+    @apply text-flow-muted;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Buttons
+   |--------------------------------------------------------------------------
+   */
+
+  .p-button {
+    @apply rounded-flow-md border-0 font-medium transition-all duration-200;
+  }
+
+  .p-button:not(.p-button-outlined):not(.p-button-text) {
+    @apply bg-gradient-to-r from-flow-blue via-flow-violet to-flow-lilac text-white shadow-flow-glow;
+  }
+
+  .p-button:not(.p-disabled):hover {
+    @apply brightness-110;
+  }
+
+  .p-button:not(.p-disabled):active {
+    transform: scale(0.98);
+  }
+
+  .p-button.p-button-outlined {
+    @apply border border-flow-border bg-flow-surface-2 text-flow-text;
+  }
+
+  .p-button.p-button-text {
+    @apply bg-transparent text-flow-muted shadow-none;
+  }
+
+  .p-button.p-button-secondary {
+    @apply bg-flow-surface-2 text-flow-text shadow-none;
+  }
+
+  .p-button.p-button-success {
+    background: linear-gradient(135deg, rgb(24 200 255), rgb(124 60 255));
+  }
+
+  .p-button.p-button-danger {
+    background: linear-gradient(135deg, rgb(255 107 138), rgb(255 64 129));
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Inputs
+   |--------------------------------------------------------------------------
+   */
+
+  .p-inputtext,
+  .p-inputnumber-input,
+  .p-password-input,
+  .p-inputtextarea,
+  .p-multiselect,
+  .p-dropdown,
+  .p-select,
+  .p-autocomplete,
+  .p-cascadeselect,
+  .p-treeselect,
+  .p-datepicker-input {
+    @apply border border-flow-border bg-flow-surface text-flow-text shadow-none transition-all;
+    border-radius: var(--radius-flow-md);
+  }
+
+  .p-inputtext,
+  .p-inputnumber-input,
+  .p-password-input,
+  .p-inputtextarea {
+    @apply px-4 py-2.5;
+  }
+
+  .p-inputtext::placeholder,
+  .p-inputtextarea::placeholder {
+    @apply text-flow-subtle;
+  }
+
+  .p-inputtext:enabled:hover,
+  .p-inputnumber-input:enabled:hover,
+  .p-password-input:enabled:hover,
+  .p-inputtextarea:enabled:hover,
+  .p-dropdown:not(.p-disabled):hover,
+  .p-select:not(.p-disabled):hover,
+  .p-multiselect:not(.p-disabled):hover {
+    @apply border-flow-lilac;
+  }
+
+  .p-inputtext:enabled:focus,
+  .p-inputnumber-input:enabled:focus,
+  .p-password-input:enabled:focus,
+  .p-inputtextarea:enabled:focus,
+  .p-focus {
+    @apply border-flow-violet ring-2 ring-flow-violet/30;
+    box-shadow: none;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Float Label
+   |--------------------------------------------------------------------------
+   */
+
+  .p-floatlabel label {
+    @apply text-flow-muted;
+  }
+
+  .p-floatlabel:has(.p-inputwrapper-focus) label,
+  .p-floatlabel:has(input:focus) label {
+    @apply text-flow-lilac;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Checkbox / Radio / Toggle
+   |--------------------------------------------------------------------------
+   */
+
+  .p-checkbox .p-checkbox-box,
+  .p-radiobutton .p-radiobutton-box {
+    @apply border border-flow-border bg-flow-surface;
+  }
+
+  .p-checkbox.p-highlight .p-checkbox-box,
+  .p-radiobutton.p-highlight .p-radiobutton-box {
+    @apply border-flow-violet bg-flow-violet;
+  }
+
+  .p-toggleswitch .p-toggleswitch-slider {
+    @apply bg-flow-surface-2;
+  }
+
+  .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider {
+    background: linear-gradient(135deg, rgb(9 120 255), rgb(124 60 255));
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Tabs
+   |--------------------------------------------------------------------------
+   */
+
+  .p-tabs {
+    @apply border-flow-border;
+  }
+
+  .p-tablist-tab-list {
+    @apply gap-2 border-flow-border bg-transparent;
+  }
+
+  .p-tab {
+    @apply rounded-flow-md border border-transparent bg-transparent text-flow-muted transition-all;
+  }
+
+  .p-tab:hover {
+    @apply border-flow-border bg-flow-surface text-flow-text;
+  }
+
+  .p-tab.p-tab-active {
+    @apply border-flow-violet bg-flow-surface text-white shadow-flow-glow;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | DataTable
+   |--------------------------------------------------------------------------
+   */
+
+  .p-datatable {
+    @apply overflow-hidden rounded-flow-lg border border-flow-border bg-flow-surface/80;
+  }
+
+  .p-datatable-table {
+    @apply bg-transparent;
+  }
+
+  .p-datatable-header,
+  .p-datatable-footer {
+    @apply border-flow-border bg-flow-surface-2 text-flow-text;
+  }
+
+  .p-datatable-thead > tr > th {
+    @apply border-flow-border bg-flow-surface-2 text-flow-muted;
+  }
+
+  .p-datatable-tbody > tr {
+    @apply border-flow-border bg-transparent transition-colors;
+  }
+
+  .p-datatable-tbody > tr:hover {
+    background: rgb(124 60 255 / 0.08);
+  }
+
+  .p-datatable-tbody > tr.p-row-selected {
+    background: rgb(124 60 255 / 0.18);
+  }
+
+  .p-paginator {
+    @apply border-flow-border bg-flow-surface-2;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Tag / Badge
+   |--------------------------------------------------------------------------
+   */
+
+  .p-tag,
+  .p-badge {
+    @apply border-0 font-medium;
+  }
+
+  .p-tag-success,
+  .p-badge-success {
+    background: linear-gradient(135deg, rgb(24 200 255), rgb(124 60 255));
+  }
+
+  .p-tag-danger,
+  .p-badge-danger {
+    background: linear-gradient(135deg, rgb(255 107 138), rgb(255 64 129));
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Toast
+   |--------------------------------------------------------------------------
+   */
+
+  .p-toast-message {
+    @apply border border-flow-border bg-flow-surface/95 text-flow-text shadow-flow-card backdrop-blur-xl;
+  }
+
+  .p-toast-message-success {
+    border-left: 4px solid rgb(24 200 255);
+  }
+
+  .p-toast-message-error {
+    border-left: 4px solid rgb(255 107 138);
+  }
+
+  .p-toast-message-warn {
+    border-left: 4px solid rgb(245 185 95);
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Dialog
+   |--------------------------------------------------------------------------
+   */
+
+  .p-dialog-mask {
+    backdrop-filter: blur(10px);
+    background: rgb(0 0 0 / 0.65);
+  }
+
+  .p-dialog-header,
+  .p-dialog-footer {
+    @apply border-flow-border bg-transparent;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Menu / Dropdown Panels
+   |--------------------------------------------------------------------------
+   */
+
+  .p-select-overlay,
+  .p-dropdown-panel,
+  .p-multiselect-overlay,
+  .p-autocomplete-panel,
+  .p-menu-overlay,
+  .p-tieredmenu-overlay {
+    @apply border border-flow-border bg-flow-surface/95 text-flow-text shadow-flow-card backdrop-blur-2xl;
+  }
+
+  .p-select-option,
+  .p-dropdown-item,
+  .p-multiselect-option,
+  .p-autocomplete-option {
+    @apply transition-colors;
+  }
+
+  .p-select-option:hover,
+  .p-dropdown-item:hover,
+  .p-multiselect-option:hover,
+  .p-autocomplete-option:hover {
+    background: rgb(124 60 255 / 0.12);
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Progress
+   |--------------------------------------------------------------------------
+   */
+
+  .p-progressbar {
+    @apply overflow-hidden rounded-full bg-flow-surface-2;
+  }
+
+  .p-progressbar-value {
+    background: linear-gradient(90deg, rgb(9 120 255), rgb(124 60 255));
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Scrollbar
+   |--------------------------------------------------------------------------
+   */
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    @apply bg-flow-bg;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-flow-border;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-flow-violet;
+  }
+}
+
+@keyframes flow-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes flow-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}

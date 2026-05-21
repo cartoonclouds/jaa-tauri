@@ -1,13 +1,17 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateCompanyInput } from "@modules/companies/domain/entities/Company";
 
+import {
+  OptionalNullableLatitudeSchema,
+  OptionalNullableLongitudeSchema,
+} from "@shared/domain/zod/fields";
 import { z } from "zod";
 
 const CreateCompanyInputSchema = z.object({
   name: z.string(),
   locationText: z.string().nullable().optional(),
-  locationLat: z.number().nullable().optional(),
-  locationLng: z.number().nullable().optional(),
+  locationLat: OptionalNullableLatitudeSchema,
+  locationLng: OptionalNullableLongitudeSchema,
 });
 
 export async function createCompany(

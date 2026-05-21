@@ -99,28 +99,26 @@
     :header="drawerHeader"
     class="w-full! max-w-3xl"
   >
-    <div class="rounded-2xl border border-surface-200 bg-white p-3 shadow-sm">
-      <div v-if="mode !== 'view'" class="space-y-4">
-        <ApplicationForm
-          :mode="mode === 'create' ? 'create' : 'edit'"
-          :initial-values="initialValues"
-          :busy="busy"
-          :companies="companyOptions"
-          :show-cancel="mode === 'edit'"
-          @submit="onSubmit"
-          @cancel="emit('cancel-edit')"
-        />
-      </div>
-
-      <ApplicationDetailsView
-        v-else-if="application"
-        :application="application"
-        :company-name="companyName"
-        :applied-at-label="appliedAtLabel"
-        :is-deleting="isDeleting"
-        @request-edit="emit('request-edit')"
-        @request-delete="onDelete"
+    <div v-if="mode !== 'view'" class="space-y-4">
+      <ApplicationForm
+        :mode="mode === 'create' ? 'create' : 'edit'"
+        :initial-values="initialValues"
+        :busy="busy"
+        :companies="companyOptions"
+        :show-cancel="mode === 'edit'"
+        @submit="onSubmit"
+        @cancel="emit('cancel-edit')"
       />
     </div>
+
+    <ApplicationDetailsView
+      v-else-if="application"
+      :application="application"
+      :company-name="companyName"
+      :applied-at-label="appliedAtLabel"
+      :is-deleting="isDeleting"
+      @request-edit="emit('request-edit')"
+      @request-delete="onDelete"
+    />
   </Drawer>
 </template>

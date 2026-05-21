@@ -32,4 +32,4 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
 
-Update any instances of icons to use HeroIcons and PrimeVue component
+Create a Mermaid diagram of how each elements of this app interaction. Add to the toplevel README.md

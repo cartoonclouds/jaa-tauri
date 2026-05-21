@@ -1,11 +1,13 @@
 import { z } from "zod";
 
+import { DateTimeSchema, NullableStringSchema, UuidSchema } from "./fields";
+
 export const TagSchema = z.object({
-  id: z.string().uuid(),
+  id: UuidSchema,
   name: z.string().min(1),
-  color: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  color: NullableStringSchema,
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
 });
 
 export const CreateTagSchema = TagSchema.pick({

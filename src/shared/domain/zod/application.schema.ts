@@ -1,30 +1,42 @@
 import { z } from "zod";
 
+import {
+  DateTimeSchema,
+  NullableDateTimeSchema,
+  NullableLatitudeSchema,
+  NullableLongitudeSchema,
+  NullableNumberSchema,
+  NullableStringSchema,
+  NullableUrlSchema,
+  NullableUuidSchema,
+  UuidSchema,
+} from "./fields";
+
 export const ApplicationSchema = z.object({
-  id: z.string().uuid(),
-  companyId: z.string().uuid().nullable(),
+  id: UuidSchema,
+  companyId: NullableUuidSchema,
   title: z.string().min(1),
   status: z.string().min(1),
-  sourceUrl: z.string().url().nullable(),
-  appliedAt: z.string().datetime().nullable(),
-  locationText: z.string().nullable(),
-  locationLat: z.number().nullable(),
-  locationLng: z.number().nullable(),
+  sourceUrl: NullableUrlSchema,
+  appliedAt: NullableDateTimeSchema,
+  locationText: NullableStringSchema,
+  locationLat: NullableLatitudeSchema,
+  locationLng: NullableLongitudeSchema,
   attendanceType: z.enum(["remote", "hybrid", "on-site"]).nullable(),
   employmentType: z
     .enum(["part-time", "contract", "internship", "full-time", "volunteer"])
     .nullable(),
-  salaryMin: z.number().nullable(),
-  salaryMax: z.number().nullable(),
-  currency: z.string().nullable(),
-  description: z.string().nullable(),
-  interviewProcess: z.string().nullable(),
-  benefits: z.string().nullable(),
+  salaryMin: NullableNumberSchema,
+  salaryMax: NullableNumberSchema,
+  currency: NullableStringSchema,
+  description: NullableStringSchema,
+  interviewProcess: NullableStringSchema,
+  benefits: NullableStringSchema,
   priority: z.number(),
   isArchived: z.boolean(),
   isDeleted: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
 });
 
 export const CreateApplicationSchema = ApplicationSchema.pick({
@@ -41,6 +53,62 @@ export const CreateApplicationSchema = ApplicationSchema.pick({
   locationLat: true,
   locationLng: true,
 });
+
+export const ApplicationFormSchema = z
+  .object({
+    companyId: NullableUuidSchema,
+    title: z.string().min(1, "Title is required"),
+    status: z.enum(
+      [
+        "saved",
+        "applied",
+        "phone-screening",
+        "technical",
+        "interview",
+        "offer",
+        "rejected",
+      ],
+      {
+        errorMap: () => ({ message: "Invalid status" }),
+      },
+    ),
+    sourceUrl: z.string().url("Invalid URL").nullable().or(z.literal("")),
+    appliedAt: z.string().nullable().or(z.literal("")),
+    locationText: z.string().nullable().or(z.literal("")),
+    locationLat: NullableLatitudeSchema,
+    locationLng: NullableLongitudeSchema,
+    attendanceType: z.enum(["remote", "hybrid", "on-site"]).nullable(),
+    employmentType: z
+      .enum(["part-time", "contract", "internship", "full-time", "volunteer"])
+      .nullable(),
+    salaryMin: z
+      .number()
+      .min(0, "Salary must be positive")
+      .nullable()
+      .or(z.undefined()),
+    salaryMax: z
+      .number()
+      .min(0, "Salary must be positive")
+      .nullable()
+      .or(z.undefined()),
+    currency: z.string().max(8).nullable().or(z.literal("")),
+    description: z.string().nullable().or(z.literal("")),
+    interviewProcess: z.string().nullable().or(z.literal("")),
+    benefits: z.string().nullable().or(z.literal("")),
+    priority: z
+      .number()
+      .min(1, "Priority must be between 1 and 5")
+      .max(5, "Priority must be between 1 and 5"),
+    isArchived: z.boolean(),
+  })
+  .refine(
+    (data) =>
+      !data.salaryMin || !data.salaryMax || data.salaryMin <= data.salaryMax,
+    {
+      message: "Salary minimum cannot exceed maximum",
+      path: ["salaryMax"],
+    },
+  );
 
 export type Application = z.infer<typeof ApplicationSchema>;
 export type CreateApplicationInput = z.infer<typeof CreateApplicationSchema>;

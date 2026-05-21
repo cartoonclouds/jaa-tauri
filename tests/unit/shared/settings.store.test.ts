@@ -49,6 +49,7 @@ describe("useSettingsStore", () => {
       developerMode: false,
       recentSearches: [],
       tableColumnVisibility: {},
+      onboardingCompleted: false,
     };
 
     mockedGetSettings.mockResolvedValue(mockSettings);
@@ -67,6 +68,7 @@ describe("useSettingsStore", () => {
       developerMode: true,
       recentSearches: [],
       tableColumnVisibility: {},
+      onboardingCompleted: false,
     };
 
     mockedGetSettings.mockResolvedValue(mockSettings);
@@ -86,6 +88,7 @@ describe("useSettingsStore", () => {
       developerMode: false,
       recentSearches: [],
       tableColumnVisibility: {},
+      onboardingCompleted: false,
     };
 
     mockedGetSettings.mockResolvedValue(mockSettings);
@@ -105,6 +108,7 @@ describe("useSettingsStore", () => {
       developerMode: false,
       recentSearches: [],
       tableColumnVisibility: {},
+      onboardingCompleted: false,
     };
 
     mockedGetSettings.mockResolvedValue(mockSettings);

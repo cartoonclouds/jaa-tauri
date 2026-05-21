@@ -1,15 +1,20 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateApplicationInput } from "@modules/applications/domain/entities/Application";
 
+import {
+  OptionalNullableLatitudeSchema,
+  OptionalNullableLongitudeSchema,
+  OptionalNullableUuidSchema,
+} from "@shared/domain/zod/fields";
 import { z } from "zod";
 
 const CreateApplicationInputSchema = z.object({
-  companyId: z.string().nullable().optional(),
+  companyId: OptionalNullableUuidSchema,
   title: z.string(),
   status: z.string().optional(),
   locationText: z.string().nullable().optional(),
-  locationLat: z.number().nullable().optional(),
-  locationLng: z.number().nullable().optional(),
+  locationLat: OptionalNullableLatitudeSchema,
+  locationLng: OptionalNullableLongitudeSchema,
 });
 
 export async function createApplication(

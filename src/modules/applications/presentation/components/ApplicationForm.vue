@@ -5,28 +5,19 @@
     APPLICATION_STATUS_OPTIONS,
   } from "@modules/applications/presentation/constants/applicationFormOptions";
   import {
-    validateApplicationLatitude,
-    validateApplicationLongitude,
-    validateApplicationSalaryRange,
-    validateApplicationSourceUrl,
-    validateApplicationTitle,
-  } from "@modules/applications/presentation/utils/applicationFormValidation";
-  import {
     formatApplicationStatusLabel,
     getApplicationPriorityClass,
     getApplicationStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
   import {
-    formatDateTimeLocalValue,
-    parseDateTimeLocalValue,
-  } from "@modules/applications/presentation/utils/dateTimeLocal";
-  import {
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,
     type ApplicationSelectOption,
-    createEmptyApplicationFormValues,
   } from "@modules/applications/types/presentation";
-  import { computed, reactive, watch } from "vue";
+  import { Form, type FormSubmitEvent } from "@primevue/forms";
+  import { zodResolver } from "@primevue/forms/resolvers/zod";
+  import { ApplicationFormSchema } from "@shared/domain/zod/application.schema";
+  import { computed } from "vue";
 
   interface Props {
     initialValues?: Partial<ApplicationFormValues>;
@@ -49,133 +40,96 @@
     cancel: [];
   }>();
 
-  const form = reactive<ApplicationFormValues>(
-    createEmptyApplicationFormValues(),
-  );
-
-  const errors = reactive({
-    title: "",
-    sourceUrl: "",
-    salaryRange: "",
-    locationLat: "",
-    locationLng: "",
+  const formValues = computed(() => {
+    return {
+      companyId: props.initialValues.companyId ?? null,
+      title: props.initialValues.title ?? "",
+      status: props.initialValues.status ?? "saved",
+      sourceUrl: props.initialValues.sourceUrl ?? "",
+      appliedAt: props.initialValues.appliedAt ?? "",
+      locationText: props.initialValues.locationText ?? "",
+      locationLat: props.initialValues.locationLat ?? null,
+      locationLng: props.initialValues.locationLng ?? null,
+      attendanceType: props.initialValues.attendanceType ?? null,
+      employmentType: props.initialValues.employmentType ?? null,
+      salaryMin: props.initialValues.salaryMin ?? null,
+      salaryMax: props.initialValues.salaryMax ?? null,
+      currency: props.initialValues.currency ?? "",
+      description: props.initialValues.description ?? "",
+      interviewProcess: props.initialValues.interviewProcess ?? "",
+      benefits: props.initialValues.benefits ?? "",
+      priority: props.initialValues.priority ?? 3,
+      isArchived: props.initialValues.isArchived ?? false,
+    };
   });
 
-  function resetErrors(): void {
-    errors.title = "";
-    errors.sourceUrl = "";
-    errors.salaryRange = "";
-    errors.locationLat = "";
-    errors.locationLng = "";
+  function getStatusPreviewClass(status: string | undefined | null) {
+    return getApplicationStatusClass(status);
   }
 
-  function applyValues(values?: Partial<ApplicationFormValues>): void {
-    form.companyId = values?.companyId ?? null;
-    form.title = values?.title ?? "";
-    form.status = values?.status ?? "saved";
-    form.sourceUrl = values?.sourceUrl ?? "";
-    form.appliedAt = values?.appliedAt ?? "";
-    form.locationText = values?.locationText ?? "";
-    form.locationLat = values?.locationLat ?? null;
-    form.locationLng = values?.locationLng ?? null;
-    form.attendanceType = values?.attendanceType ?? null;
-    form.employmentType = values?.employmentType ?? null;
-    form.salaryMin = values?.salaryMin ?? null;
-    form.salaryMax = values?.salaryMax ?? null;
-    form.currency = values?.currency ?? "";
-    form.description = values?.description ?? "";
-    form.interviewProcess = values?.interviewProcess ?? "";
-    form.benefits = values?.benefits ?? "";
-    form.priority = values?.priority ?? 3;
-    form.isArchived = values?.isArchived ?? false;
-
-    resetErrors();
+  function getStatusPreviewLabel(status: string | undefined | null) {
+    return formatApplicationStatusLabel(status);
   }
 
-  watch(
-    () => props.initialValues,
-    (values) => {
-      applyValues(values);
-    },
-    { immediate: true, deep: true },
-  );
-
-  const appliedAtModel = computed<Date | null>({
-    get() {
-      return parseDateTimeLocalValue(form.appliedAt);
-    },
-    set(value) {
-      form.appliedAt = formatDateTimeLocalValue(value);
-    },
-  });
-
-  function validate(): boolean {
-    resetErrors();
-
-    errors.title = validateApplicationTitle(form.title);
-    errors.sourceUrl = validateApplicationSourceUrl(form.sourceUrl);
-    errors.salaryRange = validateApplicationSalaryRange(
-      form.salaryMin,
-      form.salaryMax,
-    );
-    errors.locationLat = validateApplicationLatitude(form.locationLat);
-    errors.locationLng = validateApplicationLongitude(form.locationLng);
-
-    return (
-      !errors.title &&
-      !errors.sourceUrl &&
-      !errors.salaryRange &&
-      !errors.locationLat &&
-      !errors.locationLng
-    );
+  function getPriorityPreviewClass(priority: number | undefined | null) {
+    return priority
+      ? getApplicationPriorityClass(priority)
+      : "bg-slate-100 text-slate-800 ring-slate-200";
   }
 
-  function onSubmit(): void {
-    if (!validate()) {
-      return;
-    }
+  function onFormSubmit(event: FormSubmitEvent): void {
+    if (!event.valid) return;
+
+    const values = event.values as Record<string, unknown> | undefined;
+    if (!values) return;
 
     emit("submit", {
-      companyId: form.companyId,
-      title: form.title.trim(),
-      status: form.status,
-      sourceUrl: form.sourceUrl.trim() || null,
-      appliedAt: form.appliedAt || null,
-      locationText: form.locationText.trim() || null,
-      locationLat: form.locationLat,
-      locationLng: form.locationLng,
-      attendanceType: form.attendanceType,
-      employmentType: form.employmentType,
-      salaryMin: form.salaryMin,
-      salaryMax: form.salaryMax,
-      currency: form.currency.trim().toUpperCase() || null,
-      description: form.description.trim() || null,
-      interviewProcess: form.interviewProcess.trim() || null,
-      benefits: form.benefits.trim() || null,
-      priority: form.priority,
-      isArchived: form.isArchived,
+      companyId: (values.companyId as string) || null,
+      title: (values.title as string).trim(),
+      status: values.status as string,
+      sourceUrl: values.sourceUrl ? (values.sourceUrl as string).trim() : null,
+      appliedAt: values.appliedAt ? (values.appliedAt as string) : null,
+      locationText: values.locationText
+        ? (values.locationText as string).trim()
+        : null,
+      locationLat: values.locationLat as number | null,
+      locationLng: values.locationLng as number | null,
+      attendanceType: values.attendanceType as
+        | ApplicationFormSubmitPayload["attendanceType"]
+        | null,
+      employmentType: values.employmentType as
+        | ApplicationFormSubmitPayload["employmentType"]
+        | null,
+      salaryMin: values.salaryMin as number | null,
+      salaryMax: values.salaryMax as number | null,
+      currency: values.currency
+        ? (values.currency as string).trim().toUpperCase()
+        : null,
+      description: values.description
+        ? (values.description as string).trim()
+        : null,
+      interviewProcess: values.interviewProcess
+        ? (values.interviewProcess as string).trim()
+        : null,
+      benefits: values.benefits ? (values.benefits as string).trim() : null,
+      priority: values.priority as number,
+      isArchived: values.isArchived as boolean,
     });
   }
 
   function onCancel(): void {
     emit("cancel");
   }
-
-  const statusPreviewClass = computed(() => {
-    return getApplicationStatusClass(form.status);
-  });
-
-  const statusPreviewLabel = computed(() => {
-    return formatApplicationStatusLabel(form.status);
-  });
-
-  const priorityPreviewClass = computed(() => {
-    return getApplicationPriorityClass(form.priority);
-  });
 </script>
 
 <template>
-  <form class="space-y-5" @submit.prevent="onSubmit">
+  <Form
+    v-slot="$form"
+    :initial-values="formValues"
+    :resolver="zodResolver(ApplicationFormSchema)"
+    class="space-y-5"
+    @submit="onFormSubmit"
+  >
     <section
       class="grid gap-4 rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm md:grid-cols-2 md:p-5"
     >
@@ -194,8 +148,7 @@
           Company
         </label>
         <Select
-          id="application-company"
-          v-model="form.companyId"
+          name="companyId"
           :options="companies"
           option-label="label"
           option-value="value"
@@ -214,19 +167,18 @@
           Title
         </label>
         <InputText
-          id="application-title"
-          v-model="form.title"
-          fluid
+          name="title"
           placeholder="Senior Frontend Engineer"
-          :invalid="Boolean(errors.title)"
+          fluid
+          :invalid="$form.title?.invalid"
         />
         <Message
-          v-if="errors.title"
+          v-if="$form.title?.invalid"
           severity="error"
           size="small"
           variant="simple"
         >
-          {{ errors.title }}
+          {{ $form.title?.error?.message }}
         </Message>
       </div>
 
@@ -238,19 +190,18 @@
           Source URL
         </label>
         <InputText
-          id="application-source-url"
-          v-model="form.sourceUrl"
-          fluid
+          name="sourceUrl"
           placeholder="https://company.com/jobs/role"
-          :invalid="Boolean(errors.sourceUrl)"
+          fluid
+          :invalid="$form.sourceUrl?.invalid"
         />
         <Message
-          v-if="errors.sourceUrl"
+          v-if="$form.sourceUrl?.invalid"
           severity="error"
           size="small"
           variant="simple"
         >
-          {{ errors.sourceUrl }}
+          {{ $form.sourceUrl?.error?.message }}
         </Message>
       </div>
 
@@ -262,8 +213,7 @@
           Applied At
         </label>
         <DatePicker
-          v-model="appliedAtModel"
-          input-id="application-applied-at"
+          name="appliedAt"
           show-time
           hour-format="24"
           show-icon
@@ -280,8 +230,7 @@
           Status
         </label>
         <Select
-          id="application-status"
-          v-model="form.status"
+          name="status"
           :options="APPLICATION_STATUS_OPTIONS"
           option-label="label"
           option-value="value"
@@ -290,9 +239,9 @@
         <div class="pt-1">
           <span
             class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="statusPreviewClass"
+            :class="getStatusPreviewClass($form.status?.value)"
           >
-            {{ statusPreviewLabel }}
+            {{ getStatusPreviewLabel($form.status?.value) }}
           </span>
         </div>
       </div>
@@ -305,8 +254,7 @@
           Attendance Type
         </label>
         <Select
-          id="application-attendance"
-          v-model="form.attendanceType"
+          name="attendanceType"
           :options="APPLICATION_ATTENDANCE_OPTIONS"
           option-label="label"
           option-value="value"
@@ -323,8 +271,7 @@
           Employment Type
         </label>
         <Select
-          id="application-employment"
-          v-model="form.employmentType"
+          name="employmentType"
           :options="APPLICATION_EMPLOYMENT_OPTIONS"
           option-label="label"
           option-value="value"
@@ -354,10 +301,9 @@
           Location
         </label>
         <InputText
-          id="application-location"
-          v-model="form.locationText"
-          fluid
+          name="locationText"
           placeholder="Remote, New York, NY"
+          fluid
         />
       </div>
 
@@ -369,23 +315,22 @@
           Latitude
         </label>
         <InputNumber
-          id="application-lat"
-          v-model="form.locationLat"
-          fluid
+          name="locationLat"
           :use-grouping="false"
           :min="-90"
           :max="90"
           :min-fraction-digits="4"
           :max-fraction-digits="8"
-          :invalid="Boolean(errors.locationLat)"
+          fluid
+          :invalid="$form.locationLat?.invalid"
         />
         <Message
-          v-if="errors.locationLat"
+          v-if="$form.locationLat?.invalid"
           severity="error"
           size="small"
           variant="simple"
         >
-          {{ errors.locationLat }}
+          {{ $form.locationLat?.error?.message }}
         </Message>
       </div>
 
@@ -397,23 +342,22 @@
           Longitude
         </label>
         <InputNumber
-          id="application-lng"
-          v-model="form.locationLng"
-          fluid
+          name="locationLng"
           :use-grouping="false"
           :min="-180"
           :max="180"
           :min-fraction-digits="4"
           :max-fraction-digits="8"
-          :invalid="Boolean(errors.locationLng)"
+          fluid
+          :invalid="$form.locationLng?.invalid"
         />
         <Message
-          v-if="errors.locationLng"
+          v-if="$form.locationLng?.invalid"
           severity="error"
           size="small"
           variant="simple"
         >
-          {{ errors.locationLng }}
+          {{ $form.locationLng?.error?.message }}
         </Message>
       </div>
 
@@ -424,13 +368,7 @@
         >
           Salary Min
         </label>
-        <InputNumber
-          id="application-salary-min"
-          v-model="form.salaryMin"
-          fluid
-          :use-grouping="false"
-          :min="0"
-        />
+        <InputNumber name="salaryMin" :use-grouping="false" :min="0" fluid />
       </div>
 
       <div class="space-y-1">
@@ -441,19 +379,19 @@
           Salary Max
         </label>
         <InputNumber
-          id="application-salary-max"
-          v-model="form.salaryMax"
-          fluid
+          name="salaryMax"
           :use-grouping="false"
           :min="0"
+          fluid
+          :invalid="$form.salaryMax?.invalid"
         />
         <Message
-          v-if="errors.salaryRange"
+          v-if="$form.salaryMax?.invalid"
           severity="error"
           size="small"
           variant="simple"
         >
-          {{ errors.salaryRange }}
+          {{ $form.salaryMax?.error?.message }}
         </Message>
       </div>
 
@@ -464,13 +402,7 @@
         >
           Currency
         </label>
-        <InputText
-          id="application-currency"
-          v-model="form.currency"
-          fluid
-          maxlength="8"
-          placeholder="USD"
-        />
+        <InputText name="currency" placeholder="USD" maxlength="8" fluid />
       </div>
 
       <div class="space-y-1">
@@ -481,19 +413,18 @@
           Priority
         </label>
         <InputNumber
-          id="application-priority"
-          v-model="form.priority"
-          fluid
+          name="priority"
           :use-grouping="false"
           :min="1"
           :max="5"
+          fluid
         />
         <div class="pt-1">
           <span
             class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="priorityPreviewClass"
+            :class="getPriorityPreviewClass($form.priority?.value)"
           >
-            P{{ form.priority }}
+            P{{ $form.priority?.value || 3 }}
           </span>
         </div>
       </div>
@@ -518,13 +449,7 @@
         >
           Description
         </label>
-        <Textarea
-          id="application-description"
-          v-model="form.description"
-          fluid
-          auto-resize
-          rows="3"
-        />
+        <Textarea name="description" auto-resize rows="3" fluid />
       </div>
 
       <div class="space-y-1 md:col-span-2">
@@ -534,13 +459,7 @@
         >
           Interview Process
         </label>
-        <Textarea
-          id="application-interview-process"
-          v-model="form.interviewProcess"
-          fluid
-          auto-resize
-          rows="3"
-        />
+        <Textarea name="interviewProcess" auto-resize rows="3" fluid />
       </div>
 
       <div class="space-y-1 md:col-span-2">
@@ -550,13 +469,7 @@
         >
           Benefits
         </label>
-        <Textarea
-          id="application-benefits"
-          v-model="form.benefits"
-          fluid
-          auto-resize
-          rows="3"
-        />
+        <Textarea name="benefits" auto-resize rows="3" fluid />
       </div>
 
       <div
@@ -568,11 +481,11 @@
         >
           Archived
         </label>
-        <ToggleSwitch id="application-archived" v-model="form.isArchived" />
+        <ToggleSwitch name="isArchived" />
       </div>
     </section>
 
-    <div class="flex gap-2 border-t border-surface-200 pt-1 md:col-span-2">
+    <div class="flex gap-2 border-t border-surface-200 pt-4 md:col-span-2">
       <Button
         type="submit"
         :label="mode === 'edit' ? 'Update application' : 'Create application'"
@@ -590,5 +503,5 @@
         @click="onCancel"
       />
     </div>
-  </form>
+  </Form>
 </template>

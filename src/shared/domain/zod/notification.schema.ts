@@ -1,19 +1,26 @@
 import { z } from "zod";
 
+import {
+  DateTimeSchema,
+  NullableDateTimeSchema,
+  NullableUuidSchema,
+  UuidSchema,
+} from "./fields";
+
 export const SeveritySchema = z.enum(["info", "warning", "success", "error"]);
 
 export const NotificationSchema = z.object({
-  id: z.string().uuid(),
-  applicationId: z.string().uuid().nullable(),
-  eventId: z.string().uuid().nullable(),
+  id: UuidSchema,
+  applicationId: NullableUuidSchema,
+  eventId: NullableUuidSchema,
   severity: SeveritySchema,
   title: z.string().min(1),
   body: z.string().min(1),
   isRead: z.boolean(),
-  scheduledFor: z.string().datetime().nullable(),
-  sentAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  scheduledFor: NullableDateTimeSchema,
+  sentAt: NullableDateTimeSchema,
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
 });
 
 export const CreateNotificationSchema = NotificationSchema.pick({

@@ -1,4 +1,9 @@
-export function getApplicationStatusClass(status: string): string {
+export function getApplicationStatusClass(
+  status: string | undefined | null,
+): string {
+  if (!status) {
+    return "bg-slate-100 text-slate-800 ring-slate-200";
+  }
   const normalizedStatus = status.toLowerCase();
 
   if (normalizedStatus === "applied") {
@@ -20,7 +25,12 @@ export function getApplicationStatusClass(status: string): string {
   return "bg-slate-100 text-slate-800 ring-slate-200";
 }
 
-export function formatApplicationStatusLabel(status: string): string {
+export function formatApplicationStatusLabel(
+  status: string | undefined | null,
+): string {
+  if (!status) {
+    return "Unknown";
+  }
   const trimmedStatus = status.trim();
   if (!trimmedStatus) {
     return "Unknown";

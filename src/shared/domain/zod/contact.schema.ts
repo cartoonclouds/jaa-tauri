@@ -1,18 +1,26 @@
 import { z } from "zod";
 
+import {
+  DateTimeSchema,
+  NullableStringSchema,
+  NullableUrlSchema,
+  NullableUuidSchema,
+  UuidSchema,
+} from "./fields";
+
 export const ContactTypeSchema = z.enum(["company", "recruiter"]);
 
 export const ContactSchema = z.object({
-  id: z.string().uuid(),
-  companyId: z.string().uuid().nullable(),
+  id: UuidSchema,
+  companyId: NullableUuidSchema,
   fullName: z.string().min(1),
   email: z.string().email().nullable(),
-  phone: z.string().nullable(),
-  linkedinUrl: z.string().url().nullable(),
+  phone: NullableStringSchema,
+  linkedinUrl: NullableUrlSchema,
   type: ContactTypeSchema,
-  notes: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  notes: NullableStringSchema,
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
 });
 
 export const CreateContactSchema = ContactSchema.pick({

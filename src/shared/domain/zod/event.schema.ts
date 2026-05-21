@@ -1,15 +1,23 @@
 import { z } from "zod";
 
+import {
+  DateTimeSchema,
+  NullableDateTimeSchema,
+  NullableStringSchema,
+  NullableUuidSchema,
+  UuidSchema,
+} from "./fields";
+
 export const EventSchema = z.object({
-  id: z.string().uuid(),
-  applicationId: z.string().uuid(),
-  contactId: z.string().uuid().nullable(),
+  id: UuidSchema,
+  applicationId: UuidSchema,
+  contactId: NullableUuidSchema,
   type: z.string().min(1),
   title: z.string().min(1),
-  description: z.string().nullable(),
-  eventAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  description: NullableStringSchema,
+  eventAt: NullableDateTimeSchema,
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
 });
 
 export const CreateEventSchema = EventSchema.pick({

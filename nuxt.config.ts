@@ -68,6 +68,7 @@ export default defineNuxtConfig({
         autoImport: true,
         options: {
           ripple: true,
+          inputVariant: "filled",
         },
       },
     ],

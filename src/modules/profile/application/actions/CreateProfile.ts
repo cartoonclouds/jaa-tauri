@@ -1,6 +1,7 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateProfileInput } from "@modules/profile/domain/entities/Profile";
 
+import { OptionalNullableIntSchema } from "@shared/domain/zod/fields";
 import { z } from "zod";
 
 const CreateProfileInputSchema = z.object({
@@ -13,7 +14,7 @@ const CreateProfileInputSchema = z.object({
   headline: z.string().nullable().optional(),
   summary: z.string().nullable().optional(),
   locationText: z.string().nullable().optional(),
-  desiredSalary: z.number().nullable().optional(),
+  desiredSalary: OptionalNullableIntSchema,
   salaryCurrency: z.string().optional(),
   preferredLocations: z.array(z.string()).optional(),
   remotePreference: z
@@ -21,7 +22,7 @@ const CreateProfileInputSchema = z.object({
     .optional(),
   skills: z.array(z.string()).optional(),
   workEligibility: z.string().optional(),
-  noticePeriodDays: z.number().nullable().optional(),
+  noticePeriodDays: OptionalNullableIntSchema,
   interviewAvailability: z.string().optional(),
 });
 

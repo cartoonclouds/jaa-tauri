@@ -1,18 +1,27 @@
 import { z } from "zod";
 
+import {
+  DateTimeSchema,
+  NullableLatitudeSchema,
+  NullableLongitudeSchema,
+  NullableStringSchema,
+  NullableUrlSchema,
+  UuidSchema,
+} from "./fields";
+
 export const CompanySchema = z.object({
-  id: z.string().uuid(),
+  id: UuidSchema,
   name: z.string().min(1),
-  websiteUrl: z.string().url().nullable(),
-  linkedinUrl: z.string().url().nullable(),
-  industry: z.string().nullable(),
-  size: z.string().nullable(),
-  locationText: z.string().nullable(),
-  locationLat: z.number().nullable(),
-  locationLng: z.number().nullable(),
-  notes: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  websiteUrl: NullableUrlSchema,
+  linkedinUrl: NullableUrlSchema,
+  industry: NullableStringSchema,
+  size: NullableStringSchema,
+  locationText: NullableStringSchema,
+  locationLat: NullableLatitudeSchema,
+  locationLng: NullableLongitudeSchema,
+  notes: NullableStringSchema,
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
 });
 
 export const CreateCompanySchema = CompanySchema.pick({
