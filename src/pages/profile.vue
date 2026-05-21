@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Profile } from "@modules/profile/domain/entities/Profile";
 
+  import { useProfileDatatable } from "@modules/profile/presentation/composables/useProfileDatatable";
   import { profileSearchPlaceholder } from "@modules/profile/presentation/constants/profileDatatable";
   import { useProfileService } from "@modules/profile/services/useProfileService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Profile>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useProfileDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", email: "", headline: "" });
 

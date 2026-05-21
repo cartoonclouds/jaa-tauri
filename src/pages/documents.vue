@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Document } from "@modules/documents/domain/entities/Document";
 
+  import { useDocumentDatatable } from "@modules/documents/presentation/composables/useDocumentDatatable";
   import { documentsSearchPlaceholder } from "@modules/documents/presentation/constants/documentDatatable";
   import { useDocumentService } from "@modules/documents/services/useDocumentService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Document>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useDocumentDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", kind: "resume", filePath: "" });
 

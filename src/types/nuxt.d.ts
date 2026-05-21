@@ -1,15 +1,29 @@
-import type { DatabaseDriver } from '~/services/database/DatabaseDriver'
+import type { DatabaseDriver } from "../services/database/DatabaseDriver";
 
-declare module 'nuxt/app' {
+declare module "nuxt/app" {
   interface NuxtApp {
-    $database: DatabaseDriver
+    $database: DatabaseDriver;
+  }
+
+  function useNuxtApp(): NuxtApp & {
+    $database: DatabaseDriver;
+  };
+}
+
+declare module "#app" {
+  interface NuxtApp {
+    $database: DatabaseDriver;
+  }
+
+  function useNuxtApp(): NuxtApp & {
+    $database: DatabaseDriver;
+  };
+}
+
+declare module "vue" {
+  interface ComponentCustomProperties {
+    $database: DatabaseDriver;
   }
 }
 
-declare module '#app' {
-  interface NuxtApp {
-    $database: DatabaseDriver
-  }
-}
-
-export {}
+export {};

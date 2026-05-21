@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Company } from "@modules/companies/domain/entities/Company";
 
+  import { useCompanyDatatable } from "@modules/companies/presentation/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/presentation/constants/companyDatatable";
   import { useCompanyService } from "@modules/companies/services/useCompanyService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Company>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useCompanyDatatable();
 
   const editingId = ref<string | null>(null);
   const form = reactive({

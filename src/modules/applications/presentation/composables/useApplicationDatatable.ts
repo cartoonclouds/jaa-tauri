@@ -1,14 +1,13 @@
-import { useDatatable } from "@/composables/useDatatable";
+import type { Application } from "@modules/applications/domain/entities/Application";
 
-const GLOBAL_FILTER_FIELDS: string[] = [
-  "title",
-  "status",
-  "locationText",
-  "priority",
-];
+import { useApplicationService } from "@modules/applications/services/useApplicationService";
+
+import { useServerDatatable } from "@/composables/useServerDatatable";
 
 export function useApplicationDatatable() {
-  return useDatatable({
-    globalFilterFields: GLOBAL_FILTER_FIELDS,
+  const service = useApplicationService();
+
+  return useServerDatatable<Application>({
+    fetchPage: (query) => service.listPage(query),
   });
 }

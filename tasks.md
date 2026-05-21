@@ -29,3 +29,5 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 **Should be in its own module**
 
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
+
+Add docblocks to all util functions and any others which may require additional explaination. Also add docblocks to all types and their properties

@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Tag } from "@modules/tags/domain/entities/Tag";
 
+  import { useTagDatatable } from "@modules/tags/presentation/composables/useTagDatatable";
   import { tagsSearchPlaceholder } from "@modules/tags/presentation/constants/tagDatatable";
   import { useTagService } from "@modules/tags/services/useTagService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Tag>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useTagDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ name: "", color: "" });
 

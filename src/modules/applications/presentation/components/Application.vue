@@ -9,13 +9,12 @@
 
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
+  import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
   import { formatDateTimeLocalValue } from "@modules/applications/presentation/utils/dateTimeLocal";
   import { useApplicationService } from "@modules/applications/services/useApplicationService";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
   import { ref } from "vue";
-
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   const service = useApplicationService();
   const {
@@ -30,9 +29,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<ApplicationEntity>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useApplicationDatatable();
   const { items: companyItems } = useCompany();
 
   const drawerMode = ref<ApplicationDrawerMode>("view");

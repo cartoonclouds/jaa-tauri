@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
+  import { useNotificationDatatable } from "@modules/notifications/presentation/composables/useNotificationDatatable";
   import { notificationsSearchPlaceholder } from "@modules/notifications/presentation/constants/notificationDatatable";
   import { useNotificationService } from "@modules/notifications/services/useNotificationService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Notification>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useNotificationDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });
 

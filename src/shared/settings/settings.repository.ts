@@ -125,9 +125,10 @@ function getDatabase(): DatabaseDriver {
   }
 
   const { $database } = useNuxtApp();
-  database = $database;
+  const db = $database;
+  database = db;
 
-  return database;
+  return db;
 }
 
 async function upsertSettingsRow(

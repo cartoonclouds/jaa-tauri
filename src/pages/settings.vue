@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Setting } from "@modules/settings/domain/entities/Setting";
 
+  import { useSettingDatatable } from "@modules/settings/presentation/composables/useSettingDatatable";
   import { settingsSearchPlaceholder } from "@modules/settings/presentation/constants/settingDatatable";
   import { useSettingService } from "@modules/settings/services/useSettingService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Setting>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useSettingDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ theme: "system", locale: "en-GB" });
 

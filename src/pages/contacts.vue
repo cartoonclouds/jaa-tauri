@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
+  import { useContactDatatable } from "@modules/contacts/presentation/composables/useContactDatatable";
   import { contactsSearchPlaceholder } from "@modules/contacts/presentation/constants/contactDatatable";
   import { useContactService } from "@modules/contacts/services/useContactService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
@@ -24,9 +24,7 @@
     rows,
     rowsPerPageOptions,
     totalRecords,
-  } = useServerDatatable<Contact>({
-    fetchPage: (query) => service.listPage(query),
-  });
+  } = useContactDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", type: "company", email: "" });
 
