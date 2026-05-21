@@ -2,13 +2,31 @@
   import type { Setting } from "@modules/settings/domain/entities/Setting";
 
   import { useSetting } from "@modules/settings/presentation/composables/useSetting";
+  import {
+    settingsGlobalFilterFields,
+    settingsSearchPlaceholder,
+  } from "@modules/settings/presentation/constants/settingDatatable";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
+  import { useDatatable } from "@/composables/useDatatable";
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const { items, isLoading, upsert, remove } = useSetting();
+  const {
+    currentPageReportTemplate,
+    filters,
+    globalFilter,
+    globalFilterFields,
+    onGlobalFilterInput,
+    paginatorTemplate,
+    rows,
+    rowsPerPageOptions,
+  } = useDatatable({
+    globalFilterFields: settingsGlobalFilterFields,
+  });
   const editingId = ref<string | null>(null);
   const form = reactive({ theme: "system", locale: "en-GB" });
 
@@ -52,9 +70,37 @@
       </div>
     </form>
 
-    <DataTable :value="items" data-key="id" :loading="isLoading" striped-rows>
-      <Column field="theme" header="Theme" />
-      <Column field="locale" header="Locale" />
+    <DataTable
+      v-model:filters="filters"
+      :value="items"
+      data-key="id"
+      :loading="isLoading"
+      striped-rows
+      filter-display="menu"
+      :global-filter-fields="globalFilterFields"
+      paginator
+      :rows="rows"
+      :rows-per-page-options="rowsPerPageOptions"
+      :paginator-template="paginatorTemplate"
+      :current-page-report-template="currentPageReportTemplate"
+    >
+      <template #header>
+        <div class="flex justify-end">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="globalFilter"
+              :placeholder="settingsSearchPlaceholder"
+              @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
+            />
+          </IconField>
+        </div>
+      </template>
+
+      <Column field="theme" header="Theme" sortable />
+      <Column field="locale" header="Locale" sortable />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">

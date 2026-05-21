@@ -2,13 +2,31 @@
   import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
   import { useNotification } from "@modules/notifications/presentation/composables/useNotification";
+  import {
+    notificationsGlobalFilterFields,
+    notificationsSearchPlaceholder,
+  } from "@modules/notifications/presentation/constants/notificationDatatable";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
+  import { useDatatable } from "@/composables/useDatatable";
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const { items, isLoading, create, update, remove } = useNotification();
+  const {
+    currentPageReportTemplate,
+    filters,
+    globalFilter,
+    globalFilterFields,
+    onGlobalFilterInput,
+    paginatorTemplate,
+    rows,
+    rowsPerPageOptions,
+  } = useDatatable({
+    globalFilterFields: notificationsGlobalFilterFields,
+  });
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });
 
@@ -69,10 +87,38 @@
       </div>
     </form>
 
-    <DataTable :value="items" data-key="id" :loading="isLoading" striped-rows>
-      <Column field="title" header="Title" />
-      <Column field="severity" header="Severity" />
-      <Column field="isRead" header="Read" />
+    <DataTable
+      v-model:filters="filters"
+      :value="items"
+      data-key="id"
+      :loading="isLoading"
+      striped-rows
+      filter-display="menu"
+      :global-filter-fields="globalFilterFields"
+      paginator
+      :rows="rows"
+      :rows-per-page-options="rowsPerPageOptions"
+      :paginator-template="paginatorTemplate"
+      :current-page-report-template="currentPageReportTemplate"
+    >
+      <template #header>
+        <div class="flex justify-end">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="globalFilter"
+              :placeholder="notificationsSearchPlaceholder"
+              @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
+            />
+          </IconField>
+        </div>
+      </template>
+
+      <Column field="title" header="Title" sortable />
+      <Column field="severity" header="Severity" sortable />
+      <Column field="isRead" header="Read" sortable />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">

@@ -241,6 +241,7 @@ function main(): void {
       applications.map((application) => ({
         id: application.id,
         company_id: application.company_id,
+        status: application.status,
       })),
       contacts.map((contact) => ({
         id: contact.id,
@@ -255,6 +256,8 @@ function main(): void {
       events.map((event) => ({
         id: event.id,
         application_id: event.application_id,
+        type: event.type,
+        title: event.title,
       })),
       seedConfig.notificationsPerApplication,
       seed + 130,

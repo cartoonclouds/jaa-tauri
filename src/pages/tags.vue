@@ -2,12 +2,31 @@
   import type { Tag } from "@modules/tags/domain/entities/Tag";
 
   import { useTag } from "@modules/tags/presentation/composables/useTag";
-  import { definePageMeta } from "nuxt/dist/pages/runtime";
+  import {
+    tagsGlobalFilterFields,
+    tagsSearchPlaceholder,
+  } from "@modules/tags/presentation/constants/tagDatatable";
   import { reactive, ref } from "vue";
 
+  import { definePageMeta } from "#imports";
+  import { useDatatable } from "@/composables/useDatatable";
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const { items, isLoading, create, update, remove } = useTag();
+  const {
+    currentPageReportTemplate,
+    filters,
+    globalFilter,
+    globalFilterFields,
+    onGlobalFilterInput,
+    paginatorTemplate,
+    rows,
+    rowsPerPageOptions,
+  } = useDatatable({
+    globalFilterFields: tagsGlobalFilterFields,
+  });
   const editingId = ref<string | null>(null);
   const form = reactive({ name: "", color: "" });
 
@@ -55,9 +74,37 @@
       </div>
     </form>
 
-    <DataTable :value="items" data-key="id" :loading="isLoading" striped-rows>
-      <Column field="name" header="Name" />
-      <Column field="color" header="Color" />
+    <DataTable
+      v-model:filters="filters"
+      :value="items"
+      data-key="id"
+      :loading="isLoading"
+      striped-rows
+      filter-display="menu"
+      :global-filter-fields="globalFilterFields"
+      paginator
+      :rows="rows"
+      :rows-per-page-options="rowsPerPageOptions"
+      :paginator-template="paginatorTemplate"
+      :current-page-report-template="currentPageReportTemplate"
+    >
+      <template #header>
+        <div class="flex justify-end">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="globalFilter"
+              :placeholder="tagsSearchPlaceholder"
+              @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
+            />
+          </IconField>
+        </div>
+      </template>
+
+      <Column field="name" header="Name" sortable />
+      <Column field="color" header="Color" sortable />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">

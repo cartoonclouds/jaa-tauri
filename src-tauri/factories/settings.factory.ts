@@ -6,7 +6,6 @@ export interface SettingRow {
   locale: string;
   notifications_enabled: number;
   developer_mode: number;
-  sidebar_collapsed: number;
   recent_searches: string;
   table_column_visibility: string;
   onboarding_completed: number;
@@ -29,7 +28,6 @@ export function createSettingRow(
     locale: faker.helpers.arrayElement(["en-GB", "en-US"]),
     notifications_enabled: 1,
     developer_mode: 0,
-    sidebar_collapsed: 0,
     recent_searches: JSON.stringify(["frontend engineer", "tauri jobs"]),
     table_column_visibility: JSON.stringify({
       applications_status: true,

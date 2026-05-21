@@ -72,6 +72,7 @@ Follow strong software engineering conventions:
 - Avoid direct browser APIs unless guarded for SSR/client context.
 - Use `import.meta.client`, `import.meta.server`, or Nuxt lifecycle utilities where appropriate.
 - Do not place business rules directly inside components unless trivial.
+- For date or date-time picking in forms, use PrimeVue `DatePicker` instead of raw text inputs or `InputText type="datetime-local"`.
 
 ## Project directory structure
 
@@ -226,6 +227,7 @@ Do:
 
 - Keep pages and components thin.
 - When needing icons, use a heroicons package and a NuxtIcon component.
+- For date or date-time picking in forms, use PrimeVue `DatePicker` rather than raw text/date inputs.
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
 - Use project aliases (`@`, `@modules`, `@shared`, `@infra`) instead of deep relative imports.
 - Add or update tests when changing business logic.

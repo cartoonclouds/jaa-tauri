@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const SettingsSchema = z.object({
   theme: z.enum(["light", "dark", "auto"]),
-  sidebarCollapsed: z.boolean(),
   notificationsEnabled: z.boolean(),
   developerMode: z.boolean(),
   recentSearches: z.array(z.string()),

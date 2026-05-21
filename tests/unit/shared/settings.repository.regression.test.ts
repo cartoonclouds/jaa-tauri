@@ -41,7 +41,6 @@ class MockDatabaseDriver implements DatabaseDriver {
         locale: String(bindings[2] ?? "en-GB"),
         notifications_enabled: Number(bindings[3] ?? 1),
         developer_mode: Number(bindings[4] ?? 0),
-        sidebar_collapsed: Number(bindings[5] ?? 0),
         recent_searches: String(bindings[6] ?? "[]"),
         table_column_visibility: String(bindings[7] ?? "{}"),
         onboarding_completed: Number(bindings[8] ?? 0),

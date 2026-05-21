@@ -17,6 +17,10 @@
     getApplicationStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
   import {
+    formatDateTimeLocalValue,
+    parseDateTimeLocalValue,
+  } from "@modules/applications/presentation/utils/dateTimeLocal";
+  import {
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,
     type ApplicationSelectOption,
@@ -95,6 +99,15 @@
     },
     { immediate: true, deep: true },
   );
+
+  const appliedAtModel = computed<Date | null>({
+    get() {
+      return parseDateTimeLocalValue(form.appliedAt);
+    },
+    set(value) {
+      form.appliedAt = formatDateTimeLocalValue(value);
+    },
+  });
 
   function validate(): boolean {
     resetErrors();
@@ -248,10 +261,13 @@
         >
           Applied At
         </label>
-        <InputText
-          id="application-applied-at"
-          v-model="form.appliedAt"
-          type="datetime-local"
+        <DatePicker
+          v-model="appliedAtModel"
+          input-id="application-applied-at"
+          show-time
+          hour-format="24"
+          show-icon
+          show-clear
           fluid
         />
       </div>

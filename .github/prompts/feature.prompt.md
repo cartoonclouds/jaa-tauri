@@ -18,6 +18,7 @@ Create a new feature module in the DDD architecture for a Nuxt 4 + Tauri 2 deskt
   - Zod schemas for validation
   - Barrel file (`index.ts`) for the module
 - Use TypeScript strictly, no `any`.
+- For date or date-time picking in forms, use PrimeVue `DatePicker` instead of raw text inputs or `InputText type="datetime-local"`.
 - Add minimal test stubs in `tests/unit/modules/<feature>/`.
 - Follow the conventions in `copilot-instructions.md`.
 - Update boundary files like `nuxt.config.ts` and module `index.ts` as needed for imports/exports to enforce DDD boundaries and best practices.

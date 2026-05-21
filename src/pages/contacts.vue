@@ -2,13 +2,31 @@
   import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
   import { useContact } from "@modules/contacts/presentation/composables/useContact";
+  import {
+    contactsGlobalFilterFields,
+    contactsSearchPlaceholder,
+  } from "@modules/contacts/presentation/constants/contactDatatable";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
+  import { useDatatable } from "@/composables/useDatatable";
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const { items, isLoading, create, update, remove } = useContact();
+  const {
+    currentPageReportTemplate,
+    filters,
+    globalFilter,
+    globalFilterFields,
+    onGlobalFilterInput,
+    paginatorTemplate,
+    rows,
+    rowsPerPageOptions,
+  } = useDatatable({
+    globalFilterFields: contactsGlobalFilterFields,
+  });
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", type: "company", email: "" });
 
@@ -68,10 +86,38 @@
       </div>
     </form>
 
-    <DataTable :value="items" data-key="id" :loading="isLoading" striped-rows>
-      <Column field="fullName" header="Name" />
-      <Column field="type" header="Type" />
-      <Column field="email" header="Email" />
+    <DataTable
+      v-model:filters="filters"
+      :value="items"
+      data-key="id"
+      :loading="isLoading"
+      striped-rows
+      filter-display="menu"
+      :global-filter-fields="globalFilterFields"
+      paginator
+      :rows="rows"
+      :rows-per-page-options="rowsPerPageOptions"
+      :paginator-template="paginatorTemplate"
+      :current-page-report-template="currentPageReportTemplate"
+    >
+      <template #header>
+        <div class="flex justify-end">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="globalFilter"
+              :placeholder="contactsSearchPlaceholder"
+              @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
+            />
+          </IconField>
+        </div>
+      </template>
+
+      <Column field="fullName" header="Name" sortable />
+      <Column field="type" header="Type" sortable />
+      <Column field="email" header="Email" sortable />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">

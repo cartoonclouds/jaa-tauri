@@ -6,7 +6,7 @@ export interface ApplicationRow {
   title: string;
   status: string;
   source_url: string;
-  applied_at: string;
+  applied_at: string | null;
   location_text: string;
   location_lat: number;
   location_lng: number;
@@ -30,6 +30,59 @@ export interface ApplicationRow {
   updated_at: string;
 }
 
+type ApplicationSeedStatus =
+  | "saved"
+  | "applied"
+  | "interview"
+  | "offer"
+  | "rejected";
+
+interface ApplicationLifecycleProfile {
+  status: ApplicationSeedStatus;
+  isArchived: number;
+  priorityRange: {
+    min: number;
+    max: number;
+  };
+  appliedAtOffsetDays: {
+    min: number;
+    max: number;
+  } | null;
+}
+
+const APPLICATION_LIFECYCLE_PROFILES: ApplicationLifecycleProfile[] = [
+  {
+    status: "saved",
+    isArchived: 0,
+    priorityRange: { min: 1, max: 2 },
+    appliedAtOffsetDays: null,
+  },
+  {
+    status: "applied",
+    isArchived: 0,
+    priorityRange: { min: 2, max: 3 },
+    appliedAtOffsetDays: { min: 1, max: 5 },
+  },
+  {
+    status: "interview",
+    isArchived: 0,
+    priorityRange: { min: 3, max: 4 },
+    appliedAtOffsetDays: { min: 3, max: 12 },
+  },
+  {
+    status: "offer",
+    isArchived: 0,
+    priorityRange: { min: 4, max: 5 },
+    appliedAtOffsetDays: { min: 5, max: 18 },
+  },
+  {
+    status: "rejected",
+    isArchived: 1,
+    priorityRange: { min: 1, max: 2 },
+    appliedAtOffsetDays: { min: 4, max: 20 },
+  },
+];
+
 export function createApplicationRows(
   companyIds: string[],
   applicationsPerCompany = 2,
@@ -41,25 +94,34 @@ export function createApplicationRows(
   return companyIds.flatMap((companyId, companyIndex) =>
     Array.from({ length: applicationsPerCompany }, (_, index) => {
       faker.seed(seed + companyIndex * 100 + index);
-      const createdAt = faker.date.recent({ days: 60 }).toISOString();
+      const createdAt = faker.date.recent({ days: 60 });
       const salaryMin = faker.number.int({ min: 30000, max: 90000 });
       const salaryMax =
         salaryMin + faker.number.int({ min: 10000, max: 30000 });
+      const lifecycle = faker.helpers.arrayElement(
+        APPLICATION_LIFECYCLE_PROFILES,
+      );
+      const appliedAt = lifecycle.appliedAtOffsetDays
+        ? new Date(createdAt)
+        : null;
+
+      if (appliedAt && lifecycle.appliedAtOffsetDays) {
+        appliedAt.setDate(
+          appliedAt.getDate() +
+            faker.number.int({
+              min: lifecycle.appliedAtOffsetDays.min,
+              max: lifecycle.appliedAtOffsetDays.max,
+            }),
+        );
+      }
 
       return {
         id: faker.string.uuid(),
         company_id: companyId,
         title: faker.person.jobTitle(),
-        status: faker.helpers.arrayElement([
-          "saved",
-          "applied",
-          "screening",
-          "interviewing",
-          "offer",
-          "rejected",
-        ]),
+        status: lifecycle.status,
         source_url: faker.internet.url(),
-        applied_at: faker.date.recent({ days: 45 }).toISOString(),
+        applied_at: appliedAt?.toISOString() ?? null,
         location_text: faker.location.city(),
         location_lat: faker.location.latitude(),
         location_lng: faker.location.longitude(),
@@ -81,11 +143,11 @@ export function createApplicationRows(
         description: faker.lorem.paragraph(),
         interview_process: faker.lorem.sentence(),
         benefits: faker.lorem.sentence(),
-        priority: faker.number.int({ min: 1, max: 5 }),
-        is_archived: 0,
+        priority: faker.number.int(lifecycle.priorityRange),
+        is_archived: lifecycle.isArchived,
         is_deleted: 0,
-        created_at: createdAt,
-        updated_at: createdAt,
+        created_at: createdAt.toISOString(),
+        updated_at: createdAt.toISOString(),
       };
     }),
   );

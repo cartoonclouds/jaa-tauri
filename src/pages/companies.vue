@@ -2,13 +2,31 @@
   import type { Company } from "@modules/companies/domain/entities/Company";
 
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
+  import {
+    companiesGlobalFilterFields,
+    companiesSearchPlaceholder,
+  } from "@modules/companies/presentation/constants/companyDatatable";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
+  import { useDatatable } from "@/composables/useDatatable";
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const { items, isLoading, create, update, remove } = useCompany();
+  const {
+    currentPageReportTemplate,
+    filters,
+    globalFilter,
+    globalFilterFields,
+    onGlobalFilterInput,
+    paginatorTemplate,
+    rows,
+    rowsPerPageOptions,
+  } = useDatatable({
+    globalFilterFields: companiesGlobalFilterFields,
+  });
 
   const editingId = ref<string | null>(null);
   const form = reactive({
@@ -84,9 +102,37 @@
       </div>
     </form>
 
-    <DataTable :value="items" data-key="id" :loading="isLoading" striped-rows>
-      <Column field="name" header="Name" />
-      <Column field="locationText" header="Location" />
+    <DataTable
+      v-model:filters="filters"
+      :value="items"
+      data-key="id"
+      :loading="isLoading"
+      striped-rows
+      filter-display="menu"
+      :global-filter-fields="globalFilterFields"
+      paginator
+      :rows="rows"
+      :rows-per-page-options="rowsPerPageOptions"
+      :paginator-template="paginatorTemplate"
+      :current-page-report-template="currentPageReportTemplate"
+    >
+      <template #header>
+        <div class="flex justify-end">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="globalFilter"
+              :placeholder="companiesSearchPlaceholder"
+              @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
+            />
+          </IconField>
+        </div>
+      </template>
+
+      <Column field="name" header="Name" sortable />
+      <Column field="locationText" header="Location" sortable />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">

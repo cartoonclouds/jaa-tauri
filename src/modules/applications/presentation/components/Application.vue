@@ -10,6 +10,7 @@
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
   import { useApplication } from "@modules/applications/presentation/composables/useApplication";
+  import { formatDateTimeLocalValue } from "@modules/applications/presentation/utils/dateTimeLocal";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
   import { ref } from "vue";
@@ -26,20 +27,6 @@
     createEmptyApplicationFormValues(),
   );
 
-  function toDateTimeLocalValue(value: Date | null): string {
-    if (!value) {
-      return "";
-    }
-
-    const year = String(value.getFullYear());
-    const month = String(value.getMonth() + 1).padStart(2, "0");
-    const day = String(value.getDate()).padStart(2, "0");
-    const hour = String(value.getHours()).padStart(2, "0");
-    const minute = String(value.getMinutes()).padStart(2, "0");
-
-    return `${year}-${month}-${day}T${hour}:${minute}`;
-  }
-
   function toFormValues(
     application: ApplicationEntity | null,
   ): ApplicationFormValues {
@@ -52,7 +39,7 @@
       title: application.title,
       status: application.status,
       sourceUrl: application.sourceUrl ?? "",
-      appliedAt: toDateTimeLocalValue(application.appliedAt),
+      appliedAt: formatDateTimeLocalValue(application.appliedAt),
       locationText: application.locationText ?? "",
       locationLat: application.locationLat,
       locationLng: application.locationLng,

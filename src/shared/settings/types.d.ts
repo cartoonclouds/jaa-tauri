@@ -7,7 +7,6 @@
 
 export interface AppSettings {
   theme: "light" | "dark" | "auto";
-  sidebarCollapsed: boolean;
   notificationsEnabled: boolean;
   developerMode: boolean;
   recentSearches: string[];
@@ -20,7 +19,6 @@ export interface ThemeSettings {
 }
 
 export interface UiPreferences {
-  sidebarCollapsed: boolean;
   tableColumnVisibility: Record<string, boolean>;
 }
 

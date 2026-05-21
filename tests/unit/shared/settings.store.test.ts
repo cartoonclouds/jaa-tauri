@@ -45,7 +45,6 @@ describe("useSettingsStore", () => {
   it("should load settings on initialize", async () => {
     const mockSettings = {
       theme: "light" as const,
-      sidebarCollapsed: false,
       notificationsEnabled: true,
       developerMode: false,
       recentSearches: [],
@@ -64,7 +63,6 @@ describe("useSettingsStore", () => {
   it("should provide computed properties for quick access", async () => {
     const mockSettings = {
       theme: "dark" as const,
-      sidebarCollapsed: true,
       notificationsEnabled: false,
       developerMode: true,
       recentSearches: [],
@@ -77,7 +75,6 @@ describe("useSettingsStore", () => {
     await store.initialize();
 
     expect(store.theme).toBe("dark");
-    expect(store.sidebarCollapsed).toBe(true);
     expect(store.notificationsEnabled).toBe(false);
     expect(store.developerMode).toBe(true);
   });
@@ -85,7 +82,6 @@ describe("useSettingsStore", () => {
   it("should update theme", async () => {
     const mockSettings = {
       theme: "auto" as const,
-      sidebarCollapsed: false,
       notificationsEnabled: true,
       developerMode: false,
       recentSearches: [],
@@ -105,7 +101,6 @@ describe("useSettingsStore", () => {
   it("should toggle sidebar", async () => {
     const mockSettings = {
       theme: "auto" as const,
-      sidebarCollapsed: false,
       notificationsEnabled: true,
       developerMode: false,
       recentSearches: [],
@@ -120,7 +115,6 @@ describe("useSettingsStore", () => {
     await store.toggleSidebar();
 
     expect(setUiPreferences).toHaveBeenCalledWith({
-      sidebarCollapsed: true,
       tableColumnVisibility: {},
     });
   });

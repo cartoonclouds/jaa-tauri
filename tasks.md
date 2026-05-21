@@ -14,8 +14,7 @@ Application schema
 - Interview process - what stage
 - Benefits
 - Location (Add googlemaps to show pins of applied. colour based of stage)
-
-Create a feature/module which will display all events a job finder has had with regards to a job application. Use https://primevue.org/tree/. Allow each entry to be editable on double-click (in a modal). The depths can be of any length
+- GoogleMap tab https://primevue.org/tabs/
 
 ---
 
@@ -32,3 +31,5 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 **Should be in its own module**
 
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
+
+Update any instances of icons to use HeroIcons and PrimeVue component

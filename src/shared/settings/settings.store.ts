@@ -80,7 +80,6 @@ export const useSettingsStore = defineStore("settings", () => {
 
     try {
       await setUiPreferences({
-        sidebarCollapsed: !settings.value.sidebarCollapsed,
         tableColumnVisibility: settings.value.tableColumnVisibility,
       });
       await reload();
@@ -111,9 +110,6 @@ export const useSettingsStore = defineStore("settings", () => {
 
   // Computed properties for easy access in templates
   const theme = computed(() => settings.value?.theme ?? "auto");
-  const sidebarCollapsed = computed(
-    () => settings.value?.sidebarCollapsed ?? false,
-  );
   const notificationsEnabled = computed(
     () => settings.value?.notificationsEnabled ?? true,
   );
@@ -129,7 +125,6 @@ export const useSettingsStore = defineStore("settings", () => {
     toggleSidebar,
     toggleNotifications,
     theme,
-    sidebarCollapsed,
     notificationsEnabled,
     developerMode,
   };

@@ -19,7 +19,6 @@ import { z } from "zod";
 
 const SettingsInputSchema = z.object({
   theme: z.enum(["light", "dark", "auto"]),
-  sidebarCollapsed: z.boolean(),
   notificationsEnabled: z.boolean(),
   developerMode: z.boolean(),
   recentSearches: z.array(z.string()),
@@ -32,7 +31,6 @@ const STORE_KEY = "app-settings";
 
 const DEFAULT_SETTINGS: AppSettings = {
   theme: "auto",
-  sidebarCollapsed: false,
   notificationsEnabled: true,
   developerMode: false,
   recentSearches: [],
@@ -97,10 +95,6 @@ function normalizeTheme(value: unknown): AppSettings["theme"] {
 function mapRowToSettings(row: SettingsRow): AppSettings {
   return {
     theme: normalizeTheme(row.theme),
-    sidebarCollapsed:
-      Number(
-        row.sidebar_collapsed ?? Number(DEFAULT_SETTINGS.sidebarCollapsed),
-      ) === 1,
     notificationsEnabled:
       Number(
         row.notifications_enabled ??
@@ -148,7 +142,6 @@ async function upsertSettingsRow(
       locale,
       notifications_enabled,
       developer_mode,
-      sidebar_collapsed,
       recent_searches,
       table_column_visibility,
       onboarding_completed,
@@ -160,7 +153,6 @@ async function upsertSettingsRow(
       theme = excluded.theme,
       notifications_enabled = excluded.notifications_enabled,
       developer_mode = excluded.developer_mode,
-      sidebar_collapsed = excluded.sidebar_collapsed,
       recent_searches = excluded.recent_searches,
       table_column_visibility = excluded.table_column_visibility,
       onboarding_completed = excluded.onboarding_completed,
@@ -172,7 +164,6 @@ async function upsertSettingsRow(
       "en-GB",
       toInt(settings.notificationsEnabled),
       toInt(settings.developerMode),
-      toInt(settings.sidebarCollapsed),
       JSON.stringify(settings.recentSearches),
       JSON.stringify(settings.tableColumnVisibility),
       toInt(settings.onboardingCompleted),
@@ -304,7 +295,6 @@ export async function setThemeSettings(settings: ThemeSettings): Promise<void> {
 export async function getUiPreferences(): Promise<UiPreferences> {
   const settings = await getSettings();
   return {
-    sidebarCollapsed: settings.sidebarCollapsed,
     tableColumnVisibility: settings.tableColumnVisibility,
   };
 }
