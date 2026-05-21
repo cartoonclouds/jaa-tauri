@@ -4,6 +4,10 @@ External integrations and technical adapters. All components are designed for cr
 
 Updated: 2026-05-19.
 
+## System Architecture Reference
+
+For a high-level view of infrastructure's role, see the [system architecture diagram](../../README.md#system-architecture-overview) in the root README.
+
 ## Folders
 
 - **http**: API clients.

@@ -4,6 +4,10 @@ Reusable presentational UI components.
 
 Updated: 2026-05-19.
 
+## System Architecture Reference
+
+For a high-level view of UI component interactions, see the [system architecture diagram](../../../README.md#system-architecture-overview) in the root README.
+
 Guidelines:
 
 - Prefer stateless components.

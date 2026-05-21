@@ -4,6 +4,10 @@ Nuxt application source.
 
 Updated: 2026-05-19.
 
+## System Architecture
+
+See the [top-level README](../README.md#system-architecture-overview) for the canonical Mermaid diagram of app interactions and layers. This diagram illustrates how UI, modules, shared logic, infrastructure, and Tauri runtime interact.
+
 ## High-level layout
 
 - app.vue: Root app shell.

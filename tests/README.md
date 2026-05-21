@@ -4,6 +4,10 @@ Test suites organized by scope.
 
 Updated: 2026-05-19.
 
+## System Architecture Reference
+
+For a high-level overview of the app's layers and flows, see the [system architecture diagram](../README.md#system-architecture-overview) in the root README.
+
 ## Folders
 
 - unit: Fast isolated tests.

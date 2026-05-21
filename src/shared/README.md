@@ -4,6 +4,10 @@ Cross-feature shared code.
 
 Updated: 2026-05-19.
 
+## System Architecture Reference
+
+For a high-level overview of how shared code fits into the overall app, see the [system architecture diagram](../../README.md#system-architecture-overview) in the root README.
+
 ## Folders
 
 - **domain**: Shared business primitives.

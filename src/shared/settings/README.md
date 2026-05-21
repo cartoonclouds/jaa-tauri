@@ -4,6 +4,10 @@ Lightweight application preferences and settings stored using Tauri's Store plug
 
 Updated: 2026-05-19.
 
+## System Architecture Reference
+
+See the [system architecture diagram](../../../README.md#system-architecture-overview) for how settings and preferences interact with other app layers.
+
 ## Structure
 
 - **types.d.ts**: Type definitions for all settings

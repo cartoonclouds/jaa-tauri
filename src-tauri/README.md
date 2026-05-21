@@ -4,6 +4,10 @@ This directory contains the Rust-based Tauri 2 desktop runtime and configuration
 
 Updated: 2026-05-19.
 
+## System Architecture Reference
+
+See the [system architecture diagram](../README.md#system-architecture-overview) for how the Tauri runtime and plugins interact with the rest of the app.
+
 ## Structure
 
 - **src/**: Rust source code for the desktop runtime

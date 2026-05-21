@@ -4,6 +4,80 @@ Desktop-first job application tracking built with Nuxt 4 + Vue 3 + TypeScript in
 
 Last updated: 2026-05-19.
 
+## System Architecture Overview
+
+The following diagram shows the high-level interactions between the main layers and elements of the app, including UI, modules, shared logic, infrastructure, and Tauri runtime:
+
+```mermaid
+flowchart TD
+    subgraph UI[UI Layer]
+        Pages["Pages (Nuxt)"]
+        Components["UI Components (PrimeVue, NuxtUI)"]
+        Composables["Composables (useDatatable, useNativeContextMenu, useChildWebviewWindow)"]
+    end
+
+    subgraph Module[Module Layer]
+        ModuleComposables["Module Composables (useApplication, useCompany, ...)"]
+        Services["Services (useApplicationService, ...)"]
+        Actions["Actions (CreateApplication, ...)"]
+        Repositories["Repositories (ApplicationRepository, ...)"]
+        DomainEntities["Domain Entities (Application, Company, ...)"]
+    end
+
+    subgraph Shared[Shared Layer]
+        ZodSchemas["Zod Schemas"]
+        PiniaStores["Pinia Stores"]
+        SettingsService["Settings Service"]
+        SharedUtils["Shared Utils/Types"]
+    end
+
+    subgraph Infra[Infrastructure Layer]
+        TauriSQL["Tauri SQL Plugin (SQLite)"]
+        TauriStore["Tauri Store Plugin"]
+        TauriCommands["Tauri Commands"]
+        HTTP["HTTP Clients"]
+        Logging["Logging"]
+        Config["Config"]
+    end
+
+    subgraph Tauri[Tauri Runtime]
+        RustBackend["Rust Backend"]
+        Plugins["Tauri Plugins"]
+        Migrations["Migrations"]
+        SeedFactories["Seed Factories"]
+    end
+
+    Pages -->|imports| ModuleComposables
+    Components -->|use| Composables
+    Composables -->|call| ModuleComposables
+    ModuleComposables -->|use| Services
+    Services -->|call| Actions
+    Actions -->|validate| ZodSchemas
+    Actions -->|persist| Repositories
+    Repositories -->|query| TauriSQL
+    Repositories -->|map| DomainEntities
+    Services -->|inject| PiniaStores
+    PiniaStores -->|reactive| Pages
+    SettingsService -->|sync| PiniaStores
+    SettingsService -->|write/read| TauriStore
+    Pages -->|use| SettingsService
+    Pages -->|use| useChildWebviewWindow
+    useChildWebviewWindow -->|open| TauriCommands
+    TauriCommands -->|invoke| RustBackend
+    RustBackend -->|access| Plugins
+    Plugins -->|persist| TauriSQL
+    Plugins -->|persist| TauriStore
+    Plugins -->|notify| TauriCommands
+    HTTP -->|future| Services
+    Logging -->|log| Services
+    Config -->|provide| Services
+    Migrations -->|init| TauriSQL
+    SeedFactories -->|seed| TauriSQL
+
+    classDef infra fill:#f9f,stroke:#333,stroke-width:2px;
+    class Infra infra;
+```
+
 ## Product Goal
 
 This app is designed to manage the full job search lifecycle in one place:
