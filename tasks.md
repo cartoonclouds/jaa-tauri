@@ -8,7 +8,7 @@ TODO:
 
 - Applications
   \*\* Progress - stages
-- Given url fetch image to represent business
+- Given url fetch image to represent company
 
 - Search
 
@@ -23,9 +23,7 @@ Application schema
 - Enviroment type - part-time, contract, internship, full-time, volunteer
 -
 
-Create a feature/module which will display all interactions a job finder has had with regards to a job application. Use https://primevue.org/tree/. Allow each entry to be editable on double-click (in a modal). The depths can be of any length
-
-Make sure all modules use the repository pattern, if it doesn't exist create them and update references to use them. Create an interface for the repositories.
+Create a feature/module which will display all events a job finder has had with regards to a job application. Use https://primevue.org/tree/. Allow each entry to be editable on double-click (in a modal). The depths can be of any length
 
 When validating payloads or object structure, use Zod.
 
@@ -48,7 +46,3 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 **Should be in its own module**
 
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
-
-Create a splashscreen following the documentation in the docs https://v2.tauri.app/learn/splashscreen/. Use the images located in `\src\assets\images\splash`
-
-Recreate this same icon as an

@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { toDate } from "@shared/utils/toDate";
 
@@ -18,11 +18,11 @@ export type ContactUpdatePayload = Partial<ContactCreatePayload> & {
   id: string;
 };
 
-export type IContactRepository = IRepository<
+export interface IContactRepository extends IRepository<
   Contact,
   ContactCreatePayload,
   ContactUpdatePayload
->;
+> {}
 
 export class ContactRepository implements IContactRepository {
   constructor(private readonly db: DatabaseDriver) {}

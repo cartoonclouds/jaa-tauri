@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Company } from "@modules/companies/domain/entities/Company";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
 
@@ -29,11 +29,11 @@ export interface CompanyUpdatePayload {
   notes?: string | null;
 }
 
-export type ICompanyRepository = IRepository<
+export interface ICompanyRepository extends IRepository<
   Company,
   CompanyCreatePayload,
   CompanyUpdatePayload
->;
+> {}
 
 export class CompanyRepository implements ICompanyRepository {
   constructor(private readonly db: DatabaseDriver) {}

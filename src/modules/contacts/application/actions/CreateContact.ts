@@ -6,7 +6,7 @@ import type {
 
 import { z } from "zod";
 
-const CONTACT_TYPES: ContactType[] = ["business", "recruiter"];
+const CONTACT_TYPES: ContactType[] = ["company", "recruiter"];
 
 const CreateContactInputSchema = z.object({
   companyId: z.string().nullable().optional(),

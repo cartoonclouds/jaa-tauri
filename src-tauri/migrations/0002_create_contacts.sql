@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   email TEXT,
   phone TEXT,
   linkedin_url TEXT,
-  type TEXT NOT NULL CHECK (type IN ('business', 'recruiter')),
+  type TEXT NOT NULL CHECK (type IN ('company', 'recruiter')),
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -53,6 +53,20 @@ fn resolve_dev_mode() -> bool {
     cfg!(debug_assertions)
 }
 
+/// Closes the splashscreen window and shows the main window.
+/// Called from the frontend once initialization is complete.
+#[tauri::command]
+fn close_splashscreen(app: tauri::AppHandle) {
+    use tauri::Manager;
+    if let Some(splash) = app.get_webview_window("splashscreen") {
+        let _ = splash.close();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.set_focus();
+    }
+}
+
 /// Application entry point for desktop/mobile Tauri runtime.
 ///
 /// Sections:
@@ -77,7 +91,10 @@ pub fn run() {
 
     // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![parse_resume_for_ats])
+        .invoke_handler(tauri::generate_handler![
+            parse_resume_for_ats,
+            close_splashscreen
+        ])
         .plugin(tauri_plugin_window_state::Builder::new().build())
         // Persistence and native capability plugins.
         .plugin(tauri_plugin_store::Builder::default().build())

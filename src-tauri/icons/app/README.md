@@ -1,8 +1,9 @@
-# ApplyFlow Tauri Iconset — Dark
+# Apply-Flow Tauri Iconset — Dark
 
 Ready to copy into `src-tauri/icons/`.
 
 Primary Tauri desktop files:
+
 - `icon.png`
 - `32x32.png`
 - `128x128.png`
@@ -13,6 +14,7 @@ Primary Tauri desktop files:
 Additional platform folders are included for Linux, Windows PNG previews, Android launcher/adaptive icons, and iOS AppIcon assets.
 
 Recommended integration:
+
 1. Back up your current `src-tauri/icons/`.
 2. Copy the contents of this folder into `src-tauri/icons/`.
 3. In your project, run `npm run tauri dev` and confirm the icon appears correctly.

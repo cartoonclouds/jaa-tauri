@@ -10,7 +10,7 @@
 
   const { items, isLoading, create, update, remove } = useContactCrud();
   const editingId = ref<string | null>(null);
-  const form = reactive({ fullName: "", type: "business", email: "" });
+  const form = reactive({ fullName: "", type: "company", email: "" });
 
   function edit(row: Contact): void {
     editingId.value = row.id;
@@ -22,7 +22,7 @@
   function resetForm(): void {
     editingId.value = null;
     form.fullName = "";
-    form.type = "business";
+    form.type = "company";
     form.email = "";
   }
 

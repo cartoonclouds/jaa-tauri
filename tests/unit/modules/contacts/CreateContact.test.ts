@@ -12,7 +12,7 @@ describe("createContact", () => {
     const db = mockDb();
 
     await expect(
-      createContact(db as never, { fullName: "  ", type: "business" }),
+      createContact(db as never, { fullName: "  ", type: "company" }),
     ).rejects.toThrow("Contact full name is required");
   });
 

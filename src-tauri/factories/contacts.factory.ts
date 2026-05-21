@@ -7,7 +7,7 @@ export interface ContactRow {
   email: string;
   phone: string;
   linkedin_url: string;
-  type: "business" | "recruiter";
+  type: "company" | "recruiter";
   notes: string;
   created_at: string;
   updated_at: string;
@@ -34,7 +34,7 @@ export function createContactRows(
         email: faker.internet.email({ firstName: fullName.split(" ")[0] }),
         phone: faker.phone.number(),
         linkedin_url: `https://www.linkedin.com/in/${faker.helpers.slugify(fullName).toLowerCase()}`,
-        type: faker.helpers.arrayElement(["business", "recruiter"]),
+        type: faker.helpers.arrayElement(["company", "recruiter"]),
         notes: faker.person.jobTitle(),
         created_at: createdAt,
         updated_at: createdAt,

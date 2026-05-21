@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Profile } from "@modules/profile/domain/entities/Profile";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
 import { ProfileSchema } from "@shared/domain/zod/profile.schema";
@@ -12,11 +12,11 @@ export type ProfileUpdatePayload = Partial<ProfileCreatePayload> & {
   id: string;
 };
 
-export type IProfileRepository = IRepository<
+export interface IProfileRepository extends IRepository<
   Profile,
   ProfileCreatePayload,
   ProfileUpdatePayload
->;
+> {}
 
 const ProfileCreateSchema = ProfileSchema.pick({
   fullName: true,

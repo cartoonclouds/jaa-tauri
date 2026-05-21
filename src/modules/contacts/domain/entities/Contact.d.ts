@@ -1,4 +1,4 @@
-export type ContactType = "business" | "recruiter";
+export type ContactType = "company" | "recruiter";
 
 export interface Contact {
   id: string;

@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "ApplyFlow",
+  "productName": "Apply-Flow",
   "version": "0.1.0",
   "identifier": "com.apply-flow.app",
   "build": {
@@ -12,12 +12,27 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Apply-Flow",
         "width": 1024,
         "height": 768,
         "resizable": true,
         "fullscreen": false,
-        "decorations": true
+        "decorations": true,
+        "visible": false
+      },
+      {
+        "label": "splashscreen",
+        "title": "Apply-Flow",
+        "url": "splashscreen.html",
+        "width": 560,
+        "height": 420,
+        "center": true,
+        "decorations": false,
+        "resizable": false,
+        "visible": true,
+        "alwaysOnTop": true,
+        "shadow": true
       }
     ],
     "security": {

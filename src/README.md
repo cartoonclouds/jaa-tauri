@@ -21,7 +21,7 @@ Updated: 2026-05-19.
 
 ## State boundaries
 
-- SQLite: persistent business records and timeline data.
+- SQLite: persistent company records and timeline data.
 - Pinia: ephemeral UI state such as active selection, view mode, and layout.
 - Pinia Colada: async query/mutation cache.
 - Tauri Store: lightweight user preferences.

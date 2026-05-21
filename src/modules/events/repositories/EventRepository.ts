@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Event } from "@modules/events/domain/entities/Event";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
@@ -10,11 +10,11 @@ export type EventCreatePayload = Pick<
 >;
 export type EventUpdatePayload = Partial<EventCreatePayload> & { id: string };
 
-export type IEventRepository = IRepository<
+export interface IEventRepository extends IRepository<
   Event,
   EventCreatePayload,
   EventUpdatePayload
->;
+> {}
 
 export class EventRepository implements IEventRepository {
   constructor(private readonly db: DatabaseDriver) {}

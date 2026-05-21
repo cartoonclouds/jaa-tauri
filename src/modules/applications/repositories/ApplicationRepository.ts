@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Application } from "@modules/applications/domain/entities/Application";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
@@ -22,11 +22,11 @@ export interface ApplicationUpdatePayload {
   locationLng?: number | null;
 }
 
-export type IApplicationRepository = IRepository<
+export interface IApplicationRepository extends IRepository<
   Application,
   ApplicationCreatePayload,
   ApplicationUpdatePayload
->;
+> {}
 
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}

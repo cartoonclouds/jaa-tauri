@@ -10,7 +10,7 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
     email: (row.email as string | null) ?? null,
     phone: (row.phone as string | null) ?? null,
     linkedinUrl: (row.linkedin_url as string | null) ?? null,
-    type: row.type === "recruiter" ? "recruiter" : "business",
+    type: row.type === "recruiter" ? "recruiter" : "company",
     notes: (row.notes as string | null) ?? null,
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),

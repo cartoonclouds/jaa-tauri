@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
@@ -19,11 +19,11 @@ export type NotificationUpdatePayload = Partial<NotificationCreatePayload> & {
   id: string;
 };
 
-export type INotificationRepository = IRepository<
+export interface INotificationRepository extends IRepository<
   Notification,
   NotificationCreatePayload,
   NotificationUpdatePayload
->;
+> {}
 
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly db: DatabaseDriver) {}

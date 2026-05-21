@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Document } from "@modules/documents/domain/entities/Document";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { toDate } from "@shared/utils/toDate";
 
@@ -12,11 +12,11 @@ export type DocumentUpdatePayload = Partial<DocumentCreatePayload> & {
   id: string;
 };
 
-export type IDocumentRepository = IRepository<
+export interface IDocumentRepository extends IRepository<
   Document,
   DocumentCreatePayload,
   DocumentUpdatePayload
->;
+> {}
 
 export class DocumentRepository implements IDocumentRepository {
   constructor(private readonly db: DatabaseDriver) {}

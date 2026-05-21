@@ -1,6 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Setting } from "@modules/settings/domain/entities/Setting";
-import type { IRepository } from "@shared/types/repository";
+import type { IRepository } from "@shared/types";
 
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
 

@@ -4,6 +4,7 @@
     getOnboardingCompleted,
     setOnboardingCompleted,
   } from "@shared/settings";
+  import { invoke, isTauri } from "@tauri-apps/api/core";
   import { onMounted } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
@@ -13,6 +14,14 @@
   const profileService = useProfileService();
 
   onMounted(async () => {
+    if (import.meta.client && isTauri()) {
+      try {
+        await invoke("close_splashscreen");
+      } catch (error) {
+        console.error("Failed to close splashscreen:", error);
+      }
+    }
+
     try {
       const [onboardingCompleted, profiles] = await Promise.all([
         getOnboardingCompleted(),
