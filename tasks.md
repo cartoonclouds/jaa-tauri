@@ -17,10 +17,6 @@ Application schema
 
 Create a feature/module which will display all events a job finder has had with regards to a job application. Use https://primevue.org/tree/. Allow each entry to be editable on double-click (in a modal). The depths can be of any length
 
-Add the implementation of the InMemoryDriver for use as a database
-
-Don't show main window if splashscreen is still visible
-
 ---
 
 Update all readme files with latest changes
