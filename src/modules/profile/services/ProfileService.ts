@@ -1,3 +1,5 @@
+import type { DatatablePageQuery } from "@shared/types";
+
 import {
   type IProfileRepository,
   type ProfileCreatePayload,
@@ -14,13 +16,19 @@ export class ProfileService {
     return this.repository.list();
   }
 
+  listPage(query: DatatablePageQuery) {
+    return this.repository.listPage(query);
+  }
+
   create(payload: ProfileCreatePayload) {
     const parsedFullName = ProfileNameSchema.safeParse({
       fullName: payload.fullName.trim(),
     });
 
     if (!parsedFullName.success) {
-      throw new Error(parsedFullName.error.issues[0]?.message ?? "Invalid profile full name");
+      throw new Error(
+        parsedFullName.error.issues[0]?.message ?? "Invalid profile full name",
+      );
     }
 
     return this.repository.create({
@@ -38,7 +46,10 @@ export class ProfileService {
       });
 
       if (!parsedFullName.success) {
-        throw new Error(parsedFullName.error.issues[0]?.message ?? "Invalid profile full name");
+        throw new Error(
+          parsedFullName.error.issues[0]?.message ??
+            "Invalid profile full name",
+        );
       }
 
       fullName = parsedFullName.data.fullName;

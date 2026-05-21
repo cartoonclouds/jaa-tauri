@@ -1,3 +1,5 @@
+import type { DatatablePageQuery } from "@shared/types";
+
 import {
   type ContactCreatePayload,
   type ContactUpdatePayload,
@@ -10,6 +12,10 @@ export class ContactService {
 
   list() {
     return this.repository.list();
+  }
+
+  listPage(query: DatatablePageQuery) {
+    return this.repository.listPage(query);
   }
 
   create(payload: ContactCreatePayload) {

@@ -1,6 +1,10 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Document } from "@modules/documents/domain/entities/Document";
-import type { IRepository } from "@shared/types";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  IRepository,
+} from "@shared/types";
 
 import { toDate } from "@shared/utils/toDate";
 
@@ -16,16 +20,15 @@ export interface IDocumentRepository extends IRepository<
   Document,
   DocumentCreatePayload,
   DocumentUpdatePayload
-> {}
+> {
+  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Document>>;
+}
 
 export class DocumentRepository implements IDocumentRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  async list(): Promise<Document[]> {
-    const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM documents ORDER BY created_at DESC",
-    );
-    return rows.map((row) => ({
+  private mapDocumentRow(row: Record<string, unknown>): Document {
+    return {
       id: String(row.id),
       title: String(row.title),
       kind: String(row.kind),
@@ -35,7 +38,56 @@ export class DocumentRepository implements IDocumentRepository {
       checksum: (row.checksum as string | null) ?? null,
       createdAt: toDate(row.created_at),
       updatedAt: toDate(row.updated_at),
-    }));
+    };
+  }
+
+  async list(): Promise<Document[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      "SELECT * FROM documents ORDER BY created_at DESC",
+    );
+    return rows.map((row) => this.mapDocumentRow(row));
+  }
+
+  async listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Document>> {
+    const rows = Math.max(1, query.rows);
+    const page = Math.max(0, query.page);
+    const search = query.search?.trim() ?? "";
+    const hasSearch = search.length > 0;
+
+    const totalRows = hasSearch
+      ? await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM documents WHERE title LIKE $1 OR kind LIKE $1 OR file_path LIKE $1",
+          [`%${search}%`],
+        )
+      : await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM documents",
+        );
+
+    const listRows = hasSearch
+      ? await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM documents
+           WHERE title LIKE $1 OR kind LIKE $1 OR file_path LIKE $1
+           ORDER BY created_at DESC
+           LIMIT $2
+           OFFSET $3`,
+          [`%${search}%`, rows, page * rows],
+        )
+      : await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM documents
+           ORDER BY created_at DESC
+           LIMIT $1
+           OFFSET $2`,
+          [rows, page * rows],
+        );
+
+    return {
+      items: listRows.map((row) => this.mapDocumentRow(row)),
+      total: totalRows[0]?.total ?? 0,
+    };
   }
 
   async create(payload: DocumentCreatePayload): Promise<string> {

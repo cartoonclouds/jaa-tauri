@@ -2,6 +2,7 @@ import type {
   ApplicationCreatePayload,
   ApplicationUpdatePayload,
 } from "@modules/applications/types/payloads";
+import type { DatatablePageQuery } from "@shared/types";
 
 import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 import { ApplicationSchema } from "@shared/domain/zod/application.schema";
@@ -11,6 +12,10 @@ export class ApplicationService {
 
   list() {
     return this.repository.list();
+  }
+
+  listPage(query: DatatablePageQuery) {
+    return this.repository.listPage(query);
   }
 
   create(payload: ApplicationCreatePayload) {

@@ -1,31 +1,31 @@
 <script setup lang="ts">
   import type { Profile } from "@modules/profile/domain/entities/Profile";
 
-  import { useProfile } from "@modules/profile/presentation/composables/useProfile";
-  import {
-    profileGlobalFilterFields,
-    profileSearchPlaceholder,
-  } from "@modules/profile/presentation/constants/profileDatatable";
+  import { profileSearchPlaceholder } from "@modules/profile/presentation/constants/profileDatatable";
+  import { useProfileService } from "@modules/profile/services/useProfileService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useDatatable } from "@/composables/useDatatable";
+  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useProfile();
+  const service = useProfileService();
   const {
     currentPageReportTemplate,
-    filters,
     globalFilter,
-    globalFilterFields,
+    items,
+    isLoading,
     onGlobalFilterInput,
+    onPage,
     paginatorTemplate,
+    refresh,
     rows,
     rowsPerPageOptions,
-  } = useDatatable({
-    globalFilterFields: profileGlobalFilterFields,
+    totalRecords,
+  } = useServerDatatable<Profile>({
+    fetchPage: (query) => service.listPage(query),
   });
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", email: "", headline: "" });
@@ -46,14 +46,14 @@
 
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await update({
+      await service.update({
         id: editingId.value,
         fullName: form.fullName,
         email: form.email || null,
         headline: form.headline || null,
       });
     } else {
-      await create({
+      await service.create({
         fullName: form.fullName,
         email: form.email || null,
         phone: null,
@@ -64,7 +64,13 @@
         locationText: null,
       });
     }
+    await refresh();
     resetForm();
+  }
+
+  async function removeProfile(id: string): Promise<void> {
+    await service.delete(id);
+    await refresh();
   }
 </script>
 
@@ -88,18 +94,18 @@
     </form>
 
     <DataTable
-      v-model:filters="filters"
       :value="items"
       data-key="id"
       :loading="isLoading"
       striped-rows
-      filter-display="menu"
-      :global-filter-fields="globalFilterFields"
+      lazy
       paginator
       :rows="rows"
+      :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
+      @page="onPage"
     >
       <template #header>
         <div class="flex justify-end">
@@ -116,9 +122,9 @@
         </div>
       </template>
 
-      <Column field="fullName" header="Name" sortable />
-      <Column field="email" header="Email" sortable />
-      <Column field="headline" header="Headline" sortable />
+      <Column field="fullName" header="Name" />
+      <Column field="email" header="Email" />
+      <Column field="headline" header="Headline" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">
@@ -131,7 +137,7 @@
               size="small"
               severity="danger"
               label="Delete"
-              @click="remove((slotProps.data as Profile).id)"
+              @click="removeProfile((slotProps.data as Profile).id)"
             />
           </div>
         </template>

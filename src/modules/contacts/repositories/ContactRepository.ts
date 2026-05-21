@@ -1,6 +1,10 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
-import type { IRepository } from "@shared/types";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  IRepository,
+} from "@shared/types";
 
 import { toDate } from "@shared/utils/toDate";
 
@@ -22,16 +26,15 @@ export interface IContactRepository extends IRepository<
   Contact,
   ContactCreatePayload,
   ContactUpdatePayload
-> {}
+> {
+  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Contact>>;
+}
 
 export class ContactRepository implements IContactRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  async list(): Promise<Contact[]> {
-    const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM contacts ORDER BY created_at DESC",
-    );
-    return rows.map((row) => ({
+  private mapContactRow(row: Record<string, unknown>): Contact {
+    return {
       id: String(row.id),
       companyId: (row.company_id as string | null) ?? null,
       fullName: String(row.full_name),
@@ -42,7 +45,56 @@ export class ContactRepository implements IContactRepository {
       notes: (row.notes as string | null) ?? null,
       createdAt: toDate(row.created_at),
       updatedAt: toDate(row.updated_at),
-    }));
+    };
+  }
+
+  async list(): Promise<Contact[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      "SELECT * FROM contacts ORDER BY created_at DESC",
+    );
+    return rows.map((row) => this.mapContactRow(row));
+  }
+
+  async listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Contact>> {
+    const rows = Math.max(1, query.rows);
+    const page = Math.max(0, query.page);
+    const search = query.search?.trim() ?? "";
+    const hasSearch = search.length > 0;
+
+    const totalRows = hasSearch
+      ? await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM contacts WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR type LIKE $1",
+          [`%${search}%`],
+        )
+      : await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM contacts",
+        );
+
+    const listRows = hasSearch
+      ? await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM contacts
+           WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR type LIKE $1
+           ORDER BY created_at DESC
+           LIMIT $2
+           OFFSET $3`,
+          [`%${search}%`, rows, page * rows],
+        )
+      : await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM contacts
+           ORDER BY created_at DESC
+           LIMIT $1
+           OFFSET $2`,
+          [rows, page * rows],
+        );
+
+    return {
+      items: listRows.map((row) => this.mapContactRow(row)),
+      total: totalRows[0]?.total ?? 0,
+    };
   }
 
   async create(payload: ContactCreatePayload): Promise<string> {

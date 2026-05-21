@@ -1,31 +1,31 @@
 <script setup lang="ts">
   import type { Document } from "@modules/documents/domain/entities/Document";
 
-  import { useDocument } from "@modules/documents/presentation/composables/useDocument";
-  import {
-    documentsGlobalFilterFields,
-    documentsSearchPlaceholder,
-  } from "@modules/documents/presentation/constants/documentDatatable";
+  import { documentsSearchPlaceholder } from "@modules/documents/presentation/constants/documentDatatable";
+  import { useDocumentService } from "@modules/documents/services/useDocumentService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useDatatable } from "@/composables/useDatatable";
+  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useDocument();
+  const service = useDocumentService();
   const {
     currentPageReportTemplate,
-    filters,
     globalFilter,
-    globalFilterFields,
+    items,
+    isLoading,
     onGlobalFilterInput,
+    onPage,
     paginatorTemplate,
+    refresh,
     rows,
     rowsPerPageOptions,
-  } = useDatatable({
-    globalFilterFields: documentsGlobalFilterFields,
+    totalRecords,
+  } = useServerDatatable<Document>({
+    fetchPage: (query) => service.listPage(query),
   });
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", kind: "resume", filePath: "" });
@@ -46,14 +46,14 @@
 
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await update({
+      await service.update({
         id: editingId.value,
         title: form.title,
         kind: form.kind,
         filePath: form.filePath,
       });
     } else {
-      await create({
+      await service.create({
         title: form.title,
         kind: form.kind,
         filePath: form.filePath,
@@ -62,7 +62,13 @@
         checksum: null,
       });
     }
+    await refresh();
     resetForm();
+  }
+
+  async function removeDocument(id: string): Promise<void> {
+    await service.delete(id);
+    await refresh();
   }
 </script>
 
@@ -86,18 +92,18 @@
     </form>
 
     <DataTable
-      v-model:filters="filters"
       :value="items"
       data-key="id"
       :loading="isLoading"
       striped-rows
-      filter-display="menu"
-      :global-filter-fields="globalFilterFields"
+      lazy
       paginator
       :rows="rows"
+      :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
+      @page="onPage"
     >
       <template #header>
         <div class="flex justify-end">
@@ -114,9 +120,9 @@
         </div>
       </template>
 
-      <Column field="title" header="Title" sortable />
-      <Column field="kind" header="Kind" sortable />
-      <Column field="filePath" header="Path" sortable />
+      <Column field="title" header="Title" />
+      <Column field="kind" header="Kind" />
+      <Column field="filePath" header="Path" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">
@@ -129,7 +135,7 @@
               size="small"
               severity="danger"
               label="Delete"
-              @click="remove((slotProps.data as Document).id)"
+              @click="removeDocument((slotProps.data as Document).id)"
             />
           </div>
         </template>

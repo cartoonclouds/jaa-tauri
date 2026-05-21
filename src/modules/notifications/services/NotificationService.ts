@@ -1,3 +1,5 @@
+import type { DatatablePageQuery } from "@shared/types";
+
 import {
   type INotificationRepository,
   type NotificationCreatePayload,
@@ -5,7 +7,10 @@ import {
 } from "@modules/notifications/repositories/NotificationRepository";
 import { NotificationSchema } from "@shared/domain/zod/notification.schema";
 
-const NotificationContentSchema = NotificationSchema.pick({ title: true, body: true });
+const NotificationContentSchema = NotificationSchema.pick({
+  title: true,
+  body: true,
+});
 const NotificationContentUpdateSchema = NotificationContentSchema.partial();
 
 export class NotificationService {
@@ -15,6 +20,10 @@ export class NotificationService {
     return this.repository.list();
   }
 
+  listPage(query: DatatablePageQuery) {
+    return this.repository.listPage(query);
+  }
+
   create(payload: NotificationCreatePayload) {
     const parsedContent = NotificationContentSchema.safeParse({
       title: payload.title.trim(),
@@ -22,7 +31,10 @@ export class NotificationService {
     });
 
     if (!parsedContent.success) {
-      throw new Error(parsedContent.error.issues[0]?.message ?? "Invalid notification content");
+      throw new Error(
+        parsedContent.error.issues[0]?.message ??
+          "Invalid notification content",
+      );
     }
 
     return this.repository.create({
@@ -40,10 +52,14 @@ export class NotificationService {
       ...(payload.body !== undefined ? { body: payload.body.trim() } : {}),
     };
 
-    const parsedContent = NotificationContentUpdateSchema.safeParse(contentToValidate);
+    const parsedContent =
+      NotificationContentUpdateSchema.safeParse(contentToValidate);
 
     if (!parsedContent.success) {
-      throw new Error(parsedContent.error.issues[0]?.message ?? "Invalid notification content");
+      throw new Error(
+        parsedContent.error.issues[0]?.message ??
+          "Invalid notification content",
+      );
     }
 
     return this.repository.update({

@@ -1,31 +1,31 @@
 <script setup lang="ts">
   import type { Setting } from "@modules/settings/domain/entities/Setting";
 
-  import { useSetting } from "@modules/settings/presentation/composables/useSetting";
-  import {
-    settingsGlobalFilterFields,
-    settingsSearchPlaceholder,
-  } from "@modules/settings/presentation/constants/settingDatatable";
+  import { settingsSearchPlaceholder } from "@modules/settings/presentation/constants/settingDatatable";
+  import { useSettingService } from "@modules/settings/services/useSettingService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useDatatable } from "@/composables/useDatatable";
+  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, upsert, remove } = useSetting();
+  const service = useSettingService();
   const {
     currentPageReportTemplate,
-    filters,
     globalFilter,
-    globalFilterFields,
+    items,
+    isLoading,
     onGlobalFilterInput,
+    onPage,
     paginatorTemplate,
+    refresh,
     rows,
     rowsPerPageOptions,
-  } = useDatatable({
-    globalFilterFields: settingsGlobalFilterFields,
+    totalRecords,
+  } = useServerDatatable<Setting>({
+    fetchPage: (query) => service.listPage(query),
   });
   const editingId = ref<string | null>(null);
   const form = reactive({ theme: "system", locale: "en-GB" });
@@ -43,12 +43,18 @@
   }
 
   async function submit(): Promise<void> {
-    await upsert({
+    await service.upsert({
       id: editingId.value ?? undefined,
       theme: form.theme as Setting["theme"],
       locale: form.locale,
     });
+    await refresh();
     resetForm();
+  }
+
+  async function removeSetting(id: string): Promise<void> {
+    await service.delete(id);
+    await refresh();
   }
 </script>
 
@@ -71,18 +77,18 @@
     </form>
 
     <DataTable
-      v-model:filters="filters"
       :value="items"
       data-key="id"
       :loading="isLoading"
       striped-rows
-      filter-display="menu"
-      :global-filter-fields="globalFilterFields"
+      lazy
       paginator
       :rows="rows"
+      :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
+      @page="onPage"
     >
       <template #header>
         <div class="flex justify-end">
@@ -99,8 +105,8 @@
         </div>
       </template>
 
-      <Column field="theme" header="Theme" sortable />
-      <Column field="locale" header="Locale" sortable />
+      <Column field="theme" header="Theme" />
+      <Column field="locale" header="Locale" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">
@@ -113,7 +119,7 @@
               size="small"
               severity="danger"
               label="Delete"
-              @click="remove((slotProps.data as Setting).id)"
+              @click="removeSetting((slotProps.data as Setting).id)"
             />
           </div>
         </template>

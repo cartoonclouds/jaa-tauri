@@ -1,6 +1,10 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Profile } from "@modules/profile/domain/entities/Profile";
-import type { IRepository } from "@shared/types";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  IRepository,
+} from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
 import { ProfileSchema } from "@shared/domain/zod/profile.schema";
@@ -16,7 +20,9 @@ export interface IProfileRepository extends IRepository<
   Profile,
   ProfileCreatePayload,
   ProfileUpdatePayload
-> {}
+> {
+  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Profile>>;
+}
 
 const ProfileCreateSchema = ProfileSchema.pick({
   fullName: true,
@@ -50,6 +56,48 @@ export class ProfileRepository implements IProfileRepository {
       "SELECT * FROM profiles ORDER BY created_at DESC",
     );
     return rows.map((row) => mapProfileRowToEntity(row));
+  }
+
+  async listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Profile>> {
+    const rows = Math.max(1, query.rows);
+    const page = Math.max(0, query.page);
+    const search = query.search?.trim() ?? "";
+    const hasSearch = search.length > 0;
+
+    const totalRows = hasSearch
+      ? await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM profiles WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR COALESCE(headline, '') LIKE $1",
+          [`%${search}%`],
+        )
+      : await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM profiles",
+        );
+
+    const listRows = hasSearch
+      ? await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM profiles
+           WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR COALESCE(headline, '') LIKE $1
+           ORDER BY created_at DESC
+           LIMIT $2
+           OFFSET $3`,
+          [`%${search}%`, rows, page * rows],
+        )
+      : await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM profiles
+           ORDER BY created_at DESC
+           LIMIT $1
+           OFFSET $2`,
+          [rows, page * rows],
+        );
+
+    return {
+      items: listRows.map((row) => mapProfileRowToEntity(row)),
+      total: totalRows[0]?.total ?? 0,
+    };
   }
 
   async create(payload: ProfileCreatePayload): Promise<string> {

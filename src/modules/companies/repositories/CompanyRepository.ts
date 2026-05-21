@@ -1,6 +1,10 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Company } from "@modules/companies/domain/entities/Company";
-import type { IRepository } from "@shared/types";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  IRepository,
+} from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
 
@@ -33,7 +37,9 @@ export interface ICompanyRepository extends IRepository<
   Company,
   CompanyCreatePayload,
   CompanyUpdatePayload
-> {}
+> {
+  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Company>>;
+}
 
 export class CompanyRepository implements ICompanyRepository {
   constructor(private readonly db: DatabaseDriver) {}
@@ -44,6 +50,48 @@ export class CompanyRepository implements ICompanyRepository {
     );
 
     return rows.map((row) => mapCompanyRowToEntity(row));
+  }
+
+  async listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Company>> {
+    const rows = Math.max(1, query.rows);
+    const page = Math.max(0, query.page);
+    const search = query.search?.trim() ?? "";
+    const hasSearch = search.length > 0;
+
+    const totalRows = hasSearch
+      ? await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM companies WHERE name LIKE $1 OR COALESCE(location_text, '') LIKE $1",
+          [`%${search}%`],
+        )
+      : await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM companies",
+        );
+
+    const listRows = hasSearch
+      ? await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM companies
+           WHERE name LIKE $1 OR COALESCE(location_text, '') LIKE $1
+           ORDER BY created_at DESC
+           LIMIT $2
+           OFFSET $3`,
+          [`%${search}%`, rows, page * rows],
+        )
+      : await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM companies
+           ORDER BY created_at DESC
+           LIMIT $1
+           OFFSET $2`,
+          [rows, page * rows],
+        );
+
+    return {
+      items: listRows.map((row) => mapCompanyRowToEntity(row)),
+      total: totalRows[0]?.total ?? 0,
+    };
   }
 
   async create(payload: CompanyCreatePayload): Promise<string> {

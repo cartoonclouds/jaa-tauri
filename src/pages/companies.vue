@@ -1,31 +1,31 @@
 <script setup lang="ts">
   import type { Company } from "@modules/companies/domain/entities/Company";
 
-  import { useCompany } from "@modules/companies/presentation/composables/useCompany";
-  import {
-    companiesGlobalFilterFields,
-    companiesSearchPlaceholder,
-  } from "@modules/companies/presentation/constants/companyDatatable";
+  import { companiesSearchPlaceholder } from "@modules/companies/presentation/constants/companyDatatable";
+  import { useCompanyService } from "@modules/companies/services/useCompanyService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useDatatable } from "@/composables/useDatatable";
+  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useCompany();
+  const service = useCompanyService();
   const {
     currentPageReportTemplate,
-    filters,
     globalFilter,
-    globalFilterFields,
+    items,
+    isLoading,
     onGlobalFilterInput,
+    onPage,
     paginatorTemplate,
+    refresh,
     rows,
     rowsPerPageOptions,
-  } = useDatatable({
-    globalFilterFields: companiesGlobalFilterFields,
+    totalRecords,
+  } = useServerDatatable<Company>({
+    fetchPage: (query) => service.listPage(query),
   });
 
   const editingId = ref<string | null>(null);
@@ -61,7 +61,7 @@
     const locationLng = form.locationLng ? Number(form.locationLng) : null;
 
     if (editingId.value) {
-      await update({
+      await service.update({
         id: editingId.value,
         name: form.name,
         locationText: form.locationText || null,
@@ -69,7 +69,7 @@
         locationLng,
       });
     } else {
-      await create({
+      await service.create({
         name: form.name,
         locationText: form.locationText || null,
         locationLat,
@@ -77,7 +77,13 @@
       });
     }
 
+    await refresh();
     resetForm();
+  }
+
+  async function removeCompany(id: string): Promise<void> {
+    await service.delete(id);
+    await refresh();
   }
 </script>
 
@@ -103,18 +109,18 @@
     </form>
 
     <DataTable
-      v-model:filters="filters"
       :value="items"
       data-key="id"
       :loading="isLoading"
       striped-rows
-      filter-display="menu"
-      :global-filter-fields="globalFilterFields"
+      lazy
       paginator
       :rows="rows"
+      :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
+      @page="onPage"
     >
       <template #header>
         <div class="flex justify-end">
@@ -131,8 +137,8 @@
         </div>
       </template>
 
-      <Column field="name" header="Name" sortable />
-      <Column field="locationText" header="Location" sortable />
+      <Column field="name" header="Name" />
+      <Column field="locationText" header="Location" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">
@@ -145,7 +151,7 @@
               size="small"
               severity="danger"
               label="Delete"
-              @click="remove((slotProps.data as Company).id)"
+              @click="removeCompany((slotProps.data as Company).id)"
             />
           </div>
         </template>

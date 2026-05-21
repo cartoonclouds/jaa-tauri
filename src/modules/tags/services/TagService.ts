@@ -1,3 +1,5 @@
+import type { DatatablePageQuery } from "@shared/types";
+
 import {
   type ITagRepository,
   type TagCreatePayload,
@@ -14,13 +16,19 @@ export class TagService {
     return this.repository.list();
   }
 
+  listPage(query: DatatablePageQuery) {
+    return this.repository.listPage(query);
+  }
+
   create(payload: TagCreatePayload) {
     const parsedName = TagNameSchema.safeParse({
       name: payload.name.trim(),
     });
 
     if (!parsedName.success) {
-      throw new Error(parsedName.error.issues[0]?.message ?? "Invalid tag name");
+      throw new Error(
+        parsedName.error.issues[0]?.message ?? "Invalid tag name",
+      );
     }
 
     return this.repository.create({
@@ -38,7 +46,9 @@ export class TagService {
       });
 
       if (!parsedName.success) {
-        throw new Error(parsedName.error.issues[0]?.message ?? "Invalid tag name");
+        throw new Error(
+          parsedName.error.issues[0]?.message ?? "Invalid tag name",
+        );
       }
 
       name = parsedName.data.name;

@@ -1,6 +1,10 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Setting } from "@modules/settings/domain/entities/Setting";
-import type { IRepository } from "@shared/types";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  IRepository,
+} from "@shared/types";
 
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
 
@@ -21,6 +25,7 @@ export interface ISettingRepository extends IRepository<
   SettingUpdatePayload
 > {
   upsert(payload: SettingUpsertPayload): Promise<string>;
+  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Setting>>;
 }
 
 export class SettingRepository implements ISettingRepository {
@@ -31,6 +36,48 @@ export class SettingRepository implements ISettingRepository {
       "SELECT * FROM settings ORDER BY created_at DESC",
     );
     return rows.map((row) => mapSettingRowToEntity(row));
+  }
+
+  async listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Setting>> {
+    const rows = Math.max(1, query.rows);
+    const page = Math.max(0, query.page);
+    const search = query.search?.trim() ?? "";
+    const hasSearch = search.length > 0;
+
+    const totalRows = hasSearch
+      ? await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM settings WHERE theme LIKE $1 OR locale LIKE $1",
+          [`%${search}%`],
+        )
+      : await this.db.select<{ total: number }>(
+          "SELECT COUNT(*) AS total FROM settings",
+        );
+
+    const listRows = hasSearch
+      ? await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM settings
+           WHERE theme LIKE $1 OR locale LIKE $1
+           ORDER BY created_at DESC
+           LIMIT $2
+           OFFSET $3`,
+          [`%${search}%`, rows, page * rows],
+        )
+      : await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM settings
+           ORDER BY created_at DESC
+           LIMIT $1
+           OFFSET $2`,
+          [rows, page * rows],
+        );
+
+    return {
+      items: listRows.map((row) => mapSettingRowToEntity(row)),
+      total: totalRows[0]?.total ?? 0,
+    };
   }
 
   async upsert(payload: SettingUpsertPayload): Promise<string> {

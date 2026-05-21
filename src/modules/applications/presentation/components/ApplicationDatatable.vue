@@ -1,11 +1,15 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
 
-  import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
-
   interface Props {
     items: Application[];
     isLoading: boolean;
+    globalFilter: string;
+    rows: number;
+    rowsPerPageOptions: number[];
+    paginatorTemplate: string;
+    currentPageReportTemplate: string;
+    totalRecords: number;
   }
 
   defineProps<Props>();
@@ -13,6 +17,8 @@
   const emit = defineEmits<{
     "row-click": [application: Application];
     "open-details": [application: Application];
+    "update:global-filter": [value: string];
+    page: [event: { page?: number; rows?: number }];
   }>();
 
   function onRowClick(event: {
@@ -26,33 +32,30 @@
     emit("open-details", application);
   }
 
-  const {
-    currentPageReportTemplate,
-    filters,
-    globalFilter,
-    globalFilterFields,
-    onGlobalFilterInput,
-    paginatorTemplate,
-    rows,
-    rowsPerPageOptions,
-  } = useApplicationDatatable();
+  function onGlobalFilterInput(value: string): void {
+    emit("update:global-filter", value);
+  }
+
+  function onPage(event: { page?: number; rows?: number }): void {
+    emit("page", event);
+  }
 </script>
 
 <template>
   <DataTable
-    v-model:filters="filters"
     :value="items"
     data-key="id"
     :loading="isLoading"
     striped-rows
-    filter-display="menu"
-    :global-filter-fields="globalFilterFields"
+    lazy
     paginator
     :rows="rows"
+    :total-records="totalRecords"
     :rows-per-page-options="rowsPerPageOptions"
     :paginator-template="paginatorTemplate"
     :current-page-report-template="currentPageReportTemplate"
     @row-click="onRowClick"
+    @page="onPage"
   >
     <template #header>
       <div class="flex justify-end">
@@ -61,7 +64,7 @@
             <i class="pi pi-search" />
           </InputIcon>
           <InputText
-            v-model="globalFilter"
+            :model-value="globalFilter"
             placeholder="Search applications"
             @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
           />
@@ -69,10 +72,10 @@
       </div>
     </template>
 
-    <Column field="title" header="Title" sortable />
-    <Column field="status" header="Status" sortable />
-    <Column field="locationText" header="Location" sortable />
-    <Column field="priority" header="Priority" sortable />
+    <Column field="title" header="Title" />
+    <Column field="status" header="Status" />
+    <Column field="locationText" header="Location" />
+    <Column field="priority" header="Priority" />
     <Column header="Actions">
       <template #body="slotProps">
         <Button

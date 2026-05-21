@@ -1,31 +1,31 @@
 <script setup lang="ts">
   import type { Tag } from "@modules/tags/domain/entities/Tag";
 
-  import { useTag } from "@modules/tags/presentation/composables/useTag";
-  import {
-    tagsGlobalFilterFields,
-    tagsSearchPlaceholder,
-  } from "@modules/tags/presentation/constants/tagDatatable";
+  import { tagsSearchPlaceholder } from "@modules/tags/presentation/constants/tagDatatable";
+  import { useTagService } from "@modules/tags/services/useTagService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useDatatable } from "@/composables/useDatatable";
+  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useTag();
+  const service = useTagService();
   const {
     currentPageReportTemplate,
-    filters,
     globalFilter,
-    globalFilterFields,
+    items,
+    isLoading,
     onGlobalFilterInput,
+    onPage,
     paginatorTemplate,
+    refresh,
     rows,
     rowsPerPageOptions,
-  } = useDatatable({
-    globalFilterFields: tagsGlobalFilterFields,
+    totalRecords,
+  } = useServerDatatable<Tag>({
+    fetchPage: (query) => service.listPage(query),
   });
   const editingId = ref<string | null>(null);
   const form = reactive({ name: "", color: "" });
@@ -44,15 +44,21 @@
 
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await update({
+      await service.update({
         id: editingId.value,
         name: form.name,
         color: form.color || null,
       });
     } else {
-      await create({ name: form.name, color: form.color || null });
+      await service.create({ name: form.name, color: form.color || null });
     }
+    await refresh();
     resetForm();
+  }
+
+  async function removeTag(id: string): Promise<void> {
+    await service.delete(id);
+    await refresh();
   }
 </script>
 
@@ -75,18 +81,18 @@
     </form>
 
     <DataTable
-      v-model:filters="filters"
       :value="items"
       data-key="id"
       :loading="isLoading"
       striped-rows
-      filter-display="menu"
-      :global-filter-fields="globalFilterFields"
+      lazy
       paginator
       :rows="rows"
+      :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
+      @page="onPage"
     >
       <template #header>
         <div class="flex justify-end">
@@ -103,8 +109,8 @@
         </div>
       </template>
 
-      <Column field="name" header="Name" sortable />
-      <Column field="color" header="Color" sortable />
+      <Column field="name" header="Name" />
+      <Column field="color" header="Color" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">
@@ -117,7 +123,7 @@
               size="small"
               severity="danger"
               label="Delete"
-              @click="remove((slotProps.data as Tag).id)"
+              @click="removeTag((slotProps.data as Tag).id)"
             />
           </div>
         </template>

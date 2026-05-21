@@ -1,31 +1,31 @@
 <script setup lang="ts">
   import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
-  import { useNotification } from "@modules/notifications/presentation/composables/useNotification";
-  import {
-    notificationsGlobalFilterFields,
-    notificationsSearchPlaceholder,
-  } from "@modules/notifications/presentation/constants/notificationDatatable";
+  import { notificationsSearchPlaceholder } from "@modules/notifications/presentation/constants/notificationDatatable";
+  import { useNotificationService } from "@modules/notifications/services/useNotificationService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
-  import { useDatatable } from "@/composables/useDatatable";
+  import { useServerDatatable } from "@/composables/useServerDatatable";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useNotification();
+  const service = useNotificationService();
   const {
     currentPageReportTemplate,
-    filters,
     globalFilter,
-    globalFilterFields,
+    items,
+    isLoading,
     onGlobalFilterInput,
+    onPage,
     paginatorTemplate,
+    refresh,
     rows,
     rowsPerPageOptions,
-  } = useDatatable({
-    globalFilterFields: notificationsGlobalFilterFields,
+    totalRecords,
+  } = useServerDatatable<Notification>({
+    fetchPage: (query) => service.listPage(query),
   });
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });
@@ -46,14 +46,14 @@
 
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await update({
+      await service.update({
         id: editingId.value,
         title: form.title,
         body: form.body,
         severity: form.severity as Notification["severity"],
       });
     } else {
-      await create({
+      await service.create({
         title: form.title,
         body: form.body,
         severity: form.severity as Notification["severity"],
@@ -64,7 +64,13 @@
         sentAt: null,
       });
     }
+    await refresh();
     resetForm();
+  }
+
+  async function removeNotification(id: string): Promise<void> {
+    await service.delete(id);
+    await refresh();
   }
 </script>
 
@@ -88,18 +94,18 @@
     </form>
 
     <DataTable
-      v-model:filters="filters"
       :value="items"
       data-key="id"
       :loading="isLoading"
       striped-rows
-      filter-display="menu"
-      :global-filter-fields="globalFilterFields"
+      lazy
       paginator
       :rows="rows"
+      :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
+      @page="onPage"
     >
       <template #header>
         <div class="flex justify-end">
@@ -116,9 +122,9 @@
         </div>
       </template>
 
-      <Column field="title" header="Title" sortable />
-      <Column field="severity" header="Severity" sortable />
-      <Column field="isRead" header="Read" sortable />
+      <Column field="title" header="Title" />
+      <Column field="severity" header="Severity" />
+      <Column field="isRead" header="Read" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-2">
@@ -131,7 +137,7 @@
               size="small"
               severity="danger"
               label="Delete"
-              @click="remove((slotProps.data as Notification).id)"
+              @click="removeNotification((slotProps.data as Notification).id)"
             />
           </div>
         </template>

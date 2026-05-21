@@ -1,3 +1,5 @@
+import type { DatatablePageQuery } from "@shared/types";
+
 import {
   type CompanyCreatePayload,
   type CompanyUpdatePayload,
@@ -10,6 +12,10 @@ export class CompanyService {
 
   list() {
     return this.repository.list();
+  }
+
+  listPage(query: DatatablePageQuery) {
+    return this.repository.listPage(query);
   }
 
   create(payload: CompanyCreatePayload) {

@@ -1,3 +1,5 @@
+import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
+
 import { SettingRepository } from "@modules/settings/repositories/SettingRepository";
 import { SettingService } from "@modules/settings/services/SettingService";
 import { useNuxtApp } from "nuxt/app";

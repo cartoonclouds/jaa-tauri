@@ -9,13 +9,30 @@
 
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
-  import { useApplication } from "@modules/applications/presentation/composables/useApplication";
   import { formatDateTimeLocalValue } from "@modules/applications/presentation/utils/dateTimeLocal";
+  import { useApplicationService } from "@modules/applications/services/useApplicationService";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
   import { ref } from "vue";
 
-  const { items, isLoading, create, update, remove } = useApplication();
+  import { useServerDatatable } from "@/composables/useServerDatatable";
+
+  const service = useApplicationService();
+  const {
+    currentPageReportTemplate,
+    globalFilter,
+    items,
+    isLoading,
+    onGlobalFilterInput,
+    onPage,
+    paginatorTemplate,
+    refresh,
+    rows,
+    rowsPerPageOptions,
+    totalRecords,
+  } = useServerDatatable<ApplicationEntity>({
+    fetchPage: (query) => service.listPage(query),
+  });
   const { items: companyItems } = useCompany();
 
   const drawerMode = ref<ApplicationDrawerMode>("view");
@@ -43,10 +60,8 @@
       locationText: application.locationText ?? "",
       locationLat: application.locationLat,
       locationLng: application.locationLng,
-      attendanceType:
-        application.attendanceType as import("../../types/enums").ApplicationAttendanceType,
-      employmentType:
-        application.employmentType as import("../../types/enums").ApplicationEmploymentType,
+      attendanceType: application.attendanceType ?? null,
+      employmentType: application.employmentType ?? null,
       salaryMin: application.salaryMin,
       salaryMax: application.salaryMax,
       currency: application.currency ?? "",
@@ -97,7 +112,7 @@
 
     try {
       if (drawerMode.value === "edit" && selectedApplication.value) {
-        await update({
+        await service.update({
           id: selectedApplication.value.id,
           companyId: payload.companyId,
           title: payload.title,
@@ -107,8 +122,8 @@
           locationText: payload.locationText,
           locationLat: payload.locationLat,
           locationLng: payload.locationLng,
-          attendanceType: payload.attendanceType!,
-          employmentType: payload.employmentType!,
+          attendanceType: payload.attendanceType ?? null,
+          employmentType: payload.employmentType ?? null,
           salaryMin: payload.salaryMin,
           salaryMax: payload.salaryMax,
           currency: payload.currency,
@@ -119,7 +134,7 @@
           isArchived: payload.isArchived,
         });
       } else {
-        await create({
+        await service.create({
           companyId: payload.companyId,
           title: payload.title,
           status: payload.status,
@@ -128,8 +143,8 @@
           locationText: payload.locationText,
           locationLat: payload.locationLat,
           locationLng: payload.locationLng,
-          attendanceType: payload.attendanceType,
-          employmentType: payload.employmentType,
+          attendanceType: payload.attendanceType ?? null,
+          employmentType: payload.employmentType ?? null,
           salaryMin: payload.salaryMin,
           salaryMax: payload.salaryMax,
           currency: payload.currency,
@@ -144,6 +159,7 @@
       isDrawerOpen.value = false;
       drawerMode.value = "view";
       selectedApplication.value = null;
+      await refresh();
     } finally {
       isSubmitting.value = false;
     }
@@ -153,10 +169,11 @@
     isDeleting.value = true;
 
     try {
-      await remove(id);
+      await service.delete(id);
       isDrawerOpen.value = false;
       drawerMode.value = "view";
       selectedApplication.value = null;
+      await refresh();
     } finally {
       isDeleting.value = false;
     }
@@ -196,6 +213,14 @@
     <ApplicationDatatable
       :items="items"
       :is-loading="isLoading"
+      :global-filter="globalFilter"
+      :rows="rows"
+      :rows-per-page-options="rowsPerPageOptions"
+      :paginator-template="paginatorTemplate"
+      :current-page-report-template="currentPageReportTemplate"
+      :total-records="totalRecords"
+      @update:global-filter="onGlobalFilterInput"
+      @page="onPage"
       @row-click="onRowClick"
       @open-details="openDetailsFromButton"
     />

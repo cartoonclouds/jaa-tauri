@@ -106,10 +106,10 @@ class MockDatabaseDriver implements DatabaseDriver {
         locale: String(bindings[2] ?? "en-GB"),
         notifications_enabled: Number(bindings[3] ?? 1),
         developer_mode: Number(bindings[4] ?? 0),
-        recent_searches: String(bindings[6] ?? "[]"),
-        table_column_visibility: String(bindings[7] ?? "{}"),
-        onboarding_completed: Number(bindings[8] ?? 0),
-        profile_id: bindings[9] ?? null,
+        recent_searches: String(bindings[5] ?? "[]"),
+        table_column_visibility: String(bindings[6] ?? "{}"),
+        onboarding_completed: Number(bindings[7] ?? 0),
+        profile_id: null,
       };
     }
 

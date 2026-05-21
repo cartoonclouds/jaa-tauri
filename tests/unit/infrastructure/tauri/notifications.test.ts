@@ -4,10 +4,12 @@ import {
 } from "@infra/tauri/notifications";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock Tauri plugin
-const mockSendNotification = vi.fn();
-const mockIsPermissionGranted = vi.fn();
-const mockRequestPermission = vi.fn();
+const { mockSendNotification, mockIsPermissionGranted, mockRequestPermission } =
+  vi.hoisted(() => ({
+    mockSendNotification: vi.fn(),
+    mockIsPermissionGranted: vi.fn(),
+    mockRequestPermission: vi.fn(),
+  }));
 
 vi.mock("@tauri-apps/plugin-notification", () => ({
   sendNotification: mockSendNotification,

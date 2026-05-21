@@ -9,5 +9,10 @@ export * from "./presentation/utils/applicationVisualTokens";
 export * from "./repositories/ApplicationRepository";
 export * from "./services/ApplicationService";
 export * from "./services/useApplicationService";
-export * from "./types/payloads";
+export type {
+  ApplicationBasePayload,
+  ApplicationCreatePayload,
+  ApplicationMutationPayload,
+  ApplicationUpdatePayload,
+} from "./types/payloads";
 export * from "./types/presentation";

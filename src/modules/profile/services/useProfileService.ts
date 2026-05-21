@@ -1,3 +1,5 @@
+import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
+
 import { ProfileRepository } from "@modules/profile/repositories/ProfileRepository";
 import { ProfileService } from "@modules/profile/services/ProfileService";
 import { useNuxtApp } from "nuxt/app";

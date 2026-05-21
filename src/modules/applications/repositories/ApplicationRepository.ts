@@ -1,10 +1,18 @@
+import type {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "../types/enums";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Application } from "@modules/applications/domain/entities/Application";
 import type {
   ApplicationCreatePayload,
   ApplicationUpdatePayload,
 } from "@modules/applications/types/payloads";
-import type { IRepository } from "@shared/types";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  IRepository,
+} from "@shared/types";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
@@ -12,17 +20,17 @@ export interface IApplicationRepository extends IRepository<
   Application,
   ApplicationCreatePayload,
   ApplicationUpdatePayload
-> {}
+> {
+  listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Application>>;
+}
 
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  async list(): Promise<Application[]> {
-    const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM applications WHERE is_deleted = 0 ORDER BY created_at DESC",
-    );
-
-    return rows.map((row) => ({
+  private mapApplicationRow(row: Record<string, unknown>): Application {
+    return {
       id: String(row.id),
       companyId: (row.company_id as string | null) ?? null,
       title: String(row.title),
@@ -33,11 +41,9 @@ export class ApplicationRepository implements IApplicationRepository {
       locationLat: (row.location_lat as number | null) ?? null,
       locationLng: (row.location_lng as number | null) ?? null,
       attendanceType:
-        (row.attendance_type as import("../types/enums").ApplicationAttendanceType) ??
-        null,
+        (row.attendance_type as ApplicationAttendanceType | null) ?? null,
       employmentType:
-        (row.employment_type as import("../types/enums").ApplicationEmploymentType) ??
-        null,
+        (row.employment_type as ApplicationEmploymentType | null) ?? null,
       salaryMin: (row.salary_min as number | null) ?? null,
       salaryMax: (row.salary_max as number | null) ?? null,
       currency: (row.currency as string | null) ?? null,
@@ -49,7 +55,64 @@ export class ApplicationRepository implements IApplicationRepository {
       isDeleted: Number(row.is_deleted ?? 0) === 1,
       createdAt: toDate(row.created_at),
       updatedAt: toDate(row.updated_at),
-    }));
+    };
+  }
+
+  async list(): Promise<Application[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      "SELECT * FROM applications WHERE is_deleted = 0 ORDER BY created_at DESC",
+    );
+
+    return rows.map((row) => this.mapApplicationRow(row));
+  }
+
+  async listPage(
+    query: DatatablePageQuery,
+  ): Promise<DatatablePageResult<Application>> {
+    const rows = Math.max(1, query.rows);
+    const page = Math.max(0, query.page);
+    const search = query.search?.trim() ?? "";
+    const hasSearch = search.length > 0;
+
+    const totalRows = hasSearch
+      ? await this.db.select<{ total: number }>(
+          `SELECT COUNT(*) AS total
+           FROM applications
+           WHERE is_deleted = 0
+             AND (title LIKE $1 OR status LIKE $1 OR COALESCE(location_text, '') LIKE $1)`,
+          [`%${search}%`],
+        )
+      : await this.db.select<{ total: number }>(
+          `SELECT COUNT(*) AS total
+           FROM applications
+           WHERE is_deleted = 0`,
+        );
+
+    const listRows = hasSearch
+      ? await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM applications
+           WHERE is_deleted = 0
+             AND (title LIKE $1 OR status LIKE $1 OR COALESCE(location_text, '') LIKE $1)
+           ORDER BY created_at DESC
+           LIMIT $2
+           OFFSET $3`,
+          [`%${search}%`, rows, page * rows],
+        )
+      : await this.db.select<Record<string, unknown>>(
+          `SELECT *
+           FROM applications
+           WHERE is_deleted = 0
+           ORDER BY created_at DESC
+           LIMIT $1
+           OFFSET $2`,
+          [rows, page * rows],
+        );
+
+    return {
+      items: listRows.map((row) => this.mapApplicationRow(row)),
+      total: totalRows[0]?.total ?? 0,
+    };
   }
 
   async create(payload: ApplicationCreatePayload): Promise<string> {
@@ -113,8 +176,8 @@ export class ApplicationRepository implements IApplicationRepository {
         payload.locationText ?? null,
         payload.locationLat ?? null,
         payload.locationLng ?? null,
-        payload.attendanceType ?? null,
-        payload.employmentType ?? null,
+        (payload.attendanceType as string | null) ?? null,
+        (payload.employmentType as string | null) ?? null,
         payload.salaryMin ?? null,
         payload.salaryMax ?? null,
         payload.currency ?? null,
@@ -155,22 +218,22 @@ export class ApplicationRepository implements IApplicationRepository {
       WHERE id = $19
       `,
       [
-        payload.companyId,
+        payload.companyId ?? null,
         payload.title,
         payload.status,
-        payload.sourceUrl,
-        payload.appliedAt,
-        payload.locationText,
-        payload.locationLat,
-        payload.locationLng,
-        payload.attendanceType,
-        payload.employmentType,
-        payload.salaryMin,
-        payload.salaryMax,
-        payload.currency,
-        payload.description,
-        payload.interviewProcess,
-        payload.benefits,
+        payload.sourceUrl ?? null,
+        payload.appliedAt ?? null,
+        payload.locationText ?? null,
+        payload.locationLat ?? null,
+        payload.locationLng ?? null,
+        (payload.attendanceType as string | null) ?? null,
+        (payload.employmentType as string | null) ?? null,
+        payload.salaryMin ?? null,
+        payload.salaryMax ?? null,
+        payload.currency ?? null,
+        payload.description ?? null,
+        payload.interviewProcess ?? null,
+        payload.benefits ?? null,
         payload.priority,
         payload.isArchived ? 1 : 0,
         payload.id,
