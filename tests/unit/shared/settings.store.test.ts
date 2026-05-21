@@ -4,6 +4,13 @@
  * Tests for Pinia store integration with Tauri Store persistence.
  */
 
+import { useSettingsStore } from "@shared/settings";
+import {
+  getSettings,
+  initializeSettingsStore,
+  setThemeSettings,
+  setUiPreferences,
+} from "@shared/settings/settings.repository";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -17,13 +24,17 @@ vi.mock("@shared/settings/settings.repository", () => ({
 }));
 
 describe("useSettingsStore", () => {
+  const mockedGetSettings = vi.mocked(getSettings);
+  const mockedInitializeSettingsStore = vi.mocked(initializeSettingsStore);
+  const mockedSetThemeSettings = vi.mocked(setThemeSettings);
+  const mockedSetUiPreferences = vi.mocked(setUiPreferences);
+
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
   });
 
   it("should initialize with default values", async () => {
-    const { useSettingsStore } = await import("@shared/settings");
     const store = useSettingsStore();
 
     expect(store.settings).toBeNull();
@@ -41,11 +52,7 @@ describe("useSettingsStore", () => {
       tableColumnVisibility: {},
     };
 
-    const { getSettings } =
-      await import("@shared/settings/settings.repository");
-    (getSettings as any).mockResolvedValue(mockSettings);
-
-    const { useSettingsStore } = await import("@shared/settings");
+    mockedGetSettings.mockResolvedValue(mockSettings);
     const store = useSettingsStore();
 
     await store.initialize();
@@ -64,11 +71,7 @@ describe("useSettingsStore", () => {
       tableColumnVisibility: {},
     };
 
-    const { getSettings } =
-      await import("@shared/settings/settings.repository");
-    (getSettings as any).mockResolvedValue(mockSettings);
-
-    const { useSettingsStore } = await import("@shared/settings");
+    mockedGetSettings.mockResolvedValue(mockSettings);
     const store = useSettingsStore();
 
     await store.initialize();
@@ -89,12 +92,8 @@ describe("useSettingsStore", () => {
       tableColumnVisibility: {},
     };
 
-    const { getSettings, setThemeSettings } =
-      await import("@shared/settings/settings.repository");
-    (getSettings as any).mockResolvedValue(mockSettings);
-    (setThemeSettings as any).mockResolvedValue(undefined);
-
-    const { useSettingsStore } = await import("@shared/settings");
+    mockedGetSettings.mockResolvedValue(mockSettings);
+    mockedSetThemeSettings.mockResolvedValue(undefined);
     const store = useSettingsStore();
 
     await store.initialize();
@@ -113,12 +112,8 @@ describe("useSettingsStore", () => {
       tableColumnVisibility: {},
     };
 
-    const { getSettings, setUiPreferences } =
-      await import("@shared/settings/settings.repository");
-    (getSettings as any).mockResolvedValue(mockSettings);
-    (setUiPreferences as any).mockResolvedValue(undefined);
-
-    const { useSettingsStore } = await import("@shared/settings");
+    mockedGetSettings.mockResolvedValue(mockSettings);
+    mockedSetUiPreferences.mockResolvedValue(undefined);
     const store = useSettingsStore();
 
     await store.initialize();
@@ -131,12 +126,8 @@ describe("useSettingsStore", () => {
   });
 
   it("should handle initialization errors", async () => {
-    const { initializeSettingsStore } =
-      await import("@shared/settings/settings.repository");
     const error = new Error("Store initialization failed");
-    (initializeSettingsStore as any).mockRejectedValue(error);
-
-    const { useSettingsStore } = await import("@shared/settings");
+    mockedInitializeSettingsStore.mockRejectedValue(error);
     const store = useSettingsStore();
 
     await store.initialize();

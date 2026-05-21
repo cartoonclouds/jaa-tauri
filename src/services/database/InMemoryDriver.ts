@@ -1,25 +1,30 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 import type { QueryBindings, QueryResult } from "./QueryBindings";
 
+import { BetterSqliteDriver } from "./BetterSqliteDriver.server";
+
 export class InMemoryDriver implements DatabaseDriver {
   readonly name = "in-memory";
 
-  select<T = unknown>(
-    _sql: string,
-    _bindings: QueryBindings = [],
-  ): Promise<T[]> {
-    return Promise.resolve([]);
+  private constructor(private readonly delegate: DatabaseDriver) {}
+
+  static connect(): Promise<InMemoryDriver> {
+    return Promise.resolve(
+      new InMemoryDriver(BetterSqliteDriver.connect(":memory:")),
+    );
   }
 
-  execute(_sql: string, _bindings: QueryBindings = []): Promise<QueryResult> {
-    return Promise.resolve({
-      rowsAffected: 0,
-    });
+  select<T = unknown>(sql: string, bindings: QueryBindings = []): Promise<T[]> {
+    return this.delegate.select<T>(sql, bindings);
+  }
+
+  execute(sql: string, bindings: QueryBindings = []): Promise<QueryResult> {
+    return this.delegate.execute(sql, bindings);
   }
 
   async transaction<T>(
     callback: (tx: DatabaseDriver) => Promise<T>,
   ): Promise<T> {
-    return await callback(this);
+    return await this.delegate.transaction(callback);
   }
 }

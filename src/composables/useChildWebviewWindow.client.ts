@@ -1,3 +1,6 @@
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+
 export interface ChildWebviewWindowOptions {
   label: string;
   url: string;
@@ -18,11 +21,6 @@ export function useChildWebviewWindow() {
   async function openChildWebviewWindow(
     options: ChildWebviewWindowOptions,
   ): Promise<void> {
-    const [{ getCurrentWindow }, { WebviewWindow }] = await Promise.all([
-      import("@tauri-apps/api/window"),
-      import("@tauri-apps/api/webviewWindow"),
-    ]);
-
     const mainWindow = getCurrentWindow();
     const existing = await WebviewWindow.getByLabel(options.label);
 

@@ -10,7 +10,12 @@ import type {
   QueryResult,
 } from "@/services/database/QueryBindings";
 
-import { describe, expect, it, vi } from "vitest";
+import {
+  getSettings,
+  initializeSettingsStore,
+  setSettings,
+} from "@shared/settings";
+import { describe, expect, it } from "vitest";
 
 type SettingsRow = Record<string, unknown>;
 
@@ -124,10 +129,6 @@ class MockDatabaseDriver implements DatabaseDriver {
 
 describe("settings.repository", () => {
   it("initializes and returns default settings", async () => {
-    vi.resetModules();
-
-    const { initializeSettingsStore, getSettings } =
-      await import("@shared/settings");
     const db = new MockDatabaseDriver();
 
     await initializeSettingsStore(db);
@@ -139,10 +140,6 @@ describe("settings.repository", () => {
   });
 
   it("persists settings updates without profile data", async () => {
-    vi.resetModules();
-
-    const { initializeSettingsStore, setSettings, getSettings } =
-      await import("@shared/settings");
     const db = new MockDatabaseDriver();
 
     await initializeSettingsStore(db);

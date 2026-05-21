@@ -23,10 +23,15 @@ const appLogLevel = process.env.APP_LOG_LEVEL ?? "info";
 const appDatabaseDriver = process.env.APP_DATABASE_DRIVER ?? "sqlite";
 const appDatabaseName = process.env.APP_DATABASE_NAME ?? "applyflow.db";
 const configuredDatabaseUrl = process.env.APP_DATABASE_URL?.trim();
+const isInMemoryDriver = ["memory", "in-memory"].includes(
+  appDatabaseDriver.toLowerCase(),
+);
 const appDatabaseUrl =
   configuredDatabaseUrl && configuredDatabaseUrl.length > 0
     ? configuredDatabaseUrl
-    : `${appDatabaseDriver}:${resolve(rootDir, appDatabaseName)}`;
+    : isInMemoryDriver
+      ? ":memory:"
+      : `${appDatabaseDriver}:${resolve(rootDir, appDatabaseName)}`;
 
 export default defineNuxtConfig({
   srcDir: "src/",

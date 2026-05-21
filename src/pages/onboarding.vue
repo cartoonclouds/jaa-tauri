@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import AppOnboardingWizard from "@modules/onboarding/presentation/components/AppOnboardingWizard.vue";
+  import { getCurrentWindow } from "@tauri-apps/api/window";
 
   import { definePageMeta } from "#imports";
 
@@ -7,7 +8,6 @@
 
   async function handleCompleted(): Promise<void> {
     try {
-      const { getCurrentWindow } = await import("@tauri-apps/api/window");
       await getCurrentWindow().close();
     } catch (error) {
       console.error("Failed to close onboarding window:", error);

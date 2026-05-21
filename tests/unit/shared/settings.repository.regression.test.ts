@@ -4,7 +4,12 @@ import type {
   QueryResult,
 } from "@/services/database/QueryBindings";
 
-import { describe, expect, it, vi } from "vitest";
+import {
+  getOnboardingCompleted,
+  initializeSettingsStore,
+  setOnboardingCompleted,
+} from "@shared/settings";
+import { describe, expect, it } from "vitest";
 
 type SettingsRow = Record<string, unknown>;
 
@@ -64,21 +69,17 @@ class MockDatabaseDriver implements DatabaseDriver {
 
 describe("settings.repository regression", () => {
   it("does not leak onboarding completion into new databases", async () => {
-    vi.resetModules();
-
-    const settings = await import("@shared/settings");
-
     const firstDb = new MockDatabaseDriver();
-    await settings.initializeSettingsStore(firstDb);
+    await initializeSettingsStore(firstDb);
 
-    expect(await settings.getOnboardingCompleted()).toBe(false);
+    expect(await getOnboardingCompleted()).toBe(false);
 
-    await settings.setOnboardingCompleted(true);
-    expect(await settings.getOnboardingCompleted()).toBe(true);
+    await setOnboardingCompleted(true);
+    expect(await getOnboardingCompleted()).toBe(true);
 
     const secondDb = new MockDatabaseDriver();
-    await settings.initializeSettingsStore(secondDb);
+    await initializeSettingsStore(secondDb);
 
-    expect(await settings.getOnboardingCompleted()).toBe(false);
+    expect(await getOnboardingCompleted()).toBe(false);
   });
 });
