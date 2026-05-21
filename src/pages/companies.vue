@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Company } from "@modules/companies/domain/entities/Company";
 
-  import { useCompanyCrud } from "@modules/companies/presentation/composables/useCompanyCrud";
+  import { useCompany } from "@modules/companies/presentation/composables/useCompany";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useCompanyCrud();
+  const { items, isLoading, create, update, remove } = useCompany();
 
   const editingId = ref<string | null>(null);
   const form = reactive({

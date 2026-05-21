@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Event } from "@modules/events/domain/entities/Event";
 
-  import { useEventCrud } from "@modules/events/presentation/composables/useEventCrud";
+  import { useEvent } from "@modules/events/presentation/composables/useEvent";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useEventCrud();
+  const { items, isLoading, create, update, remove } = useEvent();
   const editingId = ref<string | null>(null);
   const form = reactive({ applicationId: "", type: "note", title: "" });
 

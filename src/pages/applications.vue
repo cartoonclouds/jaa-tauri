@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
 
-  import { useApplicationCrud } from "@modules/applications/presentation/composables/useApplicationCrud";
+  import { useApplication } from "@modules/applications/presentation/composables/useApplication";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useApplicationCrud();
+  const { items, isLoading, create, update, remove } = useApplication();
 
   const editingId = ref<string | null>(null);
   const form = reactive({

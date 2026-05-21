@@ -7,7 +7,7 @@ import type {
 import { useProfileService } from "@modules/profile/services/useProfileService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-export function useProfileCrud() {
+export function useProfile() {
   const service = useProfileService();
   return createCrudComposable<
     Profile,

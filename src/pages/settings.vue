@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Setting } from "@modules/settings/domain/entities/Setting";
 
-  import { useSettingCrud } from "@modules/settings/presentation/composables/useSettingCrud";
+  import { useSetting } from "@modules/settings/presentation/composables/useSetting";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, upsert, remove } = useSettingCrud();
+  const { items, isLoading, upsert, remove } = useSetting();
   const editingId = ref<string | null>(null);
   const form = reactive({ theme: "system", locale: "en-GB" });
 

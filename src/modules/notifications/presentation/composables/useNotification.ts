@@ -7,7 +7,7 @@ import type {
 import { useNotificationService } from "@modules/notifications/services/useNotificationService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-export function useNotificationCrud() {
+export function useNotification() {
   const service = useNotificationService();
   return createCrudComposable<
     Notification,

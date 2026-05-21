@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
-  import { useContactCrud } from "@modules/contacts/presentation/composables/useContactCrud";
+  import { useContact } from "@modules/contacts/presentation/composables/useContact";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useContactCrud();
+  const { items, isLoading, create, update, remove } = useContact();
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", type: "company", email: "" });
 

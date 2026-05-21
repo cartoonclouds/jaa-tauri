@@ -29,7 +29,7 @@ When validating payloads or object structure, use Zod.
 
 Add the implementation of the InMemoryDriver for use as a database
 
-Rename and update any uses of presentation composables without the suffix "curd". For example, not `useApplicationCrud` but instead `useApplication`
+Don't show main window if splashscreen is still visible
 
 ---
 

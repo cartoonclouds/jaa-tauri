@@ -7,7 +7,7 @@ import type {
 import { useApplicationService } from "@modules/applications/services/useApplicationService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-export function useApplicationCrud() {
+export function useApplication() {
   const service = useApplicationService();
   return createCrudComposable<
     Application,

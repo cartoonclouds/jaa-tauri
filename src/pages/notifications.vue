@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
-  import { useNotificationCrud } from "@modules/notifications/presentation/composables/useNotificationCrud";
+  import { useNotification } from "@modules/notifications/presentation/composables/useNotification";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useNotificationCrud();
+  const { items, isLoading, create, update, remove } = useNotification();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });
 

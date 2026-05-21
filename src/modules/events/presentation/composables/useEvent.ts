@@ -7,7 +7,7 @@ import type {
 import { useEventService } from "@modules/events/services/useEventService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-export function useEventCrud() {
+export function useEvent() {
   const service = useEventService();
   return createCrudComposable<Event, EventCreatePayload, EventUpdatePayload>(
     service,

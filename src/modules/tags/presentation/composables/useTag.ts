@@ -7,7 +7,7 @@ import type {
 import { useTagService } from "@modules/tags/services/useTagService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-export function useTagCrud() {
+export function useTag() {
   const service = useTagService();
   return createCrudComposable<Tag, TagCreatePayload, TagUpdatePayload>(service);
 }

@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Profile } from "@modules/profile/domain/entities/Profile";
 
-  import { useProfileCrud } from "@modules/profile/presentation/composables/useProfileCrud";
+  import { useProfile } from "@modules/profile/presentation/composables/useProfile";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useProfileCrud();
+  const { items, isLoading, create, update, remove } = useProfile();
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", email: "", headline: "" });
 

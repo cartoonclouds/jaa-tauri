@@ -1,13 +1,13 @@
 <script setup lang="ts">
   import type { Tag } from "@modules/tags/domain/entities/Tag";
 
-  import { useTagCrud } from "@modules/tags/presentation/composables/useTagCrud";
+  import { useTag } from "@modules/tags/presentation/composables/useTag";
   import { definePageMeta } from "nuxt/dist/pages/runtime";
   import { reactive, ref } from "vue";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useTagCrud();
+  const { items, isLoading, create, update, remove } = useTag();
   const editingId = ref<string | null>(null);
   const form = reactive({ name: "", color: "" });
 

@@ -1,14 +1,14 @@
 <script setup lang="ts">
   import type { Document } from "@modules/documents/domain/entities/Document";
 
-  import { useDocumentCrud } from "@modules/documents/presentation/composables/useDocumentCrud";
+  import { useDocument } from "@modules/documents/presentation/composables/useDocument";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
   definePageMeta({ ssr: false });
 
-  const { items, isLoading, create, update, remove } = useDocumentCrud();
+  const { items, isLoading, create, update, remove } = useDocument();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", kind: "resume", filePath: "" });
 
