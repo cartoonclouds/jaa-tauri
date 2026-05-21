@@ -1,5 +1,3 @@
-import type { DatabasePublicRuntimeConfig } from "@/types/runtime-config";
-
 import { isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
@@ -7,12 +5,19 @@ import { resolveDatabaseUrl } from "@/services/database/resolveDatabaseUrl";
 import { TauriSqliteDriver } from "@/services/database/TauriSqliteDriver.client";
 
 export default defineNuxtPlugin(async () => {
-  const config = useRuntimeConfig() as { public: DatabasePublicRuntimeConfig };
+  const config = useRuntimeConfig() as {
+    public: {
+      appDatabaseDriver?: string;
+      appDatabaseName?: string;
+      appDatabaseUrl?: string;
+    };
+  };
+
   const driver = config.public.appDatabaseDriver ?? "sqlite";
   const name = config.public.appDatabaseName ?? "applyflow.db";
   const explicitUrl = config.public.appDatabaseUrl ?? undefined;
-
   const configuredUrl = resolveDatabaseUrl(driver, name, explicitUrl);
+
   const isSqliteUrl = configuredUrl.startsWith("sqlite:");
 
   if (!isTauri()) {
@@ -23,7 +28,7 @@ export default defineNuxtPlugin(async () => {
 
   if (!isSqliteUrl) {
     throw new Error(
-      `Invalid database URL \"${configuredUrl}\". This desktop app requires a sqlite:* URL.`,
+      `Invalid database URL "${configuredUrl}". This desktop app requires a sqlite:* URL.`,
     );
   }
 

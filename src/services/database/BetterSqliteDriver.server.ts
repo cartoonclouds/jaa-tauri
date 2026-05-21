@@ -23,12 +23,18 @@ export class BetterSqliteDriver implements DatabaseDriver {
       }
 
       return new BetterSqliteDriver(
-        new Database(path.resolve(process.cwd(), file)),
+        new Database(
+          path.isAbsolute(file) ? file : path.resolve(process.cwd(), file),
+        ),
       );
     }
 
     return new BetterSqliteDriver(
-      new Database(path.resolve(process.cwd(), databaseUrl)),
+      new Database(
+        path.isAbsolute(databaseUrl)
+          ? databaseUrl
+          : path.resolve(process.cwd(), databaseUrl),
+      ),
     );
   }
 
@@ -36,7 +42,9 @@ export class BetterSqliteDriver implements DatabaseDriver {
     sql: string,
     bindings: QueryBindings = [],
   ): Promise<T[]> {
-    return this.db.prepare(sql).all(...bindings) as T[];
+    const result = this.db.prepare(sql).all(...bindings) as T[];
+
+    return Promise.resolve(result);
   }
 
   async execute(
@@ -48,13 +56,13 @@ export class BetterSqliteDriver implements DatabaseDriver {
       lastInsertRowid?: number | bigint;
     };
 
-    return {
+    return Promise.resolve({
       rowsAffected: result.changes,
       lastInsertId:
         typeof result.lastInsertRowid === "bigint"
           ? Number(result.lastInsertRowid)
           : result.lastInsertRowid,
-    };
+    });
   }
 
   async transaction<T>(

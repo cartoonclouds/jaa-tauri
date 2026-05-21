@@ -11,15 +11,19 @@ export class TauriSqliteDriver implements DatabaseDriver {
   constructor(private readonly db: TauriDatabase) {}
 
   static async connect(
-    path = "sqlite:applyflow.db",
+    databaseUrl = "sqlite:applyflow.db",
   ): Promise<TauriSqliteDriver> {
-    if (path === ":memory:") {
+    if (databaseUrl === ":memory:") {
       throw new Error(
         "In-memory SQLite is not supported by the Tauri SQL plugin URL format.",
       );
     }
 
-    const db = await Database.load(path);
+    const normalizedUrl = databaseUrl.startsWith("sqlite:")
+      ? databaseUrl
+      : `sqlite:${databaseUrl}`;
+
+    const db = await Database.load(normalizedUrl);
 
     await db.execute("PRAGMA foreign_keys = ON");
 

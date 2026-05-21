@@ -30,7 +30,6 @@ interface SqliteDatabaseLike {
   close(): void;
 }
 
-type BetterSqliteCtor = new (filename: string) => SqliteDatabaseLike;
 const DatabaseCtor = Database;
 
 type AppSeedEnv = Record<string, string>;
@@ -127,10 +126,12 @@ function resolveSqliteFile(databaseUrl: string): string {
       throw new Error("Invalid sqlite URL. Example: sqlite:applyflow.db");
     }
 
-    return path.resolve(process.cwd(), file);
+    return path.isAbsolute(file) ? file : path.resolve(process.cwd(), file);
   }
 
-  return path.resolve(process.cwd(), databaseUrl);
+  return path.isAbsolute(databaseUrl)
+    ? databaseUrl
+    : path.resolve(process.cwd(), databaseUrl);
 }
 
 function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {
@@ -144,17 +145,17 @@ function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {
   }
 }
 
-function insertMany<T extends object>(
+function insertMany(
   db: SqliteDatabaseLike,
   table: string,
-  rows: T[],
+  rows: object[],
 ): number {
   if (rows.length === 0) {
     return 0;
   }
 
-  const firstRow = rows[0] as Record<string, unknown>;
-  const columns = Object.keys(firstRow);
+  const firstRecord = rows[0] as Record<string, unknown>;
+  const columns = Object.keys(firstRecord);
   const placeholders = columns.map(() => "?").join(", ");
   const sql = `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`;
   const stmt = db.prepare(sql);
