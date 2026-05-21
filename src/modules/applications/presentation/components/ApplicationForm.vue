@@ -12,12 +12,17 @@
     validateApplicationTitle,
   } from "@modules/applications/presentation/utils/applicationFormValidation";
   import {
+    formatApplicationStatusLabel,
+    getApplicationPriorityClass,
+    getApplicationStatusClass,
+  } from "@modules/applications/presentation/utils/applicationVisualTokens";
+  import {
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,
     type ApplicationSelectOption,
     createEmptyApplicationFormValues,
   } from "@modules/applications/types/presentation";
-  import { reactive, watch } from "vue";
+  import { computed, reactive, watch } from "vue";
 
   interface Props {
     initialValues?: Partial<ApplicationFormValues>;
@@ -142,349 +147,421 @@
   function onCancel(): void {
     emit("cancel");
   }
+
+  const statusPreviewClass = computed(() => {
+    return getApplicationStatusClass(form.status);
+  });
+
+  const statusPreviewLabel = computed(() => {
+    return formatApplicationStatusLabel(form.status);
+  });
+
+  const priorityPreviewClass = computed(() => {
+    return getApplicationPriorityClass(form.priority);
+  });
 </script>
 
 <template>
-  <form class="grid gap-4 md:grid-cols-2" @submit.prevent="onSubmit">
-    <div class="space-y-1 md:col-span-2">
-      <label
-        for="application-company"
-        class="text-sm font-medium text-surface-700"
-      >
-        Company
-      </label>
-      <Select
-        id="application-company"
-        v-model="form.companyId"
-        :options="companies"
-        option-label="label"
-        option-value="value"
-        show-clear
-        filter
-        fluid
-        placeholder="Select a company"
-      />
-    </div>
-
-    <div class="space-y-1 md:col-span-2">
-      <label
-        for="application-title"
-        class="text-sm font-medium text-surface-700"
-      >
-        Title
-      </label>
-      <InputText
-        id="application-title"
-        v-model="form.title"
-        fluid
-        placeholder="Senior Frontend Engineer"
-        :invalid="Boolean(errors.title)"
-      />
-      <Message
-        v-if="errors.title"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        {{ errors.title }}
-      </Message>
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-source-url"
-        class="text-sm font-medium text-surface-700"
-      >
-        Source URL
-      </label>
-      <InputText
-        id="application-source-url"
-        v-model="form.sourceUrl"
-        fluid
-        placeholder="https://company.com/jobs/role"
-        :invalid="Boolean(errors.sourceUrl)"
-      />
-      <Message
-        v-if="errors.sourceUrl"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        {{ errors.sourceUrl }}
-      </Message>
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-applied-at"
-        class="text-sm font-medium text-surface-700"
-      >
-        Applied At
-      </label>
-      <InputText
-        id="application-applied-at"
-        v-model="form.appliedAt"
-        type="datetime-local"
-        fluid
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-status"
-        class="text-sm font-medium text-surface-700"
-      >
-        Status
-      </label>
-      <Select
-        id="application-status"
-        v-model="form.status"
-        :options="APPLICATION_STATUS_OPTIONS"
-        option-label="label"
-        option-value="value"
-        fluid
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-attendance"
-        class="text-sm font-medium text-surface-700"
-      >
-        Attendance Type
-      </label>
-      <Select
-        id="application-attendance"
-        v-model="form.attendanceType"
-        :options="APPLICATION_ATTENDANCE_OPTIONS"
-        option-label="label"
-        option-value="value"
-        show-clear
-        fluid
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-employment"
-        class="text-sm font-medium text-surface-700"
-      >
-        Employment Type
-      </label>
-      <Select
-        id="application-employment"
-        v-model="form.employmentType"
-        :options="APPLICATION_EMPLOYMENT_OPTIONS"
-        option-label="label"
-        option-value="value"
-        show-clear
-        fluid
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-location"
-        class="text-sm font-medium text-surface-700"
-      >
-        Location
-      </label>
-      <InputText
-        id="application-location"
-        v-model="form.locationText"
-        fluid
-        placeholder="Remote, New York, NY"
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label for="application-lat" class="text-sm font-medium text-surface-700">
-        Latitude
-      </label>
-      <InputNumber
-        id="application-lat"
-        v-model="form.locationLat"
-        fluid
-        :use-grouping="false"
-        :min="-90"
-        :max="90"
-        :min-fraction-digits="4"
-        :max-fraction-digits="8"
-        :invalid="Boolean(errors.locationLat)"
-      />
-      <Message
-        v-if="errors.locationLat"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        {{ errors.locationLat }}
-      </Message>
-    </div>
-
-    <div class="space-y-1">
-      <label for="application-lng" class="text-sm font-medium text-surface-700">
-        Longitude
-      </label>
-      <InputNumber
-        id="application-lng"
-        v-model="form.locationLng"
-        fluid
-        :use-grouping="false"
-        :min="-180"
-        :max="180"
-        :min-fraction-digits="4"
-        :max-fraction-digits="8"
-        :invalid="Boolean(errors.locationLng)"
-      />
-      <Message
-        v-if="errors.locationLng"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        {{ errors.locationLng }}
-      </Message>
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-salary-min"
-        class="text-sm font-medium text-surface-700"
-      >
-        Salary Min
-      </label>
-      <InputNumber
-        id="application-salary-min"
-        v-model="form.salaryMin"
-        fluid
-        :use-grouping="false"
-        :min="0"
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-salary-max"
-        class="text-sm font-medium text-surface-700"
-      >
-        Salary Max
-      </label>
-      <InputNumber
-        id="application-salary-max"
-        v-model="form.salaryMax"
-        fluid
-        :use-grouping="false"
-        :min="0"
-      />
-      <Message
-        v-if="errors.salaryRange"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        {{ errors.salaryRange }}
-      </Message>
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-currency"
-        class="text-sm font-medium text-surface-700"
-      >
-        Currency
-      </label>
-      <InputText
-        id="application-currency"
-        v-model="form.currency"
-        fluid
-        maxlength="8"
-        placeholder="USD"
-      />
-    </div>
-
-    <div class="space-y-1">
-      <label
-        for="application-priority"
-        class="text-sm font-medium text-surface-700"
-      >
-        Priority
-      </label>
-      <InputNumber
-        id="application-priority"
-        v-model="form.priority"
-        fluid
-        :use-grouping="false"
-        :min="1"
-        :max="5"
-      />
-    </div>
-
-    <div class="space-y-1 md:col-span-2">
-      <label
-        for="application-description"
-        class="text-sm font-medium text-surface-700"
-      >
-        Description
-      </label>
-      <Textarea
-        id="application-description"
-        v-model="form.description"
-        fluid
-        auto-resize
-        rows="3"
-      />
-    </div>
-
-    <div class="space-y-1 md:col-span-2">
-      <label
-        for="application-interview-process"
-        class="text-sm font-medium text-surface-700"
-      >
-        Interview Process
-      </label>
-      <Textarea
-        id="application-interview-process"
-        v-model="form.interviewProcess"
-        fluid
-        auto-resize
-        rows="3"
-      />
-    </div>
-
-    <div class="space-y-1 md:col-span-2">
-      <label
-        for="application-benefits"
-        class="text-sm font-medium text-surface-700"
-      >
-        Benefits
-      </label>
-      <Textarea
-        id="application-benefits"
-        v-model="form.benefits"
-        fluid
-        auto-resize
-        rows="3"
-      />
-    </div>
-
-    <div
-      class="flex items-center justify-between rounded-md border border-surface-200 px-3 py-2 md:col-span-2"
+  <form class="space-y-5" @submit.prevent="onSubmit">
+    <section
+      class="grid gap-4 rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm md:grid-cols-2 md:p-5"
     >
-      <label
-        for="application-archived"
-        class="text-sm font-medium text-surface-700"
-      >
-        Archived
-      </label>
-      <ToggleSwitch id="application-archived" v-model="form.isArchived" />
-    </div>
+      <div class="md:col-span-2">
+        <h3 class="text-sm font-semibold text-surface-900">Core details</h3>
+        <p class="text-xs text-surface-500">
+          Basic information and current state of this application.
+        </p>
+      </div>
 
-    <div class="flex gap-2 md:col-span-2">
+      <div class="space-y-1 md:col-span-2">
+        <label
+          for="application-company"
+          class="text-sm font-medium text-surface-700"
+        >
+          Company
+        </label>
+        <Select
+          id="application-company"
+          v-model="form.companyId"
+          :options="companies"
+          option-label="label"
+          option-value="value"
+          show-clear
+          filter
+          fluid
+          placeholder="Select a company"
+        />
+      </div>
+
+      <div class="space-y-1 md:col-span-2">
+        <label
+          for="application-title"
+          class="text-sm font-medium text-surface-700"
+        >
+          Title
+        </label>
+        <InputText
+          id="application-title"
+          v-model="form.title"
+          fluid
+          placeholder="Senior Frontend Engineer"
+          :invalid="Boolean(errors.title)"
+        />
+        <Message
+          v-if="errors.title"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ errors.title }}
+        </Message>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-source-url"
+          class="text-sm font-medium text-surface-700"
+        >
+          Source URL
+        </label>
+        <InputText
+          id="application-source-url"
+          v-model="form.sourceUrl"
+          fluid
+          placeholder="https://company.com/jobs/role"
+          :invalid="Boolean(errors.sourceUrl)"
+        />
+        <Message
+          v-if="errors.sourceUrl"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ errors.sourceUrl }}
+        </Message>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-applied-at"
+          class="text-sm font-medium text-surface-700"
+        >
+          Applied At
+        </label>
+        <InputText
+          id="application-applied-at"
+          v-model="form.appliedAt"
+          type="datetime-local"
+          fluid
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-status"
+          class="text-sm font-medium text-surface-700"
+        >
+          Status
+        </label>
+        <Select
+          id="application-status"
+          v-model="form.status"
+          :options="APPLICATION_STATUS_OPTIONS"
+          option-label="label"
+          option-value="value"
+          fluid
+        />
+        <div class="pt-1">
+          <span
+            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+            :class="statusPreviewClass"
+          >
+            {{ statusPreviewLabel }}
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-attendance"
+          class="text-sm font-medium text-surface-700"
+        >
+          Attendance Type
+        </label>
+        <Select
+          id="application-attendance"
+          v-model="form.attendanceType"
+          :options="APPLICATION_ATTENDANCE_OPTIONS"
+          option-label="label"
+          option-value="value"
+          show-clear
+          fluid
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-employment"
+          class="text-sm font-medium text-surface-700"
+        >
+          Employment Type
+        </label>
+        <Select
+          id="application-employment"
+          v-model="form.employmentType"
+          :options="APPLICATION_EMPLOYMENT_OPTIONS"
+          option-label="label"
+          option-value="value"
+          show-clear
+          fluid
+        />
+      </div>
+    </section>
+
+    <section
+      class="grid gap-4 rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm md:grid-cols-2 md:p-5"
+    >
+      <div class="md:col-span-2">
+        <h3 class="text-sm font-semibold text-surface-900">
+          Location and compensation
+        </h3>
+        <p class="text-xs text-surface-500">
+          Optional geo coordinates and salary ranges.
+        </p>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-location"
+          class="text-sm font-medium text-surface-700"
+        >
+          Location
+        </label>
+        <InputText
+          id="application-location"
+          v-model="form.locationText"
+          fluid
+          placeholder="Remote, New York, NY"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-lat"
+          class="text-sm font-medium text-surface-700"
+        >
+          Latitude
+        </label>
+        <InputNumber
+          id="application-lat"
+          v-model="form.locationLat"
+          fluid
+          :use-grouping="false"
+          :min="-90"
+          :max="90"
+          :min-fraction-digits="4"
+          :max-fraction-digits="8"
+          :invalid="Boolean(errors.locationLat)"
+        />
+        <Message
+          v-if="errors.locationLat"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ errors.locationLat }}
+        </Message>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-lng"
+          class="text-sm font-medium text-surface-700"
+        >
+          Longitude
+        </label>
+        <InputNumber
+          id="application-lng"
+          v-model="form.locationLng"
+          fluid
+          :use-grouping="false"
+          :min="-180"
+          :max="180"
+          :min-fraction-digits="4"
+          :max-fraction-digits="8"
+          :invalid="Boolean(errors.locationLng)"
+        />
+        <Message
+          v-if="errors.locationLng"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ errors.locationLng }}
+        </Message>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-salary-min"
+          class="text-sm font-medium text-surface-700"
+        >
+          Salary Min
+        </label>
+        <InputNumber
+          id="application-salary-min"
+          v-model="form.salaryMin"
+          fluid
+          :use-grouping="false"
+          :min="0"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-salary-max"
+          class="text-sm font-medium text-surface-700"
+        >
+          Salary Max
+        </label>
+        <InputNumber
+          id="application-salary-max"
+          v-model="form.salaryMax"
+          fluid
+          :use-grouping="false"
+          :min="0"
+        />
+        <Message
+          v-if="errors.salaryRange"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ errors.salaryRange }}
+        </Message>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-currency"
+          class="text-sm font-medium text-surface-700"
+        >
+          Currency
+        </label>
+        <InputText
+          id="application-currency"
+          v-model="form.currency"
+          fluid
+          maxlength="8"
+          placeholder="USD"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-priority"
+          class="text-sm font-medium text-surface-700"
+        >
+          Priority
+        </label>
+        <InputNumber
+          id="application-priority"
+          v-model="form.priority"
+          fluid
+          :use-grouping="false"
+          :min="1"
+          :max="5"
+        />
+        <div class="pt-1">
+          <span
+            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+            :class="priorityPreviewClass"
+          >
+            P{{ form.priority }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="grid gap-4 rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm md:grid-cols-2 md:p-5"
+    >
+      <div class="md:col-span-2">
+        <h3 class="text-sm font-semibold text-surface-900">
+          Notes and preferences
+        </h3>
+        <p class="text-xs text-surface-500">
+          Extra context for interview flow, benefits, and archived status.
+        </p>
+      </div>
+
+      <div class="space-y-1 md:col-span-2">
+        <label
+          for="application-description"
+          class="text-sm font-medium text-surface-700"
+        >
+          Description
+        </label>
+        <Textarea
+          id="application-description"
+          v-model="form.description"
+          fluid
+          auto-resize
+          rows="3"
+        />
+      </div>
+
+      <div class="space-y-1 md:col-span-2">
+        <label
+          for="application-interview-process"
+          class="text-sm font-medium text-surface-700"
+        >
+          Interview Process
+        </label>
+        <Textarea
+          id="application-interview-process"
+          v-model="form.interviewProcess"
+          fluid
+          auto-resize
+          rows="3"
+        />
+      </div>
+
+      <div class="space-y-1 md:col-span-2">
+        <label
+          for="application-benefits"
+          class="text-sm font-medium text-surface-700"
+        >
+          Benefits
+        </label>
+        <Textarea
+          id="application-benefits"
+          v-model="form.benefits"
+          fluid
+          auto-resize
+          rows="3"
+        />
+      </div>
+
+      <div
+        class="flex items-center justify-between rounded-xl border border-surface-200 bg-surface-50 px-3 py-2 md:col-span-2"
+      >
+        <label
+          for="application-archived"
+          class="text-sm font-medium text-surface-700"
+        >
+          Archived
+        </label>
+        <ToggleSwitch id="application-archived" v-model="form.isArchived" />
+      </div>
+    </section>
+
+    <div class="flex gap-2 border-t border-surface-200 pt-1 md:col-span-2">
       <Button
         type="submit"
         :label="mode === 'edit' ? 'Update application' : 'Create application'"
         :loading="busy"
+        class="px-5"
       />
       <Button
         v-if="showCancel"
@@ -493,6 +570,7 @@
         outlined
         label="Cancel"
         :disabled="busy"
+        class="px-5"
         @click="onCancel"
       />
     </div>

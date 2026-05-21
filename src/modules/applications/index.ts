@@ -6,6 +6,7 @@ export { default as ApplicationDatatable } from "./presentation/components/Appli
 export * from "./presentation/composables/useApplication";
 export * from "./presentation/constants/applicationFormOptions";
 export * from "./presentation/utils/applicationFormValidation";
+export * from "./presentation/utils/applicationVisualTokens";
 export * from "./repositories/ApplicationRepository";
 export * from "./services/ApplicationService";
 export * from "./services/useApplicationService";
