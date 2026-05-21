@@ -1,7 +1,13 @@
 export * from "./application/actions/CreateApplication";
 export * from "./application/actions/ListApplications";
 export type * from "./domain/entities/Application";
+export { default as Application } from "./presentation/components/Application.vue";
+export { default as ApplicationDatatable } from "./presentation/components/ApplicationDatatable.vue";
 export * from "./presentation/composables/useApplication";
+export * from "./presentation/constants/applicationFormOptions";
+export * from "./presentation/utils/applicationFormValidation";
 export * from "./repositories/ApplicationRepository";
 export * from "./services/ApplicationService";
 export * from "./services/useApplicationService";
+export * from "./types/payloads";
+export * from "./types/presentation";

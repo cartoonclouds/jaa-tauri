@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
+
   import { Icon } from "#components";
   import { definePageMeta } from "#imports";
 
@@ -74,5 +76,7 @@
         Device detection {{ $device.isMobile ? "Mobile" : "Desktop" }}
       </p>
     </div>
+
+    <ApplicationComponent />
   </main>
 </template>

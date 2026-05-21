@@ -2,7 +2,7 @@ import type { Application } from "@modules/applications/domain/entities/Applicat
 import type {
   ApplicationCreatePayload,
   ApplicationUpdatePayload,
-} from "@modules/applications/repositories/ApplicationRepository";
+} from "@modules/applications/types/payloads";
 
 import { useApplicationService } from "@modules/applications/services/useApplicationService";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";

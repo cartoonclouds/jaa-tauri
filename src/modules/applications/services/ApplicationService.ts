@@ -1,8 +1,9 @@
-import {
-  type ApplicationCreatePayload,
-  type ApplicationUpdatePayload,
-  type IApplicationRepository,
-} from "@modules/applications/repositories/ApplicationRepository";
+import type {
+  ApplicationCreatePayload,
+  ApplicationUpdatePayload,
+} from "@modules/applications/types/payloads";
+
+import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 import { ApplicationSchema } from "@shared/domain/zod/application.schema";
 
 export class ApplicationService {
@@ -22,13 +23,11 @@ export class ApplicationService {
   }
 
   update(payload: ApplicationUpdatePayload) {
-    if (payload.title !== undefined) {
-      const result = ApplicationSchema.pick({ title: true }).safeParse({
-        title: payload.title,
-      });
-      if (!result.success) {
-        throw new Error(`Validation failed: ${result.error.message}`);
-      }
+    const result = ApplicationSchema.pick({ title: true }).safeParse({
+      title: payload.title,
+    });
+    if (!result.success) {
+      throw new Error(`Validation failed: ${result.error.message}`);
     }
 
     return this.repository.update(payload);

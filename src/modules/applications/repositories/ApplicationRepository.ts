@@ -1,26 +1,12 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Application } from "@modules/applications/domain/entities/Application";
+import type {
+  ApplicationCreatePayload,
+  ApplicationUpdatePayload,
+} from "@modules/applications/types/payloads";
 import type { IRepository } from "@shared/types";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
-
-export interface ApplicationCreatePayload {
-  companyId?: string | null;
-  title: string;
-  status?: string;
-  locationText?: string | null;
-  locationLat?: number | null;
-  locationLng?: number | null;
-}
-
-export interface ApplicationUpdatePayload {
-  id: string;
-  title?: string;
-  status?: string;
-  locationText?: string | null;
-  locationLat?: number | null;
-  locationLng?: number | null;
-}
 
 export interface IApplicationRepository extends IRepository<
   Application,
@@ -73,22 +59,68 @@ export class ApplicationRepository implements IApplicationRepository {
         company_id,
         title,
         status,
+        source_url,
+        applied_at,
         location_text,
         location_lat,
         location_lng,
+        attendance_type,
+        employment_type,
+        salary_min,
+        salary_max,
+        currency,
+        description,
+        interview_process,
+        benefits,
+        priority,
+        is_archived,
         created_at,
         updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
       `,
       [
         id,
         payload.companyId ?? null,
         payload.title,
         payload.status ?? "saved",
+        payload.sourceUrl ?? null,
+        payload.appliedAt ?? null,
         payload.locationText ?? null,
         payload.locationLat ?? null,
         payload.locationLng ?? null,
+        payload.attendanceType ?? null,
+        payload.employmentType ?? null,
+        payload.salaryMin ?? null,
+        payload.salaryMax ?? null,
+        payload.currency ?? null,
+        payload.description ?? null,
+        payload.interviewProcess ?? null,
+        payload.benefits ?? null,
+        payload.priority ?? 3,
+        payload.isArchived ? 1 : 0,
       ],
     );
     return id;
@@ -99,20 +131,46 @@ export class ApplicationRepository implements IApplicationRepository {
       `
       UPDATE applications
       SET
-        title = COALESCE($1, title),
-        status = COALESCE($2, status),
-        location_text = COALESCE($3, location_text),
-        location_lat = COALESCE($4, location_lat),
-        location_lng = COALESCE($5, location_lng),
+        company_id = $1,
+        title = $2,
+        status = $3,
+        source_url = $4,
+        applied_at = $5,
+        location_text = $6,
+        location_lat = $7,
+        location_lng = $8,
+        attendance_type = $9,
+        employment_type = $10,
+        salary_min = $11,
+        salary_max = $12,
+        currency = $13,
+        description = $14,
+        interview_process = $15,
+        benefits = $16,
+        priority = $17,
+        is_archived = $18,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $6
+      WHERE id = $19
       `,
       [
-        payload.title ?? null,
-        payload.status ?? null,
-        payload.locationText ?? null,
-        payload.locationLat ?? null,
-        payload.locationLng ?? null,
+        payload.companyId,
+        payload.title,
+        payload.status,
+        payload.sourceUrl,
+        payload.appliedAt,
+        payload.locationText,
+        payload.locationLat,
+        payload.locationLng,
+        payload.attendanceType,
+        payload.employmentType,
+        payload.salaryMin,
+        payload.salaryMax,
+        payload.currency,
+        payload.description,
+        payload.interviewProcess,
+        payload.benefits,
+        payload.priority,
+        payload.isArchived ? 1 : 0,
         payload.id,
       ],
     );
