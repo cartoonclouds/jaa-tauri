@@ -35,6 +35,7 @@ Thumbs.db
 # Tauri / Rust
 src-tauri/target/
 src-tauri/target_check_temp/
+applyflow.db
 
 # Rust backup files
 **/*.rs.bk
