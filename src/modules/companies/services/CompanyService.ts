@@ -5,7 +5,7 @@ import {
   type CompanyUpdatePayload,
   type ICompanyRepository,
 } from "@modules/companies/repositories/CompanyRepository";
-import { CompanySchema } from "@shared/domain/zod/company.schema";
+import { CompanySchema } from "@modules/companies/domain/zod/company.schema";
 
 export class CompanyService {
   constructor(private readonly repository: ICompanyRepository) {}

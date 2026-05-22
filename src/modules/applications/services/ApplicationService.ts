@@ -5,7 +5,7 @@ import type {
 import type { DatatablePageQuery } from "@shared/types";
 
 import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
-import { ApplicationSchema } from "@shared/domain/zod/application.schema";
+import { ApplicationSchema } from "@modules/applications/domain/zod/application.schema";
 
 export class ApplicationService {
   constructor(private readonly repository: IApplicationRepository) {}

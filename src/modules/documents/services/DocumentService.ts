@@ -5,7 +5,7 @@ import {
   type DocumentUpdatePayload,
   type IDocumentRepository,
 } from "@modules/documents/repositories/DocumentRepository";
-import { DocumentSchema } from "@shared/domain/zod/document.schema";
+import { DocumentSchema } from "@modules/documents/domain/zod/document.schema";
 
 export class DocumentService {
   constructor(private readonly repository: IDocumentRepository) {}

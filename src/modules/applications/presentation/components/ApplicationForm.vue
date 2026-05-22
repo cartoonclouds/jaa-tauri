@@ -16,7 +16,7 @@
   } from "@modules/applications/types/presentation";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
-  import { ApplicationFormSchema } from "@shared/domain/zod/application.schema";
+  import { ApplicationFormSchema } from "@modules/applications/domain/zod/application.schema";
   import { computed } from "vue";
 
   interface Props {

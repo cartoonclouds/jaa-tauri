@@ -1,12 +1,18 @@
 <script setup lang="ts">
+  import { toErrorMessage } from "@shared/utils/error";
   import { usePrimeVue } from "primevue/config";
   import { useToast } from "primevue/usetoast";
   import { ref } from "vue";
 
   import { useFileSystem } from "@/composables/useFileSystem";
 
-  // 1 MB limit for demonstration purposes
-  const MAX_FILE_SIZE_BYTES = 1000000;
+  interface FileUploadProps {
+    uploadPath?: string;
+  }
+
+  const props = withDefaults(defineProps<FileUploadProps>(), {
+    uploadPath: "uploads",
+  });
 
   const $primevue = usePrimeVue();
   const toast = useToast();
@@ -28,21 +34,29 @@
   type RemoveFileCallback = (index: number) => void;
   type UploadCallback = () => void;
 
-  const updateTotalSizePercent = (): void => {
-    totalSizePercent.value = Math.min(
-      100,
-      Math.round((totalSize.value / MAX_FILE_SIZE_BYTES) * 100),
-    );
+  const updateTotalSizePercent = (files: UploadFile[]): void => {
+    totalSize.value = files.reduce((size, file) => size + file.size, 0);
+
+    if (!totalSize.value) {
+      totalSizePercent.value = 0;
+      return;
+    }
+
+    // Unlimited size mode: selection is always considered within bounds.
+    totalSizePercent.value = 100;
   };
 
   const onRemoveTemplatingFile = (
-    file: UploadFile,
     removeFileCallback: RemoveFileCallback,
     index: number,
   ): void => {
     removeFileCallback(index);
-    totalSize.value = Math.max(0, totalSize.value - file.size);
-    updateTotalSizePercent();
+
+    const remainingFiles = selectedFiles.value.filter(
+      (_, currentIndex) => currentIndex !== index,
+    );
+    selectedFiles.value = remainingFiles;
+    updateTotalSizePercent(remainingFiles);
   };
 
   const onClearTemplatingUpload = (clear: ClearCallback): void => {
@@ -54,15 +68,11 @@
 
   const onSelectedFiles = (event: FileSelectEvent): void => {
     selectedFiles.value = event.files;
-    totalSize.value = selectedFiles.value.reduce(
-      (size, file) => size + file.size,
-      0,
-    );
-    updateTotalSizePercent();
+    updateTotalSizePercent(selectedFiles.value);
   };
 
   const uploadEvent = (callback: UploadCallback): void => {
-    updateTotalSizePercent();
+    updateTotalSizePercent(selectedFiles.value);
     callback();
   };
 
@@ -72,11 +82,15 @@
         return;
       }
 
-      await writeBrowserFilesToAppLocalData(selectedFiles.value, "uploads", {
-        writeOptions: {
-          create: true,
+      await writeBrowserFilesToAppLocalData(
+        selectedFiles.value,
+        props.uploadPath,
+        {
+          writeOptions: {
+            create: true,
+          },
         },
-      });
+      );
 
       toast.add({
         severity: "info",
@@ -88,7 +102,7 @@
       toast.add({
         severity: "error",
         summary: "Upload failed",
-        detail: error instanceof Error ? error.message : "Unknown error",
+        detail: toErrorMessage(error),
         life: 4000,
       });
     }
@@ -106,10 +120,9 @@
     <Toast />
     <FileUpload
       name="demo[]"
-      url="/api/upload"
+      url="/upload"
       :multiple="true"
       accept="image/*"
-      :max-file-size="1000000"
       @upload="onTemplatedUpload"
       @select="onSelectedFiles"
     >
@@ -147,9 +160,7 @@
             :show-value="false"
             class="md:w-20rem h-1 w-full md:ml-auto"
           >
-            <span class="whitespace-nowrap"
-              >{{ formatSize(totalSize) }} / 1 MB</span
-            >
+            <span class="whitespace-nowrap">{{ formatSize(totalSize) }}</span>
           </ProgressBar>
         </div>
       </template>
@@ -191,11 +202,7 @@
                   rounded
                   severity="danger"
                   @click="
-                    onRemoveTemplatingFile(
-                      file,
-                      removeFileCallback,
-                      Number(index),
-                    )
+                    onRemoveTemplatingFile(removeFileCallback, Number(index))
                   "
                 />
               </div>

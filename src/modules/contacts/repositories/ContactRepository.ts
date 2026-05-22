@@ -6,7 +6,7 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import { toDate } from "@shared/utils/toDate";
+import { mapContactRowToEntity } from "@modules/contacts/application/mappers/mapContactRow";
 
 export type ContactCreatePayload = Pick<
   Contact,
@@ -33,39 +33,39 @@ export interface IContactRepository extends IRepository<
 export class ContactRepository implements IContactRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  private mapContactRow(row: Record<string, unknown>): Contact {
-    return {
-      id: String(row.id),
-      companyId: (row.company_id as string | null) ?? null,
-      fullName: String(row.full_name),
-      email: (row.email as string | null) ?? null,
-      phone: (row.phone as string | null) ?? null,
-      linkedinUrl: (row.linkedin_url as string | null) ?? null,
-      type: row.type as Contact["type"],
-      notes: (row.notes as string | null) ?? null,
-      createdAt: toDate(row.created_at),
-      updatedAt: toDate(row.updated_at),
-    };
-  }
-
   async list(): Promise<Contact[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM contacts ORDER BY created_at DESC",
     );
-    return rows.map((row) => this.mapContactRow(row));
+    return rows.map((row) => mapContactRowToEntity(row));
   }
 
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Contact>> {
+    const searchableColumns = ["full_name", "email", "type"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM contacts WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR type LIKE $1",
+          `SELECT COUNT(*) AS total
+           FROM contacts
+           WHERE ${searchWhereClause}`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -76,7 +76,7 @@ export class ContactRepository implements IContactRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM contacts
-           WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR type LIKE $1
+           WHERE ${searchWhereClause}
            ORDER BY created_at DESC
            LIMIT $2
            OFFSET $3`,
@@ -92,7 +92,7 @@ export class ContactRepository implements IContactRepository {
         );
 
     return {
-      items: listRows.map((row) => this.mapContactRow(row)),
+      items: listRows.map((row) => mapContactRowToEntity(row)),
       total: totalRows[0]?.total ?? 0,
     };
   }

@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
-import { ProfileSchema } from "@shared/domain/zod/profile.schema";
+import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import { z } from "zod";
 
 export type ProfileCreatePayload = Pick<Profile, "fullName"> &
@@ -61,14 +61,29 @@ export class ProfileRepository implements IProfileRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Profile>> {
+    const searchableColumns = ["full_name", "email", "headline"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM profiles WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR COALESCE(headline, '') LIKE $1",
+          `SELECT COUNT(*) AS total
+           FROM profiles
+           WHERE ${searchWhereClause}`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -79,7 +94,7 @@ export class ProfileRepository implements IProfileRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM profiles
-           WHERE full_name LIKE $1 OR COALESCE(email, '') LIKE $1 OR COALESCE(headline, '') LIKE $1
+           WHERE ${searchWhereClause}
            ORDER BY created_at DESC
            LIMIT $2
            OFFSET $3`,
@@ -129,9 +144,9 @@ export class ProfileRepository implements IProfileRepository {
         JSON.stringify(validated.preferredLocations),
         validated.remotePreference,
         JSON.stringify(validated.skills),
-        validated.workEligibility ?? "",
+        validated.workEligibility,
         validated.noticePeriodDays ?? null,
-        validated.interviewAvailability ?? "",
+        validated.interviewAvailability,
       ],
     );
     return id;
@@ -180,11 +195,13 @@ export class ProfileRepository implements IProfileRepository {
         validated.locationText ?? null,
         validated.desiredSalary ?? null,
         validated.salaryCurrency ?? null,
-        validated.preferredLocations
-          ? JSON.stringify(validated.preferredLocations)
-          : null,
+        validated.preferredLocations === undefined
+          ? null
+          : JSON.stringify(validated.preferredLocations),
         validated.remotePreference ?? null,
-        validated.skills ? JSON.stringify(validated.skills) : null,
+        validated.skills === undefined
+          ? null
+          : JSON.stringify(validated.skills),
         validated.workEligibility ?? null,
         validated.noticePeriodDays ?? null,
         validated.interviewAvailability ?? null,

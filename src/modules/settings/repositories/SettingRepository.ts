@@ -41,14 +41,29 @@ export class SettingRepository implements ISettingRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Setting>> {
+    const searchableColumns = ["theme", "locale"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM settings WHERE theme LIKE $1 OR locale LIKE $1",
+          `SELECT COUNT(*) AS total
+           FROM settings
+           WHERE ${searchWhereClause}`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -59,7 +74,7 @@ export class SettingRepository implements ISettingRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM settings
-           WHERE theme LIKE $1 OR locale LIKE $1
+           WHERE ${searchWhereClause}
            ORDER BY created_at DESC
            LIMIT $2
            OFFSET $3`,

@@ -5,7 +5,7 @@ import {
   type ContactUpdatePayload,
   type IContactRepository,
 } from "@modules/contacts/repositories/ContactRepository";
-import { ContactSchema } from "@shared/domain/zod/contact.schema";
+import { ContactSchema } from "@modules/contacts/domain/zod/contact.schema";
 
 export class ContactService {
   constructor(private readonly repository: IContactRepository) {}

@@ -28,39 +28,37 @@ import {
 } from "./settings.repository";
 
 /**
- * Settings service for managing app preferences.
+ * Settings service class for managing app preferences.
  */
-export const useSettingsService = () => {
+export class SettingsService {
   /**
    * Get all settings.
    */
-  const fetchSettings = async (): Promise<AppSettings> => {
+  async fetchSettings(): Promise<AppSettings> {
     return await getSettings();
-  };
+  }
 
   /**
    * Update multiple settings at once.
    */
-  const updateSettings = async (
-    updates: Partial<AppSettings>,
-  ): Promise<void> => {
+  async updateSettings(updates: Partial<AppSettings>): Promise<void> {
     await setSettings(updates);
-  };
+  }
 
   /**
    * Update a single setting.
    */
-  const updateSetting = async <K extends keyof AppSettings>(
+  async updateSetting<K extends keyof AppSettings>(
     key: K,
     value: AppSettings[K],
-  ): Promise<void> => {
+  ): Promise<void> {
     await setSetting(key, value);
-  };
+  }
 
   /**
    * Theme management.
    */
-  const themeService = {
+  readonly themeService = {
     get: getThemeSettings,
     set: setThemeSettings,
   };
@@ -68,7 +66,7 @@ export const useSettingsService = () => {
   /**
    * UI preferences management.
    */
-  const uiService = {
+  readonly uiService = {
     get: getUiPreferences,
     set: setUiPreferences,
     setTableColumnVisibility,
@@ -78,7 +76,7 @@ export const useSettingsService = () => {
   /**
    * Notification preferences management.
    */
-  const notificationService = {
+  readonly notificationService = {
     get: getNotificationSettings,
     set: setNotificationSettings,
   };
@@ -86,7 +84,7 @@ export const useSettingsService = () => {
   /**
    * Developer settings management.
    */
-  const developerService = {
+  readonly developerService = {
     get: getDeveloperSettings,
     set: setDeveloperSettings,
   };
@@ -94,23 +92,24 @@ export const useSettingsService = () => {
   /**
    * Recent searches management.
    */
-  const recentSearchService = {
+  readonly recentSearchService = {
     add: addRecentSearch,
     clear: clearRecentSearches,
   };
 
-  return {
-    fetchSettings,
-    updateSettings,
-    updateSetting,
-    themeService,
-    uiService,
-    notificationService,
-    developerService,
-    recentSearchService,
-    getOnboardingCompleted,
-    setOnboardingCompleted,
-  };
-};
+  async getOnboardingCompleted(): Promise<boolean> {
+    return await getOnboardingCompleted();
+  }
 
-export type SettingsService = ReturnType<typeof useSettingsService>;
+  async setOnboardingCompleted(value: boolean): Promise<void> {
+    await setOnboardingCompleted(value);
+  }
+}
+
+let settingsServiceInstance: SettingsService | null = null;
+
+export function useSettingsService(): SettingsService {
+  settingsServiceInstance ??= new SettingsService();
+
+  return settingsServiceInstance;
+}

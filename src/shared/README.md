@@ -14,7 +14,7 @@ For a high-level overview of how shared code fits into the overall app, see the 
 - **ui**: Shared presentational components.
 - **utils**: Pure utility helpers.
 - **types**: Shared TypeScript types.
-- **settings**: Lightweight app preferences (theme and UI settings) using Tauri Store.
+- **settings**: Lightweight app preferences (theme and UI settings) using the app database.
 
 ## Architecture Pattern
 
@@ -32,7 +32,7 @@ Real business data stored in SQLite database:
 - Activity logs
 - Search indexes
 
-### Pinia (UI State)
+### Composable Local State (UI State)
 
 Reactive UI state for immediate user interactions:
 
@@ -42,18 +42,18 @@ Reactive UI state for immediate user interactions:
 - Current filter selections
 - UI mode toggles
 
-### Pinia Colada (Query Cache)
+### Service/Repository Data Flow
 
-Query results and mutations with automatic caching:
+Query results and mutations handled by service and repository methods:
 
 - Fetched applications
 - Entity lists
 - Search results
 - API responses
 
-### Tauri Store (Preferences)
+### Settings Persistence (Preferences)
 
-Lightweight user preferences stored outside SQLite:
+Lightweight user preferences stored in the local app database:
 
 - Theme preference (light/dark/auto)
 - UI layout preferences (sidebar collapse, column visibility)
@@ -71,6 +71,6 @@ To add a new setting:
 2. Add default value in `settings/settings.repository.ts`
 3. Add getter/setter methods in repository if specialized access needed
 4. Expose via `settings.service.ts`
-5. Use from components via service or Pinia store
+5. Use from components via service and local composable state when needed
 
 Keep this layer framework-light when possible.

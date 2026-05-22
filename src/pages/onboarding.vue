@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import AppOnboardingWizard from "@modules/onboarding/presentation/components/AppOnboardingWizard.vue";
+  import { toErrorMessage } from "@shared/utils/error";
   import { getCurrentWindow } from "@tauri-apps/api/window";
 
   import { definePageMeta } from "#imports";
@@ -10,7 +11,10 @@
     try {
       await getCurrentWindow().close();
     } catch (error) {
-      console.error("Failed to close onboarding window:", error);
+      console.error(
+        "Failed to close onboarding window:",
+        toErrorMessage(error),
+      );
     }
   }
 </script>

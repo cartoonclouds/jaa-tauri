@@ -2,11 +2,19 @@ import { ApplicationRepository } from "@modules/applications/repositories/Applic
 import { ApplicationService } from "@modules/applications/services/ApplicationService";
 import { useNuxtApp } from "nuxt/app";
 
+let applicationServiceInstance: ApplicationService | null = null;
+
 /**
  * Create an application service instance backed by the injected database driver.
  */
 export function useApplicationService(): ApplicationService {
-  const { $database } = useNuxtApp();
-  const database = $database;
-  return new ApplicationService(new ApplicationRepository(database));
+  if (!applicationServiceInstance) {
+    const { $database } = useNuxtApp();
+    const database = $database;
+    applicationServiceInstance = new ApplicationService(
+      new ApplicationRepository(database),
+    );
+  }
+
+  return applicationServiceInstance;
 }

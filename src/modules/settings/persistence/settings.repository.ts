@@ -14,6 +14,7 @@ import type {
 } from "./types";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
+import { toErrorMessage } from "@shared/utils/error";
 import { parseStringArray } from "@shared/utils/parse";
 import { z } from "zod";
 
@@ -209,7 +210,10 @@ export async function initializeSettingsStore(
   try {
     await readSettingsRow(db);
   } catch (error) {
-    console.error("Failed to initialize settings persistence:", error);
+    console.error(
+      "Failed to initialize settings persistence:",
+      toErrorMessage(error),
+    );
     throw error;
   }
 }

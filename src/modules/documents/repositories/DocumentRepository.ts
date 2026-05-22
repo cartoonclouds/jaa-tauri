@@ -6,7 +6,7 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import { toDate } from "@shared/utils/toDate";
+import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
 
 export type DocumentCreatePayload = Pick<
   Document,
@@ -27,38 +27,39 @@ export interface IDocumentRepository extends IRepository<
 export class DocumentRepository implements IDocumentRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  private mapDocumentRow(row: Record<string, unknown>): Document {
-    return {
-      id: String(row.id),
-      title: String(row.title),
-      kind: String(row.kind),
-      filePath: String(row.file_path),
-      mimeType: (row.mime_type as string | null) ?? null,
-      sizeBytes: (row.size_bytes as number | null) ?? null,
-      checksum: (row.checksum as string | null) ?? null,
-      createdAt: toDate(row.created_at),
-      updatedAt: toDate(row.updated_at),
-    };
-  }
-
   async list(): Promise<Document[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM documents ORDER BY created_at DESC",
     );
-    return rows.map((row) => this.mapDocumentRow(row));
+    return rows.map((row) => mapDocumentRowToEntity(row));
   }
 
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Document>> {
+    const searchableColumns = ["title", "kind", "file_path"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM documents WHERE title LIKE $1 OR kind LIKE $1 OR file_path LIKE $1",
+          `SELECT COUNT(*) AS total
+           FROM documents
+           WHERE ${searchWhereClause}`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -69,7 +70,7 @@ export class DocumentRepository implements IDocumentRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM documents
-           WHERE title LIKE $1 OR kind LIKE $1 OR file_path LIKE $1
+           WHERE ${searchWhereClause}
            ORDER BY created_at DESC
            LIMIT $2
            OFFSET $3`,
@@ -85,7 +86,7 @@ export class DocumentRepository implements IDocumentRepository {
         );
 
     return {
-      items: listRows.map((row) => this.mapDocumentRow(row)),
+      items: listRows.map((row) => mapDocumentRowToEntity(row)),
       total: totalRows[0]?.total ?? 0,
     };
   }

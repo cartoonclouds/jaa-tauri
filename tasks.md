@@ -29,3 +29,5 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 **Should be in its own module**
 
 Add the Tauri plugin https://v2.tauri.app/plugin/logging/ and update the configuration and any references which would use this.
+
+Review all files and make sure they follow the already established conventions/standards. Then update the copilot instructions and prompts to adhere to to these established conventions/standards. Also add to these files an instruction to always add docblocks to generated code.

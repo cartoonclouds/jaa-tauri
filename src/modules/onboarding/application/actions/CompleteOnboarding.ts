@@ -6,8 +6,8 @@ import type {
 
 import { useDocumentService } from "@modules/documents";
 import { useProfileService } from "@modules/profile";
-import { ProfileSchema } from "@shared/domain/zod/profile.schema";
-import { setOnboardingCompleted } from "@shared/settings";
+import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
+import { setOnboardingCompleted } from "@modules/settings/persistence";
 
 import { getResumeDocumentTitle } from "./onboardingHelpers";
 

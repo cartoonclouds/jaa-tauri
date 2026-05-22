@@ -1,4 +1,8 @@
 import type { Application } from "@modules/applications/domain/entities/Application";
+import type {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+} from "@modules/applications/types/enums";
 
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
@@ -18,12 +22,8 @@ export function mapApplicationRowToEntity(
     locationText: (row.location_text as string | null) ?? null,
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
-    attendanceType:
-      (row.attendance_type as import("../../types/enums").ApplicationAttendanceType) ??
-      null,
-    employmentType:
-      (row.employment_type as import("../../types/enums").ApplicationEmploymentType) ??
-      null,
+    attendanceType: row.attendance_type as ApplicationAttendanceType | null,
+    employmentType: row.employment_type as ApplicationEmploymentType | null,
     salaryMin: (row.salary_min as number | null) ?? null,
     salaryMax: (row.salary_max as number | null) ?? null,
     currency: (row.currency as string | null) ?? null,

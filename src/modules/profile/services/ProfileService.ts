@@ -5,7 +5,7 @@ import {
   type ProfileCreatePayload,
   type ProfileUpdatePayload,
 } from "@modules/profile/repositories/ProfileRepository";
-import { ProfileSchema } from "@shared/domain/zod/profile.schema";
+import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 
 const ProfileNameSchema = ProfileSchema.pick({ fullName: true });
 

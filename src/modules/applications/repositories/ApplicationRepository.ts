@@ -1,7 +1,3 @@
-import type {
-  ApplicationAttendanceType,
-  ApplicationEmploymentType,
-} from "../types/enums";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Application } from "@modules/applications/domain/entities/Application";
 import type {
@@ -14,7 +10,7 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import { toDate, toNullableDate } from "@shared/utils/toDate";
+import { mapApplicationRowToEntity } from "@modules/applications/application/mappers/mapApplicationRow";
 
 export interface IApplicationRepository extends IRepository<
   Application,
@@ -29,57 +25,57 @@ export interface IApplicationRepository extends IRepository<
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  private mapApplicationRow(row: Record<string, unknown>): Application {
-    return {
-      id: String(row.id),
-      companyId: (row.company_id as string | null) ?? null,
-      title: String(row.title),
-      status: String(row.status),
-      sourceUrl: (row.source_url as string | null) ?? null,
-      appliedAt: toNullableDate(row.applied_at),
-      locationText: (row.location_text as string | null) ?? null,
-      locationLat: (row.location_lat as number | null) ?? null,
-      locationLng: (row.location_lng as number | null) ?? null,
-      attendanceType:
-        (row.attendance_type as ApplicationAttendanceType | null) ?? null,
-      employmentType:
-        (row.employment_type as ApplicationEmploymentType | null) ?? null,
-      salaryMin: (row.salary_min as number | null) ?? null,
-      salaryMax: (row.salary_max as number | null) ?? null,
-      currency: (row.currency as string | null) ?? null,
-      description: (row.description as string | null) ?? null,
-      interviewProcess: (row.interview_process as string | null) ?? null,
-      benefits: (row.benefits as string | null) ?? null,
-      priority: Number(row.priority ?? 3),
-      isArchived: Number(row.is_archived ?? 0) === 1,
-      isDeleted: Number(row.is_deleted ?? 0) === 1,
-      createdAt: toDate(row.created_at),
-      updatedAt: toDate(row.updated_at),
-    };
-  }
-
   async list(): Promise<Application[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM applications WHERE is_deleted = 0 ORDER BY created_at DESC",
     );
 
-    return rows.map((row) => this.mapApplicationRow(row));
+    return rows.map((row) => mapApplicationRowToEntity(row));
   }
 
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Application>> {
+    const searchableColumns = ["title", "status", "location_text"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
+
+    const sortableColumns: Record<string, string> = {
+      title: "title",
+      status: "status",
+      locationText: "location_text",
+      priority: "priority",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    };
+    const orderByColumn = query.sortField
+      ? sortableColumns[query.sortField]
+      : undefined;
+    const orderByDirection = query.sortOrder === "asc" ? "ASC" : "DESC";
+    const orderByClause = orderByColumn
+      ? `${orderByColumn} ${orderByDirection}`
+      : "created_at DESC";
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
           `SELECT COUNT(*) AS total
            FROM applications
            WHERE is_deleted = 0
-             AND (title LIKE $1 OR status LIKE $1 OR COALESCE(location_text, '') LIKE $1)`,
+             AND (${searchWhereClause})`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -93,8 +89,8 @@ export class ApplicationRepository implements IApplicationRepository {
           `SELECT *
            FROM applications
            WHERE is_deleted = 0
-             AND (title LIKE $1 OR status LIKE $1 OR COALESCE(location_text, '') LIKE $1)
-           ORDER BY created_at DESC
+             AND (${searchWhereClause})
+           ORDER BY ${orderByClause}
            LIMIT $2
            OFFSET $3`,
           [`%${search}%`, rows, page * rows],
@@ -103,14 +99,14 @@ export class ApplicationRepository implements IApplicationRepository {
           `SELECT *
            FROM applications
            WHERE is_deleted = 0
-           ORDER BY created_at DESC
+           ORDER BY ${orderByClause}
            LIMIT $1
            OFFSET $2`,
           [rows, page * rows],
         );
 
     return {
-      items: listRows.map((row) => this.mapApplicationRow(row)),
+      items: listRows.map((row) => mapApplicationRowToEntity(row)),
       total: totalRows[0]?.total ?? 0,
     };
   }

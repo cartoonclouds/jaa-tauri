@@ -16,7 +16,7 @@ flowchart TD
 
   subgraph Shared[Shared Layer]
     ZodSchemas["Zod Schemas"]
-    PiniaStores["Pinia Stores"]
+    ComposableState["Composable State"]
     SettingsService["Settings Service"]
     SharedUtils["Shared Utils/Types"]
   end
@@ -46,9 +46,9 @@ flowchart TD
   Actions -->|persist| Repositories
   Repositories -->|query| TauriSQL
   Repositories -->|map| DomainEntities
-  Services -->|inject| PiniaStores
-  PiniaStores -->|reactive| Pages
-  SettingsService -->|sync| PiniaStores
+  Services -->|provide| ComposableState
+  ComposableState -->|reactive| Pages
+  SettingsService -->|read/write| TauriSQL
   SettingsService -->|write/read| TauriStore
   Pages -->|use| SettingsService
   Pages -->|use| useChildWebviewWindow

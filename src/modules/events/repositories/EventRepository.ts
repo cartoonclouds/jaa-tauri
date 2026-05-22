@@ -2,7 +2,7 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Event } from "@modules/events/domain/entities/Event";
 import type { IRepository } from "@shared/types";
 
-import { toDate, toNullableDate } from "@shared/utils/toDate";
+import { mapEventRowToEntity } from "@modules/events/application/mappers/mapEventRow";
 
 export type EventCreatePayload = Pick<
   Event,
@@ -23,17 +23,7 @@ export class EventRepository implements IEventRepository {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM events ORDER BY created_at DESC",
     );
-    return rows.map((row) => ({
-      id: String(row.id),
-      applicationId: String(row.application_id),
-      contactId: (row.contact_id as string | null) ?? null,
-      type: String(row.type),
-      title: String(row.title),
-      description: (row.description as string | null) ?? null,
-      eventAt: toNullableDate(row.event_at),
-      createdAt: toDate(row.created_at),
-      updatedAt: toDate(row.updated_at),
-    }));
+    return rows.map((row) => mapEventRowToEntity(row));
   }
 
   async create(payload: EventCreatePayload): Promise<string> {

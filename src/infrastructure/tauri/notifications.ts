@@ -3,6 +3,7 @@
  * Provides low-level integration with Tauri's notification plugin.
  */
 
+import { toErrorMessage } from "@shared/utils/error";
 import {
   isPermissionGranted,
   requestPermission,
@@ -96,7 +97,7 @@ export async function sendTauriNotification(
 
     return { success: true, id: String(Date.now()) };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = toErrorMessage(error);
     console.error("[Notifications] Tauri notification failed:", message);
     return { success: false, error: message };
   }

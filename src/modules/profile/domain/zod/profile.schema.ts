@@ -6,7 +6,7 @@ import {
   NullableStringSchema,
   NullableUrlSchema,
   UuidSchema,
-} from "./fields";
+} from "@shared/domain/zod/fields";
 
 export const ProfileSchema = z.object({
   id: UuidSchema,

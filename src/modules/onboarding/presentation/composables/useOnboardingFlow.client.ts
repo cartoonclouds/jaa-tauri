@@ -8,6 +8,7 @@ import {
   mergeCommaSeparated,
 } from "@modules/onboarding/application/actions/onboardingHelpers";
 import { useProfileService } from "@modules/profile";
+import { toErrorMessage } from "@shared/utils/error";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useStepper } from "@vueuse/core";
@@ -55,9 +56,9 @@ function mapProfileToUserProfile(profile: Profile): UserProfile {
     skills: [...profile.skills],
     linkedInUrl: profile.linkedinUrl ?? "",
     githubUrl: profile.githubUrl ?? "",
-    workEligibility: profile.workEligibility ?? "",
+    workEligibility: profile.workEligibility,
     noticePeriodDays: profile.noticePeriodDays ?? null,
-    interviewAvailability: profile.interviewAvailability ?? "",
+    interviewAvailability: profile.interviewAvailability,
   };
 }
 
@@ -127,7 +128,10 @@ export function useOnboardingFlow() {
         resumePath.value = latestResume.filePath;
       }
     } catch (error) {
-      console.error("Failed to hydrate onboarding data:", error);
+      console.error(
+        "Failed to hydrate onboarding data:",
+        toErrorMessage(error),
+      );
     } finally {
       hydrating.value = false;
     }
@@ -243,10 +247,10 @@ export function useOnboardingFlow() {
       }
     } catch (error) {
       parsedResume.value = null;
-      errors.value.resume =
-        error instanceof Error
-          ? error.message
-          : "Unable to parse selected resume file.";
+      errors.value.resume = toErrorMessage(
+        error,
+        "Unable to parse selected resume file.",
+      );
     } finally {
       parsingResume.value = false;
     }
@@ -271,8 +275,7 @@ export function useOnboardingFlow() {
         resumePath: resumePath.value,
       });
     } catch (error) {
-      globalError.value =
-        error instanceof Error ? error.message : "Failed to save onboarding.";
+      globalError.value = toErrorMessage(error, "Failed to save onboarding.");
       throw error;
     } finally {
       saving.value = false;

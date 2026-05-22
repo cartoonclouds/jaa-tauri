@@ -1,6 +1,9 @@
+import {
+  DateTimeSchema,
+  NullableStringSchema,
+  UuidSchema,
+} from "@shared/domain/zod/fields";
 import { z } from "zod";
-
-import { DateTimeSchema, NullableStringSchema, UuidSchema } from "./fields";
 
 export const TagSchema = z.object({
   id: UuidSchema,

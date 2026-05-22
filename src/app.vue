@@ -3,7 +3,8 @@
   import {
     getOnboardingCompleted,
     setOnboardingCompleted,
-  } from "@shared/settings";
+  } from "@modules/settings/persistence";
+  import { toErrorMessage } from "@shared/utils/error";
   import { invoke, isTauri } from "@tauri-apps/api/core";
   import { onMounted } from "vue";
 
@@ -18,7 +19,7 @@
       try {
         await invoke("close_splashscreen");
       } catch (error) {
-        console.error("Failed to close splashscreen:", error);
+        console.error("Failed to close splashscreen:", toErrorMessage(error));
       }
     }
 
@@ -50,7 +51,7 @@
         title: "Complete Onboarding",
       });
     } catch (error) {
-      console.error("Failed to load onboarding state:", error);
+      console.error("Failed to load onboarding state:", toErrorMessage(error));
     }
   });
 </script>

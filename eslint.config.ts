@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 import perfectionist from "eslint-plugin-perfectionist";
+import unusedImports from "eslint-plugin-unused-imports";
 import vue from "eslint-plugin-vue";
 import { defineConfig } from "eslint/config";
 import globals from "globals";
@@ -58,6 +59,7 @@ export default defineConfig(
     plugins: {
       vue,
       perfectionist,
+      "unused-imports": unusedImports,
     },
 
     rules: {
@@ -82,7 +84,11 @@ export default defineConfig(
         },
       ],
 
-      "@typescript-eslint/no-unused-vars": [
+      "@typescript-eslint/no-unused-vars": "off",
+
+      "unused-imports/no-unused-imports": "error",
+
+      "unused-imports/no-unused-vars": [
         "error",
         {
           argsIgnorePattern: "^_",
@@ -103,6 +109,19 @@ export default defineConfig(
       "@typescript-eslint/explicit-function-return-type": "off",
 
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/services/[A-Z]*Service"],
+              message:
+                "Do not import service classes directly. Import the associated use*Service composable instead.",
+            },
+          ],
+        },
+      ],
 
       /*
        |--------------------------------------------------------------------------
@@ -237,6 +256,14 @@ export default defineConfig(
 
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+
+  {
+    files: ["src/modules/**/services/use*Service.ts"],
+
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
 

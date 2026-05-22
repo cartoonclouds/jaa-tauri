@@ -4,7 +4,7 @@ import type {
   ApplicationUpdatePayload,
 } from "@modules/applications/types/payloads";
 
-import { useApplicationService } from "@modules/applications/services/useApplicationService";
+import { useApplicationService } from "@modules/applications";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
 /**

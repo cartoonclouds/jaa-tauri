@@ -3,7 +3,7 @@ import {
   type EventUpdatePayload,
   type IEventRepository,
 } from "@modules/events/repositories/EventRepository";
-import { EventSchema } from "@shared/domain/zod/event.schema";
+import { EventSchema } from "@modules/events/domain/zod/event.schema";
 
 export class EventService {
   constructor(private readonly repository: IEventRepository) {}

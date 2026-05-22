@@ -8,11 +8,21 @@ import { toDate, toNullableDate } from "@shared/utils/toDate";
 export function mapNotificationRowToEntity(
   row: Record<string, unknown>,
 ): Notification {
+  const severity = row.severity;
+
   return {
     id: String(row.id),
     applicationId: (row.application_id as string | null) ?? null,
     eventId: (row.event_id as string | null) ?? null,
-    severity: (row.severity as Notification["severity"]) ?? "info",
+    severity:
+      severity === "info" ||
+      severity === "success" ||
+      severity === "warning" ||
+      severity === "error"
+        ? severity
+        : severity === "warn"
+          ? "warning"
+          : "info",
     title: String(row.title),
     body: String(row.body),
     isRead: Number(row.is_read ?? 0) === 1,

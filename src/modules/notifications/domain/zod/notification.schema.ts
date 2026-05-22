@@ -5,7 +5,7 @@ import {
   NullableDateTimeSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "./fields";
+} from "@shared/domain/zod/fields";
 
 export const SeveritySchema = z.enum(["info", "warning", "success", "error"]);
 

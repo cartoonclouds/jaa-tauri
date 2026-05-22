@@ -26,8 +26,8 @@ See the [top-level README](../README.md#system-architecture-overview) for the ca
 ## State boundaries
 
 - SQLite: persistent company records and timeline data.
-- Pinia: ephemeral UI state such as active selection, view mode, and layout.
-- Pinia Colada: async query/mutation cache.
+- Composables (`ref`, `reactive`, `computed`): ephemeral UI state such as active selection, view mode, and layout.
+- Service + repository classes: async query/mutation orchestration.
 - Tauri Store: lightweight user preferences.
 
 ## Nuxt Vite Notes

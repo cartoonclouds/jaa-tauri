@@ -6,7 +6,7 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import { toDate, toNullableDate } from "@shared/utils/toDate";
+import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
 
 export type NotificationCreatePayload = Pick<
   Notification,
@@ -36,40 +36,39 @@ export interface INotificationRepository extends IRepository<
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  private mapNotificationRow(row: Record<string, unknown>): Notification {
-    return {
-      id: String(row.id),
-      applicationId: (row.application_id as string | null) ?? null,
-      eventId: (row.event_id as string | null) ?? null,
-      severity: row.severity as Notification["severity"],
-      title: String(row.title),
-      body: String(row.body),
-      isRead: Number(row.is_read ?? 0) === 1,
-      scheduledFor: toNullableDate(row.scheduled_for),
-      sentAt: toNullableDate(row.sent_at),
-      createdAt: toDate(row.created_at),
-      updatedAt: toDate(row.updated_at),
-    };
-  }
-
   async list(): Promise<Notification[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM notifications ORDER BY created_at DESC",
     );
-    return rows.map((row) => this.mapNotificationRow(row));
+    return rows.map((row) => mapNotificationRowToEntity(row));
   }
 
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Notification>> {
+    const searchableColumns = ["title", "body", "severity"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM notifications WHERE title LIKE $1 OR body LIKE $1 OR severity LIKE $1",
+          `SELECT COUNT(*) AS total
+           FROM notifications
+           WHERE ${searchWhereClause}`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -80,7 +79,7 @@ export class NotificationRepository implements INotificationRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM notifications
-           WHERE title LIKE $1 OR body LIKE $1 OR severity LIKE $1
+           WHERE ${searchWhereClause}
            ORDER BY created_at DESC
            LIMIT $2
            OFFSET $3`,
@@ -96,7 +95,7 @@ export class NotificationRepository implements INotificationRepository {
         );
 
     return {
-      items: listRows.map((row) => this.mapNotificationRow(row)),
+      items: listRows.map((row) => mapNotificationRowToEntity(row)),
       total: totalRows[0]?.total ?? 0,
     };
   }

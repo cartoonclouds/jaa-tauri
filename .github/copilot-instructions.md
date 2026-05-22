@@ -9,7 +9,6 @@ Before suggesting architecture, APIs, configuration, or code for any package, ch
 - Nuxt
 - Vue
 - Tauri
-- Pinia / Pinia Colada
 - VueUse
 - Nuxt UI
 - PrimeVue
@@ -29,8 +28,7 @@ This project uses:
 - Vue 3
 - TypeScript
 - Tauri 2
-- Pinia
-- Pinia Colada
+- Service classes + repositories + composables
 - VueUse
 - Nuxt UI
 - PrimeVue
@@ -59,14 +57,15 @@ Follow strong software engineering conventions:
 - Avoid hidden side effects.
 - Avoid over-engineering and unnecessary abstraction.
 - Follow existing project structure before introducing new patterns.
-- Add tests for new business logic, composables, stores, utilities, and edge cases.
+- Add tests for new business logic, composables, services, utilities, and edge cases.
 - Prefer accessibility-first UI.
+- For module service factories (`use*Service`), return singleton service instances instead of constructing a new service on every call.
 
 ## Nuxt and Vue conventions
 
 - Use Nuxt conventions where possible instead of custom wiring.
 - Keep pages thin.
-- Put domain logic in modules, shared utilities, stores, or services.
+- Put domain logic in modules, shared utilities, composables, or services.
 - Prefer composables for reusable reactive logic.
 - Use Vue 3 Composition API where it fits Nuxt conventions.
 - Avoid direct browser APIs unless guarded for SSR/client context.
@@ -296,6 +295,7 @@ const validated = InsertSchema.parse(data); // throw on failure
 Do:
 
 - Keep pages and components thin.
+- Keep `use*Service` factories singleton-backed (cache one service instance per module factory).
 - When needing icons, use a heroicons package and a NuxtIcon component.
 - For date or date-time picking in forms, use PrimeVue `DatePicker` rather than raw text/date inputs.
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
@@ -305,7 +305,7 @@ Do:
 - Prefer explicit types for public function inputs/outputs. When creating a types file using the following filename convention: `types.d.ts` or `types/index.d.ts`, update the barrel export in the module's `index.ts` file and update any Typescript configuration if necessary.
 - When asked to install a Tauri plugin, check the official Tauri documentation for the latest recommended approach. Follow their guidance for installation, configuration, and usage. Ensure that any new Tauri plugin is properly integrated with the existing Tauri setup in `src-tauri` and that it does not introduce conflicts with current dependencies or configurations.
   After any significant code change, run the test suite to ensure nothing is broken. If new functionality is added, write tests to cover it. If existing tests are affected, update them accordingly. Always maintain a green test suite after your changes. Also run `npm run tauri dev` to ensure the Tauri integration is working correctly with your changes.
-- Don't ever use inline imports such as ` import("@tauri-apps/plugin-notification")`, import the files and needed properties.
+- **Don't ever use inline imports such as ` import("@tauri-apps/plugin-notification")`**, import the files and needed properties at the top if the file.
 
 Don't:
 
@@ -314,3 +314,4 @@ Don't:
 - Do not introduce new top-level architectural patterns without clear justification.
 - Do not use `any` when a safer type can be used.
 - Do not couple domain/application logic to UI frameworks unless required.
+- Do not apply the same `$database` typed import/cast pattern (for example `DatabaseDriver` import plus `as DatabaseDriver`) across every `use*Service` factory and `settings` persistence file. Prefer a single typed source via Nuxt app type augmentation or a shared typed helper.

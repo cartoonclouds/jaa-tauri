@@ -1,6 +1,6 @@
 # Settings Module
 
-Lightweight application preferences and settings stored using Tauri's Store plugin.
+Lightweight application preferences and settings stored in the app database.
 
 Updated: 2026-05-19.
 
@@ -11,16 +11,15 @@ See the [system architecture diagram](../../../README.md#system-architecture-ove
 ## Structure
 
 - **types.d.ts**: Type definitions for all settings
-- **settings.repository.ts**: Typed persistence layer wrapping Tauri Store
-- **settings.service.ts**: High-level service API for settings operations
-- **settings.store.ts**: Optional Pinia store for reactive UI bindings
+- **settings.repository.ts**: Typed persistence layer wrapping the configured database driver
+- **settings.service.ts**: Class-based service API for settings operations
 
 ## Usage
 
 ### Initialize (in app.vue or plugin)
 
 ```typescript
-import { initializeSettingsStore } from "@shared/settings";
+import { initializeSettingsStore } from "@modules/settings/persistence";
 
 // Call once at app startup
 await initializeSettingsStore();
@@ -29,7 +28,7 @@ await initializeSettingsStore();
 ### Using the Service Layer
 
 ```typescript
-import { useSettingsService } from "@shared/settings";
+import { useSettingsService } from "@modules/settings/persistence";
 
 const settingsService = useSettingsService();
 
@@ -44,27 +43,9 @@ await settingsService.themeService.set({ theme: "dark" });
 const theme = await settingsService.themeService.get();
 ```
 
-### Using the Pinia Store (for Reactive UI)
-
-```vue
-<script setup lang="ts">
-  import { useSettingsStore } from "@shared/settings";
-
-  const settings = useSettingsStore();
-  await settings.initialize();
-</script>
-
-<template>
-  <div>
-    <p>Current theme: {{ settings.theme }}</p>
-    <button @click="settings.updateTheme('dark')">Dark Mode</button>
-  </div>
-</template>
-```
-
 ## What Goes Here
 
-✅ **Use Tauri Store for:**
+âœ… **Use settings persistence for:**
 
 - User preferences (theme, layout)
 - UI visibility preferences (sidebar collapse, table columns)
@@ -73,9 +54,11 @@ const theme = await settingsService.themeService.get();
 - Recent searches
 - Lightweight persisted UI state (for example selected tab or split-pane size)
 
+Current implementation persists settings in the `settings` database table via `DatabaseDriver`.
+
 Window state (size and position) is managed by `@tauri-apps/plugin-window-state`.
 
-❌ **DO NOT use for:**
+âŒ **DO NOT use for:**
 
 - Job applications
 - Company data
@@ -86,21 +69,18 @@ Window state (size and position) is managed by `@tauri-apps/plugin-window-state`
 ## Architecture Pattern
 
 ```
-Tauri Store (settings.repository)
-    ↓ (typed API)
+Database (settings.repository)
+    â†“ (typed API)
 Settings Service (settings.service)
-    ↓ (for UI binding)
-Settings Store (Pinia) [optional]
-    ↓
+    â†“
 Vue Components
 ```
 
-For simple preferences without reactive updates, use the service directly. For UI bindings, use the Pinia store which reactively syncs with Tauri Store.
+Use the service directly from components and composables. Add local `ref`/`computed` state at the component layer when reactive bindings are needed.
 
 ## Key Benefits
 
 - **Type-safe**: Fully typed settings interface
-- **Lightweight**: Uses Tauri's native Store plugin
-- **Persistent**: Automatically saved to `settings.json`
-- **Reactive**: Optional Pinia integration for Vue reactivity
+- **Persistent**: Saved in the local app database
+- **Framework-agnostic**: No store framework dependency
 - **Extensible**: Easy to add new settings

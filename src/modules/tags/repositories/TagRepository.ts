@@ -6,7 +6,7 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import { toDate } from "@shared/utils/toDate";
+import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
 
 export type TagCreatePayload = Pick<Tag, "name" | "color">;
 export type TagUpdatePayload = Partial<TagCreatePayload> & { id: string };
@@ -22,32 +22,37 @@ export interface ITagRepository extends IRepository<
 export class TagRepository implements ITagRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
-  private mapTagRow(row: Record<string, unknown>): Tag {
-    return {
-      id: String(row.id),
-      name: String(row.name),
-      color: (row.color as string | null) ?? null,
-      createdAt: toDate(row.created_at),
-      updatedAt: toDate(row.updated_at),
-    };
-  }
-
   async list(): Promise<Tag[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM tags ORDER BY created_at DESC",
     );
-    return rows.map((row) => this.mapTagRow(row));
+    return rows.map((row) => mapTagRowToEntity(row));
   }
 
   async listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Tag>> {
+    const searchableColumns = ["name", "color"] as const;
+    const searchableColumnSet = new Set<string>(searchableColumns);
+
     const rows = Math.max(1, query.rows);
     const page = Math.max(0, query.page);
     const search = query.search?.trim() ?? "";
+    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
+      searchableColumnSet.has(field),
+    );
+    const activeSearchFields =
+      requestedSearchFields.length > 0
+        ? requestedSearchFields
+        : [...searchableColumns];
+    const searchWhereClause = activeSearchFields
+      .map((field) => `${field} LIKE $1`)
+      .join(" OR ");
     const hasSearch = search.length > 0;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM tags WHERE name LIKE $1 OR COALESCE(color, '') LIKE $1",
+          `SELECT COUNT(*) AS total
+           FROM tags
+           WHERE ${searchWhereClause}`,
           [`%${search}%`],
         )
       : await this.db.select<{ total: number }>(
@@ -58,7 +63,7 @@ export class TagRepository implements ITagRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM tags
-           WHERE name LIKE $1 OR COALESCE(color, '') LIKE $1
+           WHERE ${searchWhereClause}
            ORDER BY created_at DESC
            LIMIT $2
            OFFSET $3`,
@@ -74,7 +79,7 @@ export class TagRepository implements ITagRepository {
         );
 
     return {
-      items: listRows.map((row) => this.mapTagRow(row)),
+      items: listRows.map((row) => mapTagRowToEntity(row)),
       total: totalRows[0]?.total ?? 0,
     };
   }

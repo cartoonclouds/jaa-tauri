@@ -2,11 +2,19 @@ import { ProfileRepository } from "@modules/profile/repositories/ProfileReposito
 import { ProfileService } from "@modules/profile/services/ProfileService";
 import { useNuxtApp } from "nuxt/app";
 
+let profileServiceInstance: ProfileService | null = null;
+
 /**
  * Create a profile service instance backed by the injected database driver.
  */
 export function useProfileService(): ProfileService {
-  const { $database } = useNuxtApp();
-  const database = $database;
-  return new ProfileService(new ProfileRepository(database));
+  if (!profileServiceInstance) {
+    const { $database } = useNuxtApp();
+    const database = $database;
+    profileServiceInstance = new ProfileService(
+      new ProfileRepository(database),
+    );
+  }
+
+  return profileServiceInstance;
 }

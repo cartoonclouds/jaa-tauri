@@ -1,2 +1,8 @@
-export type { DatatablePageQuery, DatatablePageResult } from "./pagination";
+export type {
+  DatatableActiveSortOrder,
+  DatatablePageQuery,
+  DatatablePageResult,
+  DatatableSortOrder,
+  DatatableSortOrderInput,
+} from "./pagination";
 export type { IRepository } from "./repository";

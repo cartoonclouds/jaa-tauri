@@ -26,7 +26,7 @@ flowchart TD
 
     subgraph Shared[Shared Layer]
         ZodSchemas["Zod Schemas"]
-        PiniaStores["Pinia Stores"]
+        ComposableState["Composable State"]
         SettingsService["Settings Service"]
         SharedUtils["Shared Utils/Types"]
     end
@@ -56,9 +56,9 @@ flowchart TD
     Actions -->|persist| Repositories
     Repositories -->|query| TauriSQL
     Repositories -->|map| DomainEntities
-    Services -->|inject| PiniaStores
-    PiniaStores -->|reactive| Pages
-    SettingsService -->|sync| PiniaStores
+    Services -->|provide| ComposableState
+    ComposableState -->|reactive| Pages
+    SettingsService -->|read/write| TauriSQL
     SettingsService -->|write/read| TauriStore
     Pages -->|use| SettingsService
     Pages -->|use| useChildWebviewWindow
@@ -201,9 +201,9 @@ Use SQLite for durable domain data and auditability:
 - audit history
 - offline queues
 
-### Pinia (Ephemeral UI State)
+### Composable Local State (Ephemeral UI State)
 
-Use Pinia only for view interaction state:
+Use component/composable-local refs/reactive state for view interaction state:
 
 - sidebarOpen
 - selectedApplicationId
@@ -213,15 +213,15 @@ Use Pinia only for view interaction state:
 - filters
 - sortDirection
 
-### Pinia Colada
+### Service + Repository Data Flow
 
-Use Pinia Colada for query/mutation orchestration and cache lifecycle.
+Use service classes and repositories for query/mutation orchestration.
 
 ### Tauri Store
 
 Use Tauri Store for lightweight preferences/settings, not core business records.
 
-### Tauri Rust State vs Pinia
+### Tauri Rust State vs Frontend State
 
 Use Rust-managed Tauri state for backend/native process state and long-running services:
 
@@ -231,7 +231,7 @@ Use Rust-managed Tauri state for backend/native process state and long-running s
 - search index worker
 - app config/secrets/handles
 
-Use Pinia for frontend interaction state and UI composition.
+Use composables (`ref`, `reactive`, `computed`) for frontend interaction state and UI composition.
 
 ## Domain Events (Examples)
 
@@ -286,7 +286,7 @@ DATABASE_URL=sqlite:applyflow.db SEED=20260518 npm run db:seed
 - Vue 3
 - TypeScript
 - Tauri 2
-- Pinia + Pinia Colada
+- Service classes + repositories + composables
 - PrimeVue + Nuxt UI + Tailwind CSS 4
 - vee-validate + Zod
 - Vitest + Vue Test Utils
@@ -347,8 +347,6 @@ tests/              # Unit/component/integration tests + fixtures/mocks
 
 - Tauri devtools auto-open
 - Vue Devtools
-- Pinia devtools
-- Pinia Colada/TanStack query devtools
 - SQL query logger
 - domain event logger
 - notification logger
@@ -374,7 +372,7 @@ graph TD
     subgraph Frontend
         A[Nuxt 4 + Vue 3 App]
         B[PrimeVue Components]
-        C[Pinia State Management]
+        C[Composable State Management]
         D[VueUse Composables]
     end
 

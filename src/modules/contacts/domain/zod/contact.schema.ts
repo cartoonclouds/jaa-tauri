@@ -6,7 +6,7 @@ import {
   NullableUrlSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "./fields";
+} from "@shared/domain/zod/fields";
 
 export const ContactTypeSchema = z.enum(["company", "recruiter"]);
 

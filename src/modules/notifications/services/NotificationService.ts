@@ -5,7 +5,7 @@ import {
   type NotificationCreatePayload,
   type NotificationUpdatePayload,
 } from "@modules/notifications/repositories/NotificationRepository";
-import { NotificationSchema } from "@shared/domain/zod/notification.schema";
+import { NotificationSchema } from "@modules/notifications/domain/zod/notification.schema";
 
 const NotificationContentSchema = NotificationSchema.pick({
   title: true,

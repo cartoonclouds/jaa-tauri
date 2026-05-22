@@ -14,7 +14,7 @@ import {
   NullableUrlSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "./fields";
+} from "@shared/domain/zod/fields";
 
 export const ApplicationSchema = z.object({
   id: UuidSchema,

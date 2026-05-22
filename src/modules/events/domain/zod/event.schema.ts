@@ -6,7 +6,7 @@ import {
   NullableStringSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "./fields";
+} from "@shared/domain/zod/fields";
 
 export const EventSchema = z.object({
   id: UuidSchema,

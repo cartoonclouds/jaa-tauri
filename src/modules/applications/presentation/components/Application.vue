@@ -7,11 +7,11 @@
   } from "@modules/applications/types/presentation";
   import type { Company } from "@modules/companies/domain/entities/Company";
 
+  import { useApplicationService } from "@modules/applications";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
   import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
   import { formatDateTimeLocalValue } from "@modules/applications/presentation/utils/dateTimeLocal";
-  import { useApplicationService } from "@modules/applications/services/useApplicationService";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
   import { ref } from "vue";
@@ -24,10 +24,16 @@
     isLoading,
     onGlobalFilterInput,
     onPage,
+    onSearchFieldsChange,
+    onSort,
     paginatorTemplate,
     refresh,
     rows,
     rowsPerPageOptions,
+    searchFieldOptions,
+    searchFields,
+    sortField,
+    sortOrder,
     totalRecords,
   } = useApplicationDatatable();
   const { items: companyItems } = useCompany();
@@ -211,13 +217,19 @@
       :items="items"
       :is-loading="isLoading"
       :global-filter="globalFilter"
+      :search-fields="searchFields"
+      :search-field-options="searchFieldOptions"
       :rows="rows"
       :rows-per-page-options="rowsPerPageOptions"
       :paginator-template="paginatorTemplate"
       :current-page-report-template="currentPageReportTemplate"
       :total-records="totalRecords"
+      :sort-field="sortField"
+      :sort-order="sortOrder"
       @update:global-filter="onGlobalFilterInput"
+      @update:search-fields="onSearchFieldsChange"
       @page="onPage"
+      @sort="onSort"
       @row-click="onRowClick"
       @open-details="openDetailsFromButton"
     />

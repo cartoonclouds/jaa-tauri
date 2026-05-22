@@ -5,7 +5,7 @@ import {
   type TagCreatePayload,
   type TagUpdatePayload,
 } from "@modules/tags/repositories/TagRepository";
-import { TagSchema } from "@shared/domain/zod/tag.schema";
+import { TagSchema } from "@modules/tags/domain/zod/tag.schema";
 
 const TagNameSchema = TagSchema.pick({ name: true });
 

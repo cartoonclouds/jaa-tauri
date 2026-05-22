@@ -8,7 +8,7 @@ import {
   getOnboardingCompleted,
   initializeSettingsStore,
   setOnboardingCompleted,
-} from "@shared/settings";
+} from "@modules/settings/persistence";
 import { describe, expect, it } from "vitest";
 
 type SettingsRow = Record<string, unknown>;

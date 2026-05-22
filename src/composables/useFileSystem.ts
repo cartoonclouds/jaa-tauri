@@ -1,22 +1,26 @@
 import type * as TauriFs from "@tauri-apps/plugin-fs";
 
+import { toErrorMessage } from "@shared/utils/error";
+import { isTauri } from "@tauri-apps/api/core";
 import { ref } from "vue";
 
 type TauriFsModule = typeof TauriFs;
+
+export interface UseFileSystemOptions {
+  /**
+   * When true, write operations create missing parent directories automatically.
+   */
+  ensureDirectoryExists?: boolean;
+  /**
+   * Default mkdir options used when auto-creating directories.
+   */
+  ensureDirectoryOptions?: TauriFs.MkdirOptions;
+}
 
 let tauriFsModulePromise: Promise<TauriFsModule> | null = null;
 
 /** Default human-readable units used by formatBytes. */
 const DEFAULT_FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"];
-
-/** Normalize unknown throw values into a readable error message. */
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return String(error);
-}
 
 /**
  * Lazily resolves the Tauri fs module and guards against non-client / non-Tauri usage.
@@ -26,7 +30,6 @@ async function resolveFileSystemModule(): Promise<TauriFsModule> {
     throw new Error("Filesystem is only available on the client runtime.");
   }
 
-  const { isTauri } = await import("@tauri-apps/api/core");
   if (!isTauri()) {
     throw new Error("Filesystem operations require a Tauri runtime.");
   }
@@ -42,10 +45,47 @@ async function resolveFileSystemModule(): Promise<TauriFsModule> {
  * Includes guarded wrappers around @tauri-apps/plugin-fs APIs and
  * convenience helpers for browser `File` objects and display formatting.
  */
-export function useFileSystem() {
+export function useFileSystem(options: UseFileSystemOptions = {}) {
   const isSupported = ref(false);
   const isBusy = ref(false);
   const lastError = ref<string | null>(null);
+  const shouldEnsureDirectory = options.ensureDirectoryExists === true;
+
+  function toPathString(path: string | URL): string {
+    return path instanceof URL ? path.pathname : path;
+  }
+
+  function getParentDirectory(path: string | URL): string | null {
+    const normalizedPath = toPathString(path).replace(/\\/g, "/");
+    const lastSlashIndex = normalizedPath.lastIndexOf("/");
+
+    if (lastSlashIndex <= 0) {
+      return null;
+    }
+
+    return normalizedPath.slice(0, lastSlashIndex);
+  }
+
+  async function ensureParentDirectoryIfConfigured(
+    fs: TauriFsModule,
+    path: string | URL,
+    mkdirOptions?: TauriFs.MkdirOptions,
+  ): Promise<void> {
+    if (!shouldEnsureDirectory) {
+      return;
+    }
+
+    const parentDirectory = getParentDirectory(path);
+    if (!parentDirectory) {
+      return;
+    }
+
+    await fs.mkdir(parentDirectory, {
+      recursive: true,
+      ...options.ensureDirectoryOptions,
+      ...mkdirOptions,
+    });
+  }
 
   /**
    * Runs a filesystem operation with shared loading and error state handling.
@@ -104,7 +144,12 @@ export function useFileSystem() {
     data: string,
     options?: TauriFs.WriteFileOptions,
   ): Promise<void> {
-    return runOperation((fs) => fs.writeTextFile(path, data, options));
+    return runOperation(async (fs) => {
+      await ensureParentDirectoryIfConfigured(fs, path, {
+        baseDir: options?.baseDir,
+      });
+      await fs.writeTextFile(path, data, options);
+    });
   }
 
   /** Writes binary data to a path. */
@@ -113,7 +158,12 @@ export function useFileSystem() {
     data: Uint8Array | ReadableStream<Uint8Array>,
     options?: TauriFs.WriteFileOptions,
   ): Promise<void> {
-    return runOperation((fs) => fs.writeFile(path, data, options));
+    return runOperation(async (fs) => {
+      await ensureParentDirectoryIfConfigured(fs, path, {
+        baseDir: options?.baseDir,
+      });
+      await fs.writeFile(path, data, options);
+    });
   }
 
   /** Creates a directory (optionally recursively). */
@@ -152,6 +202,9 @@ export function useFileSystem() {
   ): Promise<void> {
     await runOperation(async (fs) => {
       const bytes = new Uint8Array(await file.arrayBuffer());
+      await ensureParentDirectoryIfConfigured(fs, destinationPath, {
+        baseDir: options?.baseDir,
+      });
       await fs.writeFile(destinationPath, bytes, options);
     });
   }
@@ -167,6 +220,9 @@ export function useFileSystem() {
   ): Promise<void> {
     await runOperation(async (fs) => {
       const bytes = new Uint8Array(await file.arrayBuffer());
+      await ensureParentDirectoryIfConfigured(fs, destinationPath, {
+        baseDir: fs.BaseDirectory.AppLocalData,
+      });
       await fs.writeFile(destinationPath, bytes, {
         ...options,
         baseDir: fs.BaseDirectory.AppLocalData,
