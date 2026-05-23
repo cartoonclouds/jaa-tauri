@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
+  import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
   import { ref } from "vue";
 
   import { Icon } from "#components";
@@ -117,6 +118,10 @@
     <div v-else class="mx-auto mb-6 max-w-6xl">
       <EntityLocationsMapBrowser />
     </div>
+
+    <section class="mx-auto mb-8 max-w-6xl">
+      <StatisticsSection title="Job hunt snapshot" />
+    </section>
 
     <ApplicationComponent />
   </main>
