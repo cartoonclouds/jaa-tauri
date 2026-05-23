@@ -4,6 +4,7 @@ import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
 } from "../../src/modules/applications/types/enums";
+import { createLondonLocationSeed } from "./location.factory";
 
 export interface ApplicationRow {
   id: string;
@@ -115,6 +116,8 @@ export function createApplicationRows(
         );
       }
 
+      const location = createLondonLocationSeed();
+
       return {
         id: faker.string.uuid(),
         company_id: companyId,
@@ -122,9 +125,9 @@ export function createApplicationRows(
         status: lifecycle.status,
         source_url: faker.internet.url(),
         applied_at: appliedAt?.toISOString() ?? null,
-        location_text: faker.location.city(),
-        location_lat: faker.location.latitude(),
-        location_lng: faker.location.longitude(),
+        location_text: location.locationText,
+        location_lat: location.locationLat,
+        location_lng: location.locationLng,
         attendance_type: faker.helpers.arrayElement([
           ApplicationAttendanceType.Remote,
           ApplicationAttendanceType.Hybrid,

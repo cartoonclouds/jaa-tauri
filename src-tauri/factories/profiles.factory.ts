@@ -1,5 +1,10 @@
 import { faker } from "@faker-js/faker";
 
+import {
+  createLondonLocationSeed,
+  createPreferredLondonLocations,
+} from "./location.factory";
+
 export interface ProfileRow {
   id: string;
   full_name: string;
@@ -28,6 +33,7 @@ export function createProfileRow(seed = 1800): ProfileRow {
   faker.setDefaultRefDate("2026-01-01T00:00:00.000Z");
   const createdAt = faker.date.recent({ days: 30 }).toISOString();
   const fullName = faker.person.fullName();
+  const location = createLondonLocationSeed();
 
   return {
     id: faker.string.uuid(),
@@ -39,13 +45,10 @@ export function createProfileRow(seed = 1800): ProfileRow {
     portfolio_url: faker.internet.url(),
     headline: faker.person.jobTitle(),
     summary: faker.lorem.paragraph(),
-    location_text: faker.location.city(),
+    location_text: location.locationText,
     desired_salary: faker.number.int({ min: 40000, max: 120000 }),
     salary_currency: faker.helpers.arrayElement(["GBP", "USD", "EUR"]),
-    preferred_locations: JSON.stringify([
-      faker.location.city(),
-      faker.location.city(),
-    ]),
+    preferred_locations: JSON.stringify(createPreferredLondonLocations()),
     remote_preference: faker.helpers.arrayElement([
       "remote",
       "hybrid",

@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
 
+import { createLondonLocationSeed } from "./location.factory";
+
 export interface CompanyRow {
   id: string;
   name: string;
@@ -22,6 +24,7 @@ export function createCompanyRows(count: number, seed = 1000): CompanyRow[] {
   return Array.from({ length: count }, () => {
     const createdAt = faker.date.recent({ days: 90 }).toISOString();
     const companyName = faker.company.name();
+    const location = createLondonLocationSeed();
 
     return {
       id: faker.string.uuid(),
@@ -36,9 +39,9 @@ export function createCompanyRows(count: number, seed = 1000): CompanyRow[] {
         "201-1000",
         "1000+",
       ]),
-      location_text: faker.location.city(),
-      location_lat: faker.location.latitude(),
-      location_lng: faker.location.longitude(),
+      location_text: location.locationText,
+      location_lat: location.locationLat,
+      location_lng: location.locationLng,
       notes: faker.company.catchPhrase(),
       created_at: createdAt,
       updated_at: createdAt,

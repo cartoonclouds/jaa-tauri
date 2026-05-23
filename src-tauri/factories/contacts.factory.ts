@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
 
+import { createLondonLocationSeed } from "./location.factory";
+
 export interface ContactRow {
   id: string;
   company_id: string;
@@ -29,16 +31,7 @@ export function createContactRows(
       faker.seed(seed + companyIndex * 100 + index);
       const createdAt = faker.date.recent({ days: 90 }).toISOString();
       const fullName = faker.person.fullName();
-      const latitude = faker.location.latitude({
-        min: -70,
-        max: 70,
-        precision: 4,
-      });
-      const longitude = faker.location.longitude({
-        min: -170,
-        max: 170,
-        precision: 4,
-      });
+      const location = createLondonLocationSeed();
 
       return {
         id: faker.string.uuid(),
@@ -47,9 +40,9 @@ export function createContactRows(
         email: faker.internet.email({ firstName: fullName.split(" ")[0] }),
         phone: faker.phone.number(),
         linkedin_url: `https://www.linkedin.com/in/${faker.helpers.slugify(fullName).toLowerCase()}`,
-        location_text: `${faker.location.city()}, ${faker.location.countryCode("alpha-2")}`,
-        location_lat: Number(latitude),
-        location_lng: Number(longitude),
+        location_text: location.locationText,
+        location_lat: location.locationLat,
+        location_lng: location.locationLng,
         type: faker.helpers.arrayElement(["company", "recruiter"]),
         notes: faker.person.jobTitle(),
         created_at: createdAt,
