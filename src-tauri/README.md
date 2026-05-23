@@ -2,7 +2,7 @@
 
 This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the Apply-Flow desktop application.
 
-Updated: 2026-05-19.
+Updated: 2026-05-23.
 
 ## System Architecture Reference
 

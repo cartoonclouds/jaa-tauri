@@ -2,6 +2,8 @@
 
 This package was generated from the supplied **Icon Set 2 – Light** Apply-Flow concept image.
 
+For the current app interaction and runtime flow, see the root README diagram.
+
 ## Contents
 
 - `src-tauri/icons/` desktop icon assets for Tauri bundles:

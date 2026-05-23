@@ -2,7 +2,7 @@
 
 Lightweight application preferences and settings stored in the app database.
 
-Updated: 2026-05-19.
+Updated: 2026-05-23.
 
 ## System Architecture Reference
 

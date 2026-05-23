@@ -2,7 +2,7 @@
 
 Desktop-first job application tracking built with Nuxt 4 + Vue 3 + TypeScript inside a Tauri 2 runtime.
 
-Last updated: 2026-05-19.
+Last updated: 2026-05-23.
 
 ## System Architecture Overview
 
@@ -10,72 +10,71 @@ The following diagram shows the high-level interactions between the main layers 
 
 ```mermaid
 flowchart TD
-    subgraph UI[UI Layer]
-        Pages["Pages (Nuxt)"]
-        Components["UI Components (PrimeVue, NuxtUI)"]
-        Composables["Composables (useDatatable, useNativeContextMenu, useChildWebviewWindow)"]
+    subgraph Shell["App Shell"]
+        AppVue["app.vue"]
+        Layouts["layouts/"]
+        Pages["pages/"]
     end
 
-    subgraph Module[Module Layer]
-        ModuleComposables["Module Composables (useApplication, useCompany, ...)"]
-        Services["Services (useApplicationService, ...)"]
-        Actions["Actions (CreateApplication, ...)"]
-        Repositories["Repositories (ApplicationRepository, ...)"]
-        DomainEntities["Domain Entities (Application, Company, ...)"]
+    subgraph Presentation["Presentation Layer"]
+        FeatureViews["Feature route components"]
+        SharedUI["Shared UI components"]
+        AppComposables["App composables"]
+        ModuleComposables["Feature composables"]
     end
 
-    subgraph Shared[Shared Layer]
-        ZodSchemas["Zod Schemas"]
-        ComposableState["Composable State"]
-        SettingsService["Settings Service"]
-        SharedUtils["Shared Utils/Types"]
+    subgraph Domain["Domain & Application Layer"]
+        Services["Feature services"]
+        Actions["Actions"]
+        Repositories["Repositories"]
+        Entities["Domain entities + Zod schemas"]
+        SharedCode["Shared domain / utils / types"]
+        Settings["Settings persistence"]
     end
 
-    subgraph Infra[Infrastructure Layer]
-        TauriSQL["Tauri SQL Plugin (SQLite)"]
-        TauriStore["Tauri Store Plugin"]
-        TauriCommands["Tauri Commands"]
-        HTTP["HTTP Clients"]
+    subgraph Infrastructure["Infrastructure & Adapters"]
+        NuxtServer["Nuxt server handlers"]
+        DatabaseClient["Database client"]
+        TauriBridge["Tauri bridge wrappers"]
         Logging["Logging"]
-        Config["Config"]
+        Config["Runtime config"]
     end
 
-    subgraph Tauri[Tauri Runtime]
-        RustBackend["Rust Backend"]
-        Plugins["Tauri Plugins"]
-        Migrations["Migrations"]
-        SeedFactories["Seed Factories"]
+    subgraph Runtime["Tauri 2 Runtime"]
+        RustApp["Rust app"]
+        SQLite[("SQLite database")]
+        Store[("Tauri Store")]
+        Plugins["Dialogs, FS, Shell, Notifications, Updater, Window State"]
+        Migrations["Migrations + seed factories"]
     end
 
-    Pages -->|imports| ModuleComposables
-    Components -->|use| Composables
-    Composables -->|call| ModuleComposables
-    ModuleComposables -->|use| Services
-    Services -->|call| Actions
-    Actions -->|validate| ZodSchemas
-    Actions -->|persist| Repositories
-    Repositories -->|query| TauriSQL
-    Repositories -->|map| DomainEntities
-    Services -->|provide| ComposableState
-    ComposableState -->|reactive| Pages
-    SettingsService -->|read/write| TauriSQL
-    SettingsService -->|write/read| TauriStore
-    Pages -->|use| SettingsService
-    Pages -->|use| useChildWebviewWindow
-    useChildWebviewWindow -->|open| TauriCommands
-    TauriCommands -->|invoke| RustBackend
-    RustBackend -->|access| Plugins
-    Plugins -->|persist| TauriSQL
-    Plugins -->|persist| TauriStore
-    Plugins -->|notify| TauriCommands
-    HTTP -->|future| Services
-    Logging -->|log| Services
-    Config -->|provide| Services
-    Migrations -->|init| TauriSQL
-    SeedFactories -->|seed| TauriSQL
-
-    classDef infra fill:#f9f,stroke:#333,stroke-width:2px;
-    class Infra infra;
+    AppVue --> Pages
+    Layouts --> Pages
+    Pages --> FeatureViews
+    Pages --> SharedUI
+    FeatureViews --> AppComposables
+    SharedUI --> AppComposables
+    AppComposables --> ModuleComposables
+    ModuleComposables --> Services
+    Services --> Actions
+    Actions --> Entities
+    Actions --> Repositories
+    Actions --> SharedCode
+    Repositories --> DatabaseClient
+    Repositories --> SharedCode
+    Services --> Settings
+    Settings --> DatabaseClient
+    Settings --> Store
+    DatabaseClient --> TauriBridge
+    TauriBridge --> RustApp
+    NuxtServer --> SharedCode
+    NuxtServer --> DatabaseClient
+    Config --> Services
+    Logging --> RustApp
+    RustApp --> SQLite
+    RustApp --> Store
+    RustApp --> Plugins
+    Migrations --> SQLite
 ```
 
 ## Product Goal

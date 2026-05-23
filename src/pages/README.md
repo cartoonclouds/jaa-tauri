@@ -2,7 +2,7 @@
 
 Nuxt route components.
 
-Updated: 2026-05-19.
+Updated: 2026-05-23.
 
 ## System Architecture Reference
 

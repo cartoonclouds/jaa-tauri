@@ -2,7 +2,7 @@
 
 External integrations and technical adapters. All components are designed for cross-platform compatibility on Windows, macOS, and Linux.
 
-Updated: 2026-05-19.
+Updated: 2026-05-23.
 
 ## System Architecture Reference
 

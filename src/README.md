@@ -2,7 +2,7 @@
 
 Nuxt application source.
 
-Updated: 2026-05-19.
+Updated: 2026-05-23.
 
 ## System Architecture
 

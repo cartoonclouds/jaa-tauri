@@ -2,6 +2,8 @@
 
 Ready to copy into `src-tauri/icons/`.
 
+For the current app interaction and runtime flow, see the root README diagram.
+
 Primary Tauri desktop files:
 
 - `icon.png`
