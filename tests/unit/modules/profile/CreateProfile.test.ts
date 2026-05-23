@@ -1,4 +1,4 @@
-import { createProfile } from "@modules/profile";
+import { ProfileRepository } from "@modules/profile";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
@@ -7,19 +7,21 @@ function mockDb() {
   };
 }
 
-describe("createProfile", () => {
+describe("ProfileRepository.create", () => {
   it("rejects missing full name", async () => {
     const db = mockDb();
+    const repository = new ProfileRepository(db as never);
 
-    await expect(
-      createProfile(db as never, { fullName: "" }),
-    ).rejects.toThrow("Profile full name is required");
+    await expect(repository.create({ fullName: "" })).rejects.toThrow(
+      "Profile full name is required",
+    );
   });
 
   it("inserts profile row", async () => {
     const db = mockDb();
+    const repository = new ProfileRepository(db as never);
 
-    await createProfile(db as never, { fullName: "John Doe" });
+    await repository.create({ fullName: "John Doe" });
 
     expect(db.execute).toHaveBeenCalledOnce();
   });

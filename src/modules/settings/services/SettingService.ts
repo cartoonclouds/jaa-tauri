@@ -1,4 +1,4 @@
-import type { PersistedConstantType } from "@modules/settings/constants/persistedConstantTypes";
+import type { PersistedConstantSourceType } from "@shared/constants/persistedConstants";
 import type { DatatablePageQuery } from "@shared/types";
 
 import {
@@ -26,7 +26,7 @@ export class SettingService {
     return this.repository.delete(id);
   }
 
-  listConstantRows(type: PersistedConstantType) {
+  listConstantRows(type: PersistedConstantSourceType) {
     return this.repository.listConstantRows(type);
   }
 
@@ -34,7 +34,7 @@ export class SettingService {
     return this.repository.upsertConstantRow(payload);
   }
 
-  deleteConstantRow(type: PersistedConstantType, value: string) {
+  deleteConstantRow(type: PersistedConstantSourceType, value: string) {
     return this.repository.deleteConstantRow(type, value);
   }
 }

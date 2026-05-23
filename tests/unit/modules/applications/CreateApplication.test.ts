@@ -1,4 +1,4 @@
-import { createApplication } from "@modules/applications";
+import { ApplicationRepository } from "@modules/applications";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
@@ -7,19 +7,21 @@ function mockDb() {
   };
 }
 
-describe("createApplication", () => {
+describe("ApplicationRepository.create", () => {
   it("rejects empty title", async () => {
     const db = mockDb();
+    const repository = new ApplicationRepository(db as never);
 
-    await expect(
-      createApplication(db as never, { title: "   " }),
-    ).rejects.toThrow("Application title is required");
+    await expect(repository.create({ title: "   " })).rejects.toThrow(
+      "Application title is required",
+    );
   });
 
   it("writes a row with default status", async () => {
     const db = mockDb();
+    const repository = new ApplicationRepository(db as never);
 
-    await createApplication(db as never, { title: "Frontend Engineer" });
+    await repository.create({ title: "Frontend Engineer" });
 
     expect(db.execute).toHaveBeenCalledOnce();
   });

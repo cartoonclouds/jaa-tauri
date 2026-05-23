@@ -15,6 +15,7 @@ import {
   APPLICATION_SEARCH_FIELDS,
   APPLICATION_SORTABLE_COLUMN_MAP,
 } from "@modules/applications/constants/applicationDatatableFields";
+import { ApplicationRepositoryCreateSchema } from "@modules/applications/domain/zod/application.schema";
 import { ApplicationStatus } from "@modules/applications/types/enums";
 import {
   buildSearchWhereClause,
@@ -110,6 +111,16 @@ export class ApplicationRepository implements IApplicationRepository {
   }
 
   async create(payload: ApplicationCreatePayload): Promise<string> {
+    const parseResult = ApplicationRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Application title is required");
+    }
+
+    const title = parseResult.data.title.trim();
+    if (!title) {
+      throw new Error("Application title is required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       `
@@ -162,14 +173,14 @@ export class ApplicationRepository implements IApplicationRepository {
       `,
       [
         id,
-        payload.companyId ?? null,
-        payload.title,
-        payload.status?.value ?? ApplicationStatus.Saved.value,
+        parseResult.data.companyId ?? null,
+        title,
+        parseResult.data.status?.value ?? ApplicationStatus.Saved.value,
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
-        payload.locationText ?? null,
-        payload.locationLat ?? null,
-        payload.locationLng ?? null,
+        parseResult.data.locationText ?? null,
+        parseResult.data.locationLat ?? null,
+        parseResult.data.locationLng ?? null,
         payload.attendanceType?.value ?? null,
         payload.employmentType?.value ?? null,
         payload.salaryMin ?? null,

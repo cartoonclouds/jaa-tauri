@@ -12,12 +12,12 @@ export interface PersistedConstantRow {
 
 type ConstantModule = Record<string, unknown>;
 
-interface ConstantModuleSource {
+export interface ConstantModuleSource {
   namespace: string;
   module: ConstantModule;
 }
 
-const CONSTANT_MODULE_SOURCES: ConstantModuleSource[] = [
+export const CONSTANT_MODULE_SOURCES = [
   {
     namespace: "applications.presentation.constants.applicationFormOptions",
     module: applicationFormOptions,
@@ -34,7 +34,13 @@ const CONSTANT_MODULE_SOURCES: ConstantModuleSource[] = [
     namespace: "onboarding.presentation.constants.defaultSkillOptions",
     module: onboardingDefaultSkillOptions,
   },
-];
+] as const satisfies readonly ConstantModuleSource[];
+
+type ConstantModuleNamespace =
+  (typeof CONSTANT_MODULE_SOURCES)[number]["namespace"];
+
+export type PersistedConstantSourceType =
+  `${ConstantModuleNamespace}.${string}`;
 
 function isPersistableExport(value: unknown): boolean {
   if (value === null) {
@@ -174,10 +180,19 @@ function toConstantRows(
  * Create deterministic rows for constants persisted in the database.
  */
 export function createPersistedConstantRows(): PersistedConstantRow[] {
+  return createPersistedConstantRowsFromSources(CONSTANT_MODULE_SOURCES);
+}
+
+/**
+ * Create deterministic rows from an explicit list of constant module sources.
+ */
+export function createPersistedConstantRowsFromSources(
+  sources: readonly ConstantModuleSource[],
+): PersistedConstantRow[] {
   const seen = new Set<string>();
   const rows: PersistedConstantRow[] = [];
 
-  for (const source of CONSTANT_MODULE_SOURCES) {
+  for (const source of sources) {
     for (const [exportName, value] of Object.entries(source.module)) {
       if (!isPersistableExport(value)) {
         continue;

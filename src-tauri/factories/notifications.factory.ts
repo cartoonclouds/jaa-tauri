@@ -6,6 +6,7 @@ import {
   EVENT_NOTIFICATION_BODY_PREFIX,
   EVENT_NOTIFICATION_SEVERITY_BY_PREFIX,
   EVENT_NOTIFICATION_SEVERITY_BY_STAGE,
+  isInteractionStage,
 } from "../../src/modules/events/presentation/constants/interactionStages";
 
 export interface NotificationRow {
@@ -34,10 +35,8 @@ interface NotificationEventInput {
 }
 
 function getSeverityForEventType(type: string): EventNotificationSeverity {
-  const exactMatch = EVENT_NOTIFICATION_SEVERITY_BY_STAGE[type];
-
-  if (exactMatch) {
-    return exactMatch;
+  if (isInteractionStage(type)) {
+    return EVENT_NOTIFICATION_SEVERITY_BY_STAGE[type];
   }
 
   for (const rule of EVENT_NOTIFICATION_SEVERITY_BY_PREFIX) {

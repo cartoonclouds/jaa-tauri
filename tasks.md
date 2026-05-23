@@ -19,8 +19,6 @@ Application schema
 
 Create a Mermaid diagram of how each elements of this app interaction. Add to the toplevel README.md. Then Update all readme files with latest changes.
 
-Move all code in application/actions in each module into their respective repositories. All actions should be provided by the module's repository.
-
 https://v2.tauri.app/develop/updating-dependencies/
 
 Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`

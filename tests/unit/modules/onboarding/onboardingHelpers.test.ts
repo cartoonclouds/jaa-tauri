@@ -3,7 +3,7 @@ import {
   getResumeDocumentTitle,
   isSupportedResumePath,
   mergeCommaSeparated,
-} from "@modules/onboarding/application/actions/onboardingHelpers";
+} from "@modules/onboarding/repositories/onboardingHelpers";
 import { describe, expect, it } from "vitest";
 
 describe("onboardingHelpers", () => {

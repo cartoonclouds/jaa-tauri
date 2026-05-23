@@ -1,4 +1,4 @@
-import { createEvent } from "@modules/events";
+import { EventRepository } from "@modules/events";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
@@ -7,26 +7,34 @@ function mockDb() {
   };
 }
 
-describe("createEvent", () => {
+describe("EventRepository.create", () => {
   it("rejects missing required fields", async () => {
     const db = mockDb();
+    const repository = new EventRepository(db as never);
 
     await expect(
-      createEvent(db as never, {
+      repository.create({
         applicationId: "",
+        contactId: null,
         type: "" as never,
         title: "",
+        description: null,
+        eventAt: null,
       }),
     ).rejects.toThrow("Event applicationId, type, and title are required");
   });
 
   it("inserts an event row", async () => {
     const db = mockDb();
+    const repository = new EventRepository(db as never);
 
-    await createEvent(db as never, {
+    await repository.create({
       applicationId: "11111111-1111-4111-8111-111111111111",
+      contactId: null,
       type: "Interview/Technical Interview",
       title: "Tech interview",
+      description: null,
+      eventAt: null,
     });
 
     expect(db.execute).toHaveBeenCalledOnce();

@@ -8,6 +8,7 @@ import type {
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
 import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants/companyDatatableFields";
+import { CompanyRepositoryCreateSchema } from "@modules/companies/domain/zod/company.schema";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -111,6 +112,16 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   async create(payload: CompanyCreatePayload): Promise<string> {
+    const parseResult = CompanyRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Company name is required");
+    }
+
+    const name = parseResult.data.name.trim();
+    if (!name) {
+      throw new Error("Company name is required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       `
@@ -132,14 +143,14 @@ export class CompanyRepository implements ICompanyRepository {
       `,
       [
         id,
-        payload.name,
+        name,
         payload.websiteUrl ?? null,
         payload.linkedinUrl ?? null,
         payload.industry ?? null,
         payload.size ?? null,
-        payload.locationText ?? null,
-        payload.locationLat ?? null,
-        payload.locationLng ?? null,
+        parseResult.data.locationText ?? null,
+        parseResult.data.locationLat ?? null,
+        parseResult.data.locationLng ?? null,
         payload.notes ?? null,
       ],
     );

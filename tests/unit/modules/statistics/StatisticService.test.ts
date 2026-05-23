@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 function mockRepository(): IStatisticRepository {
   return {
+    list: vi.fn(async () => []),
     getTotalAppliedApplications: vi.fn(async () => 0),
   };
 }

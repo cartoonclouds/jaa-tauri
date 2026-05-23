@@ -3,6 +3,7 @@ import type { Event } from "@modules/events/domain/entities/Event";
 import type { IRepository } from "@shared/types";
 
 import { mapEventRowToEntity } from "@modules/events/application/mappers/mapEventRow";
+import { EventRepositoryCreateSchema } from "@modules/events/domain/zod/event.schema";
 import {
   buildSelectAllOrderedQuery,
   DEFAULT_CREATED_AT_ORDER_BY,
@@ -34,15 +35,29 @@ export class EventRepository implements IEventRepository {
   }
 
   async create(payload: EventCreatePayload): Promise<string> {
+    const parseResult = EventRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Event applicationId, type, and title are required");
+    }
+
+    if (!parseResult.data.applicationId) {
+      throw new Error("Event applicationId, type, and title are required");
+    }
+
+    const title = parseResult.data.title.trim();
+    if (!title) {
+      throw new Error("Event applicationId, type, and title are required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       "INSERT INTO events (id, application_id, contact_id, type, title, description, event_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
       [
         id,
-        payload.applicationId,
-        payload.contactId ?? null,
-        payload.type,
-        payload.title,
+        parseResult.data.applicationId,
+        parseResult.data.contactId ?? null,
+        parseResult.data.type,
+        title,
         payload.description ?? null,
         payload.eventAt ? payload.eventAt.toISOString() : null,
       ],

@@ -1,4 +1,4 @@
-import { createTag } from "@modules/tags";
+import { TagRepository } from "@modules/tags";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
@@ -7,19 +7,21 @@ function mockDb() {
   };
 }
 
-describe("createTag", () => {
+describe("TagRepository.create", () => {
   it("rejects empty tag name", async () => {
     const db = mockDb();
+    const repository = new TagRepository(db as never);
 
-    await expect(createTag(db as never, { name: "  " })).rejects.toThrow(
-      "Tag name is required",
-    );
+    await expect(
+      repository.create({ name: "  ", color: null }),
+    ).rejects.toThrow("Tag name is required");
   });
 
   it("inserts tag row", async () => {
     const db = mockDb();
+    const repository = new TagRepository(db as never);
 
-    await createTag(db as never, { name: "urgent" });
+    await repository.create({ name: "urgent", color: null });
 
     expect(db.execute).toHaveBeenCalledOnce();
   });

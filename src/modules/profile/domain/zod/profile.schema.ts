@@ -1,12 +1,12 @@
-import { z } from "zod";
-
 import {
   DateTimeSchema,
   NullableIntSchema,
   NullableStringSchema,
   NullableUrlSchema,
+  OptionalNullableIntSchema,
   UuidSchema,
 } from "@shared/domain/zod/fields";
+import { z } from "zod";
 
 export const ProfileSchema = z.object({
   id: UuidSchema,
@@ -61,6 +61,33 @@ export const CreateProfileSchema = ProfileSchema.pick({
   desiredSalary: true,
   noticePeriodDays: true,
 });
+
+export const ProfileRepositoryCreateSchema = z.object({
+  fullName: z.string(),
+  email: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  linkedinUrl: z.string().nullable().optional(),
+  githubUrl: z.string().nullable().optional(),
+  portfolioUrl: z.string().nullable().optional(),
+  headline: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
+  locationText: z.string().nullable().optional(),
+  desiredSalary: OptionalNullableIntSchema,
+  salaryCurrency: z.string().optional(),
+  preferredLocations: z.array(z.string()).optional(),
+  remotePreference: z
+    .enum(["remote", "hybrid", "onsite", "flexible"])
+    .optional(),
+  skills: z.array(z.string()).optional(),
+  workEligibility: z.string().optional(),
+  noticePeriodDays: OptionalNullableIntSchema,
+  interviewAvailability: z.string().optional(),
+});
+
+export const ProfileRepositoryUpdateSchema =
+  CreateProfileSchema.partial().extend({
+    id: z.string().uuid(),
+  });
 
 export type Profile = z.infer<typeof ProfileSchema>;
 export type CreateProfileInput = z.infer<typeof CreateProfileSchema>;

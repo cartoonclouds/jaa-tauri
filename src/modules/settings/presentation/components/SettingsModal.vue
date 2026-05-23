@@ -1,14 +1,12 @@
 <script setup lang="ts">
-  import type { PersistedConstantType } from "@modules/settings/constants/persistedConstantTypes";
   import type { FormSubmitEvent } from "@primevue/forms";
+  import type { PersistedConstantSourceType } from "@shared/constants/persistedConstants";
 
   import { logError } from "@infra/logging/tauriLog.client";
-  import {
-    PERSISTED_CONSTANT_TYPES,
-    useSettingService,
-  } from "@modules/settings";
+  import { useSettingService } from "@modules/settings";
   import { Form } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
+  import { CONSTANT_MODULE_SOURCES } from "@shared/constants/persistedConstants";
   import { computed, reactive, ref, watch } from "vue";
   import { z } from "zod";
 
@@ -33,7 +31,7 @@
   interface ConstantGroup {
     key: string;
     label: string;
-    type: PersistedConstantType;
+    type: PersistedConstantSourceType;
   }
 
   const props = defineProps<Props>();
@@ -44,6 +42,21 @@
 
   const settingService = useSettingService();
 
+  function isPersistableConstantValue(value: unknown): boolean {
+    if (value === null) {
+      return true;
+    }
+
+    const valueType = typeof value;
+    return (
+      valueType === "string" ||
+      valueType === "number" ||
+      valueType === "boolean" ||
+      valueType === "bigint" ||
+      valueType === "object"
+    );
+  }
+
   const modalVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
@@ -52,15 +65,34 @@
   });
 
   const constantGroups = computed<ConstantGroup[]>(() => {
-    return Object.entries(PERSISTED_CONSTANT_TYPES).map(([key, type]) => ({
-      key,
-      label: key
-        .toLowerCase()
-        .split("_")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" "),
-      type,
-    }));
+    const seen = new Set<string>();
+    const groups: ConstantGroup[] = [];
+
+    for (const source of CONSTANT_MODULE_SOURCES) {
+      for (const [exportName, value] of Object.entries(source.module)) {
+        if (!isPersistableConstantValue(value)) {
+          continue;
+        }
+
+        const type = `${source.namespace}.${exportName}`;
+        if (seen.has(type)) {
+          continue;
+        }
+
+        seen.add(type);
+        groups.push({
+          key: type,
+          label: exportName
+            .toLowerCase()
+            .split("_")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" "),
+          type: type as PersistedConstantSourceType,
+        });
+      }
+    }
+
+    return groups;
   });
 
   const initialGeneralValues = ref<GeneralFormValues>({
@@ -94,11 +126,11 @@
     }),
   );
 
-  function resolveRows(type: PersistedConstantType): ConstantEditorRow[] {
+  function resolveRows(type: PersistedConstantSourceType): ConstantEditorRow[] {
     return constantRowsByType[type] ?? [];
   }
 
-  function addConstantRow(type: PersistedConstantType): void {
+  function addConstantRow(type: PersistedConstantSourceType): void {
     const rows = resolveRows(type);
     rows.push({
       isNew: true,
@@ -179,7 +211,7 @@
   }
 
   async function saveConstantRow(
-    type: PersistedConstantType,
+    type: PersistedConstantSourceType,
     row: ConstantEditorRow,
   ): Promise<void> {
     isBusy.value = true;
@@ -208,7 +240,7 @@
   }
 
   async function removeConstantRow(
-    type: PersistedConstantType,
+    type: PersistedConstantSourceType,
     row: ConstantEditorRow,
   ): Promise<void> {
     const rows = resolveRows(type);

@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import {
   DateTimeSchema,
   NullableLatitudeSchema,
@@ -8,6 +6,7 @@ import {
   NullableUrlSchema,
   UuidSchema,
 } from "@shared/domain/zod/fields";
+import { z } from "zod";
 
 export const CompanySchema = z.object({
   id: UuidSchema,
@@ -30,6 +29,8 @@ export const CreateCompanySchema = CompanySchema.pick({
   locationLat: true,
   locationLng: true,
 }).partial({ locationText: true, locationLat: true, locationLng: true });
+
+export const CompanyRepositoryCreateSchema = CreateCompanySchema;
 
 export type Company = z.infer<typeof CompanySchema>;
 export type CreateCompanyInput = z.infer<typeof CreateCompanySchema>;

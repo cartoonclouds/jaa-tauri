@@ -3,11 +3,11 @@ import type { Profile, UserProfile } from "@modules/profile";
 
 import { logError } from "@infra/logging/tauriLog.client";
 import { useDocumentService } from "@modules/documents";
-import { completeOnboarding } from "@modules/onboarding/application/actions/CompleteOnboarding";
 import {
   isSupportedResumePath,
   mergeCommaSeparated,
-} from "@modules/onboarding/application/actions/onboardingHelpers";
+} from "@modules/onboarding/repositories/onboardingHelpers";
+import { onboardingRepository } from "@modules/onboarding/repositories/OnboardingRepository";
 import { useProfileService } from "@modules/profile";
 import { toErrorMessage } from "@shared/utils/error";
 import { invoke } from "@tauri-apps/api/core";
@@ -279,7 +279,7 @@ function createOnboardingFlowComposable() {
         addLocations();
       }
 
-      await completeOnboarding({
+      await onboardingRepository.complete({
         profile: profile.value,
         resumePath: resumePath.value,
       });

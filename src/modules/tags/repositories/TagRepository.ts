@@ -8,9 +8,9 @@ import type {
 
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
 import { TAG_SEARCH_FIELDS } from "@modules/tags/constants/tagDatatableFields";
+import { TagRepositoryCreateSchema } from "@modules/tags/domain/zod/tag.schema";
 import {
   buildSearchWhereClause,
-  buildSelectAllOrderedQuery,
   DEFAULT_CREATED_AT_ORDER_BY,
   normalizeDatatablePageQuery,
   resolveSearchFields,
@@ -32,10 +32,7 @@ export class TagRepository implements ITagRepository {
 
   async list(): Promise<Tag[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      buildSelectAllOrderedQuery({
-        tableName: "tags",
-        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
-      }),
+      "SELECT * FROM tags ORDER BY name ASC",
     );
     return rows.map((row) => mapTagRowToEntity(row));
   }
@@ -86,10 +83,20 @@ export class TagRepository implements ITagRepository {
   }
 
   async create(payload: TagCreatePayload): Promise<string> {
+    const parseResult = TagRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Tag name is required");
+    }
+
+    const name = parseResult.data.name.trim().toLowerCase();
+    if (!name) {
+      throw new Error("Tag name is required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       "INSERT INTO tags (id, name, color, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-      [id, payload.name, payload.color ?? null],
+      [id, name, parseResult.data.color ?? null],
     );
     return id;
   }

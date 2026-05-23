@@ -115,6 +115,8 @@ export const CreateApplicationSchema = ApplicationSchema.pick({
   locationLng: true,
 });
 
+export const ApplicationRepositoryCreateSchema = CreateApplicationSchema;
+
 export const ApplicationFormSchema = z
   .object({
     companyId: NullableUuidSchema,

@@ -8,6 +8,7 @@ import type {
 
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
 import { NOTIFICATION_SEARCH_FIELDS } from "@modules/notifications/constants/notificationDatatableFields";
+import { NotificationRepositoryCreateSchema } from "@modules/notifications/domain/zod/notification.schema";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -102,16 +103,27 @@ export class NotificationRepository implements INotificationRepository {
   }
 
   async create(payload: NotificationCreatePayload): Promise<string> {
+    const parseResult = NotificationRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Notification title and body are required");
+    }
+
+    const title = parseResult.data.title.trim();
+    const body = parseResult.data.body.trim();
+    if (!title || !body) {
+      throw new Error("Notification title and body are required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       "INSERT INTO notifications (id, application_id, event_id, severity, title, body, is_read, scheduled_for, sent_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
       [
         id,
-        payload.applicationId ?? null,
-        payload.eventId ?? null,
-        payload.severity,
-        payload.title,
-        payload.body,
+        parseResult.data.applicationId ?? null,
+        parseResult.data.eventId ?? null,
+        parseResult.data.severity ?? "info",
+        title,
+        body,
         payload.isRead ? 1 : 0,
         payload.scheduledFor ? payload.scheduledFor.toISOString() : null,
         payload.sentAt ? payload.sentAt.toISOString() : null,

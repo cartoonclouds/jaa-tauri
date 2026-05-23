@@ -6,12 +6,13 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import {
-  PERSISTED_CONSTANT_TYPES,
-  type PersistedConstantType,
-} from "@modules/settings/constants/persistedConstantTypes";
 import { SETTING_SEARCH_FIELDS } from "@modules/settings/constants/settingDatatableFields";
+import { SettingRepositoryUpsertSchema } from "@modules/settings/domain/zod/settings.schema";
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
+import {
+  CONSTANT_MODULE_SOURCES,
+  type PersistedConstantSourceType,
+} from "@shared/constants/persistedConstants";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -35,23 +36,27 @@ export interface ConstantEntryRow {
 }
 
 export interface ConstantEntryUpsertPayload {
-  type: PersistedConstantType;
+  type: PersistedConstantSourceType;
   value: string;
   label: string | null;
   previousValue?: string;
 }
 
-function resolveSettingsLabel(type: PersistedConstantType): string {
+function resolveSettingsLabel(type: PersistedConstantSourceType): string {
   const typeSegments = type.split(".");
   const fallbackKey =
     typeSegments.length > 0 ? typeSegments[typeSegments.length - 1] : type;
 
-  const key =
-    Object.entries(PERSISTED_CONSTANT_TYPES).find(
-      ([, persistedType]) => persistedType === type,
-    )?.[0] ??
-    fallbackKey ??
-    type;
+  let key: string = fallbackKey ?? type;
+
+  for (const source of CONSTANT_MODULE_SOURCES) {
+    for (const exportName of Object.keys(source.module)) {
+      if (`${source.namespace}.${exportName}` === type) {
+        key = exportName;
+        break;
+      }
+    }
+  }
 
   return key
     .toLowerCase()
@@ -68,19 +73,39 @@ export interface ISettingRepository extends IRepository<
   SettingCreatePayload,
   SettingUpdatePayload
 > {
+  get(id?: string): Promise<Setting | null>;
   upsert(payload: SettingUpsertPayload): Promise<string>;
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Setting>>;
   getConstantRow(
-    type: PersistedConstantType,
+    type: PersistedConstantSourceType,
     value: string,
   ): Promise<ConstantEntryRow | null>;
-  listConstantRows(type: PersistedConstantType): Promise<ConstantEntryRow[]>;
+  listConstantRows(
+    type: PersistedConstantSourceType,
+  ): Promise<ConstantEntryRow[]>;
   upsertConstantRow(payload: ConstantEntryUpsertPayload): Promise<void>;
-  deleteConstantRow(type: PersistedConstantType, value: string): Promise<void>;
+  deleteConstantRow(
+    type: PersistedConstantSourceType,
+    value: string,
+  ): Promise<void>;
 }
 
 export class SettingRepository implements ISettingRepository {
   constructor(private readonly db: DatabaseDriver) {}
+
+  async get(id = "app"): Promise<Setting | null> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      "SELECT * FROM settings WHERE id = $1 LIMIT 1",
+      [id],
+    );
+
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+
+    return mapSettingRowToEntity(row);
+  }
 
   async list(): Promise<Setting[]> {
     const rows = await this.db.select<Record<string, unknown>>(
@@ -140,7 +165,17 @@ export class SettingRepository implements ISettingRepository {
   }
 
   async upsert(payload: SettingUpsertPayload): Promise<string> {
-    const id = payload.id ?? crypto.randomUUID();
+    const parseResult = SettingRepositoryUpsertSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error(
+        "Setting validation failed: " +
+          JSON.stringify(parseResult.error.format()),
+      );
+    }
+
+    const validated = parseResult.data;
+    const id = validated.id ?? "app";
+
     await this.db.execute(
       `INSERT INTO settings (id, theme, locale, notifications_enabled, developer_mode, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -152,17 +187,17 @@ export class SettingRepository implements ISettingRepository {
          updated_at = CURRENT_TIMESTAMP`,
       [
         id,
-        payload.theme ?? "system",
-        payload.locale ?? "en-GB",
-        payload.notificationsEnabled === false ? 0 : 1,
-        payload.developerMode ? 1 : 0,
+        validated.theme ?? "system",
+        validated.locale ?? "en-GB",
+        validated.notificationsEnabled === false ? 0 : 1,
+        validated.developerMode === true ? 1 : 0,
       ],
     );
     return id;
   }
 
   async getConstantRow(
-    type: PersistedConstantType,
+    type: PersistedConstantSourceType,
     value: string,
   ): Promise<ConstantEntryRow | null> {
     const rows = await this.db.select<ConstantEntryRow>(
@@ -177,7 +212,7 @@ export class SettingRepository implements ISettingRepository {
   }
 
   async listConstantRows(
-    type: PersistedConstantType,
+    type: PersistedConstantSourceType,
   ): Promise<ConstantEntryRow[]> {
     return await this.db.select<ConstantEntryRow>(
       `SELECT type, value, label
@@ -229,7 +264,7 @@ export class SettingRepository implements ISettingRepository {
   }
 
   async deleteConstantRow(
-    type: PersistedConstantType,
+    type: PersistedConstantSourceType,
     value: string,
   ): Promise<void> {
     await this.db.execute(

@@ -8,7 +8,10 @@ import type {
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
 import { PROFILE_SEARCH_FIELDS } from "@modules/profile/constants/profileDatatableFields";
-import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
+import {
+  ProfileRepositoryCreateSchema,
+  ProfileRepositoryUpdateSchema,
+} from "@modules/profile/domain/zod/profile.schema";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -16,7 +19,6 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
-import { z } from "zod";
 
 export type ProfileCreatePayload = Pick<Profile, "fullName"> &
   Partial<Omit<Profile, "id" | "fullName" | "createdAt" | "updatedAt">>;
@@ -29,35 +31,26 @@ export interface IProfileRepository extends IRepository<
   ProfileCreatePayload,
   ProfileUpdatePayload
 > {
+  get(id: string): Promise<Profile | null>;
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Profile>>;
 }
 
-const ProfileCreateSchema = ProfileSchema.pick({
-  fullName: true,
-  email: true,
-  phone: true,
-  linkedinUrl: true,
-  githubUrl: true,
-  portfolioUrl: true,
-  headline: true,
-  summary: true,
-  locationText: true,
-  desiredSalary: true,
-  salaryCurrency: true,
-  preferredLocations: true,
-  remotePreference: true,
-  skills: true,
-  workEligibility: true,
-  noticePeriodDays: true,
-  interviewAvailability: true,
-});
-
-const ProfileUpdateSchema = ProfileCreateSchema.partial().extend({
-  id: z.string().uuid(),
-});
-
 export class ProfileRepository implements IProfileRepository {
   constructor(private readonly db: DatabaseDriver) {}
+
+  async get(id: string): Promise<Profile | null> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      "SELECT * FROM profiles WHERE id = $1 LIMIT 1",
+      [id],
+    );
+
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+
+    return mapProfileRowToEntity(row, "Profile read validation failed");
+  }
 
   async list(): Promise<Profile[]> {
     const rows = await this.db.select<Record<string, unknown>>(
@@ -117,44 +110,45 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async create(payload: ProfileCreatePayload): Promise<string> {
-    const payloadParse = ProfileCreateSchema.safeParse(payload);
-    if (!payloadParse.success) {
-      throw new Error(
-        "Profile create validation failed: " +
-          JSON.stringify(payloadParse.error.format()),
-      );
+    const parseResult = ProfileRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Profile full name is required");
     }
 
-    const validated = payloadParse.data;
+    const fullName = parseResult.data.fullName.trim();
+    if (!fullName) {
+      throw new Error("Profile full name is required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       "INSERT INTO profiles (id, full_name, email, phone, linkedin_url, github_url, portfolio_url, headline, summary, location_text, desired_salary, salary_currency, preferred_locations, remote_preference, skills, work_eligibility, notice_period_days, interview_availability, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
       [
         id,
-        validated.fullName,
-        validated.email ?? null,
-        validated.phone ?? null,
-        validated.linkedinUrl ?? null,
-        validated.githubUrl ?? null,
-        validated.portfolioUrl ?? null,
-        validated.headline ?? null,
-        validated.summary ?? null,
-        validated.locationText ?? null,
-        validated.desiredSalary ?? null,
-        validated.salaryCurrency,
-        JSON.stringify(validated.preferredLocations),
-        validated.remotePreference,
-        JSON.stringify(validated.skills),
-        validated.workEligibility,
-        validated.noticePeriodDays ?? null,
-        validated.interviewAvailability,
+        fullName,
+        parseResult.data.email ?? null,
+        parseResult.data.phone ?? null,
+        parseResult.data.linkedinUrl ?? null,
+        parseResult.data.githubUrl ?? null,
+        parseResult.data.portfolioUrl ?? null,
+        parseResult.data.headline ?? null,
+        parseResult.data.summary ?? null,
+        parseResult.data.locationText ?? null,
+        parseResult.data.desiredSalary ?? null,
+        parseResult.data.salaryCurrency ?? "USD",
+        JSON.stringify(parseResult.data.preferredLocations ?? []),
+        parseResult.data.remotePreference ?? "flexible",
+        JSON.stringify(parseResult.data.skills ?? []),
+        parseResult.data.workEligibility ?? "",
+        parseResult.data.noticePeriodDays ?? null,
+        parseResult.data.interviewAvailability ?? "",
       ],
     );
     return id;
   }
 
   async update(payload: ProfileUpdatePayload): Promise<void> {
-    const payloadParse = ProfileUpdateSchema.safeParse(payload);
+    const payloadParse = ProfileRepositoryUpdateSchema.safeParse(payload);
     if (!payloadParse.success) {
       throw new Error(
         "Profile update validation failed: " +

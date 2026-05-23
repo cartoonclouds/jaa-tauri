@@ -1,11 +1,10 @@
-import { z } from "zod";
-
 import {
   DateTimeSchema,
   NullableDateTimeSchema,
   NullableUuidSchema,
   UuidSchema,
 } from "@shared/domain/zod/fields";
+import { z } from "zod";
 
 export const SeveritySchema = z.enum(["info", "warning", "success", "error"]);
 
@@ -38,6 +37,14 @@ export const CreateNotificationSchema = NotificationSchema.pick({
   severity: true,
   scheduledFor: true,
   sentAt: true,
+});
+
+export const NotificationRepositoryCreateSchema = z.object({
+  applicationId: z.string().nullable().optional(),
+  eventId: z.string().nullable().optional(),
+  severity: SeveritySchema.optional(),
+  title: z.string(),
+  body: z.string(),
 });
 
 export type Notification = z.infer<typeof NotificationSchema>;

@@ -18,5 +18,7 @@ export const CreateTagSchema = TagSchema.pick({
   color: true,
 }).partial({ color: true });
 
+export const TagRepositoryCreateSchema = CreateTagSchema;
+
 export type Tag = z.infer<typeof TagSchema>;
 export type CreateTagInput = z.infer<typeof CreateTagSchema>;

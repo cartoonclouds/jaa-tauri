@@ -21,5 +21,11 @@ export const CreateDocumentSchema = DocumentSchema.pick({
   checksum: true,
 }).partial({ sizeBytes: true, checksum: true });
 
+export const DocumentRepositoryCreateSchema = z.object({
+  title: z.string(),
+  kind: z.string(),
+  filePath: z.string(),
+});
+
 export type Document = z.infer<typeof DocumentSchema>;
 export type CreateDocumentInput = z.infer<typeof CreateDocumentSchema>;

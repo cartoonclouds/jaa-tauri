@@ -29,5 +29,12 @@ export const CreateEventSchema = EventSchema.pick({
   eventAt: true,
 }).partial({ contactId: true, description: true, eventAt: true });
 
+export const EventRepositoryCreateSchema = CreateEventSchema.pick({
+  applicationId: true,
+  contactId: true,
+  type: true,
+  title: true,
+});
+
 export type Event = z.infer<typeof EventSchema>;
 export type CreateEventInput = z.infer<typeof CreateEventSchema>;

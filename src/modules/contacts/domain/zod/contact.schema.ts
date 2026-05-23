@@ -49,5 +49,7 @@ export const CreateContactSchema = ContactSchema.pick({
   notes: true,
 });
 
+export const ContactRepositoryCreateSchema = CreateContactSchema;
+
 export type Contact = z.infer<typeof ContactSchema>;
 export type CreateContactInput = z.infer<typeof CreateContactSchema>;

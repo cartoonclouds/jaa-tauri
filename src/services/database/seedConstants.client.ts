@@ -1,6 +1,9 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 
-import { createPersistedConstantRows } from "@shared/constants/persistedConstants";
+import {
+  CONSTANT_MODULE_SOURCES,
+  createPersistedConstantRowsFromSources,
+} from "@shared/constants/persistedConstants";
 
 interface CountRow {
   count: number;
@@ -21,7 +24,7 @@ export async function seedConstantsOnFirstRun(
     return;
   }
 
-  const rows = createPersistedConstantRows();
+  const rows = createPersistedConstantRowsFromSources(CONSTANT_MODULE_SOURCES);
   await database.transaction(async (tx) => {
     for (const row of rows) {
       await tx.execute(

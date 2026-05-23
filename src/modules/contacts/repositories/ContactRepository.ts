@@ -9,6 +9,10 @@ import type {
 import { mapContactRowToEntity } from "@modules/contacts/application/mappers/mapContactRow";
 import { CONTACT_SEARCH_FIELDS } from "@modules/contacts/constants/contactDatatableFields";
 import {
+  ContactRepositoryCreateSchema,
+  ContactTypeSchema,
+} from "@modules/contacts/domain/zod/contact.schema";
+import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
   DEFAULT_CREATED_AT_ORDER_BY,
@@ -131,20 +135,35 @@ export class ContactRepository implements IContactRepository {
   }
 
   async create(payload: ContactCreatePayload): Promise<string> {
+    const parseResult = ContactRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Contact full name is required");
+    }
+
+    const fullName = parseResult.data.fullName.trim();
+    if (!fullName) {
+      throw new Error("Contact full name is required");
+    }
+
+    const parsedType = ContactTypeSchema.safeParse(parseResult.data.type);
+    if (!parsedType.success) {
+      throw new Error("Invalid contact type");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       "INSERT INTO contacts (id, company_id, full_name, email, phone, linkedin_url, location_text, location_lat, location_lng, type, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
       [
         id,
-        payload.companyId ?? null,
-        payload.fullName,
+        parseResult.data.companyId ?? null,
+        fullName,
         payload.email ?? null,
         payload.phone ?? null,
         payload.linkedinUrl ?? null,
-        payload.locationText ?? null,
-        payload.locationLat ?? null,
-        payload.locationLng ?? null,
-        payload.type,
+        parseResult.data.locationText ?? null,
+        parseResult.data.locationLat ?? null,
+        parseResult.data.locationLng ?? null,
+        parsedType.data,
         payload.notes ?? null,
       ],
     );

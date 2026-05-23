@@ -1,4 +1,4 @@
-import { upsertSetting } from "@modules/settings";
+import { SettingRepository } from "@modules/settings";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
@@ -7,19 +7,21 @@ function mockDb() {
   };
 }
 
-describe("upsertSetting", () => {
+describe("SettingRepository.upsert", () => {
   it("writes defaults when payload is empty", async () => {
     const db = mockDb();
+    const repository = new SettingRepository(db as never);
 
-    await upsertSetting(db as never, {});
+    await repository.upsert({});
 
     expect(db.execute).toHaveBeenCalledOnce();
   });
 
   it("writes provided setting values", async () => {
     const db = mockDb();
+    const repository = new SettingRepository(db as never);
 
-    await upsertSetting(db as never, {
+    await repository.upsert({
       theme: "dark",
       notificationsEnabled: false,
     });

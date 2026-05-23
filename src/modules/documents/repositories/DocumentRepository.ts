@@ -8,6 +8,7 @@ import type {
 
 import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
 import { DOCUMENT_SEARCH_FIELDS } from "@modules/documents/constants/documentDatatableFields";
+import { DocumentRepositoryCreateSchema } from "@modules/documents/domain/zod/document.schema";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -93,14 +94,26 @@ export class DocumentRepository implements IDocumentRepository {
   }
 
   async create(payload: DocumentCreatePayload): Promise<string> {
+    const parseResult = DocumentRepositoryCreateSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("Document title, kind, and file path are required");
+    }
+
+    const title = parseResult.data.title.trim();
+    const kind = parseResult.data.kind.trim();
+    const filePath = parseResult.data.filePath.trim();
+    if (!title || !kind || !filePath) {
+      throw new Error("Document title, kind, and file path are required");
+    }
+
     const id = crypto.randomUUID();
     await this.db.execute(
       "INSERT INTO documents (id, title, kind, file_path, mime_type, size_bytes, checksum, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
       [
         id,
-        payload.title,
-        payload.kind,
-        payload.filePath,
+        title,
+        kind,
+        filePath,
         payload.mimeType ?? null,
         payload.sizeBytes ?? null,
         payload.checksum ?? null,
