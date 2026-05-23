@@ -1,6 +1,7 @@
 mod migrations;
 mod resume_parsing;
 
+use chrono::Local;
 use std::path::PathBuf;
 
 use dotenvy::from_path_iter;
@@ -51,6 +52,10 @@ fn resolve_dev_mode() -> bool {
     }
 
     cfg!(debug_assertions)
+}
+
+fn resolve_log_file_name() -> String {
+    format!("{}.log", Local::now().format("%Y-%m-%d"))
 }
 
 /// Closes the splashscreen window and shows the main window.
@@ -110,6 +115,12 @@ pub fn run() {
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
+                .clear_targets()
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::LogDir {
+                        file_name: Some(resolve_log_file_name()),
+                    },
+                ))
                 .target(tauri_plugin_log::Target::new(
                     tauri_plugin_log::TargetKind::Webview,
                 ))

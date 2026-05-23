@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "nuxt dev --host 127.0.0.1",
     "dev:tauri": "nuxt dev --host 127.0.0.1 --port 3000 --strictPort",
+    "dev:clear": "node scripts/dev-clear.mjs",
     "generate": "nuxt generate",
     "tauri": "tauri",
     "build": "nuxt build",
@@ -20,7 +21,7 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "db:seed": "tsx src-tauri/factories/seed.ts"
+    "db:seed": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts"
   },
   "dependencies": {
     "@nuxt/hints": "1.1.1",

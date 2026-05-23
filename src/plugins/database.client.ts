@@ -1,3 +1,5 @@
+import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
+
 import { isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
@@ -5,6 +7,27 @@ import { ensureMigrationsAppliedOnFirstRun } from "@/services/database/ensureMig
 import { resolveDatabaseUrl } from "@/services/database/resolveDatabaseUrl";
 import { seedConstantsOnFirstRun } from "@/services/database/seedConstants.client";
 import { TauriSqliteDriver } from "@/services/database/TauriSqliteDriver.client";
+
+function createBrowserNoopDatabaseDriver(): DatabaseDriver {
+  const driver: DatabaseDriver = {
+    name: "browser-noop",
+    async select<T = unknown>(): Promise<T[]> {
+      return [];
+    },
+    async execute() {
+      return {
+        rowsAffected: 0,
+      };
+    },
+    async transaction<T>(
+      callback: (tx: DatabaseDriver) => Promise<T>,
+    ): Promise<T> {
+      return await callback(driver);
+    },
+  };
+
+  return driver;
+}
 
 export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig() as {
@@ -23,9 +46,21 @@ export default defineNuxtPlugin(async () => {
   const isSqliteUrl = configuredUrl.startsWith("sqlite:");
 
   if (!isTauri()) {
-    throw new Error(
-      "SQLite database is only supported inside Tauri runtime. Start the app with Tauri.",
+    if (!import.meta.dev) {
+      throw new Error(
+        "SQLite database is only supported inside Tauri runtime. Start the app with Tauri.",
+      );
+    }
+
+    console.warn(
+      "[database] Running outside Tauri in dev mode; using browser no-op database driver for UI smoke tests.",
     );
+
+    return {
+      provide: {
+        database: createBrowserNoopDatabaseDriver(),
+      },
+    };
   }
 
   if (!isSqliteUrl) {

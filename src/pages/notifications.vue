@@ -111,7 +111,7 @@
         <div class="flex justify-end">
           <IconField>
             <InputIcon>
-              <i class="pi pi-search" />
+              <Icon name="heroicons:magnifying-glass" class="h-4 w-4" />
             </InputIcon>
             <InputText
               v-model="globalFilter"

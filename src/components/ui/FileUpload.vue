@@ -132,28 +132,31 @@
         <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
           <div class="flex gap-2">
             <Button
-              icon="pi pi-images"
               rounded
               variant="outlined"
               severity="secondary"
               @click="chooseCallback()"
-            ></Button>
+            >
+              <Icon name="heroicons:photo" class="h-4 w-4" />
+            </Button>
             <Button
-              icon="pi pi-cloud-upload"
               rounded
               variant="outlined"
               severity="success"
               :disabled="!files || files.length === 0"
               @click="uploadEvent(uploadCallback)"
-            ></Button>
+            >
+              <Icon name="heroicons:cloud-arrow-up" class="h-4 w-4" />
+            </Button>
             <Button
-              icon="pi pi-times"
               rounded
               variant="outlined"
               severity="danger"
               :disabled="!files || files.length === 0"
               @click="onClearTemplatingUpload(clearCallback)"
-            ></Button>
+            >
+              <Icon name="heroicons:x-mark" class="h-4 w-4" />
+            </Button>
           </div>
           <ProgressBar
             :value="totalSizePercent"
@@ -197,14 +200,15 @@
                 <div>{{ formatSize(file.size) }}</div>
                 <Badge value="Pending" severity="warn" />
                 <Button
-                  icon="pi pi-times"
                   variant="outlined"
                   rounded
                   severity="danger"
                   @click="
                     onRemoveTemplatingFile(removeFileCallback, Number(index))
                   "
-                />
+                >
+                  <Icon name="heroicons:x-mark" class="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
@@ -233,12 +237,13 @@
                 <div>{{ formatSize(file.size) }}</div>
                 <Badge value="Completed" class="mt-4" severity="success" />
                 <Button
-                  icon="pi pi-times"
                   variant="outlined"
                   rounded
                   severity="danger"
                   @click="removeUploadedFileCallback(index)"
-                />
+                >
+                  <Icon name="heroicons:x-mark" class="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
@@ -246,9 +251,9 @@
       </template>
       <template #empty>
         <div class="flex items-center justify-center flex-col">
-          <i
-            class="pi pi-cloud-upload border-2! rounded-full! p-8! text-4xl! text-muted-color!"
-          />
+          <div class="border-2! rounded-full! p-8! text-muted-color!">
+            <Icon name="heroicons:cloud-arrow-up" class="h-10 w-10" />
+          </div>
           <p class="mt-6 mb-0">Drag and drop files to here to upload.</p>
         </div>
       </template>

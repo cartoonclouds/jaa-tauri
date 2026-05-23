@@ -50,12 +50,10 @@
       </p>
 
       <div class="flex">
-        <Button
-          label="Open Onboarding"
-          icon="pi pi-compass"
-          severity="contrast"
-          @click="openOnboarding"
-        />
+        <Button severity="contrast" @click="openOnboarding">
+          <Icon name="heroicons:compass" class="h-4 w-4" />
+          <span>Open Onboarding</span>
+        </Button>
       </div>
 
       <nav class="grid gap-2 text-sm sm:grid-cols-2">
@@ -120,7 +118,7 @@
     </div>
 
     <section class="mx-auto mb-8 max-w-6xl">
-      <StatisticsSection title="Job hunt snapshot" />
+      <StatisticsSection title="Job Hunt Snapshot" />
     </section>
 
     <ApplicationComponent />

@@ -455,8 +455,10 @@ Use this from the project root in PowerShell:
 cargo clean --manifest-path Cargo.toml
 ```
 
-For a fuller clean (Rust + Nuxt/Vite cache), run:
+For a fuller clean and reseed, run:
 
 ```bash
-Remove-Item -Recurse -Force .\src-tauri\target, ..nuxt, .output -ErrorAction SilentlyContinue
+npm run dev:clear
 ```
+
+This removes `src-tauri/target`, `.nuxt`, `.output`, deletes `applyflow.db`, and then runs `npm run db:seed`.

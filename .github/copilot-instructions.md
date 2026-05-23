@@ -297,7 +297,8 @@ Do:
 
 - Keep pages and components thin.
 - Keep `use*Service` factories singleton-backed (cache one service instance per module factory).
-- When needing icons, use a heroicons package and a NuxtIcon component.
+- When needing icons, use Heroicons via the `Icon`/Nuxt icon component pattern (for example `name="heroicons:x-mark"`).
+- Replace any existing PrimeIcons (`pi pi-*`) usage with Heroicons when touching related files.
 - For date or date-time picking in forms, use PrimeVue `DatePicker` rather than raw text/date inputs.
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
 - Use project aliases (`@`, `@modules`, `@shared`, `@infra`) instead of deep relative imports.
@@ -318,3 +319,4 @@ Don't:
 - Do not use `any` when a safer type can be used.
 - Do not couple domain/application logic to UI frameworks unless required.
 - Do not apply the same `$database` typed import/cast pattern (for example `DatabaseDriver` import plus `as DatabaseDriver`) across every `use*Service` factory and `settings` persistence file. Prefer a single typed source via Nuxt app type augmentation or a shared typed helper.
+- Do not introduce new PrimeIcons usage (`pi pi-*`) in templates or component props.

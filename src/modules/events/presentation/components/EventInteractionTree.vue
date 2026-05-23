@@ -449,22 +449,14 @@
           Interaction tree
         </h2>
         <div class="flex items-center gap-2">
-          <Button
-            type="button"
-            size="small"
-            icon="pi pi-plus"
-            label="Expand all"
-            text
-            @click="expandAll"
-          />
-          <Button
-            type="button"
-            size="small"
-            icon="pi pi-minus"
-            label="Collapse all"
-            text
-            @click="collapseAll"
-          />
+          <Button type="button" size="small" text @click="expandAll">
+            <Icon name="heroicons:plus" class="h-4 w-4" />
+            <span>Expand all</span>
+          </Button>
+          <Button type="button" size="small" text @click="collapseAll">
+            <Icon name="heroicons:minus" class="h-4 w-4" />
+            <span>Collapse all</span>
+          </Button>
           <span class="text-xs" :style="mutedTextStyle"
             >Double-click an event to edit</span
           >

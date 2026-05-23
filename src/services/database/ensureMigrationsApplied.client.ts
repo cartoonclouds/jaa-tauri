@@ -61,4 +61,13 @@ export async function ensureMigrationsAppliedOnFirstRun(
       "Database migration missing required constants.label column.",
     );
   }
+
+  const hasVisibilityColumn = constantsColumns.some(
+    (column) => column.name === "is_visible",
+  );
+  if (!hasVisibilityColumn) {
+    throw new Error(
+      "Database migration missing required constants.is_visible column.",
+    );
+  }
 }

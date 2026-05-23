@@ -23,6 +23,7 @@
 
   interface ConstantEditorRow {
     isNew: boolean;
+    isVisible: boolean;
     label: string;
     originalValue: string;
     value: string;
@@ -134,11 +135,31 @@
     const rows = resolveRows(type);
     rows.push({
       isNew: true,
+      isVisible: true,
       label: "",
       originalValue: "",
       value: "",
     });
     constantRowsByType[type] = rows;
+  }
+
+  function usesSingleLabelInput(row: ConstantEditorRow): boolean {
+    const normalizedValue = row.value.trim();
+    const normalizedLabel = row.label.trim();
+
+    if (normalizedLabel.length === 0) {
+      return false;
+    }
+
+    return normalizedValue === normalizedLabel;
+  }
+
+  function updateSingleLabelValue(
+    row: ConstantEditorRow,
+    nextValue: string,
+  ): void {
+    row.value = nextValue;
+    row.label = nextValue;
   }
 
   async function loadState(): Promise<void> {
@@ -149,7 +170,9 @@
         settingService.list(),
         Promise.all(
           constantGroups.value.map(async (group) => ({
-            rows: await settingService.listConstantRows(group.type),
+            rows: await settingService.listConstantRows(group.type, {
+              includeHidden: true,
+            }),
             type: group.type,
           })),
         ),
@@ -172,6 +195,7 @@
       for (const groupRows of constantRowsByGroup) {
         constantRowsByType[groupRows.type] = groupRows.rows.map((row) => ({
           isNew: false,
+          isVisible: row.isVisible,
           label: row.label ?? "",
           originalValue: row.value,
           value: row.value,
@@ -223,6 +247,7 @@
       }
 
       await settingService.upsertConstantRow({
+        isVisible: row.isVisible,
         label: row.label.trim() ? row.label.trim() : null,
         previousValue: row.isNew ? undefined : row.originalValue,
         type,
@@ -400,18 +425,40 @@
                     <div
                       v-for="(row, index) in resolveRows(group.type)"
                       :key="`${group.key}-${row.originalValue}-${index}`"
-                      class="grid gap-2 rounded-flow-md border border-flow-border p-3 md:grid-cols-[1fr_1fr_auto_auto]"
+                      :class="[
+                        'grid gap-2 rounded-flow-md border border-flow-border p-3',
+                        usesSingleLabelInput(row)
+                          ? 'md:grid-cols-[1fr_auto_auto_auto]'
+                          : 'md:grid-cols-[1fr_1fr_auto_auto_auto]',
+                      ]"
                     >
                       <InputText
+                        v-if="!usesSingleLabelInput(row)"
                         v-model="row.value"
                         placeholder="Value"
                         fluid
                       />
                       <InputText
-                        v-model="row.label"
-                        placeholder="Label (optional)"
+                        :model-value="
+                          usesSingleLabelInput(row) ? row.value : row.label
+                        "
+                        :placeholder="
+                          usesSingleLabelInput(row)
+                            ? 'Label'
+                            : 'Label (optional)'
+                        "
                         fluid
+                        @update:model-value="
+                          (value) =>
+                            usesSingleLabelInput(row)
+                              ? updateSingleLabelValue(row, value ?? '')
+                              : (row.label = value ?? '')
+                        "
                       />
+                      <div class="flex items-center gap-2">
+                        <label class="text-xs text-flow-muted">Visible</label>
+                        <ToggleSwitch v-model="row.isVisible" />
+                      </div>
                       <Button
                         size="small"
                         label="Save"

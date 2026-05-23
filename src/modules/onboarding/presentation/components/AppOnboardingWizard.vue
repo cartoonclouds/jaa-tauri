@@ -1,11 +1,12 @@
 <script setup lang="ts">
   import { useOnboardingFlow } from "@modules/onboarding/presentation/composables/useOnboardingFlow.client";
   import { defaultSkillOptions } from "@modules/onboarding/presentation/constants/defaultSkillOptions";
-  import { computed } from "vue";
+  import { computed, ref } from "vue";
 
   import {
     Button,
     Card,
+    Dialog,
     FileUpload,
     InputNumber,
     InputText,
@@ -16,8 +17,17 @@
     Textarea,
   } from "#components";
 
+  interface AppOnboardingWizardProps {
+    showCloseButton?: boolean;
+  }
+
+  const props = withDefaults(defineProps<AppOnboardingWizardProps>(), {
+    showCloseButton: false,
+  });
+
   const emit = defineEmits<{
     completed: [];
+    cancelled: [];
   }>();
 
   const {
@@ -61,6 +71,31 @@
   } as const;
 
   const canMoveBack = computed(() => !isFirstStep.value);
+  const showCancelConfirmDialog = ref(false);
+
+  const hasPotentialUnsavedChanges = computed(() => {
+    const hasProfileText =
+      profile.value.fullName.trim().length > 0 ||
+      profile.value.email.trim().length > 0 ||
+      profile.value.targetRole.trim().length > 0 ||
+      profile.value.salaryCurrency.trim().length > 0 ||
+      profile.value.linkedInUrl.trim().length > 0 ||
+      profile.value.githubUrl.trim().length > 0 ||
+      profile.value.workEligibility.trim().length > 0 ||
+      profile.value.interviewAvailability.trim().length > 0;
+    const hasCollections =
+      profile.value.skills.length > 0 ||
+      profile.value.preferredLocations.length > 0;
+    const hasNumericValues =
+      profile.value.desiredSalary !== null ||
+      profile.value.noticePeriodDays !== null;
+    const hasResumeData =
+      (resumePath.value ?? "").trim().length > 0 || parsedResume.value !== null;
+
+    return (
+      hasProfileText || hasCollections || hasNumericValues || hasResumeData
+    );
+  });
 
   function onResumeFileSelect(event: unknown): void {
     const selected = event as {
@@ -78,17 +113,76 @@
       // Error state is handled in composable and shown in the UI.
     }
   }
+
+  function onCancel(): void {
+    if (hasPotentialUnsavedChanges.value) {
+      showCancelConfirmDialog.value = true;
+      return;
+    }
+
+    emit("cancelled");
+  }
+
+  function onConfirmCancel(): void {
+    showCancelConfirmDialog.value = false;
+    emit("cancelled");
+  }
+
+  function onDismissCancelDialog(): void {
+    showCancelConfirmDialog.value = false;
+  }
 </script>
 
 <template>
   <Card class="w-full shadow-2xl">
-    <template #title>Welcome to Apply-Flow</template>
+    <template #title>
+      <div class="flex items-center justify-between gap-3">
+        <span>Welcome to Apply-Flow</span>
+        <Button
+          v-if="props.showCloseButton"
+          severity="secondary"
+          text
+          @click="onCancel"
+        >
+          <Icon name="heroicons:x-mark" class="h-4 w-4" />
+          <span>Close</span>
+        </Button>
+      </div>
+    </template>
     <template #subtitle>
       Complete onboarding once to personalize your workspace and parse your
       resume for ATS-ready details.
     </template>
 
     <template #content>
+      <Dialog
+        v-model:visible="showCancelConfirmDialog"
+        modal
+        header="Discard onboarding changes?"
+        :style="{ width: '28rem' }"
+      >
+        <p class="text-sm text-surface-600">
+          You have unsaved onboarding changes. Closing now will discard your
+          current progress.
+        </p>
+
+        <template #footer>
+          <div class="flex justify-end gap-2">
+            <Button
+              label="Stay"
+              severity="secondary"
+              text
+              @click="onDismissCancelDialog"
+            />
+            <Button
+              label="Discard & Close"
+              severity="danger"
+              @click="onConfirmCancel"
+            />
+          </div>
+        </template>
+      </Dialog>
+
       <Message v-if="hydrating" severity="info" class="mb-4">
         Loading existing onboarding details...
       </Message>
@@ -218,12 +312,15 @@
               name="resume"
               accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               :choose-label="parsingResume ? 'Parsing...' : 'Upload Resume'"
-              choose-icon="pi pi-upload"
               :disabled="parsingResume"
               custom-upload
               auto
               @select="onResumeFileSelect"
-            />
+            >
+              <template #chooseicon>
+                <Icon name="heroicons:arrow-up-tray" class="h-4 w-4" />
+              </template>
+            </FileUpload>
             <Tag v-if="resumePath" :value="resumePath" severity="contrast" />
           </div>
         </div>
@@ -315,28 +412,27 @@
 
       <div class="pt-6 flex justify-between">
         <Button
-          label="Back"
           severity="secondary"
-          icon="pi pi-arrow-left"
           :disabled="!canMoveBack"
           @click="previousStep"
-        />
+        >
+          <Icon name="heroicons:arrow-left" class="h-4 w-4" />
+          <span>Back</span>
+        </Button>
 
-        <Button
-          v-if="!isLastStep"
-          label="Next"
-          icon="pi pi-arrow-right"
-          icon-pos="right"
-          @click="nextStep"
-        />
+        <Button v-if="!isLastStep" @click="nextStep">
+          <span>Next</span>
+          <Icon name="heroicons:arrow-right" class="h-4 w-4" />
+        </Button>
 
         <Button
           v-else
           :label="saving ? 'Saving...' : 'Finish Setup'"
           :disabled="saving"
-          icon="pi pi-check"
           @click="onFinish"
-        />
+        >
+          <Icon name="heroicons:check" class="h-4 w-4" />
+        </Button>
       </div>
     </template>
   </Card>

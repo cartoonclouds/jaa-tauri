@@ -23,12 +23,16 @@
   ];
 
   const selectedSource = ref<MapEntityType>("contacts");
+  const searchQuery = ref("");
+  const debouncedSearchQuery = ref("");
   const selectedEntityId = ref<string | null>(null);
   const isLoading = ref(false);
   const loadingError = ref<string | null>(null);
   const contacts = ref<Contact[]>([]);
   const applications = ref<Application[]>([]);
   const mapContainer = ref<HTMLDivElement | null>(null);
+  const SEARCH_DEBOUNCE_MS = 200;
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const contactService = useContactService();
   const applicationService = useApplicationService();
@@ -80,16 +84,35 @@
     return applicationEntities.value;
   });
 
+  const filteredEntities = computed<MappableEntity[]>(() => {
+    const query = debouncedSearchQuery.value.trim().toLocaleLowerCase();
+    if (!query) {
+      return activeEntities.value;
+    }
+
+    return activeEntities.value.filter((entity) => {
+      const name = entity.name.toLocaleLowerCase();
+      const subtitle = entity.subtitle.toLocaleLowerCase();
+      const locationText = (entity.locationText ?? "").toLocaleLowerCase();
+
+      return (
+        name.includes(query) ||
+        subtitle.includes(query) ||
+        locationText.includes(query)
+      );
+    });
+  });
+
   const selectedEntity = computed<MappableEntity | null>(() => {
     if (!selectedEntityId.value) {
-      return activeEntities.value[0] ?? null;
+      return filteredEntities.value[0] ?? null;
     }
 
     return (
-      activeEntities.value.find(
+      filteredEntities.value.find(
         (entity) => entity.id === selectedEntityId.value,
       ) ??
-      activeEntities.value[0] ??
+      filteredEntities.value[0] ??
       null
     );
   });
@@ -99,14 +122,8 @@
   );
 
   const withCoordinatesCount = computed(() => activeEntities.value.length);
-
-  const totalSourceCount = computed(() => {
-    if (selectedSource.value === "contacts") {
-      return contacts.value.length;
-    }
-
-    return applications.value.length;
-  });
+  const filteredCount = computed(() => filteredEntities.value.length);
+  const hasSearchQuery = computed(() => searchQuery.value.trim().length > 0);
 
   async function loadEntities(): Promise<void> {
     isLoading.value = true;
@@ -133,9 +150,18 @@
     }
 
     await mapManager.initialize(container);
-    mapManager.render(activeEntities.value, (entityId) => {
+    mapManager.render(filteredEntities.value, (entityId) => {
       selectedEntityId.value = entityId;
     });
+  }
+
+  function clearSearch(): void {
+    searchQuery.value = "";
+    debouncedSearchQuery.value = "";
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = null;
+    }
   }
 
   onMounted(async () => {
@@ -145,14 +171,29 @@
   });
 
   onBeforeUnmount(() => {
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = null;
+    }
     mapManager.destroy();
   });
 
-  watch(activeEntities, (entities) => {
+  watch(searchQuery, (query) => {
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+
+    searchDebounceTimer = setTimeout(() => {
+      debouncedSearchQuery.value = query;
+      searchDebounceTimer = null;
+    }, SEARCH_DEBOUNCE_MS);
+  });
+
+  watch(filteredEntities, (entities) => {
     selectedEntityId.value = entities[0]?.id ?? null;
   });
 
-  watch(activeEntities, async () => {
+  watch(filteredEntities, async () => {
     await nextTick();
     await syncLeafletMap();
   });
@@ -187,8 +228,30 @@
       />
     </div>
 
+    <div class="relative w-full md:max-w-sm">
+      <InputText
+        v-model="searchQuery"
+        class="w-full pr-10"
+        type="text"
+        placeholder="Search by name, type, or location"
+        aria-label="Search map entities"
+      />
+
+      <Button
+        v-if="hasSearchQuery"
+        text
+        rounded
+        severity="secondary"
+        aria-label="Clear search"
+        class="absolute! right-1 top-1/2 -translate-y-1/2"
+        @click="clearSearch"
+      >
+        <Icon name="heroicons:x-mark" class="h-4 w-4" />
+      </Button>
+    </div>
+
     <div class="text-sm text-slate-300">
-      Showing {{ withCoordinatesCount }} of {{ totalSourceCount }}
+      Showing {{ filteredCount }} of {{ withCoordinatesCount }}
       {{ selectedSourceLabel }} with coordinates.
     </div>
 
@@ -204,12 +267,12 @@
     </div>
 
     <div
-      v-else-if="activeEntities.length"
-      class="grid gap-4 lg:grid-cols-[minmax(16rem,22rem),1fr]"
+      v-else-if="filteredEntities.length"
+      class="grid grid-cols-1 gap-4 md:grid-cols-2"
     >
       <div class="max-h-120 space-y-2 overflow-y-auto pr-1">
         <Button
-          v-for="entity in activeEntities"
+          v-for="entity in filteredEntities"
           :key="entity.id"
           class="w-full text-left"
           :severity="selectedEntity?.id === entity.id ? 'primary' : 'secondary'"
@@ -240,7 +303,10 @@
     </div>
 
     <div v-else class="rounded-lg border border-slate-700 p-4 text-slate-300">
-      No {{ selectedSourceLabel }} have coordinates yet.
+      <span v-if="withCoordinatesCount">
+        No {{ selectedSourceLabel }} match your search.
+      </span>
+      <span v-else>No {{ selectedSourceLabel }} have coordinates yet.</span>
     </div>
   </section>
 </template>

@@ -4,9 +4,13 @@ import type { DatatablePageQuery } from "@shared/types";
 import {
   type ConstantEntryUpsertPayload,
   type ISettingRepository,
+  type ListConstantRowsOptions,
   type SettingUpsertPayload,
 } from "@modules/settings/repositories/SettingRepository";
 
+/**
+ * Application service facade for reading and mutating settings domain data.
+ */
 export class SettingService {
   constructor(private readonly repository: ISettingRepository) {}
 
@@ -26,8 +30,11 @@ export class SettingService {
     return this.repository.delete(id);
   }
 
-  listConstantRows(type: PersistedConstantSourceType) {
-    return this.repository.listConstantRows(type);
+  listConstantRows(
+    type: PersistedConstantSourceType,
+    options?: ListConstantRowsOptions,
+  ) {
+    return this.repository.listConstantRows(type, options);
   }
 
   upsertConstantRow(payload: ConstantEntryUpsertPayload) {

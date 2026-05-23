@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 /**
  * CRUD service contract consumed by the shared composable factory.
@@ -93,11 +93,15 @@ export function createCrudComposable<TItem, TCreatePayload, TUpdatePayload>(
     });
   }
 
-  if (import.meta.client) {
-    // Startup refresh is intentionally fire-and-forget for UI hydration.
-    // Swallow the rejection because error state is already captured by refresh().
-    void refresh().catch(() => undefined);
-  }
+  let startupRefreshScheduled = false;
+
+  onMounted(() => {
+    if (!startupRefreshScheduled) {
+      startupRefreshScheduled = true;
+      // Swallow rejection because refresh() already captures error state.
+      void refresh().catch(() => undefined);
+    }
+  });
 
   return {
     items,
@@ -170,11 +174,15 @@ export function createUpsertCrudComposable<TItem, TUpsertPayload>(
     });
   }
 
-  if (import.meta.client) {
-    // Startup refresh is intentionally fire-and-forget for UI hydration.
-    // Swallow the rejection because error state is already captured by refresh().
-    void refresh().catch(() => undefined);
-  }
+  let startupRefreshScheduled = false;
+
+  onMounted(() => {
+    if (!startupRefreshScheduled) {
+      startupRefreshScheduled = true;
+      // Swallow rejection because refresh() already captures error state.
+      void refresh().catch(() => undefined);
+    }
+  });
 
   return { items, isLoading, error, clearError, refresh, upsert, remove };
 }

@@ -3,20 +3,30 @@ import * as interactionStageConstants from "../../modules/events/domain/constant
 import * as interactionStagePresentationConstants from "../../modules/events/presentation/constants/interactionStages";
 import * as onboardingDefaultSkillOptions from "../../modules/onboarding/presentation/constants/defaultSkillOptions";
 
+/**
+ * Normalized row payload persisted into the constants table.
+ */
 export interface PersistedConstantRow {
   settings_label: string;
   type: string;
   value: string;
   label: string | null;
+  is_visible: 0 | 1;
 }
 
 type ConstantModule = Record<string, unknown>;
 
+/**
+ * Source module descriptor for collecting constants into persistence rows.
+ */
 export interface ConstantModuleSource {
   namespace: string;
   module: ConstantModule;
 }
 
+/**
+ * Canonical list of modules whose constant exports are seeded into persistence.
+ */
 export const CONSTANT_MODULE_SOURCES = [
   {
     namespace: "applications.presentation.constants.applicationFormOptions",
@@ -39,6 +49,9 @@ export const CONSTANT_MODULE_SOURCES = [
 type ConstantModuleNamespace =
   (typeof CONSTANT_MODULE_SOURCES)[number]["namespace"];
 
+/**
+ * Fully-qualified key used to identify a persisted constant source.
+ */
 export type PersistedConstantSourceType =
   `${ConstantModuleNamespace}.${string}`;
 
@@ -163,6 +176,7 @@ function toConstantRows(
       type,
       value: serializeConstantValue(stripEmbeddedLabel(entry)),
       label: toConstantLabel(entry),
+      is_visible: 1,
     }));
   }
 
@@ -172,6 +186,7 @@ function toConstantRows(
       type,
       value: serializeConstantValue(stripEmbeddedLabel(value)),
       label: toConstantLabel(value),
+      is_visible: 1,
     },
   ];
 }

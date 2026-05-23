@@ -205,12 +205,10 @@
   <div class="space-y-6 p-6">
     <div class="flex items-center justify-between gap-3">
       <h1 class="text-2xl font-semibold">Applications</h1>
-      <Button
-        type="button"
-        label="New application"
-        icon="pi pi-plus"
-        @click="openCreateDrawer"
-      />
+      <Button type="button" @click="openCreateDrawer">
+        <Icon name="heroicons:plus" class="h-4 w-4" />
+        <span>New Application</span>
+      </Button>
     </div>
 
     <ApplicationDatatable

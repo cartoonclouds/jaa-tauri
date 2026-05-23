@@ -204,10 +204,3 @@
     </Column>
   </ServerDatatable>
 </template>
-
-<style scoped>
-  :deep(.p-datatable .p-datatable-thead > tr > th),
-  :deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 1rem;
-  }
-</style>

@@ -21,6 +21,9 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Upsert payload for the application-wide settings record.
+ */
 export interface SettingUpsertPayload {
   id?: string;
   theme?: Setting["theme"];
@@ -29,17 +32,32 @@ export interface SettingUpsertPayload {
   developerMode?: boolean;
 }
 
+/**
+ * Constant row shape returned from persistence with UI-friendly visibility mapping.
+ */
 export interface ConstantEntryRow {
   type: string;
   value: string;
   label: string | null;
+  isVisible: boolean;
 }
 
+/**
+ * Payload used to insert or update a constant row.
+ */
 export interface ConstantEntryUpsertPayload {
   type: PersistedConstantSourceType;
   value: string;
   label: string | null;
+  isVisible?: boolean;
   previousValue?: string;
+}
+
+/**
+ * Query options for loading constant rows.
+ */
+export interface ListConstantRowsOptions {
+  includeHidden?: boolean;
 }
 
 function resolveSettingsLabel(type: PersistedConstantSourceType): string {
@@ -68,6 +86,9 @@ function resolveSettingsLabel(type: PersistedConstantSourceType): string {
 export type SettingCreatePayload = SettingUpsertPayload;
 export type SettingUpdatePayload = SettingUpsertPayload & { id: string };
 
+/**
+ * Repository contract for persisted settings and editable constant rows.
+ */
 export interface ISettingRepository extends IRepository<
   Setting,
   SettingCreatePayload,
@@ -82,6 +103,7 @@ export interface ISettingRepository extends IRepository<
   ): Promise<ConstantEntryRow | null>;
   listConstantRows(
     type: PersistedConstantSourceType,
+    options?: ListConstantRowsOptions,
   ): Promise<ConstantEntryRow[]>;
   upsertConstantRow(payload: ConstantEntryUpsertPayload): Promise<void>;
   deleteConstantRow(
@@ -90,8 +112,26 @@ export interface ISettingRepository extends IRepository<
   ): Promise<void>;
 }
 
+/**
+ * SQLite-backed repository for settings and constant metadata management.
+ */
 export class SettingRepository implements ISettingRepository {
   constructor(private readonly db: DatabaseDriver) {}
+
+  private toConstantEntryRow(row: {
+    type: string;
+    value: string;
+    label: string | null;
+    is_visible: number | boolean;
+  }): ConstantEntryRow {
+    const visibility = row.is_visible;
+    return {
+      type: row.type,
+      value: row.value,
+      label: row.label,
+      isVisible: visibility === true || Number(visibility) === 1,
+    };
+  }
 
   async get(id = "app"): Promise<Setting | null> {
     const rows = await this.db.select<Record<string, unknown>>(
@@ -200,32 +240,52 @@ export class SettingRepository implements ISettingRepository {
     type: PersistedConstantSourceType,
     value: string,
   ): Promise<ConstantEntryRow | null> {
-    const rows = await this.db.select<ConstantEntryRow>(
-      `SELECT type, value, label
+    const rows = await this.db.select<{
+      type: string;
+      value: string;
+      label: string | null;
+      is_visible: number | boolean;
+    }>(
+      `SELECT type, value, label, is_visible
        FROM constants
        WHERE type = $1 AND value = $2
        LIMIT 1`,
       [type, value],
     );
 
-    return rows[0] ?? null;
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+
+    return this.toConstantEntryRow(row);
   }
 
   async listConstantRows(
     type: PersistedConstantSourceType,
+    options: ListConstantRowsOptions = {},
   ): Promise<ConstantEntryRow[]> {
-    return await this.db.select<ConstantEntryRow>(
-      `SELECT type, value, label
+    const rows = await this.db.select<{
+      type: string;
+      value: string;
+      label: string | null;
+      is_visible: number | boolean;
+    }>(
+      `SELECT type, value, label, is_visible
        FROM constants
        WHERE type = $1
+         AND ($2 = 1 OR is_visible = 1)
        ORDER BY value ASC`,
-      [type],
+      [type, options.includeHidden === true ? 1 : 0],
     );
+
+    return rows.map((row) => this.toConstantEntryRow(row));
   }
 
   async upsertConstantRow(payload: ConstantEntryUpsertPayload): Promise<void> {
     const normalizedValue = payload.value.trim();
     const normalizedLabel = payload.label?.trim() ? payload.label.trim() : null;
+    const normalizedIsVisible = payload.isVisible !== false;
     const settingsLabel = resolveSettingsLabel(payload.type);
 
     if (normalizedValue.length === 0) {
@@ -243,11 +303,18 @@ export class SettingRepository implements ISettingRepository {
         );
 
         await tx.execute(
-          `INSERT INTO constants (settings_label, type, value, label)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO constants (settings_label, type, value, label, is_visible)
+           VALUES ($1, $2, $3, $4, $5)
            ON CONFLICT(type, value) DO UPDATE SET
-             label = excluded.label`,
-          [settingsLabel, payload.type, normalizedValue, normalizedLabel],
+             label = excluded.label,
+             is_visible = excluded.is_visible`,
+          [
+            settingsLabel,
+            payload.type,
+            normalizedValue,
+            normalizedLabel,
+            normalizedIsVisible ? 1 : 0,
+          ],
         );
       });
 
@@ -255,11 +322,18 @@ export class SettingRepository implements ISettingRepository {
     }
 
     await this.db.execute(
-      `INSERT INTO constants (settings_label, type, value, label)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO constants (settings_label, type, value, label, is_visible)
+       VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT(type, value) DO UPDATE SET
-         label = excluded.label`,
-      [settingsLabel, payload.type, normalizedValue, normalizedLabel],
+         label = excluded.label,
+         is_visible = excluded.is_visible`,
+      [
+        settingsLabel,
+        payload.type,
+        normalizedValue,
+        normalizedLabel,
+        normalizedIsVisible ? 1 : 0,
+      ],
     );
   }
 

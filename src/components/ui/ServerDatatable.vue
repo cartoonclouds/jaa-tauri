@@ -51,6 +51,30 @@
     ...props.searchFieldOptions,
   ]);
 
+  const searchFieldsSelectedItemsLabel = computed(() => {
+    if (props.searchFieldOptions.length > 0) {
+      const allSelected =
+        props.searchFields.length === props.searchFieldOptions.length;
+      if (allSelected) {
+        return "All";
+      }
+    }
+
+    return "{0} fields";
+  });
+
+  const safePaginatorTemplate = computed(() =>
+    props.paginatorTemplate
+      .split(/\s+/)
+      .filter(
+        (token) =>
+          token.length > 0 &&
+          token !== "RowsPerPageDropdown" &&
+          token !== "JumpToPageDropdown",
+      )
+      .join(" "),
+  );
+
   function onRowClick(event: { data: unknown; originalEvent: Event }): void {
     emit("row-click", event.data);
   }
@@ -115,7 +139,7 @@
     :rows="props.rows"
     :total-records="props.totalRecords"
     :rows-per-page-options="props.rowsPerPageOptions"
-    :paginator-template="props.paginatorTemplate"
+    :paginator-template="safePaginatorTemplate"
     :current-page-report-template="props.currentPageReportTemplate"
     :sort-field="props.sortField ?? undefined"
     :sort-order="props.sortOrder ?? undefined"
@@ -124,27 +148,42 @@
     @sort="onSort"
   >
     <template #header>
-      <div class="flex flex-wrap justify-end gap-3">
-        <MultiSelect
-          :model-value="props.searchFields"
-          :options="searchFieldOptions"
-          option-label="label"
-          option-value="value"
-          placeholder="Search fields"
-          class="min-w-13rem"
-          @update:model-value="onSearchFieldsInput"
-        />
-        <IconField>
-          <InputIcon>
-            <i class="pi pi-search" />
-          </InputIcon>
+      <div class="flex justify-end">
+        <InputGroup class="w-full max-w-2xl">
+          <InputGroupAddon>
+            <Icon name="heroicons:magnifying-glass" class="h-4 w-4" />
+          </InputGroupAddon>
           <InputText
             :model-value="props.globalFilter"
             :placeholder="props.searchPlaceholder"
+            class="w-full"
             @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
           />
-        </IconField>
+          <MultiSelect
+            :model-value="props.searchFields"
+            :options="searchFieldOptions"
+            option-label="label"
+            option-value="value"
+            placeholder="Search fields"
+            :max-selected-labels="1"
+            :selected-items-label="searchFieldsSelectedItemsLabel"
+            class="w-44 shrink-0"
+            @update:model-value="onSearchFieldsInput"
+          />
+        </InputGroup>
       </div>
+    </template>
+
+    <template v-if="$slots.paginatorcontainer" #paginatorcontainer="slotProps">
+      <slot name="paginatorcontainer" v-bind="slotProps" />
+    </template>
+
+    <template v-if="$slots.paginatorstart" #paginatorstart>
+      <slot name="paginatorstart" />
+    </template>
+
+    <template v-if="$slots.paginatorend" #paginatorend>
+      <slot name="paginatorend" />
     </template>
 
     <slot />

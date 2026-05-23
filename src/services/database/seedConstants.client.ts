@@ -19,7 +19,7 @@ export async function seedConstantsOnFirstRun(
     "SELECT COUNT(*) AS count FROM constants",
   );
 
-  const existingCount = Number(countRows[0]?.count ?? 0);
+  const existingCount = countRows[0]?.count ?? 0;
   if (existingCount > 0) {
     return;
   }
@@ -28,9 +28,9 @@ export async function seedConstantsOnFirstRun(
   await database.transaction(async (tx) => {
     for (const row of rows) {
       await tx.execute(
-        `INSERT OR IGNORE INTO constants (settings_label, type, value, label)
-         VALUES ($1, $2, $3, $4)`,
-        [row.settings_label, row.type, row.value, row.label],
+        `INSERT OR IGNORE INTO constants (settings_label, type, value, label, is_visible)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [row.settings_label, row.type, row.value, row.label, row.is_visible],
       );
     }
   });
