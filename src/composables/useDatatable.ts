@@ -1,4 +1,5 @@
 import { FilterMatchMode } from "@primevue/core/api";
+import { DEFAULT_DATATABLE_PAGINATOR_TEMPLATE } from "@shared/utils/datatableStyles";
 import { ref } from "vue";
 
 /**
@@ -34,8 +35,7 @@ export function useDatatable(options: UseDatatableOptions) {
   const rows = ref(options.rows ?? 10);
   const rowsPerPageOptions = options.rowsPerPageOptions ?? [10, 20, 50];
   const paginatorTemplate =
-    options.paginatorTemplate ??
-    "RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink";
+    options.paginatorTemplate ?? DEFAULT_DATATABLE_PAGINATOR_TEMPLATE;
   const currentPageReportTemplate =
     options.currentPageReportTemplate ?? "{first} to {last} of {totalRecords}";
 

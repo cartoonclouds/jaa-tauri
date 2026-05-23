@@ -1,13 +1,16 @@
 <script setup lang="ts">
   import { useOnboardingFlow } from "@modules/onboarding/presentation/composables/useOnboardingFlow.client";
+  import { defaultSkillOptions } from "@modules/onboarding/presentation/constants/defaultSkillOptions";
   import { computed } from "vue";
 
   import {
     Button,
     Card,
+    FileUpload,
     InputNumber,
     InputText,
     Message,
+    MultiSelect,
     Select,
     Tag,
     Textarea,
@@ -19,7 +22,6 @@
 
   const {
     addLocations,
-    addSkills,
     currentError,
     currentStep,
     finishOnboarding,
@@ -35,12 +37,21 @@
     previousStep,
     profile,
     removeLocation,
-    removeSkill,
     resumePath,
     saving,
-    skillsInput,
     stepOrder,
   } = useOnboardingFlow();
+
+  const skillOptions = computed(() => {
+    const detectedSkills = parsedResume.value?.detectedSkills ?? [];
+    const options = new Set<string>([
+      ...defaultSkillOptions,
+      ...detectedSkills,
+      ...profile.value.skills,
+    ]);
+
+    return Array.from(options).sort((left, right) => left.localeCompare(right));
+  });
 
   const stepLabels = {
     profile: "Profile",
@@ -50,6 +61,14 @@
   } as const;
 
   const canMoveBack = computed(() => !isFirstStep.value);
+
+  function onResumeFileSelect(event: unknown): void {
+    const selected = event as {
+      files?: (File & { path?: string })[];
+    };
+    const selectedFile = selected.files?.[0] ?? null;
+    void pickAndParseResume(selectedFile);
+  }
 
   async function onFinish(): Promise<void> {
     try {
@@ -145,26 +164,16 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
-            <label for="skillsInput">Skills (comma-separated)</label>
-            <div class="flex gap-2">
-              <InputText
-                id="skillsInput"
-                v-model="skillsInput"
-                fluid
-                @keyup.enter="addSkills"
-              />
-              <Button label="Add" @click="addSkills" />
-            </div>
-            <div v-if="profile.skills.length" class="flex flex-wrap gap-2">
-              <Tag
-                v-for="skill in profile.skills"
-                :key="skill"
-                :value="skill"
-                severity="secondary"
-                class="cursor-pointer"
-                @click="removeSkill(skill)"
-              />
-            </div>
+            <label for="skills">Skills</label>
+            <MultiSelect
+              id="skills"
+              v-model="profile.skills"
+              :options="skillOptions"
+              display="chip"
+              placeholder="Select skills"
+              filter
+              fluid
+            />
           </div>
 
           <div class="flex flex-col gap-2">
@@ -204,11 +213,16 @@
             hints for ATS-style matching.
           </p>
           <div class="flex flex-wrap gap-2">
-            <Button
-              :label="parsingResume ? 'Parsing...' : 'Upload Resume'"
-              icon="pi pi-upload"
+            <FileUpload
+              mode="basic"
+              name="resume"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              :choose-label="parsingResume ? 'Parsing...' : 'Upload Resume'"
+              choose-icon="pi pi-upload"
               :disabled="parsingResume"
-              @click="pickAndParseResume"
+              custom-upload
+              auto
+              @select="onResumeFileSelect"
             />
             <Tag v-if="resumePath" :value="resumePath" severity="contrast" />
           </div>

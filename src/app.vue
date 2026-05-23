@@ -57,8 +57,10 @@
 </script>
 
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-    <Toast />
-  </NuxtLayout>
+  <div class="app-dark min-h-screen">
+    <NuxtLayout>
+      <NuxtPage />
+      <Toast />
+    </NuxtLayout>
+  </div>
 </template>

@@ -11,9 +11,9 @@
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
   import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
-  import { formatDateTimeLocalValue } from "@modules/applications/presentation/utils/dateTimeLocal";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
+  import { formatDateTimeLocalValue } from "@shared/utils/dateTimeLocal";
   import { ref } from "vue";
 
   const service = useApplicationService();

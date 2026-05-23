@@ -22,15 +22,31 @@
     "fs:default",
     {
       "identifier": "fs:allow-exists",
-      "allow": [{ "path": "$APPDATA/*" }]
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
     },
     {
       "identifier": "fs:allow-read",
-      "allow": [{ "path": "$APPDATA/*" }]
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
     },
     {
       "identifier": "fs:allow-write",
-      "allow": [{ "path": "$APPDATA/*" }]
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
     }
   ]
 }

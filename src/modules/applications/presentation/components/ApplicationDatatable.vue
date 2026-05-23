@@ -6,11 +6,22 @@
   } from "@shared/types";
 
   import {
+    APPLICATION_SEARCH_FIELDS,
     APPLICATION_SORTABLE_FIELDS,
     type ApplicationSearchField,
     type ApplicationSearchFieldOption,
     type ApplicationSortableField,
   } from "@modules/applications/presentation/composables/useApplicationDatatable";
+  import {
+    formatApplicationAttendanceTypeLabel as formatAttendanceTypeLabel,
+    formatApplicationEmploymentTypeLabel as formatEmploymentTypeLabel,
+    formatApplicationStatusLabel as formatStatusLabel,
+    getApplicationAttendanceTypeClass as getAttendanceTypeClass,
+    getApplicationEmploymentTypeClass as getEmploymentTypeClass,
+    getApplicationStatusClass as getStatusClass,
+  } from "@modules/applications/presentation/utils/applicationVisualTokens";
+
+  import ServerDatatable from "@/components/ui/ServerDatatable.vue";
 
   interface Props {
     items: Application[];
@@ -43,11 +54,8 @@
     ];
   }>();
 
-  function onRowClick(event: {
-    data: Application;
-    originalEvent: Event;
-  }): void {
-    emit("row-click", event.data);
+  function onRowClick(row: unknown): void {
+    emit("row-click", row as Application);
   }
 
   function onOpenDetails(application: Application): void {
@@ -58,19 +66,8 @@
     emit("update:global-filter", value);
   }
 
-  function onSearchFieldsInput(value: unknown): void {
-    const allowedValues = new Set<string>(
-      props.searchFieldOptions.map((option) => option.value),
-    );
-
-    const normalized = Array.isArray(value)
-      ? value.filter(
-          (field): field is ApplicationSearchField =>
-            typeof field === "string" && allowedValues.has(field),
-        )
-      : [];
-
-    emit("update:search-fields", normalized);
+  function onSearchFieldsInput(fields: string[]): void {
+    emit("update:search-fields", fields as ApplicationSearchField[]);
   }
 
   function onPage(event: { page?: number; rows?: number }): void {
@@ -78,70 +75,117 @@
   }
 
   function onSort(event: {
-    sortField?: string | ((item: Application) => string) | null;
+    sortField?: string | null;
     sortOrder?: DatatableSortOrderInput;
   }): void {
-    const sortableFields = new Set<string>(APPLICATION_SORTABLE_FIELDS);
-    const sortField =
-      typeof event.sortField === "string" && sortableFields.has(event.sortField)
-        ? (event.sortField as ApplicationSortableField)
-        : null;
-
     emit("sort", {
-      sortField,
+      sortField: (event.sortField ?? null) as ApplicationSortableField | null,
       sortOrder: event.sortOrder,
     });
   }
 </script>
 
 <template>
-  <DataTable
-    :value="props.items"
-    data-key="id"
-    :loading="props.isLoading"
-    striped-rows
-    lazy
-    paginator
+  <ServerDatatable
+    :items="props.items"
+    :is-loading="props.isLoading"
+    :global-filter="props.globalFilter"
+    :search-fields="props.searchFields"
+    :search-field-options="props.searchFieldOptions"
+    :search-field-allowlist="APPLICATION_SEARCH_FIELDS"
     :rows="props.rows"
     :total-records="props.totalRecords"
     :rows-per-page-options="props.rowsPerPageOptions"
     :paginator-template="props.paginatorTemplate"
     :current-page-report-template="props.currentPageReportTemplate"
-    :sort-field="props.sortField ?? undefined"
-    :sort-order="props.sortOrder ?? undefined"
+    :sort-field="props.sortField"
+    :sort-order="props.sortOrder"
+    :sortable-fields="APPLICATION_SORTABLE_FIELDS"
+    search-placeholder="Search applications"
     @row-click="onRowClick"
+    @update:global-filter="onGlobalFilterInput"
+    @update:search-fields="onSearchFieldsInput"
     @page="onPage"
     @sort="onSort"
   >
-    <template #header>
-      <div class="flex flex-wrap justify-end gap-3">
-        <MultiSelect
-          :model-value="props.searchFields"
-          :options="props.searchFieldOptions"
-          option-label="label"
-          option-value="value"
-          placeholder="Search fields"
-          class="min-w-13rem"
-          @update:model-value="onSearchFieldsInput"
-        />
-        <IconField>
-          <InputIcon>
-            <i class="pi pi-search" />
-          </InputIcon>
-          <InputText
-            :model-value="props.globalFilter"
-            placeholder="Search applications"
-            @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
-          />
-        </IconField>
-      </div>
-    </template>
-
     <Column field="title" header="Title" sortable />
-    <Column field="status" header="Status" sortable />
+    <Column
+      field="status"
+      header="Status"
+      sortable
+      header-class="text-center"
+      body-class="text-center"
+    >
+      <template #body="slotProps">
+        <span
+          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          :class="getStatusClass((slotProps.data as Application).status)"
+        >
+          {{ formatStatusLabel((slotProps.data as Application).status) }}
+        </span>
+      </template>
+    </Column>
+    <Column
+      header="Attendance"
+      header-class="text-center"
+      body-class="text-center"
+    >
+      <template #body="slotProps">
+        <span
+          v-if="(slotProps.data as Application).attendanceType"
+          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          :class="
+            getAttendanceTypeClass(
+              (slotProps.data as Application).attendanceType,
+            )
+          "
+        >
+          {{
+            formatAttendanceTypeLabel(
+              (slotProps.data as Application).attendanceType,
+            )
+          }}
+        </span>
+        <span v-else class="text-sm text-surface-500">-</span>
+      </template>
+    </Column>
+    <Column
+      header="Employment"
+      header-class="text-center"
+      body-class="text-center"
+    >
+      <template #body="slotProps">
+        <span
+          v-if="(slotProps.data as Application).employmentType"
+          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          :class="
+            getEmploymentTypeClass(
+              (slotProps.data as Application).employmentType,
+            )
+          "
+        >
+          {{
+            formatEmploymentTypeLabel(
+              (slotProps.data as Application).employmentType,
+            )
+          }}
+        </span>
+        <span v-else class="text-sm text-surface-500">-</span>
+      </template>
+    </Column>
     <Column field="locationText" header="Location" sortable />
-    <Column field="priority" header="Priority" sortable />
-    <Column header="Actions">
+    <Column
+      field="priority"
+      header="Priority"
+      sortable
+      header-class="text-center"
+      body-class="text-center"
+    />
+    <Column
+      header="Actions"
+      header-class="text-center"
+      body-class="text-center"
+    >
       <template #body="slotProps">
         <Button
           text
@@ -154,11 +198,12 @@
         </Button>
       </template>
     </Column>
-  </DataTable>
+  </ServerDatatable>
 </template>
 
 <style scoped>
-  :deep(.p-datatable-tbody > tr:hover) {
-    cursor: pointer;
+  :deep(.p-datatable .p-datatable-thead > tr > th),
+  :deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 0.75rem 1rem;
   }
 </style>

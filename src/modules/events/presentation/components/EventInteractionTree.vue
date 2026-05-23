@@ -33,9 +33,37 @@
     eventAt: "",
   });
 
-  const expandedKeys = ref<Map<string, boolean>>(new Map());
+  const expandedKeys = ref<Record<string, boolean>>({});
 
   const stageSuggestions = computed(() => INTERACTION_STAGES);
+
+  const surfaceCardStyle = {
+    background: "var(--p-content-background)",
+    borderColor: "var(--p-content-border-color)",
+    color: "var(--p-content-color)",
+  } as const;
+
+  const titleTextStyle = {
+    color: "var(--p-text-color)",
+  } as const;
+
+  const mutedTextStyle = {
+    color: "var(--p-text-muted-color)",
+  } as const;
+
+  function getNodeCardStyle(): Record<string, string> {
+    return {
+      background: "var(--p-content-background)",
+      borderColor: "var(--p-content-border-color)",
+      color: "var(--p-content-color)",
+    };
+  }
+
+  function getNodeMetaStyle(): Record<string, string> {
+    return {
+      color: "var(--p-text-muted-color)",
+    };
+  }
 
   function toDateTimeLocalValue(value: Date | null): string {
     if (!value) {
@@ -135,20 +163,30 @@
 
   function expandAllNodes(
     nodes: TreeNode[],
-    target: Map<string, boolean>,
+    target: Record<string, boolean>,
   ): void {
     for (const node of nodes) {
       if (node.children && node.children.length > 0 && node.key) {
-        target.set(node.key, true);
+        target[node.key] = true;
         expandAllNodes(node.children, target);
       }
     }
   }
 
+  function expandAll(): void {
+    const allExpanded: Record<string, boolean> = {};
+    expandAllNodes(treeNodes.value, allExpanded);
+    expandedKeys.value = allExpanded;
+  }
+
+  function collapseAll(): void {
+    expandedKeys.value = {};
+  }
+
   watch(
     treeNodes,
     (nodes) => {
-      const allExpanded = new Map<string, boolean>();
+      const allExpanded: Record<string, boolean> = {};
       expandAllNodes(nodes, allExpanded);
       expandedKeys.value = allExpanded;
     },
@@ -247,15 +285,15 @@
 
 <template>
   <div class="space-y-6 p-6">
-    <h1 class="text-2xl font-semibold">Application Interactions</h1>
+    <h1 class="text-2xl font-semibold" :style="titleTextStyle">
+      Application Interactions
+    </h1>
 
-    <div
-      class="rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm"
-    >
-      <h2 class="text-sm font-semibold text-surface-900">
+    <div class="rounded-xl border p-4 shadow-sm" :style="surfaceCardStyle">
+      <h2 class="text-sm font-semibold" :style="titleTextStyle">
         Add interaction event
       </h2>
-      <p class="mb-4 text-xs text-surface-500">
+      <p class="mb-4 text-xs" :style="mutedTextStyle">
         Use stage paths like
         <span class="font-mono">Interview/Technical/Final</span>
         to create any tree depth.
@@ -264,7 +302,8 @@
       <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submitCreate">
         <div class="space-y-1">
           <label
-            class="text-sm font-medium text-surface-700"
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
             for="event-application-id"
           >
             Application ID
@@ -278,7 +317,11 @@
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700" for="event-type">
+          <label
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
+            for="event-type"
+          >
             Interaction stage
           </label>
           <InputText
@@ -291,7 +334,11 @@
         </div>
 
         <div class="space-y-1 md:col-span-2">
-          <label class="text-sm font-medium text-surface-700" for="event-title">
+          <label
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
+            for="event-title"
+          >
             Title
           </label>
           <InputText
@@ -304,7 +351,8 @@
 
         <div class="space-y-1 md:col-span-2">
           <label
-            class="text-sm font-medium text-surface-700"
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
             for="event-description"
           >
             Description
@@ -320,7 +368,11 @@
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700" for="event-at">
+          <label
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
+            for="event-at"
+          >
             Event time
           </label>
           <InputText
@@ -341,10 +393,8 @@
       </datalist>
     </div>
 
-    <div
-      class="rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm"
-    >
-      <h2 class="mb-3 text-sm font-semibold text-surface-900">
+    <div class="rounded-xl border p-4 shadow-sm" :style="surfaceCardStyle">
+      <h2 class="mb-3 text-sm font-semibold" :style="titleTextStyle">
         Possible interaction stages
       </h2>
       <div class="flex flex-wrap gap-2">
@@ -352,31 +402,53 @@
       </div>
     </div>
 
-    <div
-      class="rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm"
-    >
+    <div class="rounded-xl border p-4 shadow-sm" :style="surfaceCardStyle">
       <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-surface-900">Interaction tree</h2>
-        <span class="text-xs text-surface-500"
-          >Double-click an event to edit</span
-        >
+        <h2 class="text-sm font-semibold" :style="titleTextStyle">
+          Interaction tree
+        </h2>
+        <div class="flex items-center gap-2">
+          <Button
+            type="button"
+            size="small"
+            icon="pi pi-plus"
+            label="Expand all"
+            text
+            @click="expandAll"
+          />
+          <Button
+            type="button"
+            size="small"
+            icon="pi pi-minus"
+            label="Collapse all"
+            text
+            @click="collapseAll"
+          />
+          <span class="text-xs" :style="mutedTextStyle"
+            >Double-click an event to edit</span
+          >
+        </div>
       </div>
 
       <Tree
         v-model:expanded-keys="expandedKeys"
         :value="treeNodes"
         :loading="isLoading"
+        filter
+        filter-mode="lenient"
+        filter-placeholder="Filter interactions"
         class="w-full"
       >
         <template #default="slotProps">
           <div
-            class="w-full rounded-md px-2 py-1 transition hover:bg-surface-100"
+            class="w-full rounded-md border px-2 py-1 transition hover:bg-[var(--p-content-hover-background)]"
+            :style="getNodeCardStyle()"
             @dblclick="onNodeDblClick(slotProps.node as TreeNode)"
           >
-            <p class="text-sm font-medium text-surface-900">
+            <p class="text-sm font-medium" :style="titleTextStyle">
               {{ slotProps.node.label }}
             </p>
-            <p class="text-xs text-surface-500">
+            <p class="text-xs" :style="getNodeMetaStyle()">
               {{
                 formatNodeMeta(
                   (slotProps.node.data as EventTreeNodeData)?.event,
@@ -398,7 +470,8 @@
       <div class="grid gap-3 md:grid-cols-2">
         <div class="space-y-1 md:col-span-2">
           <label
-            class="text-sm font-medium text-surface-700"
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
             for="edit-event-type"
           >
             Interaction stage
@@ -414,7 +487,8 @@
 
         <div class="space-y-1 md:col-span-2">
           <label
-            class="text-sm font-medium text-surface-700"
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
             for="edit-event-title"
           >
             Title
@@ -424,7 +498,8 @@
 
         <div class="space-y-1 md:col-span-2">
           <label
-            class="text-sm font-medium text-surface-700"
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
             for="edit-event-description"
           >
             Description
@@ -440,7 +515,8 @@
 
         <div class="space-y-1 md:col-span-2">
           <label
-            class="text-sm font-medium text-surface-700"
+            class="text-sm font-medium"
+            :style="mutedTextStyle"
             for="edit-event-at"
           >
             Event time

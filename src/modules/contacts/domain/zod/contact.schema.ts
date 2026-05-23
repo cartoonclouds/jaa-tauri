@@ -1,12 +1,13 @@
-import { z } from "zod";
-
 import {
   DateTimeSchema,
+  NullableLatitudeSchema,
+  NullableLongitudeSchema,
   NullableStringSchema,
   NullableUrlSchema,
   NullableUuidSchema,
   UuidSchema,
 } from "@shared/domain/zod/fields";
+import { z } from "zod";
 
 export const ContactTypeSchema = z.enum(["company", "recruiter"]);
 
@@ -17,6 +18,9 @@ export const ContactSchema = z.object({
   email: z.string().email().nullable(),
   phone: NullableStringSchema,
   linkedinUrl: NullableUrlSchema,
+  locationText: NullableStringSchema,
+  locationLat: NullableLatitudeSchema,
+  locationLng: NullableLongitudeSchema,
   type: ContactTypeSchema,
   notes: NullableStringSchema,
   createdAt: DateTimeSchema,
@@ -29,6 +33,9 @@ export const CreateContactSchema = ContactSchema.pick({
   email: true,
   phone: true,
   linkedinUrl: true,
+  locationText: true,
+  locationLat: true,
+  locationLng: true,
   type: true,
   notes: true,
 }).partial({
@@ -36,6 +43,9 @@ export const CreateContactSchema = ContactSchema.pick({
   email: true,
   phone: true,
   linkedinUrl: true,
+  locationText: true,
+  locationLat: true,
+  locationLng: true,
   notes: true,
 });
 

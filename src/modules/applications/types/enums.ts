@@ -1,3 +1,84 @@
+abstract class EnumValue {
+  protected constructor(public readonly value: string) {}
+
+  toString() {
+    return this.value;
+  }
+
+  protected static resolveByValue<TEnum extends EnumValue>(
+    values: readonly TEnum[],
+    value: string | null | undefined,
+  ): TEnum | null {
+    if (!value) {
+      return null;
+    }
+
+    return values.find((instance) => instance.value === value) ?? null;
+  }
+}
+
+/**
+ * PHP-style enum for application status.
+ */
+class ApplicationStatusEnum extends EnumValue {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  toLabel(): string {
+    switch (this.value) {
+      case "saved":
+        return "Saved";
+      case "applied":
+        return "Applied";
+      case "phone-screening":
+        return "Phone Screening";
+      case "technical":
+        return "Technical";
+      case "interview":
+        return "Interview";
+      case "offer":
+        return "Offer";
+      case "rejected":
+        return "Rejected";
+      default:
+        return this.value;
+    }
+  }
+
+  static readonly Saved = new ApplicationStatusEnum("saved");
+  static readonly Applied = new ApplicationStatusEnum("applied");
+  static readonly PhoneScreening = new ApplicationStatusEnum("phone-screening");
+  static readonly Technical = new ApplicationStatusEnum("technical");
+  static readonly Interview = new ApplicationStatusEnum("interview");
+  static readonly Offer = new ApplicationStatusEnum("offer");
+  static readonly Rejected = new ApplicationStatusEnum("rejected");
+
+  static values(): ApplicationStatusEnum[] {
+    return [
+      this.Saved,
+      this.Applied,
+      this.PhoneScreening,
+      this.Technical,
+      this.Interview,
+      this.Offer,
+      this.Rejected,
+    ];
+  }
+
+  static fromValue(
+    value: string | null | undefined,
+  ): ApplicationStatusEnum | null {
+    return this.resolveByValue(this.values(), value);
+  }
+}
+
+export const ApplicationStatus = ApplicationStatusEnum;
+
+export type ApplicationStatus = ReturnType<
+  typeof ApplicationStatusEnum.values
+>[number];
+
 /**
  * PHP-style enum for application attendance type.
  * Usage:
@@ -6,8 +87,10 @@
  *   ApplicationAttendanceType.values() // [Remote, Hybrid, OnSite]
  *   Object.values(ApplicationAttendanceType) // [Remote, Hybrid, OnSite, ...]
  */
-class ApplicationAttendanceTypeEnum {
-  private constructor(public readonly value: string) {}
+class ApplicationAttendanceTypeEnum extends EnumValue {
+  private constructor(value: string) {
+    super(value);
+  }
 
   /**
    * Convert the enum value into a human-readable label.
@@ -25,13 +108,6 @@ class ApplicationAttendanceTypeEnum {
     }
   }
 
-  /**
-   * Serialize the enum value as its raw string representation.
-   */
-  toString() {
-    return this.value;
-  }
-
   /** Remote attendance. */
   static readonly Remote = new ApplicationAttendanceTypeEnum("remote");
   /** Hybrid attendance. */
@@ -42,6 +118,13 @@ class ApplicationAttendanceTypeEnum {
   /** List every attendance type value. */
   static values(): ApplicationAttendanceTypeEnum[] {
     return [this.Remote, this.Hybrid, this.OnSite];
+  }
+
+  /** Resolve an enum instance from its raw string value. */
+  static fromValue(
+    value: string | null | undefined,
+  ): ApplicationAttendanceTypeEnum | null {
+    return this.resolveByValue(this.values(), value);
   }
 }
 
@@ -62,8 +145,10 @@ export type ApplicationAttendanceType = ReturnType<
  *   ApplicationEmploymentType.values() // [FullTime, PartTime, ...]
  *   Object.values(ApplicationEmploymentType) // [FullTime, PartTime, ...]
  */
-class ApplicationEmploymentTypeEnum {
-  private constructor(public readonly value: string) {}
+class ApplicationEmploymentTypeEnum extends EnumValue {
+  private constructor(value: string) {
+    super(value);
+  }
 
   /**
    * Convert the enum value into a human-readable label.
@@ -83,13 +168,6 @@ class ApplicationEmploymentTypeEnum {
       default:
         return this.value;
     }
-  }
-
-  /**
-   * Serialize the enum value as its raw string representation.
-   */
-  toString() {
-    return this.value;
   }
 
   /** Full-time employment. */
@@ -112,6 +190,13 @@ class ApplicationEmploymentTypeEnum {
       this.Internship,
       this.Volunteer,
     ];
+  }
+
+  /** Resolve an enum instance from its raw string value. */
+  static fromValue(
+    value: string | null | undefined,
+  ): ApplicationEmploymentTypeEnum | null {
+    return this.resolveByValue(this.values(), value);
   }
 }
 

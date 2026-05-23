@@ -2,8 +2,12 @@
   import type { Application } from "@modules/applications/domain/entities/Application";
 
   import {
+    formatApplicationAttendanceTypeLabel,
+    formatApplicationEmploymentTypeLabel,
     formatApplicationStatusLabel,
     getApplicationArchivedClass,
+    getApplicationAttendanceTypeClass,
+    getApplicationEmploymentTypeClass,
     getApplicationPriorityClass,
     getApplicationStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
@@ -128,8 +132,20 @@
           >
         </template>
         <template #content>
-          <p class="text-sm">{{ application.attendanceType ?? "-" }}</p>
-          <!-- enum, but display as string -->
+          <div class="mt-1">
+            <span
+              v-if="application.attendanceType"
+              class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+              :class="
+                getApplicationAttendanceTypeClass(application.attendanceType)
+              "
+            >
+              {{
+                formatApplicationAttendanceTypeLabel(application.attendanceType)
+              }}
+            </span>
+            <span v-else class="text-sm">-</span>
+          </div>
         </template>
       </Card>
       <Card :pt="{ root: 'p-3' }">
@@ -139,8 +155,20 @@
           >
         </template>
         <template #content>
-          <p class="text-sm">{{ application.employmentType ?? "-" }}</p>
-          <!-- enum, but display as string -->
+          <div class="mt-1">
+            <span
+              v-if="application.employmentType"
+              class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+              :class="
+                getApplicationEmploymentTypeClass(application.employmentType)
+              "
+            >
+              {{
+                formatApplicationEmploymentTypeLabel(application.employmentType)
+              }}
+            </span>
+            <span v-else class="text-sm">-</span>
+          </div>
         </template>
       </Card>
     </div>

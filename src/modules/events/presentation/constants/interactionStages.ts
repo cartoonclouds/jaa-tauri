@@ -26,6 +26,15 @@ export type ApplicationFlowStatus =
   | "offer"
   | "rejected";
 
+export type ApplicationProgressStatus =
+  | "saved"
+  | "applied"
+  | "phone-screening"
+  | "technical"
+  | "interview"
+  | "offer"
+  | "rejected";
+
 export interface EventStageCopy {
   title: string;
   description: string;
@@ -63,6 +72,65 @@ export const EVENT_FLOW_BY_APPLICATION_STATUS: Record<
     "Decision/Rejected",
   ],
 };
+
+export const FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS: Record<
+  ApplicationProgressStatus,
+  string[]
+> = {
+  saved: [
+    "Screening/Phone Screen",
+    "Interview/Technical Interview",
+    "Offer/Written Offer",
+    "Decision/Accepted",
+    "Post-Offer/Onboarding",
+  ],
+  applied: [
+    "Screening/Phone Screen",
+    "Interview/Technical Interview",
+    "Offer/Written Offer",
+    "Decision/Accepted",
+    "Post-Offer/Onboarding",
+  ],
+  "phone-screening": [
+    "Interview/Technical Interview",
+    "Offer/Written Offer",
+    "Decision/Accepted",
+    "Post-Offer/Onboarding",
+  ],
+  technical: [
+    "Interview/Final Round",
+    "Offer/Written Offer",
+    "Decision/Accepted",
+    "Post-Offer/Onboarding",
+  ],
+  interview: [
+    "Offer/Written Offer",
+    "Decision/Accepted",
+    "Post-Offer/Onboarding",
+  ],
+  offer: ["Decision/Accepted", "Post-Offer/Onboarding"],
+  rejected: [],
+};
+
+export function isApplicationProgressStatus(
+  value: string | null | undefined,
+): value is ApplicationProgressStatus {
+  if (!value) {
+    return false;
+  }
+
+  return value in FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS;
+}
+
+export function getFutureEventFlowStages(
+  status: ApplicationProgressStatus | null | undefined,
+): string[] {
+  if (!status) {
+    return [];
+  }
+
+  return FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS[status];
+}
 
 export const EVENT_COPY_BY_STAGE: Record<string, EventStageCopy> = {
   "Application/Saved": {

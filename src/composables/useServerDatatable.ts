@@ -5,6 +5,7 @@ import type {
   DatatableSortOrderInput,
 } from "@shared/types";
 
+import { DEFAULT_DATATABLE_PAGINATOR_TEMPLATE } from "@shared/utils/datatableStyles";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 
 /**
@@ -73,8 +74,7 @@ export function useServerDatatable<
 
   const rowsPerPageOptions = options.rowsPerPageOptions ?? [10, 20, 50];
   const paginatorTemplate =
-    options.paginatorTemplate ??
-    "RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink";
+    options.paginatorTemplate ?? DEFAULT_DATATABLE_PAGINATOR_TEMPLATE;
   const currentPageReportTemplate =
     options.currentPageReportTemplate ?? "{first} to {last} of {totalRecords}";
 

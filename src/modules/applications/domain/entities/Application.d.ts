@@ -1,6 +1,7 @@
 import type {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationStatus,
 } from "../../types/enums";
 
 /**
@@ -14,7 +15,7 @@ export interface Application {
   /** Application title. */
   title: string;
   /** Current application status. */
-  status: string;
+  status: ApplicationStatus;
   /** Source URL where the application was discovered, when available. */
   sourceUrl: string | null;
   /** Application submission date, when available. */
@@ -62,7 +63,7 @@ export interface CreateApplicationInput {
   /** Application title. */
   title: string;
   /** Application status. */
-  status?: string;
+  status?: ApplicationStatus;
   /** Free-form location text. */
   locationText?: string | null;
   /** Latitude for geocoded location data. */

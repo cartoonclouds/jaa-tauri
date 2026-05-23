@@ -4,7 +4,11 @@ import { useApplicationService } from "@modules/applications";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
-const APPLICATION_SEARCH_FIELDS = ["title", "status", "location_text"] as const;
+export const APPLICATION_SEARCH_FIELDS = [
+  "title",
+  "status",
+  "location_text",
+] as const;
 
 export type ApplicationSearchField = (typeof APPLICATION_SEARCH_FIELDS)[number];
 

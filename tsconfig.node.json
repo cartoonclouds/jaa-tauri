@@ -9,6 +9,7 @@
   },
   "include": [
     "nuxt.config.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "src/themes/applyflow.ts"
   ]
 }

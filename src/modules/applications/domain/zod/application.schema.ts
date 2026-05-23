@@ -1,9 +1,14 @@
+import type {
+  ApplicationAttendanceType as ApplicationAttendanceTypeValue,
+  ApplicationEmploymentType as ApplicationEmploymentTypeValue,
+  ApplicationStatus as ApplicationStatusValue,
+} from "@modules/applications/types/enums";
+
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationStatus,
 } from "@modules/applications/types/enums";
-import { z } from "zod";
-
 import {
   DateTimeSchema,
   NullableDateTimeSchema,
@@ -15,32 +20,72 @@ import {
   NullableUuidSchema,
   UuidSchema,
 } from "@shared/domain/zod/fields";
+import { z } from "zod";
+
+function isApplicationAttendanceType(
+  value: unknown,
+): value is ApplicationAttendanceTypeValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "value" in value &&
+    typeof value.value === "string" &&
+    ApplicationAttendanceType.values().some(
+      (instance) => instance.value === value.value,
+    )
+  );
+}
+
+function isApplicationEmploymentType(
+  value: unknown,
+): value is ApplicationEmploymentTypeValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "value" in value &&
+    typeof value.value === "string" &&
+    ApplicationEmploymentType.values().some(
+      (instance) => instance.value === value.value,
+    )
+  );
+}
+
+function isApplicationStatus(value: unknown): value is ApplicationStatusValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "value" in value &&
+    typeof value.value === "string" &&
+    ApplicationStatus.values().some(
+      (instance) => instance.value === value.value,
+    )
+  );
+}
 
 export const ApplicationSchema = z.object({
   id: UuidSchema,
   companyId: NullableUuidSchema,
   title: z.string().min(1),
-  status: z.string().min(1),
+  status: z.custom<ApplicationStatusValue>(
+    isApplicationStatus,
+    "Invalid status",
+  ),
   sourceUrl: NullableUrlSchema,
   appliedAt: NullableDateTimeSchema,
   locationText: NullableStringSchema,
   locationLat: NullableLatitudeSchema,
   locationLng: NullableLongitudeSchema,
   attendanceType: z
-    .enum([
-      ApplicationAttendanceType.Remote.value,
-      ApplicationAttendanceType.Hybrid.value,
-      ApplicationAttendanceType.OnSite.value,
-    ])
+    .custom<ApplicationAttendanceTypeValue>(
+      isApplicationAttendanceType,
+      "Invalid attendance type",
+    )
     .nullable(),
   employmentType: z
-    .enum([
-      ApplicationEmploymentType.PartTime.value,
-      ApplicationEmploymentType.Contract.value,
-      ApplicationEmploymentType.Internship.value,
-      ApplicationEmploymentType.FullTime.value,
-      ApplicationEmploymentType.Volunteer.value,
-    ])
+    .custom<ApplicationEmploymentTypeValue>(
+      isApplicationEmploymentType,
+      "Invalid employment type",
+    )
     .nullable(),
   salaryMin: NullableNumberSchema,
   salaryMax: NullableNumberSchema,
@@ -74,19 +119,9 @@ export const ApplicationFormSchema = z
   .object({
     companyId: NullableUuidSchema,
     title: z.string().min(1, "Title is required"),
-    status: z.enum(
-      [
-        "saved",
-        "applied",
-        "phone-screening",
-        "technical",
-        "interview",
-        "offer",
-        "rejected",
-      ],
-      {
-        errorMap: () => ({ message: "Invalid status" }),
-      },
+    status: z.custom<ApplicationStatusValue>(
+      isApplicationStatus,
+      "Invalid status",
     ),
     sourceUrl: z.string().url("Invalid URL").nullable().or(z.literal("")),
     appliedAt: z.string().nullable().or(z.literal("")),
@@ -94,20 +129,16 @@ export const ApplicationFormSchema = z
     locationLat: NullableLatitudeSchema,
     locationLng: NullableLongitudeSchema,
     attendanceType: z
-      .enum([
-        ApplicationAttendanceType.Remote.value,
-        ApplicationAttendanceType.Hybrid.value,
-        ApplicationAttendanceType.OnSite.value,
-      ])
+      .custom<ApplicationAttendanceTypeValue>(
+        isApplicationAttendanceType,
+        "Invalid attendance type",
+      )
       .nullable(),
     employmentType: z
-      .enum([
-        ApplicationEmploymentType.PartTime.value,
-        ApplicationEmploymentType.Contract.value,
-        ApplicationEmploymentType.Internship.value,
-        ApplicationEmploymentType.FullTime.value,
-        ApplicationEmploymentType.Volunteer.value,
-      ])
+      .custom<ApplicationEmploymentTypeValue>(
+        isApplicationEmploymentType,
+        "Invalid employment type",
+      )
       .nullable(),
     salaryMin: z
       .number()

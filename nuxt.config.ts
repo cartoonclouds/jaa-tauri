@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineNuxtConfig } from "nuxt/config";
 
+import applyFlowPrimeVueTheme from "./src/themes/applyflow";
+
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
 function readBoolean(
@@ -67,6 +69,7 @@ export default defineNuxtConfig({
         options: {
           ripple: true,
           inputVariant: "filled",
+          theme: applyFlowPrimeVueTheme,
         },
       },
     ],
@@ -112,5 +115,7 @@ export default defineNuxtConfig({
 
   experimental: {
     typedPages: true,
+    restoreState: true,
+    viewTransition: true,
   },
 });

@@ -126,19 +126,56 @@ Current MVP focus:
 - duplicate detection key
 - document linking (CV, cover letter, job spec, etc.)
 
-Supported statuses in schema:
+Current statuses in schema:
 
 - saved
 - applied
-- recruiter_contacted
-- screening
-- technical_test
-- interviewing
+- phone-screening
+- technical
+- interview
 - offer
 - rejected
-- withdrawn
-- accepted
-- ghosted
+
+Application flow with future states to reach:
+
+```mermaid
+flowchart LR
+    subgraph Current[Current tracked statuses]
+        Saved[Saved]
+        Applied[Applied]
+        PhoneScreening[Phone Screening]
+        Technical[Technical]
+        Interview[Interview]
+        Offer[Offer]
+        Rejected[Rejected]
+    end
+
+    subgraph Future[Future target states]
+        Accepted[Accepted]
+        Onboarding[Onboarding]
+    end
+
+    Saved --> Applied
+    Applied --> PhoneScreening
+    PhoneScreening --> Technical
+    PhoneScreening --> Interview
+    Technical --> Interview
+    Interview --> Offer
+
+    Applied -. terminal outcome .-> Rejected
+    PhoneScreening -. terminal outcome .-> Rejected
+    Technical -. terminal outcome .-> Rejected
+    Interview -. terminal outcome .-> Rejected
+    Offer -. declined or rescinded .-> Rejected
+
+    Offer -. future target .-> Accepted
+    Accepted -. future target .-> Onboarding
+
+    style Accepted fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray: 6 4
+    style Onboarding fill:#ecfeff,stroke:#0f766e,stroke-width:2px,stroke-dasharray: 6 4
+```
+
+The persisted application status model currently stops at `offer` and `rejected`. `accepted` and `onboarding` are shown as downstream target states so the flow documents the next milestones the app should support.
 
 ### Company Management
 

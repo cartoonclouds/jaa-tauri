@@ -1,9 +1,11 @@
 import type { Application } from "@modules/applications/domain/entities/Application";
-import type {
+
+import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationStatus,
 } from "@modules/applications/types/enums";
-
+import { mapEnumFromDbValue } from "@shared/utils/enum";
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
 /**
@@ -16,14 +18,22 @@ export function mapApplicationRowToEntity(
     id: String(row.id),
     companyId: (row.company_id as string | null) ?? null,
     title: String(row.title),
-    status: String(row.status),
+    status:
+      mapEnumFromDbValue(row.status, ApplicationStatus) ??
+      ApplicationStatus.Saved,
     sourceUrl: (row.source_url as string | null) ?? null,
     appliedAt: toNullableDate(row.applied_at),
     locationText: (row.location_text as string | null) ?? null,
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
-    attendanceType: row.attendance_type as ApplicationAttendanceType | null,
-    employmentType: row.employment_type as ApplicationEmploymentType | null,
+    attendanceType: mapEnumFromDbValue(
+      row.attendance_type,
+      ApplicationAttendanceType,
+    ),
+    employmentType: mapEnumFromDbValue(
+      row.employment_type,
+      ApplicationEmploymentType,
+    ),
     salaryMin: (row.salary_min as number | null) ?? null,
     salaryMax: (row.salary_max as number | null) ?? null,
     currency: (row.currency as string | null) ?? null,

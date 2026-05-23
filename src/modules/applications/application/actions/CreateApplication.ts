@@ -1,6 +1,7 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateApplicationInput } from "@modules/applications/domain/entities/Application";
 
+import { ApplicationStatus } from "@modules/applications/types/enums";
 import {
   OptionalNullableLatitudeSchema,
   OptionalNullableLongitudeSchema,
@@ -11,7 +12,15 @@ import { z } from "zod";
 const CreateApplicationInputSchema = z.object({
   companyId: OptionalNullableUuidSchema,
   title: z.string(),
-  status: z.string().optional(),
+  status: z
+    .custom<CreateApplicationInput["status"]>((value) => {
+      if (!value) {
+        return true;
+      }
+
+      return ApplicationStatus.fromValue(value.value) !== null;
+    })
+    .optional(),
   locationText: z.string().nullable().optional(),
   locationLat: OptionalNullableLatitudeSchema,
   locationLng: OptionalNullableLongitudeSchema,
@@ -48,7 +57,7 @@ export async function createApplication(
       id,
       parseResult.data.companyId ?? null,
       title,
-      parseResult.data.status ?? "saved",
+      parseResult.data.status?.value ?? ApplicationStatus.Saved.value,
     ],
   );
 

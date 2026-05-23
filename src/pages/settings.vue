@@ -78,9 +78,11 @@
       :value="items"
       data-key="id"
       :loading="isLoading"
+      show-gridlines
       striped-rows
       lazy
       paginator
+      table-style="min-width: 50rem"
       :rows="rows"
       :total-records="totalRecords"
       :rows-per-page-options="rowsPerPageOptions"

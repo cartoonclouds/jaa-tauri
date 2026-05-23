@@ -1,4 +1,11 @@
 <script setup lang="ts">
+  import type {
+    ApplicationAttendanceType,
+    ApplicationEmploymentType,
+    ApplicationStatus,
+  } from "@modules/applications/types/enums";
+
+  import { ApplicationFormSchema } from "@modules/applications/domain/zod/application.schema";
   import {
     APPLICATION_ATTENDANCE_OPTIONS,
     APPLICATION_EMPLOYMENT_OPTIONS,
@@ -9,6 +16,7 @@
     getApplicationPriorityClass,
     getApplicationStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
+  import { ApplicationStatus as ApplicationStatusEnum } from "@modules/applications/types/enums";
   import {
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,
@@ -16,7 +24,6 @@
   } from "@modules/applications/types/presentation";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
-  import { ApplicationFormSchema } from "@modules/applications/domain/zod/application.schema";
   import { computed } from "vue";
 
   interface Props {
@@ -44,7 +51,7 @@
     return {
       companyId: props.initialValues.companyId ?? null,
       title: props.initialValues.title ?? "",
-      status: props.initialValues.status ?? "saved",
+      status: props.initialValues.status ?? ApplicationStatusEnum.Saved,
       sourceUrl: props.initialValues.sourceUrl ?? "",
       appliedAt: props.initialValues.appliedAt ?? "",
       locationText: props.initialValues.locationText ?? "",
@@ -63,11 +70,11 @@
     };
   });
 
-  function getStatusPreviewClass(status: string | undefined | null) {
+  function getStatusPreviewClass(status: ApplicationStatus | undefined | null) {
     return getApplicationStatusClass(status);
   }
 
-  function getStatusPreviewLabel(status: string | undefined | null) {
+  function getStatusPreviewLabel(status: ApplicationStatus | undefined | null) {
     return formatApplicationStatusLabel(status);
   }
 
@@ -86,7 +93,7 @@
     emit("submit", {
       companyId: (values.companyId as string) || null,
       title: (values.title as string).trim(),
-      status: values.status as string,
+      status: values.status as ApplicationStatus,
       sourceUrl: values.sourceUrl ? (values.sourceUrl as string).trim() : null,
       appliedAt: values.appliedAt ? (values.appliedAt as string) : null,
       locationText: values.locationText
@@ -94,12 +101,8 @@
         : null,
       locationLat: values.locationLat as number | null,
       locationLng: values.locationLng as number | null,
-      attendanceType: values.attendanceType as
-        | import("../../types/enums").ApplicationAttendanceType
-        | null,
-      employmentType: values.employmentType as
-        | import("../../types/enums").ApplicationEmploymentType
-        | null,
+      attendanceType: values.attendanceType as ApplicationAttendanceType | null,
+      employmentType: values.employmentType as ApplicationEmploymentType | null,
       salaryMin: values.salaryMin as number | null,
       salaryMax: values.salaryMax as number | null,
       currency: values.currency

@@ -10,9 +10,12 @@ import {
 import { useProfileService } from "@modules/profile";
 import { toErrorMessage } from "@shared/utils/error";
 import { invoke } from "@tauri-apps/api/core";
+import { appLocalDataDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useStepper } from "@vueuse/core";
 import { computed, ref } from "vue";
+
+import { useFileSystem } from "@/composables/useFileSystem";
 
 const stepOrder = ["profile", "preferences", "resume", "review"] as const;
 
@@ -86,6 +89,9 @@ export function useOnboardingFlow() {
   const stepper = useStepper(stepOrder);
   const documentService = useDocumentService();
   const profileService = useProfileService();
+  const { sanitizeFileName, writeBrowserFile } = useFileSystem({
+    ensureDirectoryExists: true,
+  });
 
   const profile = ref<UserProfile>(defaultProfile());
   const saving = ref(false);
@@ -94,7 +100,6 @@ export function useOnboardingFlow() {
   const globalError = ref("");
   const hydrating = ref(false);
 
-  const skillsInput = ref("");
   const locationsInput = ref("");
 
   const resumePath = ref<string | null>(null);
@@ -137,26 +142,12 @@ export function useOnboardingFlow() {
     }
   }
 
-  function addSkills(): void {
-    profile.value.skills = mergeCommaSeparated(
-      skillsInput.value,
-      profile.value.skills,
-    );
-    skillsInput.value = "";
-  }
-
   function addLocations(): void {
     profile.value.preferredLocations = mergeCommaSeparated(
       locationsInput.value,
       profile.value.preferredLocations,
     );
     locationsInput.value = "";
-  }
-
-  function removeSkill(skill: string): void {
-    profile.value.skills = profile.value.skills.filter(
-      (item) => item !== skill,
-    );
   }
 
   function removeLocation(location: string): void {
@@ -206,23 +197,50 @@ export function useOnboardingFlow() {
     }
   }
 
-  async function pickAndParseResume(): Promise<void> {
+  async function saveResumeFileToLocalData(file: File): Promise<string> {
+    const baseDir = await appLocalDataDir();
+    const safeName = sanitizeFileName(file.name || "resume.pdf");
+    const timestamp = Date.now().toString();
+    const destinationPath = await join(
+      baseDir,
+      "onboarding",
+      "resumes",
+      `${timestamp}-${safeName}`,
+    );
+
+    await writeBrowserFile(file, destinationPath, { create: true });
+
+    return destinationPath;
+  }
+
+  async function pickAndParseResume(
+    selectedInput: string | File | null = null,
+  ): Promise<void> {
     globalError.value = "";
     errors.value.resume = "";
 
     try {
-      const selected = await open({
-        multiple: false,
-        directory: false,
-        filters: [
-          {
-            name: "Resume",
-            extensions: ["pdf", "docx"],
-          },
-        ],
-      });
+      let selectedPath: string | null;
 
-      const selectedPath = normalizeSelectedPath(selected);
+      if (typeof selectedInput === "string") {
+        selectedPath = selectedInput;
+      } else if (selectedInput instanceof File) {
+        selectedPath = await saveResumeFileToLocalData(selectedInput);
+      } else {
+        selectedPath = normalizeSelectedPath(
+          await open({
+            multiple: false,
+            directory: false,
+            filters: [
+              {
+                name: "Resume",
+                extensions: ["pdf", "docx"],
+              },
+            ],
+          }),
+        );
+      }
+
       if (!selectedPath) {
         return;
       }
@@ -262,10 +280,6 @@ export function useOnboardingFlow() {
     try {
       saving.value = true;
 
-      if (skillsInput.value.trim()) {
-        addSkills();
-      }
-
       if (locationsInput.value.trim()) {
         addLocations();
       }
@@ -290,7 +304,6 @@ export function useOnboardingFlow() {
     isFirstStep: stepper.isFirst,
     isLastStep: stepper.isLast,
     profile,
-    skillsInput,
     locationsInput,
     resumePath,
     parsedResume,
@@ -300,9 +313,7 @@ export function useOnboardingFlow() {
     globalError,
     currentError,
     errors,
-    addSkills,
     addLocations,
-    removeSkill,
     removeLocation,
     nextStep,
     previousStep,

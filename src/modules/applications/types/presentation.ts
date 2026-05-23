@@ -1,5 +1,7 @@
 import type { ApplicationBasePayload } from "@modules/applications/types/payloads";
 
+import { ApplicationStatus } from "@modules/applications/types/enums";
+
 /**
  * Drawer state used by the application presentation layer.
  */
@@ -8,11 +10,11 @@ export type ApplicationDrawerMode = "create" | "view" | "edit";
 /**
  * Lightweight select option used in application forms.
  */
-export interface ApplicationSelectOption {
+export interface ApplicationSelectOption<TValue = string> {
   /** Display label shown to the user. */
   label: string;
   /** Underlying value submitted by the control. */
-  value: string;
+  value: TValue;
 }
 
 /**
@@ -31,7 +33,7 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
   return {
     companyId: null,
     title: "",
-    status: "saved",
+    status: ApplicationStatus.Saved,
     sourceUrl: "",
     appliedAt: "",
     locationText: "",

@@ -3,8 +3,12 @@
 
   import { Icon } from "#components";
   import { definePageMeta } from "#imports";
+  import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
+
+  const { openOnboarding } = useOnboardingNavigation();
 </script>
 
 <template>
@@ -19,6 +23,15 @@
         Feature modules are wired with repository, service, query composable,
         and CRUD pages.
       </p>
+
+      <div class="flex">
+        <Button
+          label="Open Onboarding"
+          icon="pi pi-compass"
+          severity="contrast"
+          @click="openOnboarding"
+        />
+      </div>
 
       <nav class="grid gap-2 text-sm sm:grid-cols-2">
         <NuxtLink

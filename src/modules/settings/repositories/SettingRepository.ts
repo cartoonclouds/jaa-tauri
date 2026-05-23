@@ -7,6 +7,11 @@ import type {
 } from "@shared/types";
 
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
+import {
+  buildSearchWhereClause,
+  normalizeDatatablePageQuery,
+  resolveSearchFields,
+} from "@shared/utils/datatableQuery";
 
 export interface SettingUpsertPayload {
   id?: string;
@@ -42,22 +47,13 @@ export class SettingRepository implements ISettingRepository {
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Setting>> {
     const searchableColumns = ["theme", "locale"] as const;
-    const searchableColumnSet = new Set<string>(searchableColumns);
-
-    const rows = Math.max(1, query.rows);
-    const page = Math.max(0, query.page);
-    const search = query.search?.trim() ?? "";
-    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
-      searchableColumnSet.has(field),
+    const { hasSearch, page, rows, search } =
+      normalizeDatatablePageQuery(query);
+    const activeSearchFields = resolveSearchFields(
+      searchableColumns,
+      query.searchFields,
     );
-    const activeSearchFields =
-      requestedSearchFields.length > 0
-        ? requestedSearchFields
-        : [...searchableColumns];
-    const searchWhereClause = activeSearchFields
-      .map((field) => `${field} LIKE $1`)
-      .join(" OR ");
-    const hasSearch = search.length > 0;
+    const searchWhereClause = buildSearchWhereClause(activeSearchFields);
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(

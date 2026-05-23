@@ -7,6 +7,9 @@ export interface ContactRow {
   email: string;
   phone: string;
   linkedin_url: string;
+  location_text: string;
+  location_lat: number;
+  location_lng: number;
   type: "company" | "recruiter";
   notes: string;
   created_at: string;
@@ -26,6 +29,16 @@ export function createContactRows(
       faker.seed(seed + companyIndex * 100 + index);
       const createdAt = faker.date.recent({ days: 90 }).toISOString();
       const fullName = faker.person.fullName();
+      const latitude = faker.location.latitude({
+        min: -70,
+        max: 70,
+        precision: 4,
+      });
+      const longitude = faker.location.longitude({
+        min: -170,
+        max: 170,
+        precision: 4,
+      });
 
       return {
         id: faker.string.uuid(),
@@ -34,6 +47,9 @@ export function createContactRows(
         email: faker.internet.email({ firstName: fullName.split(" ")[0] }),
         phone: faker.phone.number(),
         linkedin_url: `https://www.linkedin.com/in/${faker.helpers.slugify(fullName).toLowerCase()}`,
+        location_text: `${faker.location.city()}, ${faker.location.countryCode("alpha-2")}`,
+        location_lat: Number(latitude),
+        location_lng: Number(longitude),
         type: faker.helpers.arrayElement(["company", "recruiter"]),
         notes: faker.person.jobTitle(),
         created_at: createdAt,

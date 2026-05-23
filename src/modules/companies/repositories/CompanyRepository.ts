@@ -7,6 +7,11 @@ import type {
 } from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
+import {
+  buildSearchWhereClause,
+  normalizeDatatablePageQuery,
+  resolveSearchFields,
+} from "@shared/utils/datatableQuery";
 
 export interface CompanyCreatePayload {
   name: string;
@@ -56,22 +61,13 @@ export class CompanyRepository implements ICompanyRepository {
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Company>> {
     const searchableColumns = ["name", "location_text"] as const;
-    const searchableColumnSet = new Set<string>(searchableColumns);
-
-    const rows = Math.max(1, query.rows);
-    const page = Math.max(0, query.page);
-    const search = query.search?.trim() ?? "";
-    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
-      searchableColumnSet.has(field),
+    const { hasSearch, page, rows, search } =
+      normalizeDatatablePageQuery(query);
+    const activeSearchFields = resolveSearchFields(
+      searchableColumns,
+      query.searchFields,
     );
-    const activeSearchFields =
-      requestedSearchFields.length > 0
-        ? requestedSearchFields
-        : [...searchableColumns];
-    const searchWhereClause = activeSearchFields
-      .map((field) => `${field} LIKE $1`)
-      .join(" OR ");
-    const hasSearch = search.length > 0;
+    const searchWhereClause = buildSearchWhereClause(activeSearchFields);
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(

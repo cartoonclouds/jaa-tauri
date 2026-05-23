@@ -1,6 +1,7 @@
 import {
   type ApplicationAttendanceType,
   type ApplicationEmploymentType,
+  type ApplicationStatus,
 } from "./enums";
 
 /**
@@ -12,7 +13,7 @@ export interface ApplicationBasePayload {
   /** Application title. */
   title: string;
   /** Current application status. */
-  status: string;
+  status: ApplicationStatus;
   /** Optional source URL where the application was found. */
   sourceUrl?: string | null;
   /** Optional date the application was submitted. */
@@ -80,5 +81,5 @@ export type ApplicationCreatePayload = {
     /** Optional archive flag override. */
     isArchived?: boolean;
     /** Optional status override. */
-    status?: string;
+    status?: ApplicationStatus;
   };

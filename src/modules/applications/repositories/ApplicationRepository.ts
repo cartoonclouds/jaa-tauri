@@ -11,6 +11,13 @@ import type {
 } from "@shared/types";
 
 import { mapApplicationRowToEntity } from "@modules/applications/application/mappers/mapApplicationRow";
+import { ApplicationStatus } from "@modules/applications/types/enums";
+import {
+  buildSearchWhereClause,
+  normalizeDatatablePageQuery,
+  resolveOrderByClause,
+  resolveSearchFields,
+} from "@shared/utils/datatableQuery";
 
 export interface IApplicationRepository extends IRepository<
   Application,
@@ -37,22 +44,13 @@ export class ApplicationRepository implements IApplicationRepository {
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Application>> {
     const searchableColumns = ["title", "status", "location_text"] as const;
-    const searchableColumnSet = new Set<string>(searchableColumns);
-
-    const rows = Math.max(1, query.rows);
-    const page = Math.max(0, query.page);
-    const search = query.search?.trim() ?? "";
-    const requestedSearchFields = (query.searchFields ?? []).filter((field) =>
-      searchableColumnSet.has(field),
+    const { hasSearch, page, rows, search } =
+      normalizeDatatablePageQuery(query);
+    const activeSearchFields = resolveSearchFields(
+      searchableColumns,
+      query.searchFields,
     );
-    const activeSearchFields =
-      requestedSearchFields.length > 0
-        ? requestedSearchFields
-        : [...searchableColumns];
-    const searchWhereClause = activeSearchFields
-      .map((field) => `${field} LIKE $1`)
-      .join(" OR ");
-    const hasSearch = search.length > 0;
+    const searchWhereClause = buildSearchWhereClause(activeSearchFields);
 
     const sortableColumns: Record<string, string> = {
       title: "title",
@@ -62,13 +60,12 @@ export class ApplicationRepository implements IApplicationRepository {
       createdAt: "created_at",
       updatedAt: "updated_at",
     };
-    const orderByColumn = query.sortField
-      ? sortableColumns[query.sortField]
-      : undefined;
-    const orderByDirection = query.sortOrder === "asc" ? "ASC" : "DESC";
-    const orderByClause = orderByColumn
-      ? `${orderByColumn} ${orderByDirection}`
-      : "created_at DESC";
+    const orderByClause = resolveOrderByClause({
+      sortField: query.sortField,
+      sortOrder: query.sortOrder,
+      sortableColumns,
+      fallbackClause: "created_at DESC",
+    });
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
@@ -166,14 +163,14 @@ export class ApplicationRepository implements IApplicationRepository {
         id,
         payload.companyId ?? null,
         payload.title,
-        payload.status ?? "saved",
+        payload.status?.value ?? ApplicationStatus.Saved.value,
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         payload.locationText ?? null,
         payload.locationLat ?? null,
         payload.locationLng ?? null,
-        (payload.attendanceType as string | null) ?? null,
-        (payload.employmentType as string | null) ?? null,
+        payload.attendanceType?.value ?? null,
+        payload.employmentType?.value ?? null,
         payload.salaryMin ?? null,
         payload.salaryMax ?? null,
         payload.currency ?? null,
@@ -216,14 +213,14 @@ export class ApplicationRepository implements IApplicationRepository {
       [
         payload.companyId ?? null,
         payload.title,
-        payload.status,
+        payload.status.value,
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         payload.locationText ?? null,
         payload.locationLat ?? null,
         payload.locationLng ?? null,
-        (payload.attendanceType as string | null) ?? null,
-        (payload.employmentType as string | null) ?? null,
+        payload.attendanceType?.value ?? null,
+        payload.employmentType?.value ?? null,
         payload.salaryMin ?? null,
         payload.salaryMax ?? null,
         payload.currency ?? null,

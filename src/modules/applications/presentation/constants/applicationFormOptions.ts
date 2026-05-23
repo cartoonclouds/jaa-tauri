@@ -3,24 +3,23 @@ import type { ApplicationSelectOption } from "@modules/applications/types/presen
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationStatus,
 } from "@modules/applications/types/enums";
 
-export const APPLICATION_STATUS_OPTIONS: ApplicationSelectOption[] = [
-  { label: "Saved", value: "saved" },
-  { label: "Applied", value: "applied" },
-  { label: "Interview", value: "interview" },
-  { label: "Offer", value: "offer" },
-  { label: "Rejected", value: "rejected" },
-];
-
-export const APPLICATION_ATTENDANCE_OPTIONS: ApplicationSelectOption[] =
-  ApplicationAttendanceType.values().map((instance) => ({
+export const APPLICATION_STATUS_OPTIONS: ApplicationSelectOption<ApplicationStatus>[] =
+  ApplicationStatus.values().map((instance) => ({
     label: instance.toLabel(),
-    value: instance.value,
+    value: instance,
   }));
 
-export const APPLICATION_EMPLOYMENT_OPTIONS: ApplicationSelectOption[] =
+export const APPLICATION_ATTENDANCE_OPTIONS: ApplicationSelectOption<ApplicationAttendanceType>[] =
+  ApplicationAttendanceType.values().map((instance) => ({
+    label: instance.toLabel(),
+    value: instance,
+  }));
+
+export const APPLICATION_EMPLOYMENT_OPTIONS: ApplicationSelectOption<ApplicationEmploymentType>[] =
   ApplicationEmploymentType.values().map((instance) => ({
     label: instance.toLabel(),
-    value: instance.value,
+    value: instance,
   }));
