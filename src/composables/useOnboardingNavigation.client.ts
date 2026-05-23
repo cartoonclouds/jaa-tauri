@@ -1,3 +1,4 @@
+import { logError } from "@infra/logging/tauriLog.client";
 import { toErrorMessage } from "@shared/utils/error";
 import { isTauri } from "@tauri-apps/api/core";
 import { useRouter } from "vue-router";
@@ -24,7 +25,7 @@ export function useOnboardingNavigation() {
 
       await router.push("/onboarding");
     } catch (error) {
-      console.error("Failed to open onboarding:", toErrorMessage(error));
+      logError("Failed to open onboarding:", toErrorMessage(error));
     }
   }
 

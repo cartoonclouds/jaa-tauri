@@ -3,6 +3,7 @@
  * Provides low-level integration with Tauri's notification plugin.
  */
 
+import { logError, logWarn } from "@infra/logging/tauriLog.client";
 import { toErrorMessage } from "@shared/utils/error";
 import {
   isPermissionGranted,
@@ -66,7 +67,7 @@ function warnWindowsDevToastLimitOnce(): void {
   if (!isWindowsDevToastLimited()) return;
 
   hasWarnedWindowsDevToastLimit = true;
-  console.warn(
+  logWarn(
     "[Notifications] Windows dev mode may show notifications only in Notification Center. Install a built app to validate native popup toasts.",
   );
 }
@@ -98,7 +99,7 @@ export async function sendTauriNotification(
     return { success: true, id: String(Date.now()) };
   } catch (error) {
     const message = toErrorMessage(error);
-    console.error("[Notifications] Tauri notification failed:", message);
+    logError("[Notifications] Tauri notification failed:", message);
     return { success: false, error: message };
   }
 }

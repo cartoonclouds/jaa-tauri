@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { logError } from "@infra/logging/tauriLog.client";
   import AppOnboardingWizard from "@modules/onboarding/presentation/components/AppOnboardingWizard.vue";
   import { toErrorMessage } from "@shared/utils/error";
   import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -11,10 +12,7 @@
     try {
       await getCurrentWindow().close();
     } catch (error) {
-      console.error(
-        "Failed to close onboarding window:",
-        toErrorMessage(error),
-      );
+      logError("Failed to close onboarding window:", toErrorMessage(error));
     }
   }
 </script>

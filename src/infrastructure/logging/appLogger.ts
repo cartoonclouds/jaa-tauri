@@ -1,0 +1,74 @@
+import { toErrorMessage } from "@shared/utils/error";
+
+type LogLevel = "error" | "info" | "warn";
+
+function fallbackConsole(level: LogLevel, message: string): void {
+  if (level === "error") {
+    console.error(message);
+    return;
+  }
+
+  if (level === "info") {
+    console.warn(`[info] ${message}`);
+    return;
+  }
+
+  console.warn(message);
+}
+
+async function writeToTauri(
+  level: LogLevel,
+  message: string,
+): Promise<boolean> {
+  if (!import.meta.client) {
+    return false;
+  }
+
+  try {
+    const [{ isTauri }, pluginLog] = await Promise.all([
+      import("@tauri-apps/api/core"),
+      import("@tauri-apps/plugin-log"),
+    ]);
+
+    if (!isTauri()) {
+      return false;
+    }
+
+    if (level === "error") {
+      await pluginLog.error(message);
+      return true;
+    }
+
+    if (level === "warn") {
+      await pluginLog.warn(message);
+      return true;
+    }
+
+    await pluginLog.info(message);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function emit(level: LogLevel, message: string): void {
+  void writeToTauri(level, message).then((written) => {
+    if (!written) {
+      fallbackConsole(level, message);
+    }
+  });
+}
+
+export function logError(message: string, error?: unknown): void {
+  const serializedError =
+    error === undefined ? "" : ` ${toErrorMessage(error)}`;
+  emit("error", `${message}${serializedError}`);
+}
+
+export function logWarn(message: string): void {
+  emit("warn", message);
+}
+
+export function logInfo(message: string): void {
+  emit("info", message);
+}

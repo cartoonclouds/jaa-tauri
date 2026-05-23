@@ -1,6 +1,7 @@
 import type { ParsedResume } from "@modules/onboarding/domain/entities/ParsedResume";
 import type { Profile, UserProfile } from "@modules/profile";
 
+import { logError } from "@infra/logging/tauriLog.client";
 import { useDocumentService } from "@modules/documents";
 import { completeOnboarding } from "@modules/onboarding/application/actions/CompleteOnboarding";
 import {
@@ -133,10 +134,7 @@ export function useOnboardingFlow() {
         resumePath.value = latestResume.filePath;
       }
     } catch (error) {
-      console.error(
-        "Failed to hydrate onboarding data:",
-        toErrorMessage(error),
-      );
+      logError("Failed to hydrate onboarding data:", toErrorMessage(error));
     } finally {
       hydrating.value = false;
     }

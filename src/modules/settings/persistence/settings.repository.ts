@@ -14,6 +14,7 @@ import type {
 } from "./types";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
+import { logError } from "@infra/logging/appLogger";
 import { toErrorMessage } from "@shared/utils/error";
 import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 import { parseStringArray } from "@shared/utils/parse";
@@ -209,7 +210,7 @@ export async function initializeSettingsStore(
   try {
     await readSettingsRow(db);
   } catch (error) {
-    console.error(
+    logError(
       "Failed to initialize settings persistence:",
       toErrorMessage(error),
     );

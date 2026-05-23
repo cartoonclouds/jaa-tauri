@@ -11,6 +11,7 @@
   ],
   "permissions": [
     "window-state:default",
+    "log:default",
     "core:webview:allow-create-webview-window",
     "core:window:allow-set-enabled",
     "core:window:allow-set-focus",

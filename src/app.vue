@@ -1,17 +1,17 @@
 <script setup lang="ts">
+  import { logError, logInfo } from "@infra/logging/tauriLog.client";
   import { useProfileService } from "@modules/profile";
   import {
     getOnboardingCompleted,
     setOnboardingCompleted,
   } from "@modules/settings/persistence";
-  import { toErrorMessage } from "@shared/utils/error";
   import { invoke, isTauri } from "@tauri-apps/api/core";
   import { onMounted } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
-  import { useChildWebviewWindow } from "@/composables/useChildWebviewWindow.client";
+  import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
 
-  const { openChildWebviewWindow } = useChildWebviewWindow();
+  const { openOnboarding } = useOnboardingNavigation();
   const profileService = useProfileService();
 
   onMounted(async () => {
@@ -19,7 +19,7 @@
       try {
         await invoke("close_splashscreen");
       } catch (error) {
-        console.error("Failed to close splashscreen:", toErrorMessage(error));
+        logError("Failed to close splashscreen:", error);
       }
     }
 
@@ -30,7 +30,9 @@
       ]);
       const profileExists = profiles.length > 0;
 
-      console.error("Onboarding state loaded:", onboardingCompleted, profiles);
+      logInfo(
+        `Onboarding state loaded: completed=${String(onboardingCompleted)} profiles=${String(profiles.length)}`,
+      );
 
       if (!onboardingCompleted && profileExists) {
         await setOnboardingCompleted(true);
@@ -41,17 +43,9 @@
         return;
       }
 
-      if (!import.meta.client) {
-        return;
-      }
-
-      await openChildWebviewWindow({
-        label: "onboarding-modal",
-        url: "/onboarding",
-        title: "Complete Onboarding",
-      });
+      await openOnboarding();
     } catch (error) {
-      console.error("Failed to load onboarding state:", toErrorMessage(error));
+      logError("Failed to load onboarding state:", error);
     }
   });
 </script>
