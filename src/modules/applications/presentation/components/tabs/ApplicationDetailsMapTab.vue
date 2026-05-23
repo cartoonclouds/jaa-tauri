@@ -3,6 +3,9 @@
 
   import LocationMapFull from "@/components/ui/LocationMapFull.vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     application: Application | null;
   }
@@ -43,3 +46,12 @@
     </Message>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

@@ -52,3 +52,6 @@ export interface CreateContactInput {
   /** Contact category. */
   type: ContactType;
 }
+
+
+

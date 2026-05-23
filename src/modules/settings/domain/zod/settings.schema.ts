@@ -17,4 +17,15 @@ export const SettingRepositoryUpsertSchema = z.object({
   developerMode: z.boolean().optional(),
 });
 
+/**
+ * Type alias for app settings.
+ */
 export type AppSettings = z.infer<typeof SettingsSchema>;
+
+
+
+
+
+
+
+

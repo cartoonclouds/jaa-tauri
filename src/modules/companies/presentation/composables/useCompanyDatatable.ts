@@ -19,3 +19,6 @@ export function useCompanyDatatable() {
     searchFields: [...COMPANY_SEARCH_FIELDS],
   });
 }
+
+
+

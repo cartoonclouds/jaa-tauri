@@ -17,3 +17,6 @@ export interface QueryResult {
   /** Row id assigned by the last insert, if available. */
   lastInsertId?: number;
 }
+
+
+

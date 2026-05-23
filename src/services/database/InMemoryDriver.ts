@@ -3,6 +3,9 @@ import type { QueryBindings, QueryResult } from "./QueryBindings";
 
 import { BetterSqliteDriver } from "./BetterSqliteDriver.server";
 
+/**
+ * Implements in memory driver.
+ */
 export class InMemoryDriver implements DatabaseDriver {
   readonly name = "in-memory";
 
@@ -28,3 +31,11 @@ export class InMemoryDriver implements DatabaseDriver {
     return await this.delegate.transaction(callback);
   }
 }
+
+
+
+
+
+
+
+

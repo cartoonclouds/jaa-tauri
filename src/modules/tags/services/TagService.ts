@@ -9,6 +9,9 @@ import { TagSchema } from "@modules/tags/domain/zod/tag.schema";
 
 const TagNameSchema = TagSchema.pick({ name: true });
 
+/**
+ * Implements tag service.
+ */
 export class TagService {
   constructor(private readonly repository: ITagRepository) {}
 
@@ -64,3 +67,11 @@ export class TagService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

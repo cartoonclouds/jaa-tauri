@@ -32,5 +32,19 @@ export const CreateCompanySchema = CompanySchema.pick({
 
 export const CompanyRepositoryCreateSchema = CreateCompanySchema;
 
+/**
+ * Type alias for company.
+ */
 export type Company = z.infer<typeof CompanySchema>;
+/**
+ * Type alias for create company input.
+ */
 export type CreateCompanyInput = z.infer<typeof CreateCompanySchema>;
+
+
+
+
+
+
+
+

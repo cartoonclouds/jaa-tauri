@@ -19,3 +19,6 @@ export function useDocumentDatatable() {
     searchFields: [...DOCUMENT_SEARCH_FIELDS],
   });
 }
+
+
+

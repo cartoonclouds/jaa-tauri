@@ -7,6 +7,9 @@ import {
 } from "@modules/companies/repositories/CompanyRepository";
 import { CompanySchema } from "@modules/companies/domain/zod/company.schema";
 
+/**
+ * Implements company service.
+ */
 export class CompanyService {
   constructor(private readonly repository: ICompanyRepository) {}
 
@@ -44,3 +47,11 @@ export class CompanyService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

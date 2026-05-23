@@ -4,6 +4,9 @@
   import { EVENT_COPY_BY_STAGE } from "@modules/events/presentation/constants/interactionStages";
   import { computed, type CSSProperties } from "vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     stages: InteractionStage[];
     futureStages?: InteractionStage[];
@@ -38,11 +41,29 @@
     return props.activeStepIndex;
   });
 
+  /**
+   * Handles is future step.
+   */
   function isFutureStep(stepValue: number): boolean {
+    /**
+     * Checks whether future step is true.
+     */
+    /**
+     * Checks whether future step is true.
+     */
     return stepValue > props.stages.length;
   }
 
+  /**
+   * Handles get step number style.
+   */
   function getStepNumberStyle(stepValue: number): CSSProperties {
+    /**
+     * Gets step number style.
+     */
+    /**
+     * Gets step number style.
+     */
     const isActive = stepValue <= normalizedActiveStepIndex.value;
     const isFuture = isFutureStep(stepValue);
 
@@ -61,7 +82,16 @@
     };
   }
 
+  /**
+   * Handles get step title style.
+   */
   function getStepTitleStyle(stepValue: number): CSSProperties {
+    /**
+     * Gets step title style.
+     */
+    /**
+     * Gets step title style.
+     */
     const isActive = stepValue <= normalizedActiveStepIndex.value;
     const isFuture = isFutureStep(stepValue);
 
@@ -73,7 +103,16 @@
     };
   }
 
+  /**
+   * Handles get connector style.
+   */
   function getConnectorStyle(stepValue: number): CSSProperties {
+    /**
+     * Gets connector style.
+     */
+    /**
+     * Gets connector style.
+     */
     const isFuture = stepValue >= props.stages.length;
 
     return {
@@ -133,3 +172,12 @@
     </StepList>
   </Stepper>
 </template>
+
+
+
+
+
+
+
+
+

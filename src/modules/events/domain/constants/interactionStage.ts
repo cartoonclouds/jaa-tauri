@@ -19,18 +19,30 @@ export const INTERACTION_STAGES = [
   "Networking/Follow-up",
 ] as const;
 
+/**
+ * Type alias for interaction stage.
+ */
 export type InteractionStage = (typeof INTERACTION_STAGES)[number];
 
+/**
+ * Type alias for stage prefix.
+ */
 type StagePrefix<T extends string> = T extends `${infer Prefix}/${string}`
   ? `${Prefix}/`
   : never;
 
+/**
+ * Type alias for interaction stage prefix.
+ */
 export type InteractionStagePrefix = StagePrefix<InteractionStage>;
 
 export const DEFAULT_INTERACTION_STAGE: InteractionStage = "Application/Saved";
 
 const INTERACTION_STAGE_SET: ReadonlySet<string> = new Set(INTERACTION_STAGES);
 
+/**
+ * Checks whether interaction stage is true.
+ */
 export function isInteractionStage(
   value: string | null | undefined,
 ): value is InteractionStage {
@@ -41,6 +53,9 @@ export function isInteractionStage(
   return INTERACTION_STAGE_SET.has(value);
 }
 
+/**
+ * Handles to interaction stage.
+ */
 export function toInteractionStage(
   value: unknown,
   fallback: InteractionStage = DEFAULT_INTERACTION_STAGE,
@@ -52,3 +67,11 @@ export function toInteractionStage(
   const normalized = value.trim();
   return isInteractionStage(normalized) ? normalized : fallback;
 }
+
+
+
+
+
+
+
+

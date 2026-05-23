@@ -19,3 +19,6 @@ export function useContactDatatable() {
     searchFields: [...CONTACT_SEARCH_FIELDS],
   });
 }
+
+
+

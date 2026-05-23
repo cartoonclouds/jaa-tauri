@@ -20,5 +20,19 @@ export const CreateTagSchema = TagSchema.pick({
 
 export const TagRepositoryCreateSchema = CreateTagSchema;
 
+/**
+ * Type alias for tag.
+ */
 export type Tag = z.infer<typeof TagSchema>;
+/**
+ * Type alias for create tag input.
+ */
 export type CreateTagInput = z.infer<typeof CreateTagSchema>;
+
+
+
+
+
+
+
+

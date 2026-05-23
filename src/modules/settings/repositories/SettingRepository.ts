@@ -60,6 +60,9 @@ export interface ListConstantRowsOptions {
   includeHidden?: boolean;
 }
 
+/**
+ * Resolves settings label.
+ */
 function resolveSettingsLabel(type: PersistedConstantSourceType): string {
   const typeSegments = type.split(".");
   const fallbackKey =
@@ -83,7 +86,13 @@ function resolveSettingsLabel(type: PersistedConstantSourceType): string {
     .join(" ");
 }
 
+/**
+ * Type alias for setting create payload.
+ */
 export type SettingCreatePayload = SettingUpsertPayload;
+/**
+ * Type alias for setting update payload.
+ */
 export type SettingUpdatePayload = SettingUpsertPayload & { id: string };
 
 /**
@@ -360,3 +369,11 @@ export class SettingRepository implements ISettingRepository {
     await this.db.execute("DELETE FROM settings WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

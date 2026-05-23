@@ -17,14 +17,23 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Type alias for document create payload.
+ */
 export type DocumentCreatePayload = Pick<
   Document,
   "title" | "kind" | "filePath" | "mimeType" | "sizeBytes" | "checksum"
 >;
+/**
+ * Type alias for document update payload.
+ */
 export type DocumentUpdatePayload = Partial<DocumentCreatePayload> & {
   id: string;
 };
 
+/**
+ * Defines idocument repository.
+ */
 export interface IDocumentRepository extends IRepository<
   Document,
   DocumentCreatePayload,
@@ -33,6 +42,9 @@ export interface IDocumentRepository extends IRepository<
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Document>>;
 }
 
+/**
+ * Implements document repository.
+ */
 export class DocumentRepository implements IDocumentRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -149,3 +161,11 @@ export class DocumentRepository implements IDocumentRepository {
     await this.db.execute("DELETE FROM documents WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

@@ -21,3 +21,6 @@ export function mapCompanyRowToEntity(row: Record<string, unknown>): Company {
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

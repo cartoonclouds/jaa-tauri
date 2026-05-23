@@ -15,6 +15,9 @@
     watch,
   } from "vue";
 
+  /**
+   * Supported source groups shown in the map browser.
+   */
   type MapEntityType = "contacts" | "applications";
 
   const sourceOptions = [
@@ -125,6 +128,9 @@
   const filteredCount = computed(() => filteredEntities.value.length);
   const hasSearchQuery = computed(() => searchQuery.value.trim().length > 0);
 
+  /**
+   * Load all entities needed to build map markers.
+   */
   async function loadEntities(): Promise<void> {
     isLoading.value = true;
     loadingError.value = null;
@@ -143,6 +149,9 @@
     }
   }
 
+  /**
+   * Render or refresh markers on the Leaflet map.
+   */
   async function syncLeafletMap(): Promise<void> {
     const container = mapContainer.value;
     if (!container) {
@@ -155,6 +164,9 @@
     });
   }
 
+  /**
+   * Reset search state and clear any pending debounce timer.
+   */
   function clearSearch(): void {
     searchQuery.value = "";
     debouncedSearchQuery.value = "";

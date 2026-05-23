@@ -47,3 +47,6 @@ export function mapApplicationRowToEntity(
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

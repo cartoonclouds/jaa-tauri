@@ -32,3 +32,6 @@ export function mapNotificationRowToEntity(
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

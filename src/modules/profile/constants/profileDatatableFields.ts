@@ -4,4 +4,15 @@ export const PROFILE_SEARCH_FIELDS = [
   "headline",
 ] as const;
 
+/**
+ * Type alias for profile search field.
+ */
 export type ProfileSearchField = (typeof PROFILE_SEARCH_FIELDS)[number];
+
+
+
+
+
+
+
+

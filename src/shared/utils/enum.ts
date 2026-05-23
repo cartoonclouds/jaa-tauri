@@ -1,3 +1,6 @@
+/**
+ * Defines enum from value.
+ */
 export interface EnumFromValue<TEnum> {
   fromValue(value: string | null | undefined): TEnum | null;
 }
@@ -15,3 +18,11 @@ export function mapEnumFromDbValue<TEnum>(
 
   return enumType.fromValue(value);
 }
+
+
+
+
+
+
+
+

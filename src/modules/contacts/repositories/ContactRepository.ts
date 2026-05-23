@@ -20,6 +20,9 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Type alias for contact create payload.
+ */
 export type ContactCreatePayload = Pick<
   Contact,
   | "companyId"
@@ -33,10 +36,16 @@ export type ContactCreatePayload = Pick<
   | "type"
   | "notes"
 >;
+/**
+ * Type alias for contact update payload.
+ */
 export type ContactUpdatePayload = Partial<ContactCreatePayload> & {
   id: string;
 };
 
+/**
+ * Defines icontact repository.
+ */
 export interface IContactRepository extends IRepository<
   Contact,
   ContactCreatePayload,
@@ -48,11 +57,17 @@ export interface IContactRepository extends IRepository<
   ): Promise<ApplicationLinkedContact[]>;
 }
 
+/**
+ * Defines application linked contact.
+ */
 export interface ApplicationLinkedContact {
   contact: Contact;
   companyName: string | null;
 }
 
+/**
+ * Implements contact repository.
+ */
 export class ContactRepository implements IContactRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -203,3 +218,11 @@ export class ContactRepository implements IContactRepository {
     await this.db.execute("DELETE FROM contacts WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

@@ -14,6 +14,9 @@
   import ApplicationDetailsSummaryTab from "@modules/applications/presentation/components/tabs/ApplicationDetailsSummaryTab.vue";
   import { computed, ref, watch } from "vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     visible: boolean;
     application: Application | null;
@@ -96,6 +99,9 @@
     { immediate: true },
   );
 
+  /**
+   * Handles on submit.
+   */
   function onSubmit(payload: ApplicationFormSubmitPayload): void {
     emit("submit", payload);
   }
@@ -156,3 +162,12 @@
     </Tabs>
   </Drawer>
 </template>
+
+
+
+
+
+
+
+
+

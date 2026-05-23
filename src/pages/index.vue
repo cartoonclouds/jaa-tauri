@@ -13,7 +13,13 @@
 
   const { openOnboarding } = useOnboardingNavigation();
 
+  /**
+   * Type alias for top section view.
+   */
   type TopSectionView = "overview" | "map";
+  /**
+   * Defines top section option.
+   */
   interface TopSectionOption {
     label: string;
     value: TopSectionView;
@@ -124,3 +130,12 @@
     <ApplicationComponent />
   </main>
 </template>
+
+
+
+
+
+
+
+
+

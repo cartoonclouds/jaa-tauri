@@ -19,3 +19,6 @@ export function useProfileDatatable() {
     searchFields: [...PROFILE_SEARCH_FIELDS],
   });
 }
+
+
+

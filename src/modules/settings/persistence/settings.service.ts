@@ -108,8 +108,19 @@ export class SettingsService {
 
 let settingsServiceInstance: SettingsService | null = null;
 
+/**
+ * Handles use settings service.
+ */
 export function useSettingsService(): SettingsService {
   settingsServiceInstance ??= new SettingsService();
 
   return settingsServiceInstance;
 }
+
+
+
+
+
+
+
+

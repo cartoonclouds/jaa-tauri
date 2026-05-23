@@ -8,6 +8,9 @@ import { resolveDatabaseUrl } from "@/services/database/resolveDatabaseUrl";
 import { seedConstantsOnFirstRun } from "@/services/database/seedConstants.client";
 import { TauriSqliteDriver } from "@/services/database/TauriSqliteDriver.client";
 
+/**
+ * Creates browser noop database driver.
+ */
 function createBrowserNoopDatabaseDriver(): DatabaseDriver {
   const driver: DatabaseDriver = {
     name: "browser-noop",
@@ -79,3 +82,7 @@ export default defineNuxtPlugin(async () => {
     },
   };
 });
+
+
+
+

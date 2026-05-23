@@ -16,6 +16,9 @@
   } from "@modules/events/presentation/constants/interactionStages";
   import { computed } from "vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     application: Application | null;
     companyName: string;
@@ -24,6 +27,9 @@
 
   const props = defineProps<Props>();
 
+  /**
+   * Handles map status to flow status.
+   */
   function mapStatusToFlowStatus(
     status: ApplicationStatus,
   ): ApplicationFlowStatus {
@@ -163,3 +169,12 @@
     Summary details are available after selecting or saving an application.
   </Message>
 </template>
+
+
+
+
+
+
+
+
+

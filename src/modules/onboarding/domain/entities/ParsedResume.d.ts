@@ -15,3 +15,6 @@ export interface ParsedResume {
   /** Target roles inferred from the extracted text. */
   inferredTargetRoles: string[];
 }
+
+
+

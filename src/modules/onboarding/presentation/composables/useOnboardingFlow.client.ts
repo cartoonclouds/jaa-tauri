@@ -22,8 +22,14 @@ import { onboardingRepository } from "../../repositories/OnboardingRepository";
 
 const stepOrder = ["profile", "preferences", "resume", "review"] as const;
 
+/**
+ * Type alias for onboarding step.
+ */
 type OnboardingStep = (typeof stepOrder)[number];
 
+/**
+ * Type alias for step errors.
+ */
 type StepErrors = Partial<Record<OnboardingStep, string>>;
 
 /**
@@ -85,6 +91,9 @@ function normalizeSelectedPath(
   return null;
 }
 
+/**
+ * Creates onboarding flow composable.
+ */
 function createOnboardingFlowComposable() {
   const stepper = useStepper(stepOrder);
   const documentService = useDocumentService();
@@ -334,6 +343,9 @@ function createOnboardingFlowComposable() {
   };
 }
 
+/**
+ * Type alias for onboarding flow composable.
+ */
 type OnboardingFlowComposable = ReturnType<
   typeof createOnboardingFlowComposable
 >;
@@ -348,3 +360,11 @@ export function useOnboardingFlow() {
 
   return onboardingFlowComposableInstance;
 }
+
+
+
+
+
+
+
+

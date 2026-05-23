@@ -26,6 +26,9 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Defines iapplication repository.
+ */
 export interface IApplicationRepository extends IRepository<
   Application,
   ApplicationCreatePayload,
@@ -36,6 +39,9 @@ export interface IApplicationRepository extends IRepository<
   ): Promise<DatatablePageResult<Application>>;
 }
 
+/**
+ * Implements application repository.
+ */
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -253,3 +259,11 @@ export class ApplicationRepository implements IApplicationRepository {
     );
   }
 }
+
+
+
+
+
+
+
+

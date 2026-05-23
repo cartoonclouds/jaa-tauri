@@ -16,9 +16,18 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Type alias for tag create payload.
+ */
 export type TagCreatePayload = Pick<Tag, "name" | "color">;
+/**
+ * Type alias for tag update payload.
+ */
 export type TagUpdatePayload = Partial<TagCreatePayload> & { id: string };
 
+/**
+ * Defines itag repository.
+ */
 export interface ITagRepository extends IRepository<
   Tag,
   TagCreatePayload,
@@ -27,6 +36,9 @@ export interface ITagRepository extends IRepository<
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Tag>>;
 }
 
+/**
+ * Implements tag repository.
+ */
 export class TagRepository implements ITagRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -112,3 +124,11 @@ export class TagRepository implements ITagRepository {
     await this.db.execute("DELETE FROM tags WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

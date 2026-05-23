@@ -7,6 +7,9 @@ import type {
 import { useContactService } from "@modules/contacts";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates contact composable.
+ */
 function createContactComposable() {
   const service = useContactService();
   return createCrudComposable<
@@ -16,6 +19,9 @@ function createContactComposable() {
   >(service);
 }
 
+/**
+ * Type alias for contact composable.
+ */
 type ContactComposable = ReturnType<typeof createContactComposable>;
 
 let contactComposableInstance: ContactComposable | null = null;
@@ -28,3 +34,11 @@ export function useContact() {
 
   return contactComposableInstance;
 }
+
+
+
+
+
+
+
+

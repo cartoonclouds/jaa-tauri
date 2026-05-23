@@ -41,3 +41,6 @@ export interface CreateCompanyInput {
   /** Longitude for geocoded location data. */
   locationLng?: number | null;
 }
+
+
+

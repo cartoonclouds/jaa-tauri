@@ -7,6 +7,9 @@ import type {
 import { useProfileService } from "@modules/profile";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates profile composable.
+ */
 function createProfileComposable() {
   const service = useProfileService();
   return createCrudComposable<
@@ -16,6 +19,9 @@ function createProfileComposable() {
   >(service);
 }
 
+/**
+ * Type alias for profile composable.
+ */
 type ProfileComposable = ReturnType<typeof createProfileComposable>;
 
 let profileComposableInstance: ProfileComposable | null = null;
@@ -28,3 +34,11 @@ export function useProfile() {
 
   return profileComposableInstance;
 }
+
+
+
+
+
+
+
+

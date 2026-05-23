@@ -19,3 +19,6 @@ export function useNotificationDatatable() {
     searchFields: [...NOTIFICATION_SEARCH_FIELDS],
   });
 }
+
+
+

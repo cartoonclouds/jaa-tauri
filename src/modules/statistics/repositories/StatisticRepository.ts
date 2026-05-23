@@ -86,8 +86,14 @@ export type StatisticsOverviewBase = Omit<
   | "offerRateDeltaPercent"
 >;
 
+/**
+ * Type alias for statistics overview base field.
+ */
 type StatisticsOverviewBaseField = keyof StatisticsOverviewBase;
 
+/**
+ * Defines statistics overview aggregate definition.
+ */
 interface StatisticsOverviewAggregateDefinition {
   field: StatisticsOverviewBaseField;
   sqlExpression: string;
@@ -107,6 +113,9 @@ const STATISTICS_OVERVIEW_AGGREGATES: readonly StatisticsOverviewAggregateDefini
     ];
   });
 
+/**
+ * Handles to numeric statistic.
+ */
 function toNumericStatistic(value: unknown): number {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : 0;
@@ -120,6 +129,9 @@ function toNumericStatistic(value: unknown): number {
   return 0;
 }
 
+/**
+ * Handles map overview aggregate row.
+ */
 function mapOverviewAggregateRow(
   row: Partial<Record<StatisticsOverviewBaseField, unknown>> | undefined,
 ): StatisticsOverviewBase {
@@ -174,3 +186,11 @@ WHERE is_deleted = 0`,
     return mapOverviewAggregateRow(rows[0]);
   }
 }
+
+
+
+
+
+
+
+

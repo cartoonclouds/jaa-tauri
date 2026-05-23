@@ -5,6 +5,9 @@ import {
   createPersistedConstantRowsFromSources,
 } from "@shared/constants/persistedConstants";
 
+/**
+ * Defines count row.
+ */
 interface CountRow {
   count: number;
 }
@@ -35,3 +38,11 @@ export async function seedConstantsOnFirstRun(
     }
   });
 }
+
+
+
+
+
+
+
+

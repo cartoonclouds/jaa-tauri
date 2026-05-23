@@ -7,6 +7,9 @@ import type {
 import { useApplicationService } from "@modules/applications";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates application composable.
+ */
 function createApplicationComposable() {
   const service = useApplicationService();
   return createCrudComposable<
@@ -16,6 +19,9 @@ function createApplicationComposable() {
   >(service);
 }
 
+/**
+ * Type alias for application composable.
+ */
 type ApplicationComposable = ReturnType<typeof createApplicationComposable>;
 
 let applicationComposableInstance: ApplicationComposable | null = null;
@@ -28,3 +34,11 @@ export function useApplication() {
 
   return applicationComposableInstance;
 }
+
+
+
+
+
+
+
+

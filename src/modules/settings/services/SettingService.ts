@@ -45,3 +45,6 @@ export class SettingService {
     return this.repository.deleteConstantRow(type, value);
   }
 }
+
+
+

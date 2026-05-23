@@ -47,5 +47,19 @@ export const NotificationRepositoryCreateSchema = z.object({
   body: z.string(),
 });
 
+/**
+ * Type alias for notification.
+ */
 export type Notification = z.infer<typeof NotificationSchema>;
+/**
+ * Type alias for create notification input.
+ */
 export type CreateNotificationInput = z.infer<typeof CreateNotificationSchema>;
+
+
+
+
+
+
+
+

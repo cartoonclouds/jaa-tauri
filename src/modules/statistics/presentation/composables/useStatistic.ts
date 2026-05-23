@@ -5,6 +5,9 @@ import { onMounted, ref } from "vue";
 
 const STATISTICS_AUTO_REFRESH_MS = 5_000;
 
+/**
+ * Creates statistic composable.
+ */
 function createStatisticComposable() {
   const service = useStatisticService();
   const isLoading = ref(false);
@@ -60,12 +63,18 @@ function createStatisticComposable() {
   };
 }
 
+/**
+ * Type alias for statistic composable.
+ */
 type StatisticComposable = ReturnType<typeof createStatisticComposable>;
 
 let statisticComposableInstance: StatisticComposable | null = null;
 let statisticsAutoRefreshTimer: ReturnType<typeof setInterval> | null = null;
 let statisticsInitialRefreshStarted = false;
 
+/**
+ * Handles start statistics auto refresh.
+ */
 function startStatisticsAutoRefresh() {
   if (!import.meta.client || statisticsAutoRefreshTimer) {
     return;
@@ -100,3 +109,11 @@ export function useStatistic() {
 
   return statisticComposableInstance;
 }
+
+
+
+
+
+
+
+

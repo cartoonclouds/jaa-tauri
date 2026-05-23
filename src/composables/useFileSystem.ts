@@ -4,8 +4,14 @@ import { toErrorMessage } from "@shared/utils/error";
 import { isTauri } from "@tauri-apps/api/core";
 import { ref } from "vue";
 
+/**
+ * Deferred type handle for the lazily imported Tauri fs module.
+ */
 type TauriFsModule = typeof TauriFs;
 
+/**
+ * Options used to configure behavior of the filesystem composable.
+ */
 export interface UseFileSystemOptions {
   /**
    * When true, write operations create missing parent directories automatically.

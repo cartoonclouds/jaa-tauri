@@ -40,3 +40,6 @@ export function useApplicationDatatable() {
     searchFieldOptions: [...APPLICATION_SEARCH_FIELD_OPTIONS],
   };
 }
+
+
+

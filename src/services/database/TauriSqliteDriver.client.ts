@@ -3,8 +3,14 @@ import type { QueryBindings, QueryResult } from "./QueryBindings";
 
 import Database from "@tauri-apps/plugin-sql";
 
+/**
+ * Type alias for tauri database.
+ */
 type TauriDatabase = Awaited<ReturnType<typeof Database.load>>;
 
+/**
+ * Implements tauri sqlite driver.
+ */
 export class TauriSqliteDriver implements DatabaseDriver {
   readonly name = "tauri-sqlite";
 
@@ -64,3 +70,11 @@ export class TauriSqliteDriver implements DatabaseDriver {
     }
   }
 }
+
+
+
+
+
+
+
+

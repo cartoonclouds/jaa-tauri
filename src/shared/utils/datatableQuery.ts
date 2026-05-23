@@ -8,12 +8,18 @@ export const DEFAULT_DATATABLE_PAGINATOR_TEMPLATE =
   "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown";
 
 
+/**
+ * Defines build select all ordered query options.
+ */
 export interface BuildSelectAllOrderedQueryOptions {
   tableName: string;
   orderByClause: string;
   whereClause?: string;
 }
 
+/**
+ * Defines normalized datatable page query.
+ */
 export interface NormalizedDatatablePageQuery {
   rows: number;
   page: number;
@@ -21,6 +27,9 @@ export interface NormalizedDatatablePageQuery {
   hasSearch: boolean;
 }
 
+/**
+ * Defines resolve order by clause options.
+ */
 export interface ResolveOrderByClauseOptions {
   sortField?: string;
   sortOrder?: DatatableSortOrder;
@@ -107,3 +116,11 @@ export function buildSelectAllOrderedQuery({
   const whereSegment = whereClause ? ` WHERE ${whereClause}` : "";
   return `SELECT * FROM ${tableName}${whereSegment} ORDER BY ${orderByClause}`;
 }
+
+
+
+
+
+
+
+

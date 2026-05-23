@@ -7,6 +7,9 @@ import type {
 import { useNotificationService } from "@modules/notifications";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates notification composable.
+ */
 function createNotificationComposable() {
   const service = useNotificationService();
   return createCrudComposable<
@@ -16,6 +19,9 @@ function createNotificationComposable() {
   >(service);
 }
 
+/**
+ * Type alias for notification composable.
+ */
 type NotificationComposable = ReturnType<typeof createNotificationComposable>;
 
 let notificationComposableInstance: NotificationComposable | null = null;
@@ -28,3 +34,11 @@ export function useNotification() {
 
   return notificationComposableInstance;
 }
+
+
+
+
+
+
+
+

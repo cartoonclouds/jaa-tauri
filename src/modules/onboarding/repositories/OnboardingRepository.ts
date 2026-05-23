@@ -14,6 +14,9 @@ import {
   getResumeMimeType,
 } from "../utils/onboardingUtils";
 
+/**
+ * Handles user profile to profile create payload.
+ */
 function userProfileToProfileCreatePayload(
   profile: UserProfile,
 ): ProfileCreatePayload {
@@ -38,12 +41,18 @@ function userProfileToProfileCreatePayload(
   };
 }
 
+/**
+ * Defines complete onboarding input.
+ */
 export interface CompleteOnboardingInput {
   profile: UserProfile;
   resumePath: string | null;
   resumeMimeType?: string | null;
 }
 
+/**
+ * Implements onboarding repository.
+ */
 export class OnboardingRepository {
   async complete(input: CompleteOnboardingInput): Promise<void> {
     const payload = userProfileToProfileCreatePayload(input.profile);
@@ -86,8 +95,19 @@ export class OnboardingRepository {
 
 export const onboardingRepository = new OnboardingRepository();
 
+/**
+ * Handles complete onboarding.
+ */
 export async function completeOnboarding(
   input: CompleteOnboardingInput,
 ): Promise<void> {
   await onboardingRepository.complete(input);
 }
+
+
+
+
+
+
+
+

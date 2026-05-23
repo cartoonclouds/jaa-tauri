@@ -17,3 +17,6 @@ export interface IRepository<
   /** Delete an entity by identifier. */
   delete(id: TId): Promise<void>;
 }
+
+
+

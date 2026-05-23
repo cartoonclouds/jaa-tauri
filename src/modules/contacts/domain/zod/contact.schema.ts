@@ -51,5 +51,19 @@ export const CreateContactSchema = ContactSchema.pick({
 
 export const ContactRepositoryCreateSchema = CreateContactSchema;
 
+/**
+ * Type alias for contact.
+ */
 export type Contact = z.infer<typeof ContactSchema>;
+/**
+ * Type alias for create contact input.
+ */
 export type CreateContactInput = z.infer<typeof CreateContactSchema>;
+
+
+
+
+
+
+
+

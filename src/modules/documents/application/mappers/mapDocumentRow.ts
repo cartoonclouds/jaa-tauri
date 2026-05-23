@@ -18,3 +18,6 @@ export function mapDocumentRowToEntity(row: Record<string, unknown>): Document {
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

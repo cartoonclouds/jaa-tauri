@@ -7,6 +7,9 @@ import type {
 import { useEventService } from "@modules/events";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates event composable.
+ */
 function createEventComposable() {
   const service = useEventService();
   return createCrudComposable<Event, EventCreatePayload, EventUpdatePayload>(
@@ -14,6 +17,9 @@ function createEventComposable() {
   );
 }
 
+/**
+ * Type alias for event composable.
+ */
 type EventComposable = ReturnType<typeof createEventComposable>;
 
 let eventComposableInstance: EventComposable | null = null;
@@ -26,3 +32,11 @@ export function useEvent() {
 
   return eventComposableInstance;
 }
+
+
+
+
+
+
+
+

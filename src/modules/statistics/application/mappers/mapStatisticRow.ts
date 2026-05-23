@@ -6,6 +6,9 @@ import {
 } from "@modules/statistics/domain/zod/statistic.schema";
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
+/**
+ * Handles to scope.
+ */
 function toScope(value: unknown): StatisticScopeValue {
   return value === "company" || value === "application" ? value : "global";
 }
@@ -26,3 +29,11 @@ export function mapStatisticRowToEntity(
     updatedAt: toDate(row.updated_at),
   });
 }
+
+
+
+
+
+
+
+

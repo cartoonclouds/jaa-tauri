@@ -8,6 +8,9 @@ import {
   type IContactRepository,
 } from "@modules/contacts/repositories/ContactRepository";
 
+/**
+ * Implements contact service.
+ */
 export class ContactService {
   constructor(private readonly repository: IContactRepository) {}
 
@@ -74,3 +77,11 @@ export class ContactService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

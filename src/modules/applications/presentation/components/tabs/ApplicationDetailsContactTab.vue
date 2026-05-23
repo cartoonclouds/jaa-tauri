@@ -6,6 +6,9 @@
 
   import LocationMapFull from "@/components/ui/LocationMapFull.vue";
 
+  /**
+   * Defines linked contact.
+   */
   interface LinkedContact {
     id: string;
     fullName: string;
@@ -19,15 +22,24 @@
     notes: string | null;
   }
 
+  /**
+   * Defines linked contact section.
+   */
   interface LinkedContactSection {
     contact: LinkedContact;
     companyName: string | null;
   }
 
+  /**
+   * Defines contact lookup service.
+   */
   interface ContactLookupService {
     listByApplicationId(applicationId: string): Promise<LinkedContactSection[]>;
   }
 
+  /**
+   * Defines props.
+   */
   interface Props {
     application: Application | null;
     companyName: string;
@@ -43,6 +55,9 @@
 
   const hasApplication = computed(() => Boolean(props.application?.id));
 
+  /**
+   * Handles load contacts.
+   */
   async function loadContacts(applicationId: string): Promise<void> {
     loading.value = true;
     errorMessage.value = null;
@@ -194,3 +209,12 @@
     </div>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

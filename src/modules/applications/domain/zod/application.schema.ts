@@ -22,6 +22,9 @@ import {
 } from "@shared/domain/zod/fields";
 import { z } from "zod";
 
+/**
+ * Type guard for `ApplicationAttendanceType` enum instances.
+ */
 function isApplicationAttendanceType(
   value: unknown,
 ): value is ApplicationAttendanceTypeValue {
@@ -36,6 +39,9 @@ function isApplicationAttendanceType(
   );
 }
 
+/**
+ * Type guard for `ApplicationEmploymentType` enum instances.
+ */
 function isApplicationEmploymentType(
   value: unknown,
 ): value is ApplicationEmploymentTypeValue {
@@ -50,6 +56,9 @@ function isApplicationEmploymentType(
   );
 }
 
+/**
+ * Type guard for `ApplicationStatus` enum instances.
+ */
 function isApplicationStatus(value: unknown): value is ApplicationStatusValue {
   return (
     typeof value === "object" &&
@@ -171,5 +180,11 @@ export const ApplicationFormSchema = z
     },
   );
 
+/**
+ * Inferred domain entity shape for persisted applications.
+ */
 export type Application = z.infer<typeof ApplicationSchema>;
+/**
+ * Inferred input shape for creating a new application.
+ */
 export type CreateApplicationInput = z.infer<typeof CreateApplicationSchema>;

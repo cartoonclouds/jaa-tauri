@@ -5,6 +5,9 @@ import {
 } from "@modules/events/repositories/EventRepository";
 import { EventSchema } from "@modules/events/domain/zod/event.schema";
 
+/**
+ * Implements event service.
+ */
 export class EventService {
   constructor(private readonly repository: IEventRepository) {}
 
@@ -41,3 +44,11 @@ export class EventService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

@@ -9,18 +9,30 @@ import {
   DEFAULT_CREATED_AT_ORDER_BY,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Type alias for event create payload.
+ */
 export type EventCreatePayload = Pick<
   Event,
   "applicationId" | "contactId" | "type" | "title" | "description" | "eventAt"
 >;
+/**
+ * Type alias for event update payload.
+ */
 export type EventUpdatePayload = Partial<EventCreatePayload> & { id: string };
 
+/**
+ * Defines ievent repository.
+ */
 export interface IEventRepository extends IRepository<
   Event,
   EventCreatePayload,
   EventUpdatePayload
 > {}
 
+/**
+ * Implements event repository.
+ */
 export class EventRepository implements IEventRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -88,3 +100,11 @@ export class EventRepository implements IEventRepository {
     await this.db.execute("DELETE FROM events WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

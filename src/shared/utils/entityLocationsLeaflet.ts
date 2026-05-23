@@ -4,6 +4,9 @@ import type * as LeafletNamespace from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 
+/**
+ * Defines mappable entity.
+ */
 export interface MappableEntity {
   id: string;
   name: string;
@@ -13,12 +16,21 @@ export interface MappableEntity {
   subtitle: string;
 }
 
+/**
+ * Defines leaflet map manager options.
+ */
 interface LeafletMapManagerOptions {
   onError?: (message: string) => void;
 }
 
+/**
+ * Type alias for leaflet marker cluster group.
+ */
 type LeafletMarkerClusterGroup = LeafletNamespace.MarkerClusterGroup;
 
+/**
+ * Defines leaflet map manager.
+ */
 export interface LeafletMapManager {
   initialize(container: HTMLDivElement): Promise<void>;
   render(
@@ -29,6 +41,9 @@ export interface LeafletMapManager {
   destroy(): void;
 }
 
+/**
+ * Builds popup content.
+ */
 function buildPopupContent(entity: MappableEntity): HTMLDivElement {
   const root = document.createElement("div");
   const title = document.createElement("strong");
@@ -46,6 +61,9 @@ function buildPopupContent(entity: MappableEntity): HTMLDivElement {
   return root;
 }
 
+/**
+ * Creates entity locations leaflet manager.
+ */
 export function createEntityLocationsLeafletManager(
   options: LeafletMapManagerOptions = {},
 ): LeafletMapManager {
@@ -240,3 +258,11 @@ export function createEntityLocationsLeafletManager(
     },
   };
 }
+
+
+
+
+
+
+
+

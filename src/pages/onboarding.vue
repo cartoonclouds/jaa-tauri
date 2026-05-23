@@ -12,6 +12,9 @@
 
   const router = useRouter();
 
+  /**
+   * Handles handle completed.
+   */
   async function handleCompleted(): Promise<void> {
     try {
       await getCurrentWindow().close();
@@ -20,6 +23,9 @@
     }
   }
 
+  /**
+   * Handles handle cancelled.
+   */
   async function handleCancelled(): Promise<void> {
     try {
       if (isTauri()) {
@@ -43,3 +49,12 @@
     />
   </div>
 </template>
+
+
+
+
+
+
+
+
+

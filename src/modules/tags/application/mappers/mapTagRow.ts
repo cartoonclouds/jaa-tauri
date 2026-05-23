@@ -14,3 +14,6 @@ export function mapTagRowToEntity(row: Record<string, unknown>): Tag {
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

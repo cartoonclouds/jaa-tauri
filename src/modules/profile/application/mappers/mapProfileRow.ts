@@ -47,3 +47,6 @@ export function mapProfileRowToEntity(
   void errorPrefix;
   return mapped as Profile;
 }
+
+
+

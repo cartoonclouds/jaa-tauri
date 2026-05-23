@@ -34,6 +34,9 @@
     locationLng: "",
   });
 
+  /**
+   * Handles hydrate for edit.
+   */
   function hydrateForEdit(row: Company): void {
     editingId.value = row.id;
     form.name = row.name;
@@ -42,6 +45,9 @@
     form.locationLng = row.locationLng?.toString() ?? "";
   }
 
+  /**
+   * Handles reset form.
+   */
   function resetForm(): void {
     editingId.value = null;
     form.name = "";
@@ -50,6 +56,9 @@
     form.locationLng = "";
   }
 
+  /**
+   * Handles on submit.
+   */
   async function onSubmit(): Promise<void> {
     if (!form.name.trim()) {
       return;
@@ -79,6 +88,9 @@
     resetForm();
   }
 
+  /**
+   * Handles remove company.
+   */
   async function removeCompany(id: string): Promise<void> {
     await service.delete(id);
     await refresh();
@@ -159,3 +171,12 @@
     </DataTable>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

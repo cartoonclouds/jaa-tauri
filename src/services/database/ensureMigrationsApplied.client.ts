@@ -1,9 +1,15 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 
+/**
+ * Defines sqlite master row.
+ */
 interface SqliteMasterRow {
   name: string;
 }
 
+/**
+ * Defines sqlite column info row.
+ */
 interface SqliteColumnInfoRow {
   name: string;
 }
@@ -71,3 +77,11 @@ export async function ensureMigrationsAppliedOnFirstRun(
     );
   }
 }
+
+
+
+
+
+
+
+

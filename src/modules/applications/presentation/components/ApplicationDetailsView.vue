@@ -13,6 +13,9 @@
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
   import Card from "primevue/card";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     application: Application;
     companyName: string;
@@ -317,3 +320,12 @@
     </div>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

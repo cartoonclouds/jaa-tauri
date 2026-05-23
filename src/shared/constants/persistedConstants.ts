@@ -14,6 +14,9 @@ export interface PersistedConstantRow {
   is_visible: 0 | 1;
 }
 
+/**
+ * Type alias for constant module.
+ */
 type ConstantModule = Record<string, unknown>;
 
 /**
@@ -46,6 +49,9 @@ export const CONSTANT_MODULE_SOURCES = [
   },
 ] as const satisfies readonly ConstantModuleSource[];
 
+/**
+ * Type alias for constant module namespace.
+ */
 type ConstantModuleNamespace =
   (typeof CONSTANT_MODULE_SOURCES)[number]["namespace"];
 
@@ -55,6 +61,9 @@ type ConstantModuleNamespace =
 export type PersistedConstantSourceType =
   `${ConstantModuleNamespace}.${string}`;
 
+/**
+ * Checks whether persistable export is true.
+ */
 function isPersistableExport(value: unknown): boolean {
   if (value === null) {
     return true;
@@ -70,6 +79,9 @@ function isPersistableExport(value: unknown): boolean {
   );
 }
 
+/**
+ * Convert supported values to JSON-safe primitives or structures.
+ */
 function toSerializableValue(value: unknown): unknown {
   if (value && typeof value === "object") {
     if (value instanceof Date) {
@@ -100,6 +112,9 @@ function toSerializableValue(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Serialize a constant value into a deterministic string representation.
+ */
 function serializeConstantValue(value: unknown): string {
   const serialized = toSerializableValue(value);
 
@@ -119,6 +134,9 @@ function serializeConstantValue(value: unknown): string {
   return JSON.stringify(serialized);
 }
 
+/**
+ * Resolve a human-readable label from a constant entry when available.
+ */
 function toConstantLabel(value: unknown): string | null {
   if (
     typeof value === "string" ||
@@ -141,6 +159,9 @@ function toConstantLabel(value: unknown): string | null {
   return null;
 }
 
+/**
+ * Remove embedded label metadata before persistence value serialization.
+ */
 function stripEmbeddedLabel(value: unknown): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return value;
@@ -158,6 +179,9 @@ function stripEmbeddedLabel(value: unknown): unknown {
   return rest;
 }
 
+/**
+ * Normalize a constant export into persisted row entries.
+ */
 function toConstantRows(
   namespace: string,
   exportName: string,

@@ -27,5 +27,19 @@ export const DocumentRepositoryCreateSchema = z.object({
   filePath: z.string(),
 });
 
+/**
+ * Type alias for document.
+ */
 export type Document = z.infer<typeof DocumentSchema>;
+/**
+ * Type alias for create document input.
+ */
 export type CreateDocumentInput = z.infer<typeof CreateDocumentSchema>;
+
+
+
+
+
+
+
+

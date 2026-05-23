@@ -8,11 +8,17 @@
 
   import { DEFAULT_DATATABLE_TABLE_STYLE } from "@/shared/utils/datatableQuery";
 
+  /**
+   * Search field option rendered by the table header multi-select.
+   */
   interface SearchFieldOption {
     label: string;
     value: string;
   }
 
+  /**
+   * Props accepted by the reusable server-backed datatable component.
+   */
   interface Props {
     items: unknown[];
     isLoading: boolean;
@@ -75,14 +81,23 @@
       .join(" "),
   );
 
+  /**
+   * Emit row-click with normalized row payload.
+   */
   function onRowClick(event: { data: unknown; originalEvent: Event }): void {
     emit("row-click", event.data);
   }
 
+  /**
+   * Emit global filter changes.
+   */
   function onGlobalFilterInput(value: string): void {
     emit("update:global-filter", value);
   }
 
+  /**
+   * Normalize and emit search field selections from the multi-select.
+   */
   function onSearchFieldsInput(value: unknown): void {
     const allowedSearchFieldValues =
       props.searchFieldAllowlist.length > 0
@@ -101,10 +116,16 @@
     emit("update:search-fields", normalized);
   }
 
+  /**
+   * Forward pagination events to the parent.
+   */
   function onPage(event: { page?: number; rows?: number }): void {
     emit("page", event);
   }
 
+  /**
+   * Validate and emit sorting events using the allowed sortable fields.
+   */
   function onSort(event: {
     sortField?: string | ((item: unknown) => string) | null;
     sortOrder?: DatatableSortOrderInput;

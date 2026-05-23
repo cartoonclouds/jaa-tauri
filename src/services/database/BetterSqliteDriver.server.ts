@@ -4,8 +4,14 @@ import type { QueryBindings, QueryResult } from "./QueryBindings";
 import Database from "better-sqlite3";
 import path from "node:path";
 
+/**
+ * Type alias for better sqlite database.
+ */
 type BetterSqliteDatabase = InstanceType<typeof Database>;
 
+/**
+ * Implements better sqlite driver.
+ */
 export class BetterSqliteDriver implements DatabaseDriver {
   readonly name = "better-sqlite3";
 
@@ -80,3 +86,11 @@ export class BetterSqliteDriver implements DatabaseDriver {
     }
   }
 }
+
+
+
+
+
+
+
+

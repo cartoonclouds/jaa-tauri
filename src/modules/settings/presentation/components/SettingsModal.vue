@@ -10,10 +10,16 @@
   import { computed, reactive, ref, watch } from "vue";
   import { z } from "zod";
 
+  /**
+   * Props accepted by the settings modal.
+   */
   interface Props {
     visible: boolean;
   }
 
+  /**
+   * Form values managed by the general settings section.
+   */
   interface GeneralFormValues {
     theme: "dark" | "light" | "system";
     locale: string;
@@ -21,6 +27,9 @@
     developerMode: boolean;
   }
 
+  /**
+   * Editable row state for a single constant value.
+   */
   interface ConstantEditorRow {
     isNew: boolean;
     isVisible: boolean;
@@ -29,6 +38,9 @@
     value: string;
   }
 
+  /**
+   * Constant group metadata shown as tabs in the modal.
+   */
   interface ConstantGroup {
     key: string;
     label: string;
@@ -43,6 +55,9 @@
 
   const settingService = useSettingService();
 
+  /**
+   * Returns whether an exported constant value can be persisted.
+   */
   function isPersistableConstantValue(value: unknown): boolean {
     if (value === null) {
       return true;
@@ -127,10 +142,16 @@
     }),
   );
 
+  /**
+   * Resolve editable rows for a constant source type.
+   */
   function resolveRows(type: PersistedConstantSourceType): ConstantEditorRow[] {
     return constantRowsByType[type] ?? [];
   }
 
+  /**
+   * Append a new unsaved row to a constant group.
+   */
   function addConstantRow(type: PersistedConstantSourceType): void {
     const rows = resolveRows(type);
     rows.push({
@@ -143,6 +164,9 @@
     constantRowsByType[type] = rows;
   }
 
+  /**
+   * Returns true when the row should render a single label input.
+   */
   function usesSingleLabelInput(row: ConstantEditorRow): boolean {
     const normalizedValue = row.value.trim();
     const normalizedLabel = row.label.trim();
@@ -154,6 +178,9 @@
     return normalizedValue === normalizedLabel;
   }
 
+  /**
+   * Keep value and label synchronized in single-input mode.
+   */
   function updateSingleLabelValue(
     row: ConstantEditorRow,
     nextValue: string,
@@ -162,6 +189,9 @@
     row.label = nextValue;
   }
 
+  /**
+   * Load persisted settings and constants into modal state.
+   */
   async function loadState(): Promise<void> {
     isBusy.value = true;
 
@@ -210,6 +240,9 @@
     }
   }
 
+  /**
+   * Persist updates from the general settings form.
+   */
   async function submitGeneral(event: FormSubmitEvent): Promise<void> {
     if (!event.valid) {
       return;
@@ -234,6 +267,9 @@
     }
   }
 
+  /**
+   * Save or update a single constant row.
+   */
   async function saveConstantRow(
     type: PersistedConstantSourceType,
     row: ConstantEditorRow,
@@ -264,6 +300,9 @@
     }
   }
 
+  /**
+   * Remove a constant row (or just discard if unsaved).
+   */
   async function removeConstantRow(
     type: PersistedConstantSourceType,
     row: ConstantEditorRow,

@@ -17,6 +17,9 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Type alias for notification create payload.
+ */
 export type NotificationCreatePayload = Pick<
   Notification,
   | "applicationId"
@@ -28,10 +31,16 @@ export type NotificationCreatePayload = Pick<
   | "scheduledFor"
   | "sentAt"
 >;
+/**
+ * Type alias for notification update payload.
+ */
 export type NotificationUpdatePayload = Partial<NotificationCreatePayload> & {
   id: string;
 };
 
+/**
+ * Defines inotification repository.
+ */
 export interface INotificationRepository extends IRepository<
   Notification,
   NotificationCreatePayload,
@@ -42,6 +51,9 @@ export interface INotificationRepository extends IRepository<
   ): Promise<DatatablePageResult<Notification>>;
 }
 
+/**
+ * Implements notification repository.
+ */
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -159,3 +171,11 @@ export class NotificationRepository implements INotificationRepository {
     await this.db.execute("DELETE FROM notifications WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

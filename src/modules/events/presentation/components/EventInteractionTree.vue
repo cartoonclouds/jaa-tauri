@@ -16,11 +16,17 @@
   } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
+  /**
+   * Defines event tree node data.
+   */
   interface EventTreeNodeData {
     kind: "application" | "stage" | "event";
     event?: Event;
   }
 
+  /**
+   * Defines create event form state.
+   */
   interface CreateEventFormState {
     applicationId: string;
     type: InteractionStage;
@@ -29,6 +35,9 @@
     eventAt: string;
   }
 
+  /**
+   * Defines edit event form state.
+   */
   interface EditEventFormState {
     id: string;
     type: InteractionStage | "";
@@ -93,7 +102,16 @@
     color: "var(--p-text-muted-color)",
   } as const;
 
+  /**
+   * Handles get node card style.
+   */
   function getNodeCardStyle(): Record<string, string> {
+    /**
+     * Gets node card style.
+     */
+    /**
+     * Gets node card style.
+     */
     return {
       background: "var(--p-content-background)",
       borderColor: "var(--p-content-border-color)",
@@ -101,7 +119,16 @@
     };
   }
 
+  /**
+   * Handles get node meta style.
+   */
   function getNodeMetaStyle(): Record<string, string> {
+    /**
+     * Gets node meta style.
+     */
+    /**
+     * Gets node meta style.
+     */
     return {
       color: "var(--p-text-muted-color)",
     };
@@ -115,7 +142,16 @@
     return toErrorMessage(error.value, "Failed to manage interaction.");
   });
 
+  /**
+   * Handles build tree nodes.
+   */
   function buildTreeNodes(events: Event[]): TreeNode[] {
+    /**
+     * Builds tree nodes.
+     */
+    /**
+     * Builds tree nodes.
+     */
     const sorted = [...events].sort((a, b) => {
       const left = a.eventAt?.getTime() ?? a.createdAt.getTime();
       const right = b.eventAt?.getTime() ?? b.createdAt.getTime();
@@ -184,6 +220,9 @@
 
   const treeNodes = computed(() => buildTreeNodes(items.value));
 
+  /**
+   * Handles expand all nodes.
+   */
   function expandAllNodes(
     nodes: TreeNode[],
     target: Record<string, boolean>,
@@ -196,12 +235,18 @@
     }
   }
 
+  /**
+   * Handles expand all.
+   */
   function expandAll(): void {
     const allExpanded: Record<string, boolean> = {};
     expandAllNodes(treeNodes.value, allExpanded);
     expandedKeys.value = allExpanded;
   }
 
+  /**
+   * Handles collapse all.
+   */
   function collapseAll(): void {
     expandedKeys.value = {};
   }
@@ -216,6 +261,9 @@
     { immediate: true },
   );
 
+  /**
+   * Handles format node meta.
+   */
   function formatNodeMeta(event: Event | undefined): string {
     if (!event) {
       return "";
@@ -227,6 +275,9 @@
     return `${eventAtLabel} | ${event.type}`;
   }
 
+  /**
+   * Handles on node dbl click.
+   */
   function onNodeDblClick(node: TreeNode): void {
     const data = node.data as EventTreeNodeData | undefined;
     if (data?.kind !== "event" || !data.event) {
@@ -243,6 +294,9 @@
     isEditDialogVisible.value = true;
   }
 
+  /**
+   * Handles submit create.
+   */
   async function submitCreate(): Promise<void> {
     if (
       !createForm.applicationId.trim() ||
@@ -271,6 +325,9 @@
     }
   }
 
+  /**
+   * Handles submit edit.
+   */
   async function submitEdit(): Promise<void> {
     if (
       !editForm.id ||
@@ -297,6 +354,9 @@
     }
   }
 
+  /**
+   * Handles delete from edit dialog.
+   */
   async function deleteFromEditDialog(): Promise<void> {
     if (!editForm.id) {
       return;
@@ -599,3 +659,12 @@
     </Dialog>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

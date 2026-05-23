@@ -7,11 +7,17 @@ import type {
 import { useTagService } from "@modules/tags";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates tag composable.
+ */
 function createTagComposable() {
   const service = useTagService();
   return createCrudComposable<Tag, TagCreatePayload, TagUpdatePayload>(service);
 }
 
+/**
+ * Type alias for tag composable.
+ */
 type TagComposable = ReturnType<typeof createTagComposable>;
 
 let tagComposableInstance: TagComposable | null = null;
@@ -24,3 +30,11 @@ export function useTag() {
 
   return tagComposableInstance;
 }
+
+
+
+
+
+
+
+

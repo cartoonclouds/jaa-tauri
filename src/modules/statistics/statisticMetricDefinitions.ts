@@ -3,16 +3,31 @@ import type {
   StatisticsOverviewBase,
 } from "@modules/statistics/repositories/StatisticRepository";
 
+/**
+ * Type alias for statistic metric id.
+ */
 export type StatisticMetricId = keyof StatisticsOverview;
+/**
+ * Type alias for statistic aggregate field.
+ */
 export type StatisticAggregateField = keyof StatisticsOverviewBase;
+/**
+ * Type alias for statistic card tone.
+ */
 export type StatisticCardTone =
   | "default"
   | "success"
   | "warning"
   | "danger"
   | "info";
+/**
+ * Type alias for statistic trend value format.
+ */
 export type StatisticTrendValueFormat = "percent" | "points";
 
+/**
+ * Defines statistic card definition.
+ */
 export interface StatisticCardDefinition {
   title: string;
   description: string;
@@ -26,6 +41,9 @@ export interface StatisticCardDefinition {
   trendValueFormat?: StatisticTrendValueFormat;
 }
 
+/**
+ * Defines statistic metric definition.
+ */
 export interface StatisticMetricDefinition {
   id: StatisticMetricId;
   aggregateSql?: string;
@@ -196,3 +214,11 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
       },
     },
   ];
+
+
+
+
+
+
+
+

@@ -9,3 +9,6 @@ export interface DatabasePublicRuntimeConfig {
   /** Optional database URL override. */
   appDatabaseUrl?: string;
 }
+
+
+

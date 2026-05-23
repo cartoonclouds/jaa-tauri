@@ -7,6 +7,9 @@ import {
 } from "@modules/documents/repositories/DocumentRepository";
 import { DocumentSchema } from "@modules/documents/domain/zod/document.schema";
 
+/**
+ * Implements document service.
+ */
 export class DocumentService {
   constructor(private readonly repository: IDocumentRepository) {}
 
@@ -53,3 +56,11 @@ export class DocumentService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

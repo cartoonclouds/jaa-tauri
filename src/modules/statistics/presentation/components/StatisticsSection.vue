@@ -5,6 +5,9 @@
 
   import { Icon } from "#components";
 
+  /**
+   * Defines statistics section props.
+   */
   interface StatisticsSectionProps {
     title?: string;
   }
@@ -31,3 +34,12 @@
     <StatisticsMomentumSummary :overview="overview" />
   </section>
 </template>
+
+
+
+
+
+
+
+
+

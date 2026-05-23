@@ -4,6 +4,9 @@
   import StatisticCard from "@modules/statistics/presentation/components/StatisticCard.vue";
   import { statisticMetricDefinitions } from "@modules/statistics/presentation/utils/statisticMetricUtils";
 
+  /**
+   * Defines statistic cards section props.
+   */
   interface StatisticCardsSectionProps {
     overview: StatisticsOverview;
   }
@@ -28,3 +31,12 @@
     />
   </div>
 </template>
+
+
+
+
+
+
+
+
+

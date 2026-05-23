@@ -29,6 +29,9 @@
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", kind: "resume", filePath: "" });
 
+  /**
+   * Handles edit.
+   */
   function edit(row: Document): void {
     editingId.value = row.id;
     form.title = row.title;
@@ -36,6 +39,9 @@
     form.filePath = row.filePath;
   }
 
+  /**
+   * Handles reset form.
+   */
   function resetForm(): void {
     editingId.value = null;
     form.title = "";
@@ -43,6 +49,9 @@
     form.filePath = "";
   }
 
+  /**
+   * Handles submit.
+   */
   async function submit(): Promise<void> {
     if (editingId.value) {
       await service.update({
@@ -65,6 +74,9 @@
     resetForm();
   }
 
+  /**
+   * Handles remove document.
+   */
   async function removeDocument(id: string): Promise<void> {
     await service.delete(id);
     await refresh();
@@ -144,3 +156,12 @@
     </DataTable>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

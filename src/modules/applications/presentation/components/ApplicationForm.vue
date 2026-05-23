@@ -26,6 +26,9 @@
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { computed } from "vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     initialValues?: Partial<ApplicationFormValues>;
     mode?: "create" | "edit";
@@ -70,20 +73,50 @@
     };
   });
 
+  /**
+   * Handles get status preview class.
+   */
   function getStatusPreviewClass(status: ApplicationStatus | undefined | null) {
+    /**
+     * Gets status preview class.
+     */
+    /**
+     * Gets status preview class.
+     */
     return getApplicationStatusClass(status);
   }
 
+  /**
+   * Handles get status preview label.
+   */
   function getStatusPreviewLabel(status: ApplicationStatus | undefined | null) {
+    /**
+     * Gets status preview label.
+     */
+    /**
+     * Gets status preview label.
+     */
     return formatApplicationStatusLabel(status);
   }
 
+  /**
+   * Handles get priority preview class.
+   */
   function getPriorityPreviewClass(priority: number | undefined | null) {
+    /**
+     * Gets priority preview class.
+     */
+    /**
+     * Gets priority preview class.
+     */
     return priority
       ? getApplicationPriorityClass(priority)
       : "bg-slate-100 text-slate-800 ring-slate-200";
   }
 
+  /**
+   * Handles on form submit.
+   */
   function onFormSubmit(event: FormSubmitEvent): void {
     if (!event.valid) return;
 
@@ -120,6 +153,9 @@
     });
   }
 
+  /**
+   * Handles on cancel.
+   */
   function onCancel(): void {
     emit("cancel");
   }
@@ -508,3 +544,12 @@
     </div>
   </Form>
 </template>
+
+
+
+
+
+
+
+
+

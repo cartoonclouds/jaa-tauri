@@ -17,6 +17,9 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Defines company create payload.
+ */
 export interface CompanyCreatePayload {
   name: string;
   websiteUrl?: string | null;
@@ -29,6 +32,9 @@ export interface CompanyCreatePayload {
   notes?: string | null;
 }
 
+/**
+ * Defines company update payload.
+ */
 export interface CompanyUpdatePayload {
   id: string;
   name?: string;
@@ -42,6 +48,9 @@ export interface CompanyUpdatePayload {
   notes?: string | null;
 }
 
+/**
+ * Defines icompany repository.
+ */
 export interface ICompanyRepository extends IRepository<
   Company,
   CompanyCreatePayload,
@@ -50,6 +59,9 @@ export interface ICompanyRepository extends IRepository<
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Company>>;
 }
 
+/**
+ * Implements company repository.
+ */
 export class CompanyRepository implements ICompanyRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -193,3 +205,11 @@ export class CompanyRepository implements ICompanyRepository {
     await this.db.execute("DELETE FROM companies WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

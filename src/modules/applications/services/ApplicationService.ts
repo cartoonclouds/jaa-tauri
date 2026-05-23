@@ -7,6 +7,9 @@ import type { DatatablePageQuery } from "@shared/types";
 import { ApplicationSchema } from "@modules/applications/domain/zod/application.schema";
 import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 
+/**
+ * Implements application service.
+ */
 export class ApplicationService {
   constructor(private readonly repository: IApplicationRepository) {}
 
@@ -42,3 +45,11 @@ export class ApplicationService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

@@ -47,8 +47,14 @@
     createEmptyApplicationFormValues(),
   );
 
+  /**
+   * Handles to form values.
+   */
   function toFormValues(
     application: ApplicationEntity | null,
+    /**
+     * Handles to form values.
+     */
   ): ApplicationFormValues {
     if (!application) {
       return createEmptyApplicationFormValues();
@@ -76,6 +82,9 @@
     };
   }
 
+  /**
+   * Handles open create drawer.
+   */
   function openCreateDrawer(): void {
     selectedApplication.value = null;
     initialFormValues.value = toFormValues(null);
@@ -83,13 +92,22 @@
     isDrawerOpen.value = true;
   }
 
+  /**
+   * Handles open view drawer.
+   */
   function openViewDrawer(application: ApplicationEntity): void {
+    /**
+     * Handles open create drawer.
+     */
     selectedApplication.value = application;
     initialFormValues.value = toFormValues(application);
     drawerMode.value = "view";
     isDrawerOpen.value = true;
   }
 
+  /**
+   * Handles switch to edit mode.
+   */
   function switchToEditMode(): void {
     if (!selectedApplication.value) {
       return;
@@ -97,17 +115,38 @@
 
     initialFormValues.value = toFormValues(selectedApplication.value);
     drawerMode.value = "edit";
+    /**
+     * Handles open view drawer.
+     */
   }
 
+  /**
+   * Handles cancel edit mode.
+   */
   function cancelEditMode(): void {
+    /**
+     * Checks whether cel edit mode is true.
+     */
+    /**
+     * Checks whether cel edit mode is true.
+     */
     if (!selectedApplication.value) {
       drawerMode.value = "create";
       return;
     }
 
+    /**
+
+ * Handles switch to edit mode.
+
+ */
+
     drawerMode.value = "view";
   }
 
+  /**
+   * Handles on drawer submit.
+   */
   async function onDrawerSubmit(
     payload: ApplicationFormSubmitPayload,
   ): Promise<void> {
@@ -119,6 +158,9 @@
           id: selectedApplication.value.id,
           companyId: payload.companyId,
           title: payload.title,
+          /**
+           * Handles cancel edit mode.
+           */
           status: payload.status,
           sourceUrl: payload.sourceUrl,
           appliedAt: payload.appliedAt,
@@ -134,6 +176,9 @@
           interviewProcess: payload.interviewProcess,
           benefits: payload.benefits,
           priority: payload.priority,
+          /**
+           * Handles on drawer submit.
+           */
           isArchived: payload.isArchived,
         });
       } else {
@@ -168,6 +213,9 @@
     }
   }
 
+  /**
+   * Handles on request delete.
+   */
   async function onRequestDelete(id: string): Promise<void> {
     isDeleting.value = true;
 
@@ -182,6 +230,9 @@
     }
   }
 
+  /**
+   * Handles on drawer visibility change.
+   */
   function onDrawerVisibilityChange(visible: boolean): void {
     isDrawerOpen.value = visible;
     if (visible) {
@@ -192,10 +243,16 @@
     selectedApplication.value = null;
   }
 
+  /**
+   * Handles on row click.
+   */
   function onRowClick(application: ApplicationEntity): void {
     openViewDrawer(application);
   }
 
+  /**
+   * Handles open details from button.
+   */
   function openDetailsFromButton(row: ApplicationEntity): void {
     openViewDrawer(row);
   }
@@ -248,3 +305,10 @@
     />
   </div>
 </template>
+
+
+
+
+
+
+

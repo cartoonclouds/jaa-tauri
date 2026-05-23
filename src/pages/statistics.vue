@@ -5,3 +5,6 @@
 <template>
   <StatisticsPage />
 </template>
+
+
+

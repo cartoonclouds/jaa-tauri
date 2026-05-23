@@ -6,6 +6,9 @@
 
   import { useFileSystem } from "@/composables/useFileSystem";
 
+  /**
+   * Props accepted by the file upload wrapper component.
+   */
   interface FileUploadProps {
     uploadPath?: string;
   }
@@ -22,16 +25,31 @@
   const totalSizePercent = ref(0);
   const selectedFiles = ref<UploadFile[]>([]);
 
+  /**
+   * Browser file model extended with optional preview URL.
+   */
   interface UploadFile extends File {
     objectURL?: string;
   }
 
+  /**
+   * File selection event payload emitted by PrimeVue upload.
+   */
   interface FileSelectEvent {
     files: UploadFile[];
   }
 
+  /**
+   * Callback signature used to clear pending files.
+   */
   type ClearCallback = () => void;
+  /**
+   * Callback signature used to remove a selected file by index.
+   */
   type RemoveFileCallback = (index: number) => void;
+  /**
+   * Callback signature used to trigger upload execution.
+   */
   type UploadCallback = () => void;
 
   const updateTotalSizePercent = (files: UploadFile[]): void => {

@@ -7,6 +7,9 @@ import type {
 import { useCompanyService } from "@modules/companies";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates company composable.
+ */
 function createCompanyComposable() {
   const service = useCompanyService();
   return createCrudComposable<
@@ -16,6 +19,9 @@ function createCompanyComposable() {
   >(service);
 }
 
+/**
+ * Type alias for company composable.
+ */
 type CompanyComposable = ReturnType<typeof createCompanyComposable>;
 
 let companyComposableInstance: CompanyComposable | null = null;
@@ -28,3 +34,11 @@ export function useCompany() {
 
   return companyComposableInstance;
 }
+
+
+
+
+
+
+
+

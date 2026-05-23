@@ -1,4 +1,7 @@
 <script setup lang="ts">
+  /**
+   * Minimal props needed for the compact map preview variant.
+   */
   interface Props {
     latitude: number | null;
     longitude: number | null;

@@ -75,6 +75,9 @@ class ApplicationStatusEnum extends EnumValue {
 
 export const ApplicationStatus = ApplicationStatusEnum;
 
+/**
+ * Type alias for application status.
+ */
 export type ApplicationStatus = ReturnType<
   typeof ApplicationStatusEnum.values
 >[number];
@@ -208,3 +211,11 @@ export const ApplicationEmploymentType = ApplicationEmploymentTypeEnum;
 export type ApplicationEmploymentType = ReturnType<
   typeof ApplicationEmploymentTypeEnum.values
 >[number];
+
+
+
+
+
+
+
+

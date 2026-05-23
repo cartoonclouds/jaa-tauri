@@ -10,3 +10,6 @@ export function getDocumentMimeTypeFromFilePath(filePath: string): string {
   const extension = filePath.split(".").pop()?.toLowerCase() ?? "";
   return documentMimeTypeByExtension[extension] ?? "application/octet-stream";
 }
+
+
+

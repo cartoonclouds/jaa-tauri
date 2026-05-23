@@ -28,6 +28,9 @@
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });
 
+  /**
+   * Handles edit.
+   */
   function edit(row: Notification): void {
     editingId.value = row.id;
     form.title = row.title;
@@ -35,6 +38,9 @@
     form.severity = row.severity;
   }
 
+  /**
+   * Handles reset form.
+   */
   function resetForm(): void {
     editingId.value = null;
     form.title = "";
@@ -42,6 +48,9 @@
     form.severity = "info";
   }
 
+  /**
+   * Handles submit.
+   */
   async function submit(): Promise<void> {
     if (editingId.value) {
       await service.update({
@@ -66,6 +75,9 @@
     resetForm();
   }
 
+  /**
+   * Handles remove notification.
+   */
   async function removeNotification(id: string): Promise<void> {
     await service.delete(id);
     await refresh();
@@ -145,3 +157,12 @@
     </DataTable>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

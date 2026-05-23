@@ -37,6 +37,9 @@ export interface NotificationResult {
   error?: string;
 }
 
+/**
+ * Ensure notification permission is granted before sending notifications.
+ */
 async function ensureNotificationPermission(): Promise<boolean> {
   let permissionGranted = await isPermissionGranted();
 
@@ -62,6 +65,9 @@ export function isWindowsDevToastLimited(): boolean {
   return !isTauriProtocol && /windows/i.test(navigator.userAgent);
 }
 
+/**
+ * Warn once when development limitations can suppress Windows toast popups.
+ */
 function warnWindowsDevToastLimitOnce(): void {
   if (hasWarnedWindowsDevToastLimit) return;
   if (!isWindowsDevToastLimited()) return;

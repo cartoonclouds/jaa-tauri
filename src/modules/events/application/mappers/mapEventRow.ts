@@ -19,3 +19,6 @@ export function mapEventRowToEntity(row: Record<string, unknown>): Event {
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

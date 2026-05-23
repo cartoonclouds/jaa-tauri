@@ -13,6 +13,9 @@ const NotificationContentSchema = NotificationSchema.pick({
 });
 const NotificationContentUpdateSchema = NotificationContentSchema.partial();
 
+/**
+ * Implements notification service.
+ */
 export class NotificationService {
   constructor(private readonly repository: INotificationRepository) {}
 
@@ -72,3 +75,11 @@ export class NotificationService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

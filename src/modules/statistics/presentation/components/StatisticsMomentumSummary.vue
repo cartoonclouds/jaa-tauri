@@ -3,6 +3,9 @@
 
   import { Icon } from "#components";
 
+  /**
+   * Defines statistics momentum summary props.
+   */
   interface StatisticsMomentumSummaryProps {
     overview: StatisticsOverview;
   }
@@ -35,3 +38,12 @@
     </p>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

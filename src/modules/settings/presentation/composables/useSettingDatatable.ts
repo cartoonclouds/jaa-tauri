@@ -19,3 +19,6 @@ export function useSettingDatatable() {
     searchFields: [...SETTING_SEARCH_FIELDS],
   });
 }
+
+
+

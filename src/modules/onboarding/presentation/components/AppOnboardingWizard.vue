@@ -17,6 +17,9 @@
     Textarea,
   } from "#components";
 
+  /**
+   * Defines app onboarding wizard props.
+   */
   interface AppOnboardingWizardProps {
     showCloseButton?: boolean;
   }
@@ -97,6 +100,9 @@
     );
   });
 
+  /**
+   * Handles on resume file select.
+   */
   function onResumeFileSelect(event: unknown): void {
     const selected = event as {
       files?: (File & { path?: string })[];
@@ -105,6 +111,9 @@
     void pickAndParseResume(selectedFile);
   }
 
+  /**
+   * Handles on finish.
+   */
   async function onFinish(): Promise<void> {
     try {
       await finishOnboarding();
@@ -114,6 +123,9 @@
     }
   }
 
+  /**
+   * Handles on cancel.
+   */
   function onCancel(): void {
     if (hasPotentialUnsavedChanges.value) {
       showCancelConfirmDialog.value = true;
@@ -123,11 +135,17 @@
     emit("cancelled");
   }
 
+  /**
+   * Handles on confirm cancel.
+   */
   function onConfirmCancel(): void {
     showCancelConfirmDialog.value = false;
     emit("cancelled");
   }
 
+  /**
+   * Handles on dismiss cancel dialog.
+   */
   function onDismissCancelDialog(): void {
     showCancelConfirmDialog.value = false;
   }
@@ -437,3 +455,12 @@
     </template>
   </Card>
 </template>
+
+
+
+
+
+
+
+
+

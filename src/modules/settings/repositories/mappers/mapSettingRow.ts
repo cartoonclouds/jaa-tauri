@@ -16,3 +16,6 @@ export function mapSettingRowToEntity(row: Record<string, unknown>): Setting {
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

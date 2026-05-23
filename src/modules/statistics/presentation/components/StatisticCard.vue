@@ -3,14 +3,23 @@
 
   import { Icon } from "#components";
 
+  /**
+   * Type alias for statistic card tone.
+   */
   type StatisticCardTone =
     | "default"
     | "success"
     | "warning"
     | "danger"
     | "info";
+  /**
+   * Type alias for statistic trend tone.
+   */
   type StatisticTrendTone = "positive" | "negative" | "neutral";
 
+  /**
+   * Defines statistic card props.
+   */
   interface StatisticCardProps {
     title: string;
     value: string | number;
@@ -102,3 +111,12 @@
     </template>
   </Card>
 </template>
+
+
+
+
+
+
+
+
+

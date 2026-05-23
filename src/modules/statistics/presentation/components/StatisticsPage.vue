@@ -12,3 +12,6 @@
     <StatisticsSection />
   </div>
 </template>
+
+
+

@@ -1,6 +1,9 @@
 <script setup lang="ts">
   import { computed } from "vue";
 
+  /**
+   * Props controlling map rendering and optional link behavior.
+   */
   interface Props {
     latitude: number | null;
     longitude: number | null;
@@ -16,6 +19,9 @@
     showOpenLink: true,
   });
 
+  /**
+   * Build an OpenStreetMap embed URL centered around the given coordinates.
+   */
   function buildOsmEmbedUrl(latitude: number, longitude: number): string {
     const delta = 0.02;
     const minLon = Math.max(-180, longitude - delta);

@@ -4,3 +4,6 @@ export const notificationsGlobalFilterFields: string[] = [
   "severity",
 ];
 export const notificationsSearchPlaceholder = "Search notifications";
+
+
+

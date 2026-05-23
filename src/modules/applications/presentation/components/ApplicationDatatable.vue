@@ -23,6 +23,9 @@
 
   import ServerDatatable from "@/components/ui/ServerDatatable.vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     items: Application[];
     isLoading: boolean;
@@ -54,26 +57,44 @@
     ];
   }>();
 
+  /**
+   * Handles on row click.
+   */
   function onRowClick(row: unknown): void {
     emit("row-click", row as Application);
   }
 
+  /**
+   * Handles on open details.
+   */
   function onOpenDetails(application: Application): void {
     emit("open-details", application);
   }
 
+  /**
+   * Handles on global filter input.
+   */
   function onGlobalFilterInput(value: string): void {
     emit("update:global-filter", value);
   }
 
+  /**
+   * Handles on search fields input.
+   */
   function onSearchFieldsInput(fields: string[]): void {
     emit("update:search-fields", fields as ApplicationSearchField[]);
   }
 
+  /**
+   * Handles on page.
+   */
   function onPage(event: { page?: number; rows?: number }): void {
     emit("page", event);
   }
 
+  /**
+   * Handles on sort.
+   */
   function onSort(event: {
     sortField?: string | null;
     sortOrder?: DatatableSortOrderInput;
@@ -204,3 +225,12 @@
     </Column>
   </ServerDatatable>
 </template>
+
+
+
+
+
+
+
+
+

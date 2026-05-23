@@ -28,18 +28,27 @@
   const editingId = ref<string | null>(null);
   const form = reactive({ name: "", color: "" });
 
+  /**
+   * Handles edit.
+   */
   function edit(row: Tag): void {
     editingId.value = row.id;
     form.name = row.name;
     form.color = row.color ?? "";
   }
 
+  /**
+   * Handles reset form.
+   */
   function resetForm(): void {
     editingId.value = null;
     form.name = "";
     form.color = "";
   }
 
+  /**
+   * Handles submit.
+   */
   async function submit(): Promise<void> {
     if (editingId.value) {
       await service.update({
@@ -54,6 +63,9 @@
     resetForm();
   }
 
+  /**
+   * Handles remove tag.
+   */
   async function removeTag(id: string): Promise<void> {
     await service.delete(id);
     await refresh();
@@ -131,3 +143,12 @@
     </DataTable>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

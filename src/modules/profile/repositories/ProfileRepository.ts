@@ -20,12 +20,21 @@ import {
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
 
+/**
+ * Type alias for profile create payload.
+ */
 export type ProfileCreatePayload = Pick<Profile, "fullName"> &
   Partial<Omit<Profile, "id" | "fullName" | "createdAt" | "updatedAt">>;
+/**
+ * Type alias for profile update payload.
+ */
 export type ProfileUpdatePayload = Partial<ProfileCreatePayload> & {
   id: string;
 };
 
+/**
+ * Defines iprofile repository.
+ */
 export interface IProfileRepository extends IRepository<
   Profile,
   ProfileCreatePayload,
@@ -35,6 +44,9 @@ export interface IProfileRepository extends IRepository<
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Profile>>;
 }
 
+/**
+ * Implements profile repository.
+ */
 export class ProfileRepository implements IProfileRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
@@ -209,3 +221,11 @@ export class ProfileRepository implements IProfileRepository {
     await this.db.execute("DELETE FROM profiles WHERE id = $1", [id]);
   }
 }
+
+
+
+
+
+
+
+

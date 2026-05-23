@@ -89,5 +89,19 @@ export const ProfileRepositoryUpdateSchema =
     id: z.string().uuid(),
   });
 
+/**
+ * Type alias for profile.
+ */
 export type Profile = z.infer<typeof ProfileSchema>;
+/**
+ * Type alias for create profile input.
+ */
 export type CreateProfileInput = z.infer<typeof CreateProfileSchema>;
+
+
+
+
+
+
+
+

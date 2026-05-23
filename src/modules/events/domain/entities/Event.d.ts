@@ -37,3 +37,6 @@ export interface CreateEventInput {
   /** Event title. */
   title: string;
 }
+
+
+

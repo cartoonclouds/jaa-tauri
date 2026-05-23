@@ -8,6 +8,9 @@ import {
 export { INTERACTION_STAGES, isInteractionStage };
 export type { InteractionStage, InteractionStagePrefix };
 
+/**
+ * Type alias for application flow status.
+ */
 export type ApplicationFlowStatus =
   | "saved"
   | "applied"
@@ -15,6 +18,9 @@ export type ApplicationFlowStatus =
   | "offer"
   | "rejected";
 
+/**
+ * Type alias for application progress status.
+ */
 export type ApplicationProgressStatus =
   | "saved"
   | "applied"
@@ -24,11 +30,17 @@ export type ApplicationProgressStatus =
   | "offer"
   | "rejected";
 
+/**
+ * Defines event stage copy.
+ */
 export interface EventStageCopy {
   title: string;
   description: string;
 }
 
+/**
+ * Type alias for event notification severity.
+ */
 export type EventNotificationSeverity =
   | "info"
   | "warning"
@@ -101,6 +113,9 @@ export const FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS: Record<
   rejected: [],
 };
 
+/**
+ * Checks whether application progress status is true.
+ */
 export function isApplicationProgressStatus(
   value: string | null | undefined,
 ): value is ApplicationProgressStatus {
@@ -114,6 +129,9 @@ export function isApplicationProgressStatus(
   );
 }
 
+/**
+ * Gets future event flow stages.
+ */
 export function getFutureEventFlowStages(
   status: ApplicationProgressStatus | null | undefined,
 ): InteractionStage[] {
@@ -256,3 +274,11 @@ export const EVENT_NOTIFICATION_SEVERITY_BY_PREFIX: {
 ];
 
 export const EVENT_NOTIFICATION_BODY_PREFIX = "Flow update" as const;
+
+
+
+
+
+
+
+

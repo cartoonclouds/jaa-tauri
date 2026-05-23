@@ -10,6 +10,9 @@
   import ApplicationDetailsView from "@modules/applications/presentation/components/ApplicationDetailsView.vue";
   import ApplicationForm from "@modules/applications/presentation/components/ApplicationForm.vue";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     mode: ApplicationDrawerMode;
     application: Application | null;
@@ -33,10 +36,16 @@
     "cancel-edit": [];
   }>();
 
+  /**
+   * Handles on submit.
+   */
   function onSubmit(payload: ApplicationFormSubmitPayload): void {
     emit("submit", payload);
   }
 
+  /**
+   * Handles on delete.
+   */
   function onDelete(application: Application): void {
     emit("request-delete", application.id);
   }
@@ -69,3 +78,12 @@
     No application details are currently available.
   </Message>
 </template>
+
+
+
+
+
+
+
+
+

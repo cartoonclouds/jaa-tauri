@@ -50,3 +50,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   });
 });
+
+
+

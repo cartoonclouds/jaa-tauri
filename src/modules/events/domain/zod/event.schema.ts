@@ -36,5 +36,19 @@ export const EventRepositoryCreateSchema = CreateEventSchema.pick({
   title: true,
 });
 
+/**
+ * Type alias for event.
+ */
 export type Event = z.infer<typeof EventSchema>;
+/**
+ * Type alias for create event input.
+ */
 export type CreateEventInput = z.infer<typeof CreateEventSchema>;
+
+
+
+
+
+
+
+

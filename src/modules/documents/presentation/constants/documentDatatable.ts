@@ -4,3 +4,6 @@ export const documentsGlobalFilterFields: string[] = [
   "filePath",
 ];
 export const documentsSearchPlaceholder = "Search documents";
+
+
+

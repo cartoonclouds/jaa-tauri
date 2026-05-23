@@ -9,6 +9,9 @@ import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 
 const ProfileNameSchema = ProfileSchema.pick({ fullName: true });
 
+/**
+ * Implements profile service.
+ */
 export class ProfileService {
   constructor(private readonly repository: IProfileRepository) {}
 
@@ -65,3 +68,11 @@ export class ProfileService {
     return this.repository.delete(id);
   }
 }
+
+
+
+
+
+
+
+

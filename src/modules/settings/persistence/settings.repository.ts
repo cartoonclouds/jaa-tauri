@@ -40,10 +40,16 @@ const DEFAULT_SETTINGS: AppSettings = {
   onboardingCompleted: false,
 };
 
+/**
+ * Type alias for settings row.
+ */
 type SettingsRow = Record<string, unknown>;
 
 let database: DatabaseDriver | null = null;
 
+/**
+ * Handles clone settings.
+ */
 function cloneSettings(settings: AppSettings): AppSettings {
   return {
     ...settings,
@@ -52,10 +58,16 @@ function cloneSettings(settings: AppSettings): AppSettings {
   };
 }
 
+/**
+ * Handles to int.
+ */
 function toInt(value: boolean): number {
   return value ? 1 : 0;
 }
 
+/**
+ * Handles parse boolean record.
+ */
 function parseBooleanRecord(
   value: unknown,
   fallback: Record<string, boolean>,
@@ -82,6 +94,9 @@ function parseBooleanRecord(
   }
 }
 
+/**
+ * Handles normalize theme.
+ */
 function normalizeTheme(value: unknown): AppSettings["theme"] {
   if (value === "light" || value === "dark" || value === "auto") {
     return value;
@@ -94,6 +109,9 @@ function normalizeTheme(value: unknown): AppSettings["theme"] {
   return DEFAULT_SETTINGS.theme;
 }
 
+/**
+ * Handles map row to settings.
+ */
 function mapRowToSettings(row: SettingsRow): AppSettings {
   return {
     theme: normalizeTheme(row.theme),
@@ -121,6 +139,9 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
   };
 }
 
+/**
+ * Gets database.
+ */
 function getDatabase(): DatabaseDriver {
   if (database) {
     return database;
@@ -132,6 +153,9 @@ function getDatabase(): DatabaseDriver {
   return db;
 }
 
+/**
+ * Handles upsert settings row.
+ */
 async function upsertSettingsRow(
   db: DatabaseDriver,
   settings: AppSettings,
@@ -173,6 +197,9 @@ async function upsertSettingsRow(
   );
 }
 
+/**
+ * Handles read settings row.
+ */
 async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
   const rows = await db.select<SettingsRow>(
     `
@@ -402,3 +429,11 @@ export async function resetSettings(): Promise<void> {
 }
 
 export { DEFAULT_SETTINGS };
+
+
+
+
+
+
+
+

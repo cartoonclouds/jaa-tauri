@@ -22,3 +22,6 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
     updatedAt: toDate(row.updated_at),
   };
 }
+
+
+

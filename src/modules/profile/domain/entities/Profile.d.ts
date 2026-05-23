@@ -83,3 +83,6 @@ export interface CreateProfileInput {
   /** Interview availability note. */
   interviewAvailability?: string;
 }
+
+
+

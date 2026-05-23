@@ -3,6 +3,9 @@ import type { RouteNamedMap } from "vue-router/auto-routes";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+/**
+ * Route path union accepted by child webview windows.
+ */
 type ChildWebviewRoutePath = RouteNamedMap[keyof RouteNamedMap]["path"];
 
 /**

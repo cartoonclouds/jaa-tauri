@@ -17,3 +17,6 @@ export function useStatisticService(): StatisticService {
 
   return statisticServiceInstance;
 }
+
+
+

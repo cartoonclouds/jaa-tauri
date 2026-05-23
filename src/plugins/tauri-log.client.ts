@@ -16,3 +16,6 @@ export default defineNuxtPlugin(async () => {
     logError("Failed to attach Tauri console logger:", error);
   }
 });
+
+
+

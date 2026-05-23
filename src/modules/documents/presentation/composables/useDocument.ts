@@ -7,6 +7,9 @@ import type {
 import { useDocumentService } from "@modules/documents";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
+/**
+ * Creates document composable.
+ */
 function createDocumentComposable() {
   const service = useDocumentService();
   return createCrudComposable<
@@ -16,6 +19,9 @@ function createDocumentComposable() {
   >(service);
 }
 
+/**
+ * Type alias for document composable.
+ */
 type DocumentComposable = ReturnType<typeof createDocumentComposable>;
 
 let documentComposableInstance: DocumentComposable | null = null;
@@ -28,3 +34,11 @@ export function useDocument() {
 
   return documentComposableInstance;
 }
+
+
+
+
+
+
+
+

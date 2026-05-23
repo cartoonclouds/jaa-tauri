@@ -1,6 +1,9 @@
 <script setup lang="ts">
   import Card from "primevue/card";
 
+  /**
+   * Defines props.
+   */
   interface Props {
     label: string;
     compact?: boolean;
@@ -23,3 +26,12 @@
     </template>
   </Card>
 </template>
+
+
+
+
+
+
+
+
+

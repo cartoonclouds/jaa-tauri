@@ -39,6 +39,9 @@
     locationLng: "",
   });
 
+  /**
+   * Handles to nullable number.
+   */
   function toNullableNumber(value: string): number | null {
     const trimmed = value.trim();
     if (!trimmed) {
@@ -49,6 +52,9 @@
     return Number.isFinite(numeric) ? numeric : null;
   }
 
+  /**
+   * Handles edit.
+   */
   function edit(row: Contact): void {
     editingId.value = row.id;
     form.fullName = row.fullName;
@@ -59,6 +65,9 @@
     form.locationLng = row.locationLng === null ? "" : String(row.locationLng);
   }
 
+  /**
+   * Handles reset form.
+   */
   function resetForm(): void {
     editingId.value = null;
     form.fullName = "";
@@ -69,6 +78,9 @@
     form.locationLng = "";
   }
 
+  /**
+   * Handles submit.
+   */
   async function submit(): Promise<void> {
     if (editingId.value) {
       await service.update({
@@ -98,16 +110,25 @@
     resetForm();
   }
 
+  /**
+   * Handles remove contact.
+   */
   async function removeContact(id: string): Promise<void> {
     await service.delete(id);
     await refresh();
   }
 
+  /**
+   * Handles open map.
+   */
   function openMap(contact: Contact): void {
     selectedMapContact.value = contact;
     mapDialogVisible.value = true;
   }
 
+  /**
+   * Handles close map dialog.
+   */
   function closeMapDialog(): void {
     mapDialogVisible.value = false;
     selectedMapContact.value = null;
@@ -230,3 +251,12 @@
     </Dialog>
   </div>
 </template>
+
+
+
+
+
+
+
+
+

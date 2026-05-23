@@ -71,3 +71,6 @@ export interface CreateApplicationInput {
   /** Longitude for geocoded location data. */
   locationLng?: number | null;
 }
+
+
+

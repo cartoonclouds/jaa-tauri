@@ -4,3 +4,6 @@ export const contactsGlobalFilterFields: string[] = [
   "email",
 ];
 export const contactsSearchPlaceholder = "Search contacts";
+
+
+

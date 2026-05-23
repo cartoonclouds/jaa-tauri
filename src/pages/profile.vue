@@ -28,6 +28,9 @@
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", email: "", headline: "" });
 
+  /**
+   * Handles edit.
+   */
   function edit(row: Profile): void {
     editingId.value = row.id;
     form.fullName = row.fullName;
@@ -35,6 +38,9 @@
     form.headline = row.headline ?? "";
   }
 
+  /**
+   * Handles reset form.
+   */
   function resetForm(): void {
     editingId.value = null;
     form.fullName = "";
@@ -42,6 +48,9 @@
     form.headline = "";
   }
 
+  /**
+   * Handles submit.
+   */
   async function submit(): Promise<void> {
     if (editingId.value) {
       await service.update({
@@ -66,6 +75,9 @@
     resetForm();
   }
 
+  /**
+   * Handles remove profile.
+   */
   async function removeProfile(id: string): Promise<void> {
     await service.delete(id);
     await refresh();
@@ -145,3 +157,12 @@
     </DataTable>
   </div>
 </template>
+
+
+
+
+
+
+
+
+
