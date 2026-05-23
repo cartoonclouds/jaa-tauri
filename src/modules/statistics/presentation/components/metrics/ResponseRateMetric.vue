@@ -5,7 +5,7 @@
   import {
     toTrendPointLabel,
     toTrendTone,
-  } from "@modules/statistics/presentation/utils/statisticCard.utils";
+  } from "@modules/statistics/presentation/utils/statisticCardUtils";
 
   interface ResponseRateMetricProps {
     overview: StatisticsOverview;

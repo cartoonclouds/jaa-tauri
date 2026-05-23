@@ -1,5 +1,10 @@
 const resumeExtensionPattern = /\.([a-z0-9]+)$/i;
 
+const resumeMimeTypeByExtension: Record<string, string> = {
+  pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+};
+
 /**
  * Merge comma-separated values into an existing unique list.
  */
@@ -44,6 +49,21 @@ export function getFileExtension(filePath: string): string {
 export function isSupportedResumePath(filePath: string): boolean {
   const extension = getFileExtension(filePath);
   return extension === "pdf" || extension === "docx";
+}
+
+/**
+ * Derive a resume MIME type from an uploaded file or its path.
+ */
+export function getResumeMimeType(
+  filePath: string,
+  fileType?: string | null,
+): string {
+  if (fileType?.trim()) {
+    return fileType;
+  }
+
+  const extension = getFileExtension(filePath);
+  return resumeMimeTypeByExtension[extension] ?? "application/octet-stream";
 }
 
 /**

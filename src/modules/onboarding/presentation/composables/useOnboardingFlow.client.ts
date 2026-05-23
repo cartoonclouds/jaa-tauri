@@ -4,10 +4,10 @@ import type { Profile, UserProfile } from "@modules/profile";
 import { logError } from "@infra/logging/tauriLog.client";
 import { useDocumentService } from "@modules/documents";
 import {
+  getResumeMimeType,
   isSupportedResumePath,
   mergeCommaSeparated,
-} from "@modules/onboarding/repositories/onboardingHelpers";
-import { onboardingRepository } from "@modules/onboarding/repositories/OnboardingRepository";
+} from "@modules/onboarding/utils/onboardingUtils";
 import { useProfileService } from "@modules/profile";
 import { toErrorMessage } from "@shared/utils/error";
 import { invoke } from "@tauri-apps/api/core";
@@ -17,6 +17,8 @@ import { useStepper } from "@vueuse/core";
 import { computed, ref } from "vue";
 
 import { useFileSystem } from "@/composables/useFileSystem";
+
+import { onboardingRepository } from "../../repositories/OnboardingRepository";
 
 const stepOrder = ["profile", "preferences", "resume", "review"] as const;
 
@@ -101,6 +103,7 @@ function createOnboardingFlowComposable() {
   const locationsInput = ref("");
 
   const resumePath = ref<string | null>(null);
+  const resumeMimeType = ref<string | null>(null);
   const parsedResume = ref<ParsedResume | null>(null);
 
   const currentStep = computed<OnboardingStep>(
@@ -129,6 +132,7 @@ function createOnboardingFlowComposable() {
       );
       if (latestResume?.filePath) {
         resumePath.value = latestResume.filePath;
+        resumeMimeType.value = latestResume.mimeType;
       }
     } catch (error) {
       logError("Failed to hydrate onboarding data:", toErrorMessage(error));
@@ -221,8 +225,13 @@ function createOnboardingFlowComposable() {
 
       if (typeof selectedInput === "string") {
         selectedPath = selectedInput;
+        resumeMimeType.value = getResumeMimeType(selectedPath);
       } else if (selectedInput instanceof File) {
         selectedPath = await saveResumeFileToLocalData(selectedInput);
+        resumeMimeType.value = getResumeMimeType(
+          selectedInput.name || selectedPath,
+          selectedInput.type,
+        );
       } else {
         selectedPath = normalizeSelectedPath(
           await open({
@@ -236,6 +245,9 @@ function createOnboardingFlowComposable() {
             ],
           }),
         );
+        if (selectedPath) {
+          resumeMimeType.value = getResumeMimeType(selectedPath);
+        }
       }
 
       if (!selectedPath) {
@@ -284,6 +296,7 @@ function createOnboardingFlowComposable() {
       await onboardingRepository.complete({
         profile: profile.value,
         resumePath: resumePath.value,
+        resumeMimeType: resumeMimeType.value,
       });
     } catch (error) {
       globalError.value = toErrorMessage(error, "Failed to save onboarding.");
@@ -303,6 +316,7 @@ function createOnboardingFlowComposable() {
     profile,
     locationsInput,
     resumePath,
+    resumeMimeType,
     parsedResume,
     parsingResume,
     hydrating,

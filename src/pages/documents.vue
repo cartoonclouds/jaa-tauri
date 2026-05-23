@@ -1,9 +1,10 @@
 <script setup lang="ts">
   import type { Document } from "@modules/documents/domain/entities/Document";
 
+  import { useDocumentService } from "@modules/documents";
   import { useDocumentDatatable } from "@modules/documents/presentation/composables/useDocumentDatatable";
   import { documentsSearchPlaceholder } from "@modules/documents/presentation/constants/documentDatatable";
-  import { useDocumentService } from "@modules/documents/services/useDocumentService";
+  import { getDocumentMimeTypeFromFilePath } from "@modules/documents/utils/documentUtils";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -55,7 +56,7 @@
         title: form.title,
         kind: form.kind,
         filePath: form.filePath,
-        mimeType: null,
+        mimeType: getDocumentMimeTypeFromFilePath(form.filePath),
         sizeBytes: null,
         checksum: null,
       });

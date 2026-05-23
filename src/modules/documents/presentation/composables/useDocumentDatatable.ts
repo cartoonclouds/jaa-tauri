@@ -1,10 +1,10 @@
 import type { Document } from "@modules/documents/domain/entities/Document";
 
+import { useDocumentService } from "@modules/documents";
 import {
   DOCUMENT_SEARCH_FIELDS,
   type DocumentSearchField,
 } from "@modules/documents/constants/documentDatatableFields";
-import { useDocumentService } from "@modules/documents/services/useDocumentService";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

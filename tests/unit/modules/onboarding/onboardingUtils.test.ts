@@ -3,10 +3,10 @@ import {
   getResumeDocumentTitle,
   isSupportedResumePath,
   mergeCommaSeparated,
-} from "@modules/onboarding/repositories/onboardingHelpers";
+} from "@modules/onboarding/utils/onboardingUtils";
 import { describe, expect, it } from "vitest";
 
-describe("onboardingHelpers", () => {
+describe("onboardingUtils", () => {
   it("merges comma separated entries without duplicates", () => {
     const merged = mergeCommaSeparated("Vue, TypeScript, vue", ["Nuxt"]);
 

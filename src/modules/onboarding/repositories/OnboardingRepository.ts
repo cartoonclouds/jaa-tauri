@@ -9,7 +9,10 @@ import { useProfileService } from "@modules/profile";
 import { CreateProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import { setOnboardingCompleted } from "@modules/settings/persistence";
 
-import { getResumeDocumentTitle } from "./onboardingHelpers";
+import {
+  getResumeDocumentTitle,
+  getResumeMimeType,
+} from "../utils/onboardingUtils";
 
 function userProfileToProfileCreatePayload(
   profile: UserProfile,
@@ -38,6 +41,7 @@ function userProfileToProfileCreatePayload(
 export interface CompleteOnboardingInput {
   profile: UserProfile;
   resumePath: string | null;
+  resumeMimeType?: string | null;
 }
 
 export class OnboardingRepository {
@@ -70,7 +74,7 @@ export class OnboardingRepository {
         title: getResumeDocumentTitle(input.resumePath),
         kind: "resume",
         filePath: input.resumePath,
-        mimeType: null,
+        mimeType: getResumeMimeType(input.resumePath, input.resumeMimeType),
         sizeBytes: null,
         checksum: null,
       });

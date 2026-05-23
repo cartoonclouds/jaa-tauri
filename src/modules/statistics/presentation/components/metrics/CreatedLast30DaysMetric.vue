@@ -5,7 +5,7 @@
   import {
     toTrendPercentLabel,
     toTrendTone,
-  } from "@modules/statistics/presentation/utils/statisticCard.utils";
+  } from "@modules/statistics/presentation/utils/statisticCardUtils";
 
   interface CreatedLast30DaysMetricProps {
     overview: StatisticsOverview;
