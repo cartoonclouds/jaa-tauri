@@ -61,6 +61,7 @@ Follow strong software engineering conventions:
 - Add tests for new business logic, composables, services, utilities, and edge cases.
 - Prefer accessibility-first UI.
 - For module service factories (`use*Service`), return singleton service instances instead of constructing a new service on every call.
+- For module composables that use `createCrudComposable` (or related CRUD composable factories), return singleton composable instances instead of creating fresh state on each call.
 
 ## Nuxt and Vue conventions
 
