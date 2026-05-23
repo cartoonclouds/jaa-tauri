@@ -83,10 +83,7 @@ function normalizeSelectedPath(
   return null;
 }
 
-/**
- * Orchestrate onboarding form state, validation, resume parsing, and submission.
- */
-export function useOnboardingFlow() {
+function createOnboardingFlowComposable() {
   const stepper = useStepper(stepOrder);
   const documentService = useDocumentService();
   const profileService = useProfileService();
@@ -319,4 +316,19 @@ export function useOnboardingFlow() {
     finishOnboarding,
     validateStep,
   };
+}
+
+type OnboardingFlowComposable = ReturnType<
+  typeof createOnboardingFlowComposable
+>;
+
+let onboardingFlowComposableInstance: OnboardingFlowComposable | null = null;
+
+/**
+ * Orchestrate onboarding form state, validation, resume parsing, and submission.
+ */
+export function useOnboardingFlow() {
+  onboardingFlowComposableInstance ??= createOnboardingFlowComposable();
+
+  return onboardingFlowComposableInstance;
 }

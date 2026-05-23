@@ -53,6 +53,7 @@ Follow strong software engineering conventions:
 - Avoid `any` unless there is a documented reason.
 - Prefer `unknown` plus narrowing for unsafe input.
 - Keep functions small and focused.
+- Add concise docblocks to all generated exported functions, classes, interfaces, and type aliases. Keep descriptions intent-focused and avoid noise.
 - Use clear names that describe intent.
 - Avoid hidden side effects.
 - Avoid over-engineering and unnecessary abstraction.
@@ -124,7 +125,7 @@ Use the PrimeVue Forms library (`@primevue/forms`) for all form implementations.
    ```ts
    function onFormSubmit(event: FormSubmitEvent) {
      if (!event.valid) return;
-     const formData = event.value; // validated, typed data
+     const formData = event.values; // validated, typed data
      // process form data
    }
    ```
@@ -239,9 +240,9 @@ Always use Zod for validating payloads and object structures. This ensures type 
 
 **Zod Schema Location & Naming:**
 
-- Centralized entity schemas in `src/shared/domain/zod/[entity].schema.ts`
-- Export schema with consistent naming: `[Entity]Schema`
-- Example: `src/shared/domain/zod/application.schema.ts` exports `ApplicationSchema`
+- Feature/entity schemas live under `src/modules/<feature>/domain/zod/`
+- Shared reusable validators remain in `src/shared/domain/zod/fields.ts`
+- Export schema with consistent naming: `[Entity]Schema` (and feature-specific variants like `[Entity]FormSchema` when needed)
 
 **Usage Pattern:**
 
@@ -301,12 +302,13 @@ Do:
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
 - Use project aliases (`@`, `@modules`, `@shared`, `@infra`) instead of deep relative imports.
 - Add or update tests when changing business logic.
-- **Validate all payloads and object structures with Zod** — use centralized schemas from `src/shared/domain/zod/`, never rely on TypeScript interfaces alone for runtime validation.
+- **Validate all payloads and object structures with Zod** — use feature schemas from `src/modules/<feature>/domain/zod/` and shared primitives from `src/shared/domain/zod/fields.ts`; never rely on TypeScript interfaces alone for runtime validation.
 - In mapper functions, when a field is typed as a class-based enum, convert raw values with the enum factory (for example `fromValue`) and return enum instances (or `null`) instead of plain strings.
 - Prefer explicit types for public function inputs/outputs. When creating a types file using the following filename convention: `types.d.ts` or `types/index.d.ts`, update the barrel export in the module's `index.ts` file and update any Typescript configuration if necessary.
+- Add concise docblocks to generated exported symbols (functions, classes, interfaces, and type aliases).
 - When asked to install a Tauri plugin, check the official Tauri documentation for the latest recommended approach. Follow their guidance for installation, configuration, and usage. Ensure that any new Tauri plugin is properly integrated with the existing Tauri setup in `src-tauri` and that it does not introduce conflicts with current dependencies or configurations.
   After any significant code change, run the test suite to ensure nothing is broken. If new functionality is added, write tests to cover it. If existing tests are affected, update them accordingly. Always maintain a green test suite after your changes. Also run `npm run tauri dev` to ensure the Tauri integration is working correctly with your changes.
-- **Don't ever use inline imports such as ` import("@tauri-apps/plugin-notification")`**, import the files and needed properties at the top if the file.
+- **Don't ever use inline imports such as `import("@tauri-apps/plugin-notification")`**. Import required symbols at the top of the file.
 
 Don't:
 

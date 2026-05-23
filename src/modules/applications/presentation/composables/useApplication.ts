@@ -7,14 +7,24 @@ import type {
 import { useApplicationService } from "@modules/applications";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-/**
- * Create CRUD state and handlers for applications.
- */
-export function useApplication() {
+function createApplicationComposable() {
   const service = useApplicationService();
   return createCrudComposable<
     Application,
     ApplicationCreatePayload,
     ApplicationUpdatePayload
   >(service);
+}
+
+type ApplicationComposable = ReturnType<typeof createApplicationComposable>;
+
+let applicationComposableInstance: ApplicationComposable | null = null;
+
+/**
+ * Create CRUD state and handlers for applications.
+ */
+export function useApplication() {
+  applicationComposableInstance ??= createApplicationComposable();
+
+  return applicationComposableInstance;
 }

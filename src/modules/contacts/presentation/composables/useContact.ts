@@ -4,17 +4,27 @@ import type {
   ContactUpdatePayload,
 } from "@modules/contacts/repositories/ContactRepository";
 
-import { useContactService } from "@modules/contacts/services/useContactService";
+import { useContactService } from "@modules/contacts";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-/**
- * Create CRUD state and handlers for contacts.
- */
-export function useContact() {
+function createContactComposable() {
   const service = useContactService();
   return createCrudComposable<
     Contact,
     ContactCreatePayload,
     ContactUpdatePayload
   >(service);
+}
+
+type ContactComposable = ReturnType<typeof createContactComposable>;
+
+let contactComposableInstance: ContactComposable | null = null;
+
+/**
+ * Create CRUD state and handlers for contacts.
+ */
+export function useContact() {
+  contactComposableInstance ??= createContactComposable();
+
+  return contactComposableInstance;
 }

@@ -1,6 +1,7 @@
 import { FilterMatchMode } from "@primevue/core/api";
-import { DEFAULT_DATATABLE_PAGINATOR_TEMPLATE } from "@shared/utils/datatableStyles";
 import { ref } from "vue";
+
+import { DEFAULT_DATATABLE_PAGINATOR_TEMPLATE } from "@/shared/utils/datatableQuery";
 
 /**
  * Configuration for the client-side datatable composable.

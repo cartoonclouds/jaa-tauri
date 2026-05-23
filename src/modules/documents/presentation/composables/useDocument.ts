@@ -4,17 +4,27 @@ import type {
   DocumentUpdatePayload,
 } from "@modules/documents/repositories/DocumentRepository";
 
-import { useDocumentService } from "@modules/documents/services/useDocumentService";
+import { useDocumentService } from "@modules/documents";
 import { createCrudComposable } from "@shared/utils/crudComposableFactory";
 
-/**
- * Create CRUD state and handlers for documents.
- */
-export function useDocument() {
+function createDocumentComposable() {
   const service = useDocumentService();
   return createCrudComposable<
     Document,
     DocumentCreatePayload,
     DocumentUpdatePayload
   >(service);
+}
+
+type DocumentComposable = ReturnType<typeof createDocumentComposable>;
+
+let documentComposableInstance: DocumentComposable | null = null;
+
+/**
+ * Create CRUD state and handlers for documents.
+ */
+export function useDocument() {
+  documentComposableInstance ??= createDocumentComposable();
+
+  return documentComposableInstance;
 }

@@ -1,6 +1,9 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
+import type { NuxtApp } from "nuxt/app";
 
 import { useNuxtApp } from "nuxt/app";
+
+const databaseByApp = new WeakMap<NuxtApp, DatabaseDriver>();
 
 /**
  * Read the injected database driver from the current Nuxt app instance.
@@ -10,5 +13,15 @@ import { useNuxtApp } from "nuxt/app";
  * place instead of repeating it across service factories.
  */
 export function getNuxtDatabase(): DatabaseDriver {
-  return useNuxtApp().$database;
+  const nuxtApp = useNuxtApp();
+  const existingDatabase = databaseByApp.get(nuxtApp);
+
+  if (existingDatabase) {
+    return existingDatabase;
+  }
+
+  const database = nuxtApp.$database;
+  databaseByApp.set(nuxtApp, database);
+
+  return database;
 }

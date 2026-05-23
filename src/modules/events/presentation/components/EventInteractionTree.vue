@@ -65,6 +65,20 @@
     () => INTERACTION_STAGES,
   );
 
+  const createEventAtValue = computed<Date | null>({
+    get: () => parseDateTimeLocalValue(createForm.eventAt),
+    set: (value) => {
+      createForm.eventAt = formatDateTimeLocalValue(value);
+    },
+  });
+
+  const editEventAtValue = computed<Date | null>({
+    get: () => parseDateTimeLocalValue(editForm.eventAt),
+    set: (value) => {
+      editForm.eventAt = formatDateTimeLocalValue(value);
+    },
+  });
+
   const surfaceCardStyle = {
     background: "var(--p-content-background)",
     borderColor: "var(--p-content-border-color)",
@@ -400,10 +414,12 @@
           >
             Event time
           </label>
-          <InputText
+          <DatePicker
             id="event-at"
-            v-model="createForm.eventAt"
-            type="datetime-local"
+            v-model="createEventAtValue"
+            show-time
+            hour-format="24"
+            date-format="yy-mm-dd"
             fluid
           />
         </div>
@@ -550,10 +566,12 @@
           >
             Event time
           </label>
-          <InputText
+          <DatePicker
             id="edit-event-at"
-            v-model="editForm.eventAt"
-            type="datetime-local"
+            v-model="editEventAtValue"
+            show-time
+            hour-format="24"
+            date-format="yy-mm-dd"
             fluid
           />
         </div>

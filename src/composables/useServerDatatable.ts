@@ -5,8 +5,9 @@ import type {
   DatatableSortOrderInput,
 } from "@shared/types";
 
-import { DEFAULT_DATATABLE_PAGINATOR_TEMPLATE } from "@shared/utils/datatableStyles";
 import { onBeforeUnmount, onMounted, ref } from "vue";
+
+import { DEFAULT_DATATABLE_PAGINATOR_TEMPLATE } from "@/shared/utils/datatableQuery";
 
 /**
  * Configuration for the server-backed datatable composable.

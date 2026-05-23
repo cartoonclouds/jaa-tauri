@@ -2,6 +2,12 @@ import type { DatatablePageQuery, DatatableSortOrder } from "@shared/types";
 
 export const DEFAULT_CREATED_AT_ORDER_BY = "created_at DESC" as const;
 
+export const DEFAULT_DATATABLE_TABLE_STYLE = "min-width: 50rem";
+
+export const DEFAULT_DATATABLE_PAGINATOR_TEMPLATE =
+  "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown";
+
+
 export interface BuildSelectAllOrderedQueryOptions {
   tableName: string;
   orderByClause: string;
