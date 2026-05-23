@@ -76,6 +76,22 @@ export default defineNuxtConfig({
     "@vee-validate/nuxt",
   ],
 
+  // @ts-expect-error Nuxt Security augments config at runtime; augmentation is not available in this static config type.
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        "img-src": [
+          "'self'",
+          "data:",
+          "https://tile.openstreetmap.org",
+          "https://a.tile.openstreetmap.org",
+          "https://b.tile.openstreetmap.org",
+          "https://c.tile.openstreetmap.org",
+        ],
+      },
+    },
+  },
+
   devtools: {
     enabled: appDevMode,
   },

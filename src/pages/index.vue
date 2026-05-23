@@ -1,19 +1,43 @@
 <script setup lang="ts">
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
+  import { ref } from "vue";
 
   import { Icon } from "#components";
   import { definePageMeta } from "#imports";
+  import EntityLocationsMapBrowser from "@/components/ui/EntityLocationsMapBrowser.vue";
   import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const { openOnboarding } = useOnboardingNavigation();
+
+  type TopSectionView = "overview" | "map";
+  interface TopSectionOption {
+    label: string;
+    value: TopSectionView;
+  }
+
+  const topView = ref<TopSectionView>("overview");
+  const topViewOptions: TopSectionOption[] = [
+    { label: "Overview", value: "overview" },
+    { label: "Map", value: "map" },
+  ];
 </script>
 
 <template>
   <main class="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-    <div class="mx-auto max-w-3xl space-y-6">
+    <div class="mx-auto mb-6 flex max-w-6xl justify-end">
+      <SelectButton
+        v-model="topView"
+        :options="topViewOptions"
+        option-label="label"
+        option-value="value"
+        aria-label="Home view"
+      />
+    </div>
+
+    <div v-if="topView === 'overview'" class="mx-auto max-w-3xl space-y-6">
       <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
         <Icon name="heroicons:briefcase" class="text-emerald-400" />
         Apply-Flow
@@ -88,6 +112,10 @@
 
         Device detection {{ $device.isMobile ? "Mobile" : "Desktop" }}
       </p>
+    </div>
+
+    <div v-else class="mx-auto mb-6 max-w-6xl">
+      <EntityLocationsMapBrowser />
     </div>
 
     <ApplicationComponent />
