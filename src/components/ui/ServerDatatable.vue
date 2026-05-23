@@ -4,8 +4,9 @@
     DatatableSortOrderInput,
   } from "@shared/types";
 
-  import { DEFAULT_DATATABLE_TABLE_STYLE } from "@shared/utils/datatableStyles";
   import { computed } from "vue";
+
+  import { DEFAULT_DATATABLE_TABLE_STYLE } from "@/shared/utils/datatableQuery";
 
   interface SearchFieldOption {
     label: string;

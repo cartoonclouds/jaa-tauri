@@ -215,7 +215,6 @@ Typical `index.ts` exports:
 
 ```ts
 export * from "./domain/entities/Application";
-export * from "./application/actions/CreateApplication";
 ```
 
 ## Test structure guidance

@@ -67,6 +67,12 @@ fn close_splashscreen(app: tauri::AppHandle) {
     }
 }
 
+/// Exits the desktop application process.
+#[tauri::command]
+fn exit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 /// Application entry point for desktop/mobile Tauri runtime.
 ///
 /// Sections:
@@ -93,7 +99,8 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             parse_resume_for_ats,
-            close_splashscreen
+            close_splashscreen,
+            exit_app
         ])
         .plugin(tauri_plugin_window_state::Builder::new().build())
         // Persistence and native capability plugins.

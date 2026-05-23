@@ -1,6 +1,8 @@
+import type { PersistedConstantType } from "@modules/settings/constants/persistedConstantTypes";
 import type { DatatablePageQuery } from "@shared/types";
 
 import {
+  type ConstantEntryUpsertPayload,
   type ISettingRepository,
   type SettingUpsertPayload,
 } from "@modules/settings/repositories/SettingRepository";
@@ -22,5 +24,17 @@ export class SettingService {
 
   delete(id: string) {
     return this.repository.delete(id);
+  }
+
+  listConstantRows(type: PersistedConstantType) {
+    return this.repository.listConstantRows(type);
+  }
+
+  upsertConstantRow(payload: ConstantEntryUpsertPayload) {
+    return this.repository.upsertConstantRow(payload);
+  }
+
+  deleteConstantRow(type: PersistedConstantType, value: string) {
+    return this.repository.deleteConstantRow(type, value);
   }
 }

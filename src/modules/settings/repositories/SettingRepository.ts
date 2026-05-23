@@ -6,6 +6,10 @@ import type {
   IRepository,
 } from "@shared/types";
 
+import {
+  PERSISTED_CONSTANT_TYPES,
+  type PersistedConstantType,
+} from "@modules/settings/constants/persistedConstantTypes";
 import { SETTING_SEARCH_FIELDS } from "@modules/settings/constants/settingDatatableFields";
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
 import {
@@ -24,6 +28,38 @@ export interface SettingUpsertPayload {
   developerMode?: boolean;
 }
 
+export interface ConstantEntryRow {
+  type: string;
+  value: string;
+  label: string | null;
+}
+
+export interface ConstantEntryUpsertPayload {
+  type: PersistedConstantType;
+  value: string;
+  label: string | null;
+  previousValue?: string;
+}
+
+function resolveSettingsLabel(type: PersistedConstantType): string {
+  const typeSegments = type.split(".");
+  const fallbackKey =
+    typeSegments.length > 0 ? typeSegments[typeSegments.length - 1] : type;
+
+  const key =
+    Object.entries(PERSISTED_CONSTANT_TYPES).find(
+      ([, persistedType]) => persistedType === type,
+    )?.[0] ??
+    fallbackKey ??
+    type;
+
+  return key
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export type SettingCreatePayload = SettingUpsertPayload;
 export type SettingUpdatePayload = SettingUpsertPayload & { id: string };
 
@@ -34,6 +70,13 @@ export interface ISettingRepository extends IRepository<
 > {
   upsert(payload: SettingUpsertPayload): Promise<string>;
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Setting>>;
+  getConstantRow(
+    type: PersistedConstantType,
+    value: string,
+  ): Promise<ConstantEntryRow | null>;
+  listConstantRows(type: PersistedConstantType): Promise<ConstantEntryRow[]>;
+  upsertConstantRow(payload: ConstantEntryUpsertPayload): Promise<void>;
+  deleteConstantRow(type: PersistedConstantType, value: string): Promise<void>;
 }
 
 export class SettingRepository implements ISettingRepository {
@@ -116,6 +159,84 @@ export class SettingRepository implements ISettingRepository {
       ],
     );
     return id;
+  }
+
+  async getConstantRow(
+    type: PersistedConstantType,
+    value: string,
+  ): Promise<ConstantEntryRow | null> {
+    const rows = await this.db.select<ConstantEntryRow>(
+      `SELECT type, value, label
+       FROM constants
+       WHERE type = $1 AND value = $2
+       LIMIT 1`,
+      [type, value],
+    );
+
+    return rows[0] ?? null;
+  }
+
+  async listConstantRows(
+    type: PersistedConstantType,
+  ): Promise<ConstantEntryRow[]> {
+    return await this.db.select<ConstantEntryRow>(
+      `SELECT type, value, label
+       FROM constants
+       WHERE type = $1
+       ORDER BY value ASC`,
+      [type],
+    );
+  }
+
+  async upsertConstantRow(payload: ConstantEntryUpsertPayload): Promise<void> {
+    const normalizedValue = payload.value.trim();
+    const normalizedLabel = payload.label?.trim() ? payload.label.trim() : null;
+    const settingsLabel = resolveSettingsLabel(payload.type);
+
+    if (normalizedValue.length === 0) {
+      throw new Error("Constant value cannot be empty");
+    }
+
+    const previousValue = payload.previousValue?.trim();
+
+    if (previousValue && previousValue !== normalizedValue) {
+      await this.db.transaction(async (tx) => {
+        await tx.execute(
+          `DELETE FROM constants
+           WHERE type = $1 AND value = $2`,
+          [payload.type, previousValue],
+        );
+
+        await tx.execute(
+          `INSERT INTO constants (settings_label, type, value, label)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT(type, value) DO UPDATE SET
+             label = excluded.label`,
+          [settingsLabel, payload.type, normalizedValue, normalizedLabel],
+        );
+      });
+
+      return;
+    }
+
+    await this.db.execute(
+      `INSERT INTO constants (settings_label, type, value, label)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT(type, value) DO UPDATE SET
+         label = excluded.label`,
+      [settingsLabel, payload.type, normalizedValue, normalizedLabel],
+    );
+  }
+
+  async deleteConstantRow(
+    type: PersistedConstantType,
+    value: string,
+  ): Promise<void> {
+    await this.db.execute(
+      `DELETE FROM constants
+       WHERE type = $1 AND value = $2`,
+      [type, value],
+    );
   }
 
   async create(payload: SettingCreatePayload): Promise<string> {

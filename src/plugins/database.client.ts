@@ -1,7 +1,9 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
+import { ensureMigrationsAppliedOnFirstRun } from "@/services/database/ensureMigrationsApplied.client";
 import { resolveDatabaseUrl } from "@/services/database/resolveDatabaseUrl";
+import { seedConstantsOnFirstRun } from "@/services/database/seedConstants.client";
 import { TauriSqliteDriver } from "@/services/database/TauriSqliteDriver.client";
 
 export default defineNuxtPlugin(async () => {
@@ -33,6 +35,8 @@ export default defineNuxtPlugin(async () => {
   }
 
   const database = await TauriSqliteDriver.connect(configuredUrl);
+  await ensureMigrationsAppliedOnFirstRun(database);
+  await seedConstantsOnFirstRun(database);
 
   return {
     provide: {

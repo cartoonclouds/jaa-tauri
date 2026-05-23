@@ -5,6 +5,26 @@ import { useNuxtApp } from "nuxt/app";
 
 const databaseByApp = new WeakMap<NuxtApp, DatabaseDriver>();
 
+function isDatabaseDriver(value: unknown): value is DatabaseDriver {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as {
+    name?: unknown;
+    select?: unknown;
+    execute?: unknown;
+    transaction?: unknown;
+  };
+
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.select === "function" &&
+    typeof candidate.execute === "function" &&
+    typeof candidate.transaction === "function"
+  );
+}
+
 /**
  * Read the injected database driver from the current Nuxt app instance.
  *
@@ -20,7 +40,12 @@ export function getNuxtDatabase(): DatabaseDriver {
     return existingDatabase;
   }
 
-  const database = nuxtApp.$database;
+  const injectedDatabase = nuxtApp.$database;
+  if (!isDatabaseDriver(injectedDatabase)) {
+    throw new Error("Nuxt database injection is unavailable or invalid.");
+  }
+
+  const database = injectedDatabase;
   databaseByApp.set(nuxtApp, database);
 
   return database;

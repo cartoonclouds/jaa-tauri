@@ -5,13 +5,16 @@
     getOnboardingCompleted,
     setOnboardingCompleted,
   } from "@modules/settings/persistence";
+  import SettingsModal from "@modules/settings/presentation/components/SettingsModal.vue";
   import { invoke, isTauri } from "@tauri-apps/api/core";
   import { onMounted } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
   import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
+  import { useSettingsModal } from "@/composables/useSettingsModal";
 
   const { openOnboarding } = useOnboardingNavigation();
+  const { isSettingsModalVisible } = useSettingsModal();
   const profileService = useProfileService();
 
   onMounted(async () => {
@@ -54,6 +57,7 @@
   <div class="app-dark min-h-screen">
     <NuxtLayout>
       <NuxtPage />
+      <SettingsModal v-model:visible="isSettingsModalVisible" />
       <Toast />
     </NuxtLayout>
   </div>

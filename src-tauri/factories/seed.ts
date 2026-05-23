@@ -8,6 +8,7 @@ import { createApplicationDocumentRows } from "./application_documents.factory";
 import { createApplicationTagRows } from "./application_tags.factory";
 import { createApplicationRows } from "./applications.factory";
 import { createCompanyRows } from "./companies.factory";
+import { createConstantRows } from "./constants.factory";
 import { createContactRows } from "./contacts.factory";
 import { createDocumentRows } from "./documents.factory";
 import { createEventRows } from "./events.factory";
@@ -221,6 +222,7 @@ function insertMany(
 
 function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
   const tables = [
+    "constants",
     "application_documents",
     "application_contacts",
     "notifications",
@@ -278,6 +280,7 @@ function main(): void {
     const documents = createDocumentRows(seedConfig.documentCount, seed + 80);
     const profile = createProfileRow(seed + 100);
     const settings = createSettingRow(profile.id, seed + 90);
+    const constants = createConstantRows();
 
     const applicationTags = createApplicationTagRows(
       applications.map((a) => a.id),
@@ -333,6 +336,7 @@ function main(): void {
     );
 
     const counts = {
+      constants: insertMany(db, "constants", constants),
       companies: insertMany(db, "companies", companies),
       contacts: insertMany(db, "contacts", contacts),
       applications: insertMany(db, "applications", applications),
