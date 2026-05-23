@@ -93,7 +93,11 @@ export function createCrudComposable<TItem, TCreatePayload, TUpdatePayload>(
     });
   }
 
-  void refresh();
+  if (import.meta.client) {
+    // Startup refresh is intentionally fire-and-forget for UI hydration.
+    // Swallow the rejection because error state is already captured by refresh().
+    void refresh().catch(() => undefined);
+  }
 
   return {
     items,
@@ -166,7 +170,11 @@ export function createUpsertCrudComposable<TItem, TUpsertPayload>(
     });
   }
 
-  void refresh();
+  if (import.meta.client) {
+    // Startup refresh is intentionally fire-and-forget for UI hydration.
+    // Swallow the rejection because error state is already captured by refresh().
+    void refresh().catch(() => undefined);
+  }
 
   return { items, isLoading, error, clearError, refresh, upsert, remove };
 }

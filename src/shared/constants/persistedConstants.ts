@@ -1,25 +1,10 @@
-import * as applicationDatatableFields from "../../modules/applications/constants/applicationDatatableFields";
 import * as applicationFormOptions from "../../modules/applications/presentation/constants/applicationFormOptions";
-import * as companyDatatableFields from "../../modules/companies/constants/companyDatatableFields";
-import * as companyDatatablePresentation from "../../modules/companies/presentation/constants/companyDatatable";
-import * as contactDatatableFields from "../../modules/contacts/constants/contactDatatableFields";
-import * as contactDatatablePresentation from "../../modules/contacts/presentation/constants/contactDatatable";
-import * as documentDatatableFields from "../../modules/documents/constants/documentDatatableFields";
-import * as documentDatatablePresentation from "../../modules/documents/presentation/constants/documentDatatable";
 import * as interactionStageConstants from "../../modules/events/domain/constants/interactionStage";
 import * as interactionStagePresentationConstants from "../../modules/events/presentation/constants/interactionStages";
-import * as notificationDatatableFields from "../../modules/notifications/constants/notificationDatatableFields";
-import * as notificationDatatablePresentation from "../../modules/notifications/presentation/constants/notificationDatatable";
 import * as onboardingDefaultSkillOptions from "../../modules/onboarding/presentation/constants/defaultSkillOptions";
-import * as profileDatatableFields from "../../modules/profile/constants/profileDatatableFields";
-import * as profileDatatablePresentation from "../../modules/profile/presentation/constants/profileDatatable";
-import * as settingDatatableFields from "../../modules/settings/constants/settingDatatableFields";
-import * as settingDatatablePresentation from "../../modules/settings/presentation/constants/settingDatatable";
-import * as tagDatatableFields from "../../modules/tags/constants/tagDatatableFields";
-import * as tagDatatablePresentation from "../../modules/tags/presentation/constants/tagDatatable";
 
 export interface PersistedConstantRow {
-  settingsLabel: string;
+  settings_label: string;
   type: string;
   value: string;
   label: string | null;
@@ -34,36 +19,8 @@ interface ConstantModuleSource {
 
 const CONSTANT_MODULE_SOURCES: ConstantModuleSource[] = [
   {
-    namespace: "applications.constants.applicationDatatableFields",
-    module: applicationDatatableFields,
-  },
-  {
     namespace: "applications.presentation.constants.applicationFormOptions",
     module: applicationFormOptions,
-  },
-  {
-    namespace: "companies.constants.companyDatatableFields",
-    module: companyDatatableFields,
-  },
-  {
-    namespace: "companies.presentation.constants.companyDatatable",
-    module: companyDatatablePresentation,
-  },
-  {
-    namespace: "contacts.constants.contactDatatableFields",
-    module: contactDatatableFields,
-  },
-  {
-    namespace: "contacts.presentation.constants.contactDatatable",
-    module: contactDatatablePresentation,
-  },
-  {
-    namespace: "documents.constants.documentDatatableFields",
-    module: documentDatatableFields,
-  },
-  {
-    namespace: "documents.presentation.constants.documentDatatable",
-    module: documentDatatablePresentation,
   },
   {
     namespace: "events.domain.constants.interactionStage",
@@ -74,40 +31,8 @@ const CONSTANT_MODULE_SOURCES: ConstantModuleSource[] = [
     module: interactionStagePresentationConstants,
   },
   {
-    namespace: "notifications.constants.notificationDatatableFields",
-    module: notificationDatatableFields,
-  },
-  {
-    namespace: "notifications.presentation.constants.notificationDatatable",
-    module: notificationDatatablePresentation,
-  },
-  {
     namespace: "onboarding.presentation.constants.defaultSkillOptions",
     module: onboardingDefaultSkillOptions,
-  },
-  {
-    namespace: "profile.constants.profileDatatableFields",
-    module: profileDatatableFields,
-  },
-  {
-    namespace: "profile.presentation.constants.profileDatatable",
-    module: profileDatatablePresentation,
-  },
-  {
-    namespace: "settings.constants.settingDatatableFields",
-    module: settingDatatableFields,
-  },
-  {
-    namespace: "settings.presentation.constants.settingDatatable",
-    module: settingDatatablePresentation,
-  },
-  {
-    namespace: "tags.constants.tagDatatableFields",
-    module: tagDatatableFields,
-  },
-  {
-    namespace: "tags.presentation.constants.tagDatatable",
-    module: tagDatatablePresentation,
   },
 ];
 
@@ -228,7 +153,7 @@ function toConstantRows(
 
   if (Array.isArray(value)) {
     return value.map((entry) => ({
-      settingsLabel,
+      settings_label: settingsLabel,
       type,
       value: serializeConstantValue(stripEmbeddedLabel(entry)),
       label: toConstantLabel(entry),
@@ -237,7 +162,7 @@ function toConstantRows(
 
   return [
     {
-      settingsLabel,
+      settings_label: settingsLabel,
       type,
       value: serializeConstantValue(stripEmbeddedLabel(value)),
       label: toConstantLabel(value),

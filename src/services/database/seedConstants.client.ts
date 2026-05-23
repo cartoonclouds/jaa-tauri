@@ -27,7 +27,7 @@ export async function seedConstantsOnFirstRun(
       await tx.execute(
         `INSERT OR IGNORE INTO constants (settings_label, type, value, label)
          VALUES ($1, $2, $3, $4)`,
-        [row.settingsLabel, row.type, row.value, row.label],
+        [row.settings_label, row.type, row.value, row.label],
       );
     }
   });
