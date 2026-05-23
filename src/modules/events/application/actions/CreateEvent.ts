@@ -1,13 +1,13 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { CreateEventInput } from "@modules/events/domain/entities/Event";
 
-import { z } from "zod";
+import { CreateEventSchema } from "@modules/events/domain/zod/event.schema";
 
-const CreateEventInputSchema = z.object({
-  applicationId: z.string(),
-  contactId: z.string().nullable().optional(),
-  type: z.string(),
-  title: z.string(),
+const CreateEventInputSchema = CreateEventSchema.pick({
+  applicationId: true,
+  contactId: true,
+  type: true,
+  title: true,
 });
 
 export async function createEvent(
@@ -22,9 +22,8 @@ export async function createEvent(
   if (!parseResult.data.applicationId) {
     throw new Error("Event applicationId, type, and title are required");
   }
-  const type = parseResult.data.type.trim();
   const title = parseResult.data.title.trim();
-  if (!type || !title) {
+  if (!title) {
     throw new Error("Event applicationId, type, and title are required");
   }
 
@@ -47,7 +46,7 @@ export async function createEvent(
       id,
       parseResult.data.applicationId,
       parseResult.data.contactId ?? null,
-      type,
+      parseResult.data.type,
       title,
     ],
   );

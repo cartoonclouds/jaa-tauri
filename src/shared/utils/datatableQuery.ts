@@ -1,5 +1,13 @@
 import type { DatatablePageQuery, DatatableSortOrder } from "@shared/types";
 
+export const DEFAULT_CREATED_AT_ORDER_BY = "created_at DESC" as const;
+
+export interface BuildSelectAllOrderedQueryOptions {
+  tableName: string;
+  orderByClause: string;
+  whereClause?: string;
+}
+
 export interface NormalizedDatatablePageQuery {
   rows: number;
   page: number;
@@ -79,4 +87,17 @@ export function resolveOrderByClause({
 
   const direction = sortOrder === "asc" ? "ASC" : "DESC";
   return `${column} ${direction}`;
+}
+
+/**
+ * Build a SELECT * query with optional WHERE and ORDER BY clauses.
+ * Note: table and where clauses should come from trusted code paths.
+ */
+export function buildSelectAllOrderedQuery({
+  tableName,
+  orderByClause,
+  whereClause,
+}: BuildSelectAllOrderedQueryOptions): string {
+  const whereSegment = whereClause ? ` WHERE ${whereClause}` : "";
+  return `SELECT * FROM ${tableName}${whereSegment} ORDER BY ${orderByClause}`;
 }

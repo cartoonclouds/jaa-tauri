@@ -12,7 +12,11 @@ describe("createEvent", () => {
     const db = mockDb();
 
     await expect(
-      createEvent(db as never, { applicationId: "", type: "", title: "" }),
+      createEvent(db as never, {
+        applicationId: "",
+        type: "" as never,
+        title: "",
+      }),
     ).rejects.toThrow("Event applicationId, type, and title are required");
   });
 
@@ -20,8 +24,8 @@ describe("createEvent", () => {
     const db = mockDb();
 
     await createEvent(db as never, {
-      applicationId: "app-1",
-      type: "interview",
+      applicationId: "11111111-1111-4111-8111-111111111111",
+      type: "Interview/Technical Interview",
       title: "Tech interview",
     });
 

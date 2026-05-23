@@ -7,9 +7,12 @@ import type {
 } from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
+import { PROFILE_SEARCH_FIELDS } from "@modules/profile/constants/profileDatatableFields";
 import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import {
   buildSearchWhereClause,
+  buildSelectAllOrderedQuery,
+  DEFAULT_CREATED_AT_ORDER_BY,
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
@@ -58,7 +61,10 @@ export class ProfileRepository implements IProfileRepository {
 
   async list(): Promise<Profile[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM profiles ORDER BY created_at DESC",
+      buildSelectAllOrderedQuery({
+        tableName: "profiles",
+        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      }),
     );
     return rows.map((row) => mapProfileRowToEntity(row));
   }
@@ -66,11 +72,10 @@ export class ProfileRepository implements IProfileRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Profile>> {
-    const searchableColumns = ["full_name", "email", "headline"] as const;
     const { hasSearch, page, rows, search } =
       normalizeDatatablePageQuery(query);
     const activeSearchFields = resolveSearchFields(
-      searchableColumns,
+      PROFILE_SEARCH_FIELDS,
       query.searchFields,
     );
     const searchWhereClause = buildSearchWhereClause(activeSearchFields);
@@ -91,7 +96,7 @@ export class ProfileRepository implements IProfileRepository {
           `SELECT *
            FROM profiles
            WHERE ${searchWhereClause}
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $2
            OFFSET $3`,
           [`%${search}%`, rows, page * rows],
@@ -99,7 +104,7 @@ export class ProfileRepository implements IProfileRepository {
       : await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM profiles
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $1
            OFFSET $2`,
           [rows, page * rows],

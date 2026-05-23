@@ -1,6 +1,6 @@
 import { TagRepository } from "@modules/tags/repositories/TagRepository";
 import { TagService } from "@modules/tags/services/TagService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let tagServiceInstance: TagService | null = null;
 
@@ -9,8 +9,7 @@ let tagServiceInstance: TagService | null = null;
  */
 export function useTagService(): TagService {
   if (!tagServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     tagServiceInstance = new TagService(new TagRepository(database));
   }
 

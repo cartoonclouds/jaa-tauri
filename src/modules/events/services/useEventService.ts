@@ -1,6 +1,6 @@
 import { EventRepository } from "@modules/events/repositories/EventRepository";
 import { EventService } from "@modules/events/services/EventService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let eventServiceInstance: EventService | null = null;
 
@@ -9,8 +9,7 @@ let eventServiceInstance: EventService | null = null;
  */
 export function useEventService(): EventService {
   if (!eventServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     eventServiceInstance = new EventService(new EventRepository(database));
   }
 

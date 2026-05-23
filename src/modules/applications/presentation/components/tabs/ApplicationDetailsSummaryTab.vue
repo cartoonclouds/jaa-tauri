@@ -11,6 +11,7 @@
     type ApplicationFlowStatus,
     EVENT_FLOW_BY_APPLICATION_STATUS,
     getFutureEventFlowStages,
+    type InteractionStage,
     isApplicationProgressStatus,
   } from "@modules/events/presentation/constants/interactionStages";
   import { computed } from "vue";
@@ -55,17 +56,17 @@
     return "saved";
   }
 
-  const summaryFlowStages = computed(() => {
+  const summaryFlowStages = computed<InteractionStage[]>(() => {
     const status = props.application?.status;
     if (!status) {
-      return [] as string[];
+      return [];
     }
 
     const flowStatus = mapStatusToFlowStatus(status);
     return EVENT_FLOW_BY_APPLICATION_STATUS[flowStatus];
   });
 
-  const futureFlowStages = computed(() => {
+  const futureFlowStages = computed<InteractionStage[]>(() => {
     const statusValue = props.application?.status.value;
 
     return isApplicationProgressStatus(statusValue)

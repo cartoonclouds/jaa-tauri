@@ -11,9 +11,15 @@ import type {
 } from "@shared/types";
 
 import { mapApplicationRowToEntity } from "@modules/applications/application/mappers/mapApplicationRow";
+import {
+  APPLICATION_SEARCH_FIELDS,
+  APPLICATION_SORTABLE_COLUMN_MAP,
+} from "@modules/applications/constants/applicationDatatableFields";
 import { ApplicationStatus } from "@modules/applications/types/enums";
 import {
   buildSearchWhereClause,
+  buildSelectAllOrderedQuery,
+  DEFAULT_CREATED_AT_ORDER_BY,
   normalizeDatatablePageQuery,
   resolveOrderByClause,
   resolveSearchFields,
@@ -34,7 +40,11 @@ export class ApplicationRepository implements IApplicationRepository {
 
   async list(): Promise<Application[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM applications WHERE is_deleted = 0 ORDER BY created_at DESC",
+      buildSelectAllOrderedQuery({
+        tableName: "applications",
+        whereClause: "is_deleted = 0",
+        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      }),
     );
 
     return rows.map((row) => mapApplicationRowToEntity(row));
@@ -43,28 +53,19 @@ export class ApplicationRepository implements IApplicationRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Application>> {
-    const searchableColumns = ["title", "status", "location_text"] as const;
     const { hasSearch, page, rows, search } =
       normalizeDatatablePageQuery(query);
     const activeSearchFields = resolveSearchFields(
-      searchableColumns,
+      APPLICATION_SEARCH_FIELDS,
       query.searchFields,
     );
     const searchWhereClause = buildSearchWhereClause(activeSearchFields);
 
-    const sortableColumns: Record<string, string> = {
-      title: "title",
-      status: "status",
-      locationText: "location_text",
-      priority: "priority",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-    };
     const orderByClause = resolveOrderByClause({
       sortField: query.sortField,
       sortOrder: query.sortOrder,
-      sortableColumns,
-      fallbackClause: "created_at DESC",
+      sortableColumns: APPLICATION_SORTABLE_COLUMN_MAP,
+      fallbackClause: DEFAULT_CREATED_AT_ORDER_BY,
     });
 
     const totalRows = hasSearch

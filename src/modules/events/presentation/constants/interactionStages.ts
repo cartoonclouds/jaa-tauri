@@ -1,23 +1,12 @@
-export const INTERACTION_STAGES: string[] = [
-  "Application/Saved",
-  "Application/Submitted",
-  "Screening/Recruiter Outreach",
-  "Screening/Phone Screen",
-  "Screening/Hiring Manager Review",
-  "Interview/Technical Interview",
-  "Interview/Panel Interview",
-  "Interview/Final Round",
-  "Assessment/Take-home Assignment",
-  "Assessment/Live Coding",
-  "Offer/Verbal Offer",
-  "Offer/Written Offer",
-  "Negotiation/Compensation Negotiation",
-  "Decision/Accepted",
-  "Decision/Rejected",
-  "Post-Offer/Background Check",
-  "Post-Offer/Onboarding",
-  "Networking/Follow-up",
-];
+import {
+  INTERACTION_STAGES,
+  type InteractionStage,
+  type InteractionStagePrefix,
+  isInteractionStage,
+} from "@modules/events/domain/constants/interactionStage";
+
+export { INTERACTION_STAGES, isInteractionStage };
+export type { InteractionStage, InteractionStagePrefix };
 
 export type ApplicationFlowStatus =
   | "saved"
@@ -48,7 +37,7 @@ export type EventNotificationSeverity =
 
 export const EVENT_FLOW_BY_APPLICATION_STATUS: Record<
   ApplicationFlowStatus,
-  string[]
+  InteractionStage[]
 > = {
   saved: ["Application/Saved"],
   applied: ["Application/Saved", "Application/Submitted"],
@@ -75,7 +64,7 @@ export const EVENT_FLOW_BY_APPLICATION_STATUS: Record<
 
 export const FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS: Record<
   ApplicationProgressStatus,
-  string[]
+  InteractionStage[]
 > = {
   saved: [
     "Screening/Phone Screen",
@@ -119,12 +108,15 @@ export function isApplicationProgressStatus(
     return false;
   }
 
-  return value in FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS;
+  return Object.prototype.hasOwnProperty.call(
+    FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS,
+    value,
+  );
 }
 
 export function getFutureEventFlowStages(
   status: ApplicationProgressStatus | null | undefined,
-): string[] {
+): InteractionStage[] {
   if (!status) {
     return [];
   }
@@ -132,7 +124,7 @@ export function getFutureEventFlowStages(
   return FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS[status];
 }
 
-export const EVENT_COPY_BY_STAGE: Record<string, EventStageCopy> = {
+export const EVENT_COPY_BY_STAGE: Record<InteractionStage, EventStageCopy> = {
   "Application/Saved": {
     title: "Application saved",
     description:
@@ -222,15 +214,31 @@ export const EVENT_COPY_BY_STAGE: Record<string, EventStageCopy> = {
 };
 
 export const EVENT_NOTIFICATION_SEVERITY_BY_STAGE: Record<
-  string,
+  InteractionStage,
   EventNotificationSeverity
 > = {
+  "Application/Saved": "info",
+  "Application/Submitted": "info",
+  "Screening/Recruiter Outreach": "info",
+  "Screening/Phone Screen": "info",
+  "Screening/Hiring Manager Review": "info",
+  "Interview/Technical Interview": "info",
+  "Interview/Panel Interview": "info",
+  "Interview/Final Round": "info",
+  "Assessment/Take-home Assignment": "warning",
+  "Assessment/Live Coding": "warning",
+  "Offer/Verbal Offer": "success",
+  "Offer/Written Offer": "success",
+  "Negotiation/Compensation Negotiation": "warning",
   "Decision/Accepted": "success",
   "Decision/Rejected": "error",
+  "Post-Offer/Background Check": "success",
+  "Post-Offer/Onboarding": "success",
+  "Networking/Follow-up": "info",
 };
 
 export const EVENT_NOTIFICATION_SEVERITY_BY_PREFIX: {
-  prefix: string;
+  prefix: InteractionStagePrefix;
   severity: EventNotificationSeverity;
 }[] = [
   {
@@ -247,4 +255,4 @@ export const EVENT_NOTIFICATION_SEVERITY_BY_PREFIX: {
   },
 ];
 
-export const EVENT_NOTIFICATION_BODY_PREFIX = "Flow update";
+export const EVENT_NOTIFICATION_BODY_PREFIX = "Flow update" as const;

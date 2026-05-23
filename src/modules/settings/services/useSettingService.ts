@@ -1,6 +1,6 @@
 import { SettingRepository } from "@modules/settings/repositories/SettingRepository";
 import { SettingService } from "@modules/settings/services/SettingService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let settingServiceInstance: SettingService | null = null;
 
@@ -9,8 +9,7 @@ let settingServiceInstance: SettingService | null = null;
  */
 export function useSettingService(): SettingService {
   if (!settingServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     settingServiceInstance = new SettingService(
       new SettingRepository(database),
     );

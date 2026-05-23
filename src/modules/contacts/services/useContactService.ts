@@ -1,6 +1,6 @@
 import { ContactRepository } from "@modules/contacts/repositories/ContactRepository";
 import { ContactService } from "@modules/contacts/services/ContactService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let contactServiceInstance: ContactService | null = null;
 
@@ -9,8 +9,7 @@ let contactServiceInstance: ContactService | null = null;
  */
 export function useContactService(): ContactService {
   if (!contactServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     contactServiceInstance = new ContactService(
       new ContactRepository(database),
     );

@@ -4,7 +4,16 @@
   import type { TreeNode } from "primevue/treenode";
 
   import { useEvent } from "@modules/events/presentation/composables/useEvent";
-  import { INTERACTION_STAGES } from "@modules/events/presentation/constants/interactionStages";
+  import {
+    INTERACTION_STAGES,
+    type InteractionStage,
+    isInteractionStage,
+  } from "@modules/events/presentation/constants/interactionStages";
+  import { toErrorMessage } from "@shared/utils/error";
+  import {
+    formatDateTimeLocalValue,
+    parseDateTimeLocalValue,
+  } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
   interface EventTreeNodeData {
@@ -12,11 +21,28 @@
     event?: Event;
   }
 
-  const { items, isLoading, create, update, remove } = useEvent();
+  interface CreateEventFormState {
+    applicationId: string;
+    type: InteractionStage;
+    title: string;
+    description: string;
+    eventAt: string;
+  }
 
-  const createForm = reactive({
+  interface EditEventFormState {
+    id: string;
+    type: InteractionStage | "";
+    title: string;
+    description: string;
+    eventAt: string;
+  }
+
+  const { items, isLoading, error, clearError, create, update, remove } =
+    useEvent();
+
+  const createForm = reactive<CreateEventFormState>({
     applicationId: "",
-    type: INTERACTION_STAGES[0] ?? "Application/Saved",
+    type: INTERACTION_STAGES[0],
     title: "",
     description: "",
     eventAt: "",
@@ -25,7 +51,7 @@
   const isEditDialogVisible = ref(false);
   const isSavingEdit = ref(false);
   const isSavingCreate = ref(false);
-  const editForm = reactive({
+  const editForm = reactive<EditEventFormState>({
     id: "",
     type: "",
     title: "",
@@ -35,7 +61,9 @@
 
   const expandedKeys = ref<Record<string, boolean>>({});
 
-  const stageSuggestions = computed(() => INTERACTION_STAGES);
+  const stageSuggestions = computed<readonly InteractionStage[]>(
+    () => INTERACTION_STAGES,
+  );
 
   const surfaceCardStyle = {
     background: "var(--p-content-background)",
@@ -65,32 +93,13 @@
     };
   }
 
-  function toDateTimeLocalValue(value: Date | null): string {
-    if (!value) {
+  const eventErrorMessage = computed(() => {
+    if (!error.value) {
       return "";
     }
 
-    const year = String(value.getFullYear());
-    const month = String(value.getMonth() + 1).padStart(2, "0");
-    const day = String(value.getDate()).padStart(2, "0");
-    const hour = String(value.getHours()).padStart(2, "0");
-    const minute = String(value.getMinutes()).padStart(2, "0");
-
-    return `${year}-${month}-${day}T${hour}:${minute}`;
-  }
-
-  function parseDateTimeLocal(value: string): Date | null {
-    if (!value.trim()) {
-      return null;
-    }
-
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return null;
-    }
-
-    return parsed;
-  }
+    return toErrorMessage(error.value, "Failed to manage interaction.");
+  });
 
   function buildTreeNodes(events: Event[]): TreeNode[] {
     const sorted = [...events].sort((a, b) => {
@@ -211,10 +220,12 @@
     }
 
     editForm.id = data.event.id;
-    editForm.type = data.event.type;
+    editForm.type = isInteractionStage(data.event.type)
+      ? data.event.type
+      : INTERACTION_STAGES[0];
     editForm.title = data.event.title;
     editForm.description = data.event.description ?? "";
-    editForm.eventAt = toDateTimeLocalValue(data.event.eventAt);
+    editForm.eventAt = formatDateTimeLocalValue(data.event.eventAt);
     isEditDialogVisible.value = true;
   }
 
@@ -222,7 +233,7 @@
     if (
       !createForm.applicationId.trim() ||
       !createForm.title.trim() ||
-      !createForm.type.trim()
+      !isInteractionStage(createForm.type)
     ) {
       return;
     }
@@ -232,10 +243,10 @@
       await create({
         applicationId: createForm.applicationId.trim(),
         contactId: null,
-        type: createForm.type.trim(),
+        type: createForm.type,
         title: createForm.title.trim(),
         description: createForm.description.trim() || null,
-        eventAt: parseDateTimeLocal(createForm.eventAt),
+        eventAt: parseDateTimeLocalValue(createForm.eventAt),
       });
 
       createForm.title = "";
@@ -247,7 +258,11 @@
   }
 
   async function submitEdit(): Promise<void> {
-    if (!editForm.id || !editForm.title.trim() || !editForm.type.trim()) {
+    if (
+      !editForm.id ||
+      !editForm.title.trim() ||
+      !isInteractionStage(editForm.type)
+    ) {
       return;
     }
 
@@ -255,10 +270,10 @@
     try {
       const payload: EventUpdatePayload = {
         id: editForm.id,
-        type: editForm.type.trim(),
+        type: editForm.type,
         title: editForm.title.trim(),
         description: editForm.description.trim() || null,
-        eventAt: parseDateTimeLocal(editForm.eventAt),
+        eventAt: parseDateTimeLocalValue(editForm.eventAt),
       };
 
       await update(payload);
@@ -281,6 +296,12 @@
       isSavingEdit.value = false;
     }
   }
+
+  watch(isEditDialogVisible, (isVisible) => {
+    if (!isVisible) {
+      clearError();
+    }
+  });
 </script>
 
 <template>
@@ -298,6 +319,10 @@
         <span class="font-mono">Interview/Technical/Final</span>
         to create any tree depth.
       </p>
+
+      <Message v-if="eventErrorMessage" severity="error" class="mb-4">
+        {{ eventErrorMessage }}
+      </Message>
 
       <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submitCreate">
         <div class="space-y-1">
@@ -441,7 +466,7 @@
       >
         <template #default="slotProps">
           <div
-            class="w-full rounded-md border px-2 py-1 transition hover:bg-[var(--p-content-hover-background)]"
+            class="w-full rounded-md border px-2 py-1 transition hover:bg-(--p-content-hover-background)"
             :style="getNodeCardStyle()"
             @dblclick="onNodeDblClick(slotProps.node as TreeNode)"
           >
@@ -467,6 +492,10 @@
       :style="{ width: '38rem' }"
       :breakpoints="{ '1199px': '70vw', '575px': '95vw' }"
     >
+      <Message v-if="eventErrorMessage" severity="error" class="mb-4">
+        {{ eventErrorMessage }}
+      </Message>
+
       <div class="grid gap-3 md:grid-cols-2">
         <div class="space-y-1 md:col-span-2">
           <label

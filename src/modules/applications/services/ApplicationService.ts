@@ -4,8 +4,8 @@ import type {
 } from "@modules/applications/types/payloads";
 import type { DatatablePageQuery } from "@shared/types";
 
-import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 import { ApplicationSchema } from "@modules/applications/domain/zod/application.schema";
+import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 
 export class ApplicationService {
   constructor(private readonly repository: IApplicationRepository) {}

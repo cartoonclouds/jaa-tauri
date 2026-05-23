@@ -7,8 +7,11 @@ import type {
 } from "@shared/types";
 
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
+import { TAG_SEARCH_FIELDS } from "@modules/tags/constants/tagDatatableFields";
 import {
   buildSearchWhereClause,
+  buildSelectAllOrderedQuery,
+  DEFAULT_CREATED_AT_ORDER_BY,
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
@@ -29,17 +32,19 @@ export class TagRepository implements ITagRepository {
 
   async list(): Promise<Tag[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM tags ORDER BY created_at DESC",
+      buildSelectAllOrderedQuery({
+        tableName: "tags",
+        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      }),
     );
     return rows.map((row) => mapTagRowToEntity(row));
   }
 
   async listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Tag>> {
-    const searchableColumns = ["name", "color"] as const;
     const { hasSearch, page, rows, search } =
       normalizeDatatablePageQuery(query);
     const activeSearchFields = resolveSearchFields(
-      searchableColumns,
+      TAG_SEARCH_FIELDS,
       query.searchFields,
     );
     const searchWhereClause = buildSearchWhereClause(activeSearchFields);
@@ -60,7 +65,7 @@ export class TagRepository implements ITagRepository {
           `SELECT *
            FROM tags
            WHERE ${searchWhereClause}
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $2
            OFFSET $3`,
           [`%${search}%`, rows, page * rows],
@@ -68,7 +73,7 @@ export class TagRepository implements ITagRepository {
       : await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM tags
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $1
            OFFSET $2`,
           [rows, page * rows],

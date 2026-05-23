@@ -1,3 +1,5 @@
+import type { InteractionStage } from "@modules/events/domain/constants/interactionStage";
+
 /**
  * Event entity used to track application interactions.
  */
@@ -9,7 +11,7 @@ export interface Event {
   /** Related contact identifier, when available. */
   contactId: string | null;
   /** Event type identifier. */
-  type: string;
+  type: InteractionStage;
   /** Event title. */
   title: string;
   /** Free-form event description. */
@@ -31,7 +33,7 @@ export interface CreateEventInput {
   /** Related contact identifier, when available. */
   contactId?: string | null;
   /** Event type identifier. */
-  type: string;
+  type: InteractionStage;
   /** Event title. */
   title: string;
 }

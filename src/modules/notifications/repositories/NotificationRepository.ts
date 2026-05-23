@@ -7,8 +7,11 @@ import type {
 } from "@shared/types";
 
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
+import { NOTIFICATION_SEARCH_FIELDS } from "@modules/notifications/constants/notificationDatatableFields";
 import {
   buildSearchWhereClause,
+  buildSelectAllOrderedQuery,
+  DEFAULT_CREATED_AT_ORDER_BY,
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
@@ -43,7 +46,10 @@ export class NotificationRepository implements INotificationRepository {
 
   async list(): Promise<Notification[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM notifications ORDER BY created_at DESC",
+      buildSelectAllOrderedQuery({
+        tableName: "notifications",
+        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      }),
     );
     return rows.map((row) => mapNotificationRowToEntity(row));
   }
@@ -51,11 +57,10 @@ export class NotificationRepository implements INotificationRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Notification>> {
-    const searchableColumns = ["title", "body", "severity"] as const;
     const { hasSearch, page, rows, search } =
       normalizeDatatablePageQuery(query);
     const activeSearchFields = resolveSearchFields(
-      searchableColumns,
+      NOTIFICATION_SEARCH_FIELDS,
       query.searchFields,
     );
     const searchWhereClause = buildSearchWhereClause(activeSearchFields);
@@ -76,7 +81,7 @@ export class NotificationRepository implements INotificationRepository {
           `SELECT *
            FROM notifications
            WHERE ${searchWhereClause}
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $2
            OFFSET $3`,
           [`%${search}%`, rows, page * rows],
@@ -84,7 +89,7 @@ export class NotificationRepository implements INotificationRepository {
       : await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM notifications
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $1
            OFFSET $2`,
           [rows, page * rows],

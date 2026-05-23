@@ -20,6 +20,7 @@ type SqlValue = string | number | bigint | Uint8Array | null;
 
 interface SqliteStatement {
   run(...params: SqlValue[]): unknown;
+  all(...params: SqlValue[]): unknown[];
 }
 
 interface SqliteDatabaseLike {
@@ -139,9 +140,57 @@ function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {
     .filter((name) => name.endsWith(".sql"))
     .sort();
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS __seed_migrations (
+      name TEXT PRIMARY KEY NOT NULL,
+      applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const appliedRows = db
+    .prepare("SELECT name FROM __seed_migrations")
+    .all() as {
+    name: string;
+  }[];
+  const appliedMigrations = new Set(appliedRows.map((row) => row.name));
+
+  if (appliedMigrations.size === 0) {
+    const existingTables = db
+      .prepare(
+        `
+          SELECT name
+          FROM sqlite_master
+          WHERE type = 'table'
+            AND name NOT LIKE 'sqlite_%'
+            AND name NOT IN ('__seed_migrations')
+        `,
+      )
+      .all() as { name: string }[];
+
+    if (existingTables.length > 0) {
+      const recordMigration = db.prepare(
+        "INSERT OR IGNORE INTO __seed_migrations (name) VALUES (?)",
+      );
+
+      for (const file of files) {
+        recordMigration.run(file);
+        appliedMigrations.add(file);
+      }
+    }
+  }
+
+  const recordMigration = db.prepare(
+    "INSERT OR IGNORE INTO __seed_migrations (name) VALUES (?)",
+  );
+
   for (const file of files) {
+    if (appliedMigrations.has(file)) {
+      continue;
+    }
+
     const sql = readFileSync(path.join(migrationsDir, file), "utf8");
     db.exec(sql);
+    recordMigration.run(file);
   }
 }
 

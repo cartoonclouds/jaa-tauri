@@ -1,5 +1,6 @@
 import type { Event } from "@modules/events/domain/entities/Event";
 
+import { toInteractionStage } from "@modules/events/domain/constants/interactionStage";
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
 /**
@@ -10,7 +11,7 @@ export function mapEventRowToEntity(row: Record<string, unknown>): Event {
     id: String(row.id),
     applicationId: String(row.application_id),
     contactId: (row.contact_id as string | null) ?? null,
-    type: String(row.type),
+    type: toInteractionStage(row.type),
     title: String(row.title),
     description: (row.description as string | null) ?? null,
     eventAt: toNullableDate(row.event_at),

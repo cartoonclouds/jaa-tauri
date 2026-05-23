@@ -1,39 +1,24 @@
 import type { Application } from "@modules/applications/domain/entities/Application";
 
 import { useApplicationService } from "@modules/applications";
+import {
+  APPLICATION_SEARCH_FIELD_OPTIONS,
+  APPLICATION_SEARCH_FIELDS,
+  APPLICATION_SORTABLE_FIELDS,
+  type ApplicationSearchField,
+  type ApplicationSearchFieldOption,
+  type ApplicationSortableField,
+} from "@modules/applications/constants/applicationDatatableFields";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
-export const APPLICATION_SEARCH_FIELDS = [
-  "title",
-  "status",
-  "location_text",
-] as const;
-
-export type ApplicationSearchField = (typeof APPLICATION_SEARCH_FIELDS)[number];
-
-export interface ApplicationSearchFieldOption {
-  label: string;
-  value: ApplicationSearchField;
-}
-
-export const APPLICATION_SORTABLE_FIELDS = [
-  "title",
-  "status",
-  "locationText",
-  "priority",
-  "createdAt",
-  "updatedAt",
-] as const;
-
-export type ApplicationSortableField =
-  (typeof APPLICATION_SORTABLE_FIELDS)[number];
-
-const APPLICATION_SEARCH_FIELD_OPTIONS = [
-  { label: "Title", value: "title" },
-  { label: "Status", value: "status" },
-  { label: "Location", value: "location_text" },
-] satisfies readonly ApplicationSearchFieldOption[];
+export {
+  APPLICATION_SEARCH_FIELDS,
+  APPLICATION_SORTABLE_FIELDS,
+  type ApplicationSearchField,
+  type ApplicationSearchFieldOption,
+  type ApplicationSortableField,
+};
 
 /**
  * Create server-backed datatable state for applications.

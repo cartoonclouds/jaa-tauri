@@ -126,9 +126,11 @@
       </template>
     </Column>
     <Column
+      field="attendanceType"
       header="Attendance"
       header-class="text-center"
       body-class="text-center"
+      sortable
     >
       <template #body="slotProps">
         <span
@@ -150,9 +152,11 @@
       </template>
     </Column>
     <Column
+      field="employmentType"
       header="Employment"
       header-class="text-center"
       body-class="text-center"
+      sortable
     >
       <template #body="slotProps">
         <span

@@ -1,6 +1,10 @@
 import type { Setting } from "@modules/settings/domain/entities/Setting";
 
-import { useSettingService } from "@modules/settings/services/useSettingService";
+import { useSettingService } from "@modules/settings";
+import {
+  SETTING_SEARCH_FIELDS,
+  type SettingSearchField,
+} from "@modules/settings/constants/settingDatatableFields";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 
@@ -10,7 +14,8 @@ import { useServerDatatable } from "@/composables/useServerDatatable";
 export function useSettingDatatable() {
   const service = useSettingService();
 
-  return useServerDatatable<Setting>({
+  return useServerDatatable<Setting, SettingSearchField>({
     fetchPage: (query) => service.listPage(query),
+    searchFields: [...SETTING_SEARCH_FIELDS],
   });
 }

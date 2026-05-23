@@ -1,10 +1,12 @@
 <script setup lang="ts">
+  import type { InteractionStage } from "@modules/events/presentation/constants/interactionStages";
+
   import { EVENT_COPY_BY_STAGE } from "@modules/events/presentation/constants/interactionStages";
   import { computed, type CSSProperties } from "vue";
 
   interface Props {
-    stages: string[];
-    futureStages?: string[];
+    stages: InteractionStage[];
+    futureStages?: InteractionStage[];
     activeStepIndex?: number;
   }
 
@@ -13,10 +15,12 @@
     activeStepIndex: 1,
   });
 
-  const displayedStages = computed(() => [
-    ...props.stages,
-    ...props.futureStages.filter((stage) => !props.stages.includes(stage)),
-  ]);
+  const displayedStages = computed<InteractionStage[]>(() => {
+    return [
+      ...props.stages,
+      ...props.futureStages.filter((stage) => !props.stages.includes(stage)),
+    ];
+  });
 
   const normalizedActiveStepIndex = computed(() => {
     if (displayedStages.value.length === 0) {
@@ -34,7 +38,7 @@
     return props.activeStepIndex;
   });
 
-  function isFutureStep(stepValue: number) {
+  function isFutureStep(stepValue: number): boolean {
     return stepValue > props.stages.length;
   }
 

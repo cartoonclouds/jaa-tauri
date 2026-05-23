@@ -13,7 +13,7 @@
   import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
-  import { formatDateTimeLocalValue } from "@shared/utils/dateTimeLocal";
+  import { formatDateTimeLocalValue } from "@shared/utils/toDate";
   import { ref } from "vue";
 
   const service = useApplicationService();

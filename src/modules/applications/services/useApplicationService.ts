@@ -1,6 +1,6 @@
 import { ApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 import { ApplicationService } from "@modules/applications/services/ApplicationService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let applicationServiceInstance: ApplicationService | null = null;
 
@@ -9,8 +9,7 @@ let applicationServiceInstance: ApplicationService | null = null;
  */
 export function useApplicationService(): ApplicationService {
   if (!applicationServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     applicationServiceInstance = new ApplicationService(
       new ApplicationRepository(database),
     );

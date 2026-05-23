@@ -15,8 +15,8 @@ export interface ApplicationRow {
   location_text: string;
   location_lat: number;
   location_lng: number;
-  attendance_type: ApplicationAttendanceType;
-  employment_type: ApplicationEmploymentType;
+  attendance_type: string;
+  employment_type: string;
   salary_min: number;
   salary_max: number;
   currency: string;
@@ -129,14 +129,14 @@ export function createApplicationRows(
           ApplicationAttendanceType.Remote,
           ApplicationAttendanceType.Hybrid,
           ApplicationAttendanceType.OnSite,
-        ]),
+        ]).value,
         employment_type: faker.helpers.arrayElement([
           ApplicationEmploymentType.PartTime,
           ApplicationEmploymentType.Contract,
           ApplicationEmploymentType.Internship,
           ApplicationEmploymentType.FullTime,
           ApplicationEmploymentType.Volunteer,
-        ]),
+        ]).value,
         salary_min: salaryMin,
         salary_max: salaryMax,
         currency: "GBP",

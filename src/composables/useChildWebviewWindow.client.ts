@@ -1,5 +1,9 @@
+import type { RouteNamedMap } from "vue-router/auto-routes";
+
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+
+type ChildWebviewRoutePath = RouteNamedMap[keyof RouteNamedMap]["path"];
 
 /**
  * Options used to configure a child webview window.
@@ -8,7 +12,7 @@ export interface ChildWebviewWindowOptions {
   /** Unique window label used for reuse checks. */
   label: string;
   /** Initial URL loaded inside the child window. */
-  url: string;
+  url: ChildWebviewRoutePath;
   /** Window title displayed by the OS. */
   title: string;
   /** Optional window width. */

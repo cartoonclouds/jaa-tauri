@@ -1,6 +1,6 @@
 import { DocumentRepository } from "@modules/documents/repositories/DocumentRepository";
 import { DocumentService } from "@modules/documents/services/DocumentService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let documentServiceInstance: DocumentService | null = null;
 
@@ -9,8 +9,7 @@ let documentServiceInstance: DocumentService | null = null;
  */
 export function useDocumentService(): DocumentService {
   if (!documentServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     documentServiceInstance = new DocumentService(
       new DocumentRepository(database),
     );

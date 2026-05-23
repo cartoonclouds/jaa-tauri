@@ -1,6 +1,6 @@
 import { ProfileRepository } from "@modules/profile/repositories/ProfileRepository";
 import { ProfileService } from "@modules/profile/services/ProfileService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let profileServiceInstance: ProfileService | null = null;
 
@@ -9,8 +9,7 @@ let profileServiceInstance: ProfileService | null = null;
  */
 export function useProfileService(): ProfileService {
   if (!profileServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     profileServiceInstance = new ProfileService(
       new ProfileRepository(database),
     );

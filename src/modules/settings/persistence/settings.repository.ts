@@ -15,6 +15,7 @@ import type {
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toErrorMessage } from "@shared/utils/error";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 import { parseStringArray } from "@shared/utils/parse";
 import { z } from "zod";
 
@@ -27,7 +28,6 @@ const SettingsInputSchema = z.object({
   onboardingCompleted: z.boolean(),
 });
 
-import { useNuxtApp } from "nuxt/app";
 const STORE_KEY = "app-settings";
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -125,8 +125,7 @@ function getDatabase(): DatabaseDriver {
     return database;
   }
 
-  const { $database } = useNuxtApp();
-  const db = $database;
+  const db = getNuxtDatabase();
   database = db;
 
   return db;

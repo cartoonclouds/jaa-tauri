@@ -1,6 +1,6 @@
 import { NotificationRepository } from "@modules/notifications/repositories/NotificationRepository";
 import { NotificationService } from "@modules/notifications/services/NotificationService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let notificationServiceInstance: NotificationService | null = null;
 
@@ -9,8 +9,7 @@ let notificationServiceInstance: NotificationService | null = null;
  */
 export function useNotificationService(): NotificationService {
   if (!notificationServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     notificationServiceInstance = new NotificationService(
       new NotificationRepository(database),
     );

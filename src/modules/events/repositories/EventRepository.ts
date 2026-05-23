@@ -3,6 +3,10 @@ import type { Event } from "@modules/events/domain/entities/Event";
 import type { IRepository } from "@shared/types";
 
 import { mapEventRowToEntity } from "@modules/events/application/mappers/mapEventRow";
+import {
+  buildSelectAllOrderedQuery,
+  DEFAULT_CREATED_AT_ORDER_BY,
+} from "@shared/utils/datatableQuery";
 
 export type EventCreatePayload = Pick<
   Event,
@@ -21,7 +25,10 @@ export class EventRepository implements IEventRepository {
 
   async list(): Promise<Event[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM events ORDER BY created_at DESC",
+      buildSelectAllOrderedQuery({
+        tableName: "events",
+        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      }),
     );
     return rows.map((row) => mapEventRowToEntity(row));
   }

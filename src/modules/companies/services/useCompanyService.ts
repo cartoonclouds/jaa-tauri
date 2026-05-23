@@ -1,6 +1,6 @@
 import { CompanyRepository } from "@modules/companies/repositories/CompanyRepository";
 import { CompanyService } from "@modules/companies/services/CompanyService";
-import { useNuxtApp } from "nuxt/app";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 
 let companyServiceInstance: CompanyService | null = null;
 
@@ -9,8 +9,7 @@ let companyServiceInstance: CompanyService | null = null;
  */
 export function useCompanyService(): CompanyService {
   if (!companyServiceInstance) {
-    const { $database } = useNuxtApp();
-    const database = $database;
+    const database = getNuxtDatabase();
     companyServiceInstance = new CompanyService(
       new CompanyRepository(database),
     );

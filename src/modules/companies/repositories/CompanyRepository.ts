@@ -7,8 +7,11 @@ import type {
 } from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
+import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants/companyDatatableFields";
 import {
   buildSearchWhereClause,
+  buildSelectAllOrderedQuery,
+  DEFAULT_CREATED_AT_ORDER_BY,
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
@@ -51,7 +54,10 @@ export class CompanyRepository implements ICompanyRepository {
 
   async list(): Promise<Company[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      "SELECT * FROM companies ORDER BY created_at DESC",
+      buildSelectAllOrderedQuery({
+        tableName: "companies",
+        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      }),
     );
 
     return rows.map((row) => mapCompanyRowToEntity(row));
@@ -60,11 +66,10 @@ export class CompanyRepository implements ICompanyRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Company>> {
-    const searchableColumns = ["name", "location_text"] as const;
     const { hasSearch, page, rows, search } =
       normalizeDatatablePageQuery(query);
     const activeSearchFields = resolveSearchFields(
-      searchableColumns,
+      COMPANY_SEARCH_FIELDS,
       query.searchFields,
     );
     const searchWhereClause = buildSearchWhereClause(activeSearchFields);
@@ -85,7 +90,7 @@ export class CompanyRepository implements ICompanyRepository {
           `SELECT *
            FROM companies
            WHERE ${searchWhereClause}
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $2
            OFFSET $3`,
           [`%${search}%`, rows, page * rows],
@@ -93,7 +98,7 @@ export class CompanyRepository implements ICompanyRepository {
       : await this.db.select<Record<string, unknown>>(
           `SELECT *
            FROM companies
-           ORDER BY created_at DESC
+           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
            LIMIT $1
            OFFSET $2`,
           [rows, page * rows],
