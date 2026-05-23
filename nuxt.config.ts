@@ -38,6 +38,15 @@ const appDatabaseUrl =
 export default defineNuxtConfig({
   srcDir: "src/",
 
+  app: {
+    head: {
+      title: appName,
+      htmlAttrs: {
+        lang: "en",
+      },
+    },
+  },
+
   css: ["~/assets/css/tailwind.css"],
 
   alias: {
@@ -76,7 +85,14 @@ export default defineNuxtConfig({
     "@vee-validate/nuxt",
   ],
 
-  // @ts-expect-error Nuxt Security augments config at runtime; augmentation is not available in this static config type.
+  // @ts-expect-error Nuxt Hints module options are applied at runtime; augmentation is not available in this static config type.
+  hints: {
+    features: {
+      lazyLoad: false,
+      hydration: true,
+    },
+  },
+
   security: {
     headers: {
       contentSecurityPolicy: {

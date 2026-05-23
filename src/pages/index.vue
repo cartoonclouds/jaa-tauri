@@ -1,15 +1,14 @@
 <script setup lang="ts">
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
   import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
-  import { ref } from "vue";
+  import { defineAsyncComponent, ref } from "vue";
 
   import { Icon } from "#components";
-  import { definePageMeta } from "#imports";
-  import EntityLocationsMapBrowser from "@/components/ui/EntityLocationsMapBrowser.vue";
   import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  definePageMeta({ ssr: false });
+  const EntityLocationsMapBrowser = defineAsyncComponent(
+    () => import("@/components/ui/EntityLocationsMapBrowser.vue"),
+  );
 
   const { openOnboarding } = useOnboardingNavigation();
 
@@ -120,13 +119,19 @@
     </div>
 
     <div v-else class="mx-auto mb-6 max-w-6xl">
-      <EntityLocationsMapBrowser />
+      <ClientOnly>
+        <EntityLocationsMapBrowser />
+      </ClientOnly>
     </div>
 
-    <section class="mx-auto mb-8 max-w-6xl">
-      <StatisticsSection title="Job Hunt Snapshot" />
-    </section>
+    <ClientOnly>
+      <section class="mx-auto mb-8 max-w-6xl">
+        <StatisticsSection title="Job Hunt Snapshot" />
+      </section>
+    </ClientOnly>
 
-    <ApplicationComponent />
+    <ClientOnly>
+      <ApplicationComponent />
+    </ClientOnly>
   </main>
 </template>

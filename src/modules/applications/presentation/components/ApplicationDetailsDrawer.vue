@@ -8,11 +8,35 @@
   } from "@modules/applications/types/presentation";
   import type { Company } from "@modules/companies/domain/entities/Company";
 
-  import ApplicationDetailsApplicationTab from "@modules/applications/presentation/components/tabs/ApplicationDetailsApplicationTab.vue";
-  import ApplicationDetailsContactTab from "@modules/applications/presentation/components/tabs/ApplicationDetailsContactTab.vue";
-  import ApplicationDetailsMapTab from "@modules/applications/presentation/components/tabs/ApplicationDetailsMapTab.vue";
-  import ApplicationDetailsSummaryTab from "@modules/applications/presentation/components/tabs/ApplicationDetailsSummaryTab.vue";
-  import { computed, ref, watch } from "vue";
+  import { computed, defineAsyncComponent, ref, watch } from "vue";
+
+  const props = withDefaults(defineProps<Props>(), {
+    busy: false,
+    isDeleting: false,
+  });
+  const emit = defineEmits<{
+    "update:visible": [value: boolean];
+    submit: [payload: ApplicationFormSubmitPayload];
+    "request-edit": [];
+    "request-delete": [id: string];
+    "cancel-edit": [];
+  }>();
+  const ApplicationDetailsApplicationTab = defineAsyncComponent(
+    () =>
+      import("@modules/applications/presentation/components/tabs/ApplicationDetailsApplicationTab.vue"),
+  );
+  const ApplicationDetailsContactTab = defineAsyncComponent(
+    () =>
+      import("@modules/applications/presentation/components/tabs/ApplicationDetailsContactTab.vue"),
+  );
+  const ApplicationDetailsMapTab = defineAsyncComponent(
+    () =>
+      import("@modules/applications/presentation/components/tabs/ApplicationDetailsMapTab.vue"),
+  );
+  const ApplicationDetailsSummaryTab = defineAsyncComponent(
+    () =>
+      import("@modules/applications/presentation/components/tabs/ApplicationDetailsSummaryTab.vue"),
+  );
 
   /**
    * Defines props.
@@ -26,19 +50,6 @@
     busy?: boolean;
     isDeleting?: boolean;
   }
-
-  const props = withDefaults(defineProps<Props>(), {
-    busy: false,
-    isDeleting: false,
-  });
-
-  const emit = defineEmits<{
-    "update:visible": [value: boolean];
-    submit: [payload: ApplicationFormSubmitPayload];
-    "request-edit": [];
-    "request-delete": [id: string];
-    "cancel-edit": [];
-  }>();
 
   const drawerVisible = computed({
     get: () => props.visible,
@@ -162,12 +173,3 @@
     </Tabs>
   </Drawer>
 </template>
-
-
-
-
-
-
-
-
-

@@ -177,6 +177,7 @@
           <InputText
             :model-value="props.globalFilter"
             :placeholder="props.searchPlaceholder"
+            aria-label="Table search"
             class="w-full"
             @update:model-value="(value) => onGlobalFilterInput(value ?? '')"
           />
@@ -186,6 +187,7 @@
             option-label="label"
             option-value="value"
             placeholder="Search fields"
+            aria-label="Search fields"
             :max-selected-labels="1"
             :selected-items-label="searchFieldsSelectedItemsLabel"
             class="w-44 shrink-0"

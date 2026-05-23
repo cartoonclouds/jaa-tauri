@@ -254,7 +254,7 @@
 <template>
   <div class="space-y-6 p-6">
     <div class="flex items-center justify-between gap-3">
-      <h1 class="text-2xl font-semibold">Applications</h1>
+      <h2 class="text-2xl font-semibold">Applications</h2>
       <Button type="button" @click="openCreateDrawer">
         <Icon name="heroicons:plus" class="h-4 w-4" />
         <span>New Application</span>
