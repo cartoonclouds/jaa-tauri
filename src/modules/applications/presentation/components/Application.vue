@@ -249,13 +249,6 @@
   function onRowClick(application: ApplicationEntity): void {
     openViewDrawer(application);
   }
-
-  /**
-   * Handles open details from button.
-   */
-  function openDetailsFromButton(row: ApplicationEntity): void {
-    openViewDrawer(row);
-  }
 </script>
 
 <template>
@@ -286,7 +279,6 @@
       @page="onPage"
       @sort="onSort"
       @row-click="onRowClick"
-      @open-details="openDetailsFromButton"
     />
 
     <ApplicationDetailsDrawer
@@ -305,10 +297,3 @@
     />
   </div>
 </template>
-
-
-
-
-
-
-

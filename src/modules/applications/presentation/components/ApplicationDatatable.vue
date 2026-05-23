@@ -45,7 +45,6 @@
 
   const emit = defineEmits<{
     "row-click": [application: Application];
-    "open-details": [application: Application];
     "update:global-filter": [value: string];
     "update:search-fields": [value: ApplicationSearchField[]];
     page: [event: { page?: number; rows?: number }];
@@ -62,13 +61,6 @@
    */
   function onRowClick(row: unknown): void {
     emit("row-click", row as Application);
-  }
-
-  /**
-   * Handles on open details.
-   */
-  function onOpenDetails(application: Application): void {
-    emit("open-details", application);
   }
 
   /**
@@ -206,31 +198,5 @@
       header-class="text-center"
       body-class="text-center"
     />
-    <Column
-      header="Actions"
-      header-class="text-center"
-      body-class="text-center"
-    >
-      <template #body="slotProps">
-        <Button
-          text
-          rounded
-          class="h-9 w-9 border border-transparent text-slate-600 transition hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-400"
-          aria-label="Open application drawer"
-          @click.stop="onOpenDetails(slotProps.data as Application)"
-        >
-          <Icon name="heroicons:eye" class="h-5 w-5" />
-        </Button>
-      </template>
-    </Column>
   </ServerDatatable>
 </template>
-
-
-
-
-
-
-
-
-

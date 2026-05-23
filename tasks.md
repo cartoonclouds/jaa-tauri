@@ -27,4 +27,3 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 
 Review all files and make sure they follow the already established conventions/standards. Also add to these files docblocks.
 
-Remove the actions column from the ApplicationDatatable and any associated code

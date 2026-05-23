@@ -57,7 +57,7 @@
 
       <div class="flex">
         <Button severity="contrast" @click="openOnboarding">
-          <Icon name="heroicons:compass" class="h-4 w-4" />
+          <Icon name="heroicons:compass-solid" class="h-4 w-4" />
           <span>Open Onboarding</span>
         </Button>
       </div>
@@ -130,12 +130,3 @@
     <ApplicationComponent />
   </main>
 </template>
-
-
-
-
-
-
-
-
-
