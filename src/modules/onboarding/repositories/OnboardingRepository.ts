@@ -6,7 +6,7 @@ import type {
 
 import { useDocumentService } from "@modules/documents";
 import { useProfileService } from "@modules/profile";
-import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
+import { CreateProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import { setOnboardingCompleted } from "@modules/settings/persistence";
 
 import { getResumeDocumentTitle } from "./onboardingHelpers";
@@ -43,7 +43,7 @@ export interface CompleteOnboardingInput {
 export class OnboardingRepository {
   async complete(input: CompleteOnboardingInput): Promise<void> {
     const payload = userProfileToProfileCreatePayload(input.profile);
-    const parseResult = ProfileSchema.safeParse(payload);
+    const parseResult = CreateProfileSchema.safeParse(payload);
     if (!parseResult.success) {
       throw new Error(
         "Profile validation failed: " +
