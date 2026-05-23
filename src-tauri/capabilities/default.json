@@ -27,6 +27,7 @@
     "fs:allow-copy-file",
     "fs:allow-read-file", 
     "fs:allow-mkdir",
+    "fs:allow-write-file",
     "fs:read-all",
     "fs:write-all",
     "store:default",

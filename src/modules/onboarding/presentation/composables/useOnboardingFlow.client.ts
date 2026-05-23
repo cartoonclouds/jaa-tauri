@@ -87,7 +87,7 @@ function createOnboardingFlowComposable() {
   const stepper = useStepper(stepOrder);
   const documentService = useDocumentService();
   const profileService = useProfileService();
-  const { sanitizeFileName, writeBrowserFile } = useFileSystem({
+  const { sanitizeFileName, writeBrowserFileToAppLocalData } = useFileSystem({
     ensureDirectoryExists: true,
   });
 
@@ -203,7 +203,9 @@ function createOnboardingFlowComposable() {
       `${timestamp}-${safeName}`,
     );
 
-    await writeBrowserFile(file, destinationPath, { create: true });
+    await writeBrowserFileToAppLocalData(file, destinationPath, {
+      create: true,
+    });
 
     return destinationPath;
   }
