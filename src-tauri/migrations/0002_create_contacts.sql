@@ -20,3 +20,18 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 CREATE INDEX IF NOT EXISTS idx_contacts_company_id
 ON contacts (company_id);
+
+CREATE INDEX IF NOT EXISTS idx_contacts_created_at
+ON contacts (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_contacts_full_name
+ON contacts (full_name);
+
+CREATE INDEX IF NOT EXISTS idx_contacts_email
+ON contacts (email);
+
+CREATE INDEX IF NOT EXISTS idx_contacts_type
+ON contacts (type);
+
+CREATE INDEX IF NOT EXISTS idx_contacts_location_text
+ON contacts (location_text);

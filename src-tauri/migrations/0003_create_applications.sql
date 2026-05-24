@@ -36,3 +36,15 @@ ON applications (event_flow_status);
 
 CREATE INDEX IF NOT EXISTS idx_applications_location_coords
 ON applications (location_lat, location_lng);
+
+CREATE INDEX IF NOT EXISTS idx_applications_deleted_created_at
+ON applications (deleted_at, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_applications_title
+ON applications (title);
+
+CREATE INDEX IF NOT EXISTS idx_applications_status
+ON applications (status);
+
+CREATE INDEX IF NOT EXISTS idx_applications_location_text
+ON applications (location_text);

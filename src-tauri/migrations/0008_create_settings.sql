@@ -11,3 +11,12 @@ CREATE TABLE IF NOT EXISTS settings (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_settings_created_at
+ON settings (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_settings_theme
+ON settings (theme);
+
+CREATE INDEX IF NOT EXISTS idx_settings_locale
+ON settings (locale);

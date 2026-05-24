@@ -15,3 +15,12 @@ CREATE TABLE IF NOT EXISTS companies (
 
 CREATE INDEX IF NOT EXISTS idx_companies_location_coords
 ON companies (location_lat, location_lng);
+
+CREATE INDEX IF NOT EXISTS idx_companies_created_at
+ON companies (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_companies_name
+ON companies (name);
+
+CREATE INDEX IF NOT EXISTS idx_companies_location_text
+ON companies (location_text);

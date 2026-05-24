@@ -9,3 +9,15 @@ CREATE TABLE IF NOT EXISTS documents (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_documents_created_at
+ON documents (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_documents_title
+ON documents (title);
+
+CREATE INDEX IF NOT EXISTS idx_documents_kind
+ON documents (kind);
+
+CREATE INDEX IF NOT EXISTS idx_documents_file_path
+ON documents (file_path);

@@ -5,3 +5,12 @@ CREATE TABLE IF NOT EXISTS tags (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_tags_created_at
+ON tags (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_tags_name
+ON tags (name);
+
+CREATE INDEX IF NOT EXISTS idx_tags_color
+ON tags (color);

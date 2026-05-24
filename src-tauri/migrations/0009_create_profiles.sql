@@ -20,3 +20,15 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_profiles_created_at
+ON profiles (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_full_name
+ON profiles (full_name);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_email
+ON profiles (email);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_headline
+ON profiles (headline);

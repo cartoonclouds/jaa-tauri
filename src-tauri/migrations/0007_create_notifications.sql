@@ -24,3 +24,15 @@ ON notifications (application_id);
 
 CREATE INDEX IF NOT EXISTS idx_notifications_event_id
 ON notifications (event_id);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at
+ON notifications (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_title
+ON notifications (title);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_body
+ON notifications (body);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_severity
+ON notifications (severity);
