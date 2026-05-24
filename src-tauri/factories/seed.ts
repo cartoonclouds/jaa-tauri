@@ -225,6 +225,7 @@ function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
     "constants",
     "application_documents",
     "application_contacts",
+    "application_events",
     "notifications",
     "events",
     "application_tags",
@@ -315,6 +316,13 @@ function main(): void {
       seed + 130,
     );
 
+    const applicationEvents = events.map((event) => ({
+      application_id: event.application_id,
+      event_id: event.id,
+    }));
+
+    const eventRows = events.map(({ application_id, ...eventRow }) => eventRow);
+
     const applicationDocuments = createApplicationDocumentRows(
       applications.map((a) => a.id),
       documents.map((document) => ({ id: document.id, kind: document.kind })),
@@ -345,7 +353,12 @@ function main(): void {
       profiles: insertMany(db, "profiles", [profile]),
       settings: insertMany(db, "settings", [settings]),
       application_tags: insertMany(db, "application_tags", applicationTags),
-      events: insertMany(db, "events", events),
+      events: insertMany(db, "events", eventRows),
+      application_events: insertMany(
+        db,
+        "application_events",
+        applicationEvents,
+      ),
       notifications: insertMany(db, "notifications", notifications),
       application_documents: insertMany(
         db,

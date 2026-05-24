@@ -1,6 +1,7 @@
 import type {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 
@@ -53,6 +54,48 @@ export function formatApplicationStatusLabel(
   }
 
   return status.toLabel();
+}
+
+/**
+ * Resolve the Tailwind classes used to render an application event-flow badge.
+ */
+export function getApplicationEventFlowStatusClass(
+  eventFlowStatus: ApplicationEventFlowStatus | undefined | null,
+): string {
+  if (!eventFlowStatus) {
+    return "bg-slate-100 text-slate-800 ring-slate-200";
+  }
+
+  if (eventFlowStatus.value === "applied") {
+    return "bg-blue-100 text-blue-800 ring-blue-200";
+  }
+
+  if (eventFlowStatus.value === "interview") {
+    return "bg-amber-100 text-amber-800 ring-amber-200";
+  }
+
+  if (eventFlowStatus.value === "offer") {
+    return "bg-emerald-100 text-emerald-800 ring-emerald-200";
+  }
+
+  if (eventFlowStatus.value === "rejected") {
+    return "bg-rose-100 text-rose-800 ring-rose-200";
+  }
+
+  return "bg-slate-100 text-slate-800 ring-slate-200";
+}
+
+/**
+ * Format event-flow status value into a display label.
+ */
+export function formatApplicationEventFlowStatusLabel(
+  eventFlowStatus: ApplicationEventFlowStatus | undefined | null,
+): string {
+  if (!eventFlowStatus) {
+    return "Unknown";
+  }
+
+  return eventFlowStatus.toLabel();
 }
 
 /**
@@ -168,6 +211,3 @@ export function formatApplicationEmploymentTypeLabel(
 
   return employmentType.toLabel();
 }
-
-
-

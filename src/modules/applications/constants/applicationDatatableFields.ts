@@ -4,6 +4,7 @@
 export const APPLICATION_SEARCH_FIELDS = [
   "title",
   "status",
+  "event_flow_status",
   "attendance_type",
   "location_text",
   "employment_type",
@@ -29,6 +30,7 @@ export const APPLICATION_SEARCH_FIELD_OPTIONS: readonly ApplicationSearchFieldOp
   [
     { label: "Title", value: "title" },
     { label: "Status", value: "status" },
+    { label: "Event Flow", value: "event_flow_status" },
     { label: "Attendance Type", value: "attendance_type" },
     { label: "Employment Type", value: "employment_type" },
     { label: "Location", value: "location_text" },
@@ -40,6 +42,7 @@ export const APPLICATION_SEARCH_FIELD_OPTIONS: readonly ApplicationSearchFieldOp
 export const APPLICATION_SORTABLE_COLUMN_MAP = {
   title: "title",
   status: "status",
+  eventFlowStatus: "event_flow_status",
   attendanceType: "attendance_type",
   locationText: "location_text",
   priority: "priority",

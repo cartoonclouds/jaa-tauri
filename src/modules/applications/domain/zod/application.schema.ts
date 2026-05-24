@@ -1,12 +1,14 @@
 import type {
   ApplicationAttendanceType as ApplicationAttendanceTypeValue,
   ApplicationEmploymentType as ApplicationEmploymentTypeValue,
+  ApplicationEventFlowStatus as ApplicationEventFlowStatusValue,
   ApplicationStatus as ApplicationStatusValue,
 } from "@modules/applications/types/enums";
 
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 import {
@@ -71,6 +73,23 @@ function isApplicationStatus(value: unknown): value is ApplicationStatusValue {
   );
 }
 
+/**
+ * Type guard for `ApplicationEventFlowStatus` enum instances.
+ */
+function isApplicationEventFlowStatus(
+  value: unknown,
+): value is ApplicationEventFlowStatusValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "value" in value &&
+    typeof value.value === "string" &&
+    ApplicationEventFlowStatus.values().some(
+      (instance) => instance.value === value.value,
+    )
+  );
+}
+
 export const ApplicationSchema = z.object({
   id: UuidSchema,
   companyId: NullableUuidSchema,
@@ -78,6 +97,10 @@ export const ApplicationSchema = z.object({
   status: z.custom<ApplicationStatusValue>(
     isApplicationStatus,
     "Invalid status",
+  ),
+  eventFlowStatus: z.custom<ApplicationEventFlowStatusValue>(
+    isApplicationEventFlowStatus,
+    "Invalid event flow status",
   ),
   sourceUrl: NullableUrlSchema,
   appliedAt: NullableDateTimeSchema,
@@ -113,11 +136,13 @@ export const CreateApplicationSchema = ApplicationSchema.pick({
   companyId: true,
   title: true,
   status: true,
+  eventFlowStatus: true,
   locationText: true,
   locationLat: true,
   locationLng: true,
 }).partial({
   status: true,
+  eventFlowStatus: true,
   companyId: true,
   locationText: true,
   locationLat: true,
@@ -133,6 +158,10 @@ export const ApplicationFormSchema = z
     status: z.custom<ApplicationStatusValue>(
       isApplicationStatus,
       "Invalid status",
+    ),
+    eventFlowStatus: z.custom<ApplicationEventFlowStatusValue>(
+      isApplicationEventFlowStatus,
+      "Invalid event flow status",
     ),
     sourceUrl: z.string().url("Invalid URL").nullable().or(z.literal("")),
     appliedAt: z.string().nullable().or(z.literal("")),

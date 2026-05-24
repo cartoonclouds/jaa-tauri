@@ -16,7 +16,10 @@ import {
   APPLICATION_SORTABLE_COLUMN_MAP,
 } from "@modules/applications/constants/applicationDatatableFields";
 import { ApplicationRepositoryCreateSchema } from "@modules/applications/domain/zod/application.schema";
-import { ApplicationStatus } from "@modules/applications/types/enums";
+import {
+  ApplicationEventFlowStatus,
+  ApplicationStatus,
+} from "@modules/applications/types/enums";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -135,6 +138,7 @@ export class ApplicationRepository implements IApplicationRepository {
         company_id,
         title,
         status,
+        event_flow_status,
         source_url,
         applied_at,
         location_text,
@@ -173,6 +177,7 @@ export class ApplicationRepository implements IApplicationRepository {
         $17,
         $18,
         $19,
+        $20,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
       )
@@ -182,6 +187,8 @@ export class ApplicationRepository implements IApplicationRepository {
         parseResult.data.companyId ?? null,
         title,
         parseResult.data.status?.value ?? ApplicationStatus.Saved.value,
+        parseResult.data.eventFlowStatus?.value ??
+          ApplicationEventFlowStatus.Saved.value,
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         parseResult.data.locationText ?? null,
@@ -210,28 +217,30 @@ export class ApplicationRepository implements IApplicationRepository {
         company_id = $1,
         title = $2,
         status = $3,
-        source_url = $4,
-        applied_at = $5,
-        location_text = $6,
-        location_lat = $7,
-        location_lng = $8,
-        attendance_type = $9,
-        employment_type = $10,
-        salary_min = $11,
-        salary_max = $12,
-        currency = $13,
-        description = $14,
-        interview_process = $15,
-        benefits = $16,
-        priority = $17,
-        is_archived = $18,
+        event_flow_status = $4,
+        source_url = $5,
+        applied_at = $6,
+        location_text = $7,
+        location_lat = $8,
+        location_lng = $9,
+        attendance_type = $10,
+        employment_type = $11,
+        salary_min = $12,
+        salary_max = $13,
+        currency = $14,
+        description = $15,
+        interview_process = $16,
+        benefits = $17,
+        priority = $18,
+        is_archived = $19,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $19
+      WHERE id = $20
       `,
       [
         payload.companyId ?? null,
         payload.title,
         payload.status.value,
+        payload.eventFlowStatus.value,
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         payload.locationText ?? null,
@@ -259,11 +268,3 @@ export class ApplicationRepository implements IApplicationRepository {
     );
   }
 }
-
-
-
-
-
-
-
-

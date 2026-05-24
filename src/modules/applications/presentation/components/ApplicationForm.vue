@@ -2,6 +2,7 @@
   import type {
     ApplicationAttendanceType,
     ApplicationEmploymentType,
+    ApplicationEventFlowStatus,
     ApplicationStatus,
   } from "@modules/applications/types/enums";
 
@@ -9,6 +10,7 @@
   import {
     APPLICATION_ATTENDANCE_OPTIONS,
     APPLICATION_EMPLOYMENT_OPTIONS,
+    APPLICATION_EVENT_FLOW_STATUS_OPTIONS,
     APPLICATION_STATUS_OPTIONS,
   } from "@modules/applications/presentation/constants/applicationFormOptions";
   import {
@@ -16,7 +18,10 @@
     getApplicationPriorityClass,
     getApplicationStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
-  import { ApplicationStatus as ApplicationStatusEnum } from "@modules/applications/types/enums";
+  import {
+    ApplicationEventFlowStatus as ApplicationEventFlowStatusEnum,
+    ApplicationStatus as ApplicationStatusEnum,
+  } from "@modules/applications/types/enums";
   import {
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,
@@ -55,6 +60,9 @@
       companyId: props.initialValues.companyId ?? null,
       title: props.initialValues.title ?? "",
       status: props.initialValues.status ?? ApplicationStatusEnum.Saved,
+      eventFlowStatus:
+        props.initialValues.eventFlowStatus ??
+        ApplicationEventFlowStatusEnum.Saved,
       sourceUrl: props.initialValues.sourceUrl ?? "",
       appliedAt: props.initialValues.appliedAt ?? "",
       locationText: props.initialValues.locationText ?? "",
@@ -127,6 +135,7 @@
       companyId: (values.companyId as string) || null,
       title: (values.title as string).trim(),
       status: values.status as ApplicationStatus,
+      eventFlowStatus: values.eventFlowStatus as ApplicationEventFlowStatus,
       sourceUrl: values.sourceUrl ? (values.sourceUrl as string).trim() : null,
       appliedAt: values.appliedAt ? (values.appliedAt as string) : null,
       locationText: values.locationText
@@ -283,6 +292,22 @@
             {{ getStatusPreviewLabel($form.status?.value) }}
           </span>
         </div>
+      </div>
+
+      <div class="space-y-1">
+        <label
+          for="application-event-flow-status"
+          class="text-sm font-medium text-surface-700"
+        >
+          Event Flow
+        </label>
+        <Select
+          name="eventFlowStatus"
+          :options="APPLICATION_EVENT_FLOW_STATUS_OPTIONS"
+          option-label="label"
+          option-value="value"
+          fluid
+        />
       </div>
 
       <div class="space-y-1">
@@ -544,12 +569,3 @@
     </div>
   </Form>
 </template>
-
-
-
-
-
-
-
-
-

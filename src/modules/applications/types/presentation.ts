@@ -1,6 +1,10 @@
 import type { ApplicationBasePayload } from "@modules/applications/types/payloads";
+import type { InteractionStage } from "@modules/events/presentation/constants/interactionStages";
 
-import { ApplicationStatus } from "@modules/applications/types/enums";
+import {
+  ApplicationEventFlowStatus,
+  ApplicationStatus,
+} from "@modules/applications/types/enums";
 
 /**
  * Drawer state used by the application presentation layer.
@@ -21,10 +25,24 @@ export interface ApplicationSelectOption<TValue = string> {
  * Form values used by the application presentation layer.
  */
 export type ApplicationFormValues = ApplicationBasePayload;
+
+/**
+ * Draft flow step payload used when creating an application.
+ */
+export interface ApplicationDraftFlowStep {
+  type: InteractionStage;
+  eventAt: Date | null;
+}
+
 /**
  * Submission payload emitted by application forms.
  */
-export type ApplicationFormSubmitPayload = Omit<ApplicationBasePayload, "id">;
+export type ApplicationFormSubmitPayload = Omit<
+  ApplicationBasePayload,
+  "id"
+> & {
+  flowSteps?: ApplicationDraftFlowStep[];
+};
 
 /**
  * Build the default empty application form values.
@@ -34,6 +52,7 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
     companyId: null,
     title: "",
     status: ApplicationStatus.Saved,
+    eventFlowStatus: ApplicationEventFlowStatus.Saved,
     sourceUrl: "",
     appliedAt: "",
     locationText: "",
@@ -51,6 +70,3 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
     isArchived: false,
   };
 }
-
-
-

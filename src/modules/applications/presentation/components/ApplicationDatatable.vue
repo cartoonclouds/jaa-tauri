@@ -15,9 +15,11 @@
   import {
     formatApplicationAttendanceTypeLabel as formatAttendanceTypeLabel,
     formatApplicationEmploymentTypeLabel as formatEmploymentTypeLabel,
+    formatApplicationEventFlowStatusLabel as formatEventFlowStatusLabel,
     formatApplicationStatusLabel as formatStatusLabel,
     getApplicationAttendanceTypeClass as getAttendanceTypeClass,
     getApplicationEmploymentTypeClass as getEmploymentTypeClass,
+    getApplicationEventFlowStatusClass as getEventFlowStatusClass,
     getApplicationStatusClass as getStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
 
@@ -135,6 +137,30 @@
           :class="getStatusClass((slotProps.data as Application).status)"
         >
           {{ formatStatusLabel((slotProps.data as Application).status) }}
+        </span>
+      </template>
+    </Column>
+    <Column
+      field="eventFlowStatus"
+      header="Event Flow"
+      sortable
+      header-class="text-center"
+      body-class="text-center"
+    >
+      <template #body="slotProps">
+        <span
+          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          :class="
+            getEventFlowStatusClass(
+              (slotProps.data as Application).eventFlowStatus,
+            )
+          "
+        >
+          {{
+            formatEventFlowStatusLabel(
+              (slotProps.data as Application).eventFlowStatus,
+            )
+          }}
         </span>
       </template>
     </Column>

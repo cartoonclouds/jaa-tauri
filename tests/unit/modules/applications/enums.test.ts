@@ -1,6 +1,7 @@
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 import { describe, expect, it } from "vitest";
@@ -33,7 +34,15 @@ describe("application enums", () => {
 
   it("serializes enum instances with toString", () => {
     expect(ApplicationStatus.Technical.toString()).toBe("technical");
+    expect(ApplicationEventFlowStatus.Interview.toString()).toBe("interview");
     expect(ApplicationAttendanceType.OnSite.toString()).toBe("on-site");
     expect(ApplicationEmploymentType.Contract.toString()).toBe("contract");
+  });
+
+  it("resolves event-flow status instances from raw values", () => {
+    expect(ApplicationEventFlowStatus.fromValue("offer")).toBe(
+      ApplicationEventFlowStatus.Offer,
+    );
+    expect(ApplicationEventFlowStatus.fromValue("unknown")).toBeNull();
   });
 });

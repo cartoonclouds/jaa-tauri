@@ -3,6 +3,7 @@ import type { Application } from "@modules/applications/domain/entities/Applicat
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 import { mapEnumFromDbValue } from "@shared/utils/enum";
@@ -21,6 +22,9 @@ export function mapApplicationRowToEntity(
     status:
       mapEnumFromDbValue(row.status, ApplicationStatus) ??
       ApplicationStatus.Saved,
+    eventFlowStatus:
+      mapEnumFromDbValue(row.event_flow_status, ApplicationEventFlowStatus) ??
+      ApplicationEventFlowStatus.Saved,
     sourceUrl: (row.source_url as string | null) ?? null,
     appliedAt: toNullableDate(row.applied_at),
     locationText: (row.location_text as string | null) ?? null,
@@ -47,6 +51,3 @@ export function mapApplicationRowToEntity(
     updatedAt: toDate(row.updated_at),
   };
 }
-
-
-

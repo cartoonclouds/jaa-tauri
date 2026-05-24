@@ -13,10 +13,14 @@
   import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
+  import { useEventService } from "@modules/events";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
   import { ref } from "vue";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   const service = useApplicationService();
+  const eventService = useEventService();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -47,6 +51,8 @@
     createEmptyApplicationFormValues(),
   );
 
+  useBodyScrollLock(isDrawerOpen);
+
   /**
    * Handles to form values.
    */
@@ -64,6 +70,7 @@
       companyId: application.companyId,
       title: application.title,
       status: application.status,
+      eventFlowStatus: application.eventFlowStatus,
       sourceUrl: application.sourceUrl ?? "",
       appliedAt: formatDateTimeLocalValue(application.appliedAt),
       locationText: application.locationText ?? "",
@@ -162,6 +169,7 @@
            * Handles cancel edit mode.
            */
           status: payload.status,
+          eventFlowStatus: payload.eventFlowStatus,
           sourceUrl: payload.sourceUrl,
           appliedAt: payload.appliedAt,
           locationText: payload.locationText,
@@ -182,10 +190,11 @@
           isArchived: payload.isArchived,
         });
       } else {
-        await service.create({
+        const createdApplicationId = await service.create({
           companyId: payload.companyId,
           title: payload.title,
           status: payload.status,
+          eventFlowStatus: payload.eventFlowStatus,
           sourceUrl: payload.sourceUrl,
           appliedAt: payload.appliedAt,
           locationText: payload.locationText,
@@ -202,6 +211,17 @@
           priority: payload.priority,
           isArchived: payload.isArchived,
         });
+
+        for (const step of payload.flowSteps ?? []) {
+          await eventService.create({
+            applicationId: createdApplicationId,
+            contactId: null,
+            type: step.type,
+            title: step.type,
+            description: null,
+            eventAt: step.eventAt,
+          });
+        }
       }
 
       isDrawerOpen.value = false;

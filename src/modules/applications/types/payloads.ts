@@ -1,6 +1,7 @@
 import {
   type ApplicationAttendanceType,
   type ApplicationEmploymentType,
+  type ApplicationEventFlowStatus,
   type ApplicationStatus,
 } from "./enums";
 
@@ -14,6 +15,8 @@ export interface ApplicationBasePayload {
   title: string;
   /** Current application status. */
   status: ApplicationStatus;
+  /** Current high-level event flow status. */
+  eventFlowStatus: ApplicationEventFlowStatus;
   /** Optional source URL where the application was found. */
   sourceUrl?: string | null;
   /** Optional date the application was submitted. */
@@ -83,6 +86,3 @@ export type ApplicationCreatePayload = {
     /** Optional status override. */
     status?: ApplicationStatus;
   };
-
-
-

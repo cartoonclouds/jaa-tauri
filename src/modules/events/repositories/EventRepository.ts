@@ -4,10 +4,6 @@ import type { IRepository } from "@shared/types";
 
 import { mapEventRowToEntity } from "@modules/events/application/mappers/mapEventRow";
 import { EventRepositoryCreateSchema } from "@modules/events/domain/zod/event.schema";
-import {
-  buildSelectAllOrderedQuery,
-  DEFAULT_CREATED_AT_ORDER_BY,
-} from "@shared/utils/datatableQuery";
 
 /**
  * Type alias for event create payload.
@@ -38,10 +34,20 @@ export class EventRepository implements IEventRepository {
 
   async list(): Promise<Event[]> {
     const rows = await this.db.select<Record<string, unknown>>(
-      buildSelectAllOrderedQuery({
-        tableName: "events",
-        orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
-      }),
+      `SELECT
+         e.id,
+         ae.application_id,
+         e.contact_id,
+         e.type,
+         e.title,
+         e.description,
+         e.event_at,
+         e.created_at,
+         e.updated_at
+       FROM events e
+       INNER JOIN application_events ae
+         ON ae.event_id = e.id
+       ORDER BY e.created_at DESC, e.id DESC`,
     );
     return rows.map((row) => mapEventRowToEntity(row));
   }
@@ -63,10 +69,9 @@ export class EventRepository implements IEventRepository {
 
     const id = crypto.randomUUID();
     await this.db.execute(
-      "INSERT INTO events (id, application_id, contact_id, type, title, description, event_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+      "INSERT INTO events (id, contact_id, type, title, description, event_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
       [
         id,
-        parseResult.data.applicationId,
         parseResult.data.contactId ?? null,
         parseResult.data.type,
         title,
@@ -74,6 +79,12 @@ export class EventRepository implements IEventRepository {
         payload.eventAt ? payload.eventAt.toISOString() : null,
       ],
     );
+
+    await this.db.execute(
+      "INSERT INTO application_events (application_id, event_id) VALUES ($1, $2)",
+      [parseResult.data.applicationId, id],
+    );
+
     return id;
   }
 
@@ -100,11 +111,3 @@ export class EventRepository implements IEventRepository {
     await this.db.execute("DELETE FROM events WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

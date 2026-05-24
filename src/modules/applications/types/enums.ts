@@ -83,6 +83,63 @@ export type ApplicationStatus = ReturnType<
 >[number];
 
 /**
+ * PHP-style enum for application event-flow status.
+ */
+class ApplicationEventFlowStatusEnum extends EnumValue {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  toLabel(): string {
+    switch (this.value) {
+      case "saved":
+        return "Saved";
+      case "applied":
+        return "Applied";
+      case "interview":
+        return "Interview";
+      case "offer":
+        return "Offer";
+      case "rejected":
+        return "Rejected";
+      default:
+        return this.value;
+    }
+  }
+
+  static readonly Saved = new ApplicationEventFlowStatusEnum("saved");
+  static readonly Applied = new ApplicationEventFlowStatusEnum("applied");
+  static readonly Interview = new ApplicationEventFlowStatusEnum("interview");
+  static readonly Offer = new ApplicationEventFlowStatusEnum("offer");
+  static readonly Rejected = new ApplicationEventFlowStatusEnum("rejected");
+
+  static values(): ApplicationEventFlowStatusEnum[] {
+    return [
+      this.Saved,
+      this.Applied,
+      this.Interview,
+      this.Offer,
+      this.Rejected,
+    ];
+  }
+
+  static fromValue(
+    value: string | null | undefined,
+  ): ApplicationEventFlowStatusEnum | null {
+    return this.resolveByValue(this.values(), value);
+  }
+}
+
+export const ApplicationEventFlowStatus = ApplicationEventFlowStatusEnum;
+
+/**
+ * Type alias for application event-flow status.
+ */
+export type ApplicationEventFlowStatus = ReturnType<
+  typeof ApplicationEventFlowStatusEnum.values
+>[number];
+
+/**
  * PHP-style enum for application attendance type.
  * Usage:
  *   ApplicationAttendanceType.Remote.value // "remote"
@@ -211,11 +268,3 @@ export const ApplicationEmploymentType = ApplicationEmploymentTypeEnum;
 export type ApplicationEmploymentType = ReturnType<
   typeof ApplicationEmploymentTypeEnum.values
 >[number];
-
-
-
-
-
-
-
-

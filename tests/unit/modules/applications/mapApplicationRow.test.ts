@@ -2,6 +2,7 @@ import { mapApplicationRowToEntity } from "@modules/applications/application/map
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
+  ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 import { describe, expect, it } from "vitest";
@@ -15,6 +16,7 @@ describe("mapApplicationRowToEntity", () => {
       company_id: null,
       title: "Frontend Engineer",
       status: "applied",
+      event_flow_status: "offer",
       source_url: null,
       applied_at: now,
       location_text: null,
@@ -38,6 +40,7 @@ describe("mapApplicationRowToEntity", () => {
     expect(entity.attendanceType).toBe(ApplicationAttendanceType.Remote);
     expect(entity.employmentType).toBe(ApplicationEmploymentType.FullTime);
     expect(entity.status).toBe(ApplicationStatus.Applied);
+    expect(entity.eventFlowStatus).toBe(ApplicationEventFlowStatus.Offer);
   });
 
   it("returns null for unsupported optional enums and defaults invalid status", () => {
@@ -48,6 +51,7 @@ describe("mapApplicationRowToEntity", () => {
       company_id: null,
       title: "Backend Engineer",
       status: "invalid-status",
+      event_flow_status: "invalid-flow",
       source_url: null,
       applied_at: now,
       location_text: null,
@@ -71,5 +75,6 @@ describe("mapApplicationRowToEntity", () => {
     expect(entity.attendanceType).toBeNull();
     expect(entity.employmentType).toBeNull();
     expect(entity.status).toBe(ApplicationStatus.Saved);
+    expect(entity.eventFlowStatus).toBe(ApplicationEventFlowStatus.Saved);
   });
 });
