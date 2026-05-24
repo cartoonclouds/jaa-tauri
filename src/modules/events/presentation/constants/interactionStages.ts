@@ -52,24 +52,40 @@ export const EVENT_FLOW_BY_APPLICATION_STATUS: Record<
   InteractionStage[]
 > = {
   saved: ["Application/Saved"],
-  applied: ["Application/Saved", "Application/Submitted"],
+  applied: [
+    "Application/Saved",
+    "Application/Submitted",
+    "Screening/Recruiter Outreach",
+    "Screening/Phone Screen",
+  ],
   interview: [
     "Application/Saved",
     "Application/Submitted",
+    "Screening/Recruiter Outreach",
     "Screening/Phone Screen",
+    "Screening/Hiring Manager Review",
     "Interview/Technical Interview",
+    "Interview/Panel Interview",
   ],
   offer: [
     "Application/Saved",
     "Application/Submitted",
+    "Screening/Recruiter Outreach",
+    "Screening/Phone Screen",
     "Screening/Hiring Manager Review",
+    "Interview/Technical Interview",
+    "Interview/Panel Interview",
     "Interview/Final Round",
+    "Assessment/Take-home Assignment",
     "Offer/Written Offer",
+    "Negotiation/Compensation Negotiation",
   ],
   rejected: [
     "Application/Saved",
     "Application/Submitted",
+    "Screening/Recruiter Outreach",
     "Screening/Phone Screen",
+    "Interview/Technical Interview",
     "Decision/Rejected",
   ],
 };
@@ -79,26 +95,39 @@ export const FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS: Record<
   InteractionStage[]
 > = {
   saved: [
+    "Application/Submitted",
+    "Screening/Recruiter Outreach",
     "Screening/Phone Screen",
+    "Screening/Hiring Manager Review",
     "Interview/Technical Interview",
+    "Interview/Panel Interview",
+    "Interview/Final Round",
     "Offer/Written Offer",
     "Decision/Accepted",
     "Post-Offer/Onboarding",
   ],
   applied: [
+    "Screening/Recruiter Outreach",
     "Screening/Phone Screen",
+    "Screening/Hiring Manager Review",
     "Interview/Technical Interview",
+    "Interview/Panel Interview",
+    "Interview/Final Round",
     "Offer/Written Offer",
     "Decision/Accepted",
     "Post-Offer/Onboarding",
   ],
   "phone-screening": [
+    "Screening/Hiring Manager Review",
     "Interview/Technical Interview",
+    "Interview/Panel Interview",
+    "Interview/Final Round",
     "Offer/Written Offer",
     "Decision/Accepted",
     "Post-Offer/Onboarding",
   ],
   technical: [
+    "Interview/Panel Interview",
     "Interview/Final Round",
     "Offer/Written Offer",
     "Decision/Accepted",
@@ -274,11 +303,3 @@ export const EVENT_NOTIFICATION_SEVERITY_BY_PREFIX: {
 ];
 
 export const EVENT_NOTIFICATION_BODY_PREFIX = "Flow update" as const;
-
-
-
-
-
-
-
-

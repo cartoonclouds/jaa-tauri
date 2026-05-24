@@ -52,7 +52,7 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
     companyId: null,
     title: "",
     status: ApplicationStatus.Saved,
-    eventFlowStatus: ApplicationEventFlowStatus.Saved,
+    eventFlowStatus: ApplicationEventFlowStatus.Applied,
     sourceUrl: "",
     appliedAt: "",
     locationText: "",

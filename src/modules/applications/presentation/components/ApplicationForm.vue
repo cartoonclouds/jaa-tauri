@@ -62,7 +62,7 @@
       status: props.initialValues.status ?? ApplicationStatusEnum.Saved,
       eventFlowStatus:
         props.initialValues.eventFlowStatus ??
-        ApplicationEventFlowStatusEnum.Saved,
+        ApplicationEventFlowStatusEnum.Applied,
       sourceUrl: props.initialValues.sourceUrl ?? "",
       appliedAt: props.initialValues.appliedAt ?? "",
       locationText: props.initialValues.locationText ?? "",

@@ -188,7 +188,7 @@ export class ApplicationRepository implements IApplicationRepository {
         title,
         parseResult.data.status?.value ?? ApplicationStatus.Saved.value,
         parseResult.data.eventFlowStatus?.value ??
-          ApplicationEventFlowStatus.Saved.value,
+          ApplicationEventFlowStatus.Applied.value,
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         parseResult.data.locationText ?? null,

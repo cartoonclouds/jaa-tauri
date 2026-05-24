@@ -241,6 +241,20 @@
 
     await remove(item.eventId);
   }
+
+  /**
+   * Returns connector classes for timeline transitions.
+   */
+  function getStageConnectorClass(index: number): string {
+    const nextItem = displayedFlowStages.value[index + 1];
+    if (!nextItem) {
+      return "";
+    }
+
+    return nextItem.isFuture
+      ? "border-l-2 border-dashed border-surface-300"
+      : "border-l-2 border-solid border-surface-300";
+  }
 </script>
 
 <template>
@@ -273,6 +287,7 @@
               v-for="(item, index) in displayedFlowStages"
               :key="`${item.stage}-${index}`"
               :value="String(index + 1)"
+              class="group"
             >
               <Step class="pointer-events-none">
                 <div class="flex w-full justify-start gap-3 text-left">
@@ -290,7 +305,7 @@
 
                   <div
                     v-if="!item.isFuture && item.eventId"
-                    class="pointer-events-auto ml-auto flex items-center gap-1"
+                    class="pointer-events-none ml-auto flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
                   >
                     <Button
                       type="button"
@@ -316,6 +331,18 @@
                   </div>
                 </div>
               </Step>
+
+              <div
+                v-if="index < displayedFlowStages.length - 1"
+                class="my-1 h-4"
+                style="
+                  margin-left: calc(
+                    0.75rem + (var(--p-stepper-step-number-size, 2rem) / 2) -
+                      1px
+                  );
+                "
+                :class="getStageConnectorClass(index)"
+              />
             </StepItem>
           </Stepper>
         </div>
