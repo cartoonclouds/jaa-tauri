@@ -23,6 +23,7 @@ export const ContactSchema = z.object({
   locationLng: NullableLongitudeSchema,
   type: ContactTypeSchema,
   notes: NullableStringSchema,
+  tagIds: z.array(UuidSchema),
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
@@ -59,11 +60,3 @@ export type Contact = z.infer<typeof ContactSchema>;
  * Type alias for create contact input.
  */
 export type CreateContactInput = z.infer<typeof CreateContactSchema>;
-
-
-
-
-
-
-
-

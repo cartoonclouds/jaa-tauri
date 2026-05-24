@@ -13,8 +13,5 @@ CREATE TABLE IF NOT EXISTS companies (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_companies_name
-ON companies (name);
-
 CREATE INDEX IF NOT EXISTS idx_companies_location_coords
 ON companies (location_lat, location_lng);

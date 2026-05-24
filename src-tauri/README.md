@@ -94,6 +94,14 @@ cd .. && npm run db:seed
 The seed runner reads SQL migrations from `migrations/`, clears data in FK-safe order,
 then inserts mock rows in FK-safe order into `sqlite:applyflow.db`.
 
+To upsert production baseline data (for example canonical tags and constants) without deleting existing records:
+
+```bash
+cd .. && npm run db:seed:production
+```
+
+This command runs `src-tauri/factories/seed.ts` in production mode.
+
 To build for release:
 
 ```bash

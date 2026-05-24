@@ -141,8 +141,8 @@
         <Tab value="summary">Summary</Tab>
         <Tab value="application">Application</Tab>
         <Tab value="contact">Contacts</Tab>
-        <Tab value="files">Files</Tab>
         <Tab value="map">Map</Tab>
+        <Tab value="files">Files</Tab>
       </TabList>
 
       <TabPanels>
@@ -178,12 +178,12 @@
           />
         </TabPanel>
 
-        <TabPanel value="files">
-          <ApplicationDetailsFilesTab :application="application" />
-        </TabPanel>
-
         <TabPanel value="map">
           <ApplicationDetailsMapTab :application="application" />
+        </TabPanel>
+
+        <TabPanel value="files">
+          <ApplicationDetailsFilesTab :application="application" />
         </TabPanel>
       </TabPanels>
     </Tabs>

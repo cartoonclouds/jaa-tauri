@@ -21,7 +21,8 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "db:seed": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts"
+    "db:seed": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts",
+    "db:seed:production": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts --mode=production"
   },
   "dependencies": {
     "@nuxt/hints": "1.1.1",

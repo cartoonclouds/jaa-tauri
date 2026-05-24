@@ -18,10 +18,8 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
     locationLng: (row.location_lng as number | null) ?? null,
     type: row.type === "recruiter" ? "recruiter" : "company",
     notes: (row.notes as string | null) ?? null,
+    tagIds: [],
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),
   };
 }
-
-
-

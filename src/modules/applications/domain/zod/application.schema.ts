@@ -125,6 +125,7 @@ export const ApplicationSchema = z.object({
   description: NullableStringSchema,
   interviewProcess: NullableStringSchema,
   benefits: NullableStringSchema,
+  tagIds: z.array(UuidSchema),
   priority: z.number(),
   isArchived: z.boolean(),
   isDeleted: z.boolean(),
@@ -194,6 +195,7 @@ export const ApplicationFormSchema = z
     description: z.string().nullable().or(z.literal("")),
     interviewProcess: z.string().nullable().or(z.literal("")),
     benefits: z.string().nullable().or(z.literal("")),
+    tagIds: z.array(UuidSchema),
     priority: z
       .number()
       .min(1, "Priority must be between 1 and 5")

@@ -25,6 +25,8 @@ const REQUIRED_MIGRATION_TABLES = [
   "settings",
   "profiles",
   "application_tags",
+  "company_tags",
+  "contact_tags",
   "application_documents",
   "application_contacts",
   "constants",
@@ -77,11 +79,3 @@ export async function ensureMigrationsAppliedOnFirstRun(
     );
   }
 }
-
-
-
-
-
-
-
-

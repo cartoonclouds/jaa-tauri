@@ -19,6 +19,10 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
+import {
+  listTagIdsForEntity,
+  syncTagIdsForEntity,
+} from "@shared/utils/tagAssociations";
 
 /**
  * Type alias for contact create payload.
@@ -35,7 +39,9 @@ export type ContactCreatePayload = Pick<
   | "locationLng"
   | "type"
   | "notes"
->;
+> & {
+  tagIds?: string[];
+};
 /**
  * Type alias for contact update payload.
  */
@@ -71,6 +77,13 @@ export interface ApplicationLinkedContact {
 export class ContactRepository implements IContactRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
+  private async withTags(contact: Contact): Promise<Contact> {
+    return {
+      ...contact,
+      tagIds: await listTagIdsForEntity(this.db, "contact", contact.id),
+    };
+  }
+
   async list(): Promise<Contact[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       buildSelectAllOrderedQuery({
@@ -78,7 +91,9 @@ export class ContactRepository implements IContactRepository {
         orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
       }),
     );
-    return rows.map((row) => mapContactRowToEntity(row));
+    return Promise.all(
+      rows.map(async (row) => this.withTags(mapContactRowToEntity(row))),
+    );
   }
 
   async listPage(
@@ -123,7 +138,9 @@ export class ContactRepository implements IContactRepository {
         );
 
     return {
-      items: listRows.map((row) => mapContactRowToEntity(row)),
+      items: await Promise.all(
+        listRows.map(async (row) => this.withTags(mapContactRowToEntity(row))),
+      ),
       total: totalRows[0]?.total ?? 0,
     };
   }
@@ -182,6 +199,9 @@ export class ContactRepository implements IContactRepository {
         payload.notes ?? null,
       ],
     );
+
+    await syncTagIdsForEntity(this.db, "contact", id, payload.tagIds);
+
     return id;
   }
 
@@ -212,17 +232,13 @@ export class ContactRepository implements IContactRepository {
         payload.id,
       ],
     );
+
+    if (payload.tagIds !== undefined) {
+      await syncTagIdsForEntity(this.db, "contact", payload.id, payload.tagIds);
+    }
   }
 
   async delete(id: string): Promise<void> {
     await this.db.execute("DELETE FROM contacts WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

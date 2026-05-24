@@ -2,9 +2,14 @@ import { CompanyRepository } from "@modules/companies";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
-  return {
+  const db = {
     execute: vi.fn(async () => ({ rowsAffected: 1 })),
+    transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+      callback(db),
+    ),
   };
+
+  return db;
 }
 
 describe("CompanyRepository.create", () => {
@@ -23,6 +28,6 @@ describe("CompanyRepository.create", () => {
 
     await repository.create({ name: "Acme Ltd" });
 
-    expect(db.execute).toHaveBeenCalledOnce();
+    expect(db.execute).toHaveBeenCalledTimes(2);
   });
 });

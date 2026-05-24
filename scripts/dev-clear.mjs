@@ -36,10 +36,14 @@ async function main() {
     throw new Error("npm_execpath is not available");
   }
 
-  const result = spawnSync(process.execPath, [npmCliPath, "run", "db:seed"], {
-    cwd: projectRoot,
-    stdio: "inherit",
-  });
+  const result = spawnSync(
+    process.execPath,
+    [npmCliPath, "run", "db:seed", "--", "--mode=development"],
+    {
+      cwd: projectRoot,
+      stdio: "inherit",
+    },
+  );
 
   if (result.error) {
     throw result.error;

@@ -29,6 +29,8 @@ export interface Contact {
   type: ContactType;
   /** Free-form notes about the contact. */
   notes: string | null;
+  /** Associated tag identifiers. */
+  tagIds: string[];
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -52,6 +54,3 @@ export interface CreateContactInput {
   /** Contact category. */
   type: ContactType;
 }
-
-
-

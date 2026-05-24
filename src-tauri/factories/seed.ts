@@ -8,20 +8,59 @@ import { createApplicationDocumentRows } from "./application_documents.factory";
 import { createApplicationTagRows } from "./application_tags.factory";
 import { createApplicationRows } from "./applications.factory";
 import { createCompanyRows } from "./companies.factory";
+import { createCompanyTagRows } from "./company_tags.factory";
 import { createConstantRows } from "./constants.factory";
+import { createContactTagRows } from "./contact_tags.factory";
 import { createContactRows } from "./contacts.factory";
 import { createDocumentRows } from "./documents.factory";
 import { createEventRows } from "./events.factory";
 import { createNotificationRows } from "./notifications.factory";
+import { createProductionConstantRows } from "./production/constants.factory";
+import { createProductionTagRows } from "./production/tags.factory";
 import { createProfileRow } from "./profiles.factory";
 import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
 
 type SqlValue = string | number | bigint | Uint8Array | null;
 
+type SeedMode = "development" | "production";
+
+interface UpsertStats {
+  inserted: number;
+  updated: number;
+}
+
+interface ProductionSeedResult {
+  mode: SeedMode;
+  tags: UpsertStats;
+  constants: UpsertStats;
+}
+
+interface DevelopmentSeedResult {
+  mode: SeedMode;
+  seed: number;
+  counts: Record<string, number>;
+}
+
+type SeedResult = DevelopmentSeedResult | ProductionSeedResult;
+
+interface SqliteRunResult {
+  changes: number;
+}
+
+interface ExistingTagRow {
+  id: string;
+}
+
+interface ExistingConstantRow {
+  type: string;
+  value: string;
+}
+
 interface SqliteStatement {
   run(...params: SqlValue[]): unknown;
   all(...params: SqlValue[]): unknown[];
+  get(...params: SqlValue[]): unknown;
 }
 
 interface SqliteDatabaseLike {
@@ -71,6 +110,25 @@ function resolveDatabaseUrlFromEnv(env: AppSeedEnv): string {
   return `${driver}:${name}`;
 }
 
+function resolveSeedMode(rawMode: string | undefined): SeedMode {
+  if (rawMode === "production") {
+    return "production";
+  }
+
+  return "development";
+}
+
+function readSeedMode(env: AppSeedEnv, args: string[]): SeedMode {
+  const modeArg = args.find((arg) => arg.startsWith("--mode="));
+  if (modeArg) {
+    const value = modeArg.slice("--mode=".length).trim();
+    return resolveSeedMode(value);
+  }
+
+  const envMode = env.APP_SEED_MODE;
+  return resolveSeedMode(envMode?.trim());
+}
+
 interface SeedConfig {
   seed: number;
   companyCount: number;
@@ -79,6 +137,8 @@ interface SeedConfig {
   tagCount: number;
   documentCount: number;
   tagsPerApplication: number;
+  tagsPerCompany: number;
+  tagsPerContact: number;
   eventsPerApplication: number;
   notificationsPerApplication: number;
   documentsPerApplication: number;
@@ -98,6 +158,8 @@ function readSeedConfig(env: AppSeedEnv): SeedConfig {
     tagCount: readNumber(env, "APP_SEED_TAGS_COUNT", 8),
     documentCount: readNumber(env, "APP_SEED_DOCUMENTS_COUNT", 24),
     tagsPerApplication: readNumber(env, "APP_SEED_TAGS_PER_APPLICATION", 2),
+    tagsPerCompany: readNumber(env, "APP_SEED_TAGS_PER_COMPANY", 1),
+    tagsPerContact: readNumber(env, "APP_SEED_TAGS_PER_CONTACT", 1),
     eventsPerApplication: readNumber(env, "APP_SEED_EVENTS_PER_APPLICATION", 3),
     notificationsPerApplication: readNumber(
       env,
@@ -229,6 +291,8 @@ function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
     "notifications",
     "events",
     "application_tags",
+    "company_tags",
+    "contact_tags",
     "profiles",
     "settings",
     "documents",
@@ -243,8 +307,101 @@ function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
   }
 }
 
+function upsertTags(
+  db: SqliteDatabaseLike,
+  rows: ReturnType<typeof createProductionTagRows>,
+): UpsertStats {
+  const selectExisting = db.prepare("SELECT id FROM tags WHERE name = ?");
+  const insertTag = db.prepare(
+    "INSERT INTO tags (id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+  );
+  const updateTag = db.prepare(
+    "UPDATE tags SET color = ?, updated_at = ? WHERE name = ?",
+  );
+
+  let inserted = 0;
+  let updated = 0;
+
+  for (const row of rows) {
+    const existing = selectExisting.get(row.name) as ExistingTagRow | undefined;
+    if (!existing) {
+      insertTag.run(
+        row.id,
+        row.name,
+        row.color,
+        row.created_at,
+        row.updated_at,
+      );
+      inserted += 1;
+      continue;
+    }
+
+    const result = updateTag.run(
+      row.color,
+      row.updated_at,
+      row.name,
+    ) as SqliteRunResult;
+    if (result.changes > 0) {
+      updated += 1;
+    }
+  }
+
+  return { inserted, updated };
+}
+
+function upsertConstants(
+  db: SqliteDatabaseLike,
+  rows: ReturnType<typeof createProductionConstantRows>,
+): UpsertStats {
+  const selectExisting = db.prepare(
+    "SELECT type, value FROM constants WHERE type = ? AND value = ?",
+  );
+  const insertConstant = db.prepare(
+    "INSERT INTO constants (settings_label, type, value, label, is_visible) VALUES (?, ?, ?, ?, ?)",
+  );
+  const updateConstant = db.prepare(
+    "UPDATE constants SET settings_label = ?, label = ?, is_visible = ? WHERE type = ? AND value = ?",
+  );
+
+  let inserted = 0;
+  let updated = 0;
+
+  for (const row of rows) {
+    const existing = selectExisting.get(row.type, row.value) as
+      | ExistingConstantRow
+      | undefined;
+
+    if (!existing) {
+      insertConstant.run(
+        row.settings_label,
+        row.type,
+        row.value,
+        row.label,
+        row.is_visible,
+      );
+      inserted += 1;
+      continue;
+    }
+
+    const result = updateConstant.run(
+      row.settings_label,
+      row.label,
+      row.is_visible,
+      row.type,
+      row.value,
+    ) as SqliteRunResult;
+
+    if (result.changes > 0) {
+      updated += 1;
+    }
+  }
+
+  return { inserted, updated };
+}
+
 function main(): void {
   const env = loadEnv("", process.cwd(), "");
+  const seedMode = readSeedMode(env, process.argv.slice(2));
 
   const databaseUrl =
     env.DATABASE_URL && env.DATABASE_URL.trim().length > 0
@@ -258,10 +415,22 @@ function main(): void {
   const migrationsDir = path.resolve(process.cwd(), "src-tauri", "migrations");
   runMigrations(db, migrationsDir);
 
-  const seedConfig = readSeedConfig(env);
-  const seed = seedConfig.seed;
+  const seedTx = db.transaction((): SeedResult => {
+    if (seedMode === "production") {
+      const timestamp = new Date().toISOString();
+      const tags = upsertTags(db, createProductionTagRows(timestamp));
+      const constants = upsertConstants(db, createProductionConstantRows());
 
-  const seedTx = db.transaction((): Record<string, number> => {
+      return {
+        mode: "production",
+        tags,
+        constants,
+      };
+    }
+
+    const seedConfig = readSeedConfig(env);
+    const seed = seedConfig.seed;
+
     deleteAllInFkSafeOrder(db);
 
     const companies = createCompanyRows(seedConfig.companyCount, seed + 40);
@@ -288,6 +457,20 @@ function main(): void {
       tags.map((t) => t.id),
       seedConfig.tagsPerApplication,
       seed + 110,
+    );
+
+    const companyTags = createCompanyTagRows(
+      companies.map((company) => company.id),
+      tags.map((tag) => tag.id),
+      seedConfig.tagsPerCompany,
+      seed + 111,
+    );
+
+    const contactTags = createContactTagRows(
+      contacts.map((contact) => contact.id),
+      tags.map((tag) => tag.id),
+      seedConfig.tagsPerContact,
+      seed + 112,
     );
 
     const events = createEventRows(
@@ -321,7 +504,9 @@ function main(): void {
       event_id: event.id,
     }));
 
-    const eventRows = events.map(({ application_id, ...eventRow }) => eventRow);
+    const eventRows = events.map(
+      ({ application_id: _application_id, ...eventRow }) => eventRow,
+    );
 
     const applicationDocuments = createApplicationDocumentRows(
       applications.map((a) => a.id),
@@ -353,6 +538,8 @@ function main(): void {
       profiles: insertMany(db, "profiles", [profile]),
       settings: insertMany(db, "settings", [settings]),
       application_tags: insertMany(db, "application_tags", applicationTags),
+      company_tags: insertMany(db, "company_tags", companyTags),
+      contact_tags: insertMany(db, "contact_tags", contactTags),
       events: insertMany(db, "events", eventRows),
       application_events: insertMany(
         db,
@@ -372,15 +559,18 @@ function main(): void {
       ),
     };
 
-    return counts;
+    return {
+      mode: "development",
+      seed,
+      counts,
+    };
   });
 
-  const counts = seedTx();
+  const result = seedTx();
 
   process.stdout.write("Seed complete\n");
-  process.stdout.write(`${JSON.stringify(counts, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   process.stdout.write(`Database: ${databaseFile}\n`);
-  process.stdout.write(`Seed: ${String(seed)}\n`);
 
   db.close();
 }

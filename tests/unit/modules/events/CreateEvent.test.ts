@@ -37,6 +37,6 @@ describe("EventRepository.create", () => {
       eventAt: null,
     });
 
-    expect(db.execute).toHaveBeenCalledOnce();
+    expect(db.execute).toHaveBeenCalledTimes(2);
   });
 });

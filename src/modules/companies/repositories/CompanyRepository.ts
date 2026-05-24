@@ -16,6 +16,10 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
+import {
+  listTagIdsForEntity,
+  syncTagIdsForEntity,
+} from "@shared/utils/tagAssociations";
 
 /**
  * Defines company create payload.
@@ -30,6 +34,7 @@ export interface CompanyCreatePayload {
   locationLat?: number | null;
   locationLng?: number | null;
   notes?: string | null;
+  tagIds?: string[];
 }
 
 /**
@@ -46,6 +51,7 @@ export interface CompanyUpdatePayload {
   locationLat?: number | null;
   locationLng?: number | null;
   notes?: string | null;
+  tagIds?: string[];
 }
 
 /**
@@ -65,6 +71,13 @@ export interface ICompanyRepository extends IRepository<
 export class CompanyRepository implements ICompanyRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
+  private async withTags(company: Company): Promise<Company> {
+    return {
+      ...company,
+      tagIds: await listTagIdsForEntity(this.db, "company", company.id),
+    };
+  }
+
   async list(): Promise<Company[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       buildSelectAllOrderedQuery({
@@ -73,7 +86,9 @@ export class CompanyRepository implements ICompanyRepository {
       }),
     );
 
-    return rows.map((row) => mapCompanyRowToEntity(row));
+    return Promise.all(
+      rows.map(async (row) => this.withTags(mapCompanyRowToEntity(row))),
+    );
   }
 
   async listPage(
@@ -118,7 +133,9 @@ export class CompanyRepository implements ICompanyRepository {
         );
 
     return {
-      items: listRows.map((row) => mapCompanyRowToEntity(row)),
+      items: await Promise.all(
+        listRows.map(async (row) => this.withTags(mapCompanyRowToEntity(row))),
+      ),
       total: totalRows[0]?.total ?? 0,
     };
   }
@@ -166,6 +183,9 @@ export class CompanyRepository implements ICompanyRepository {
         payload.notes ?? null,
       ],
     );
+
+    await syncTagIdsForEntity(this.db, "company", id, payload.tagIds);
+
     return id;
   }
 
@@ -199,17 +219,13 @@ export class CompanyRepository implements ICompanyRepository {
         payload.id,
       ],
     );
+
+    if (payload.tagIds !== undefined) {
+      await syncTagIdsForEntity(this.db, "company", payload.id, payload.tagIds);
+    }
   }
 
   async delete(id: string): Promise<void> {
     await this.db.execute("DELETE FROM companies WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

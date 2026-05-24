@@ -290,6 +290,8 @@ Current tables include:
 - company_contacts
 - tags
 - application_tags
+- company_tags
+- contact_tags
 - application_events
 - application_tasks
 - documents
@@ -298,6 +300,8 @@ Current tables include:
 ## Seed Data and Factories
 
 Deterministic factories (one file per table) are in `src-tauri/factories`.
+
+Production bootstrap factories are in `src-tauri/factories/production` and are executed through `src-tauri/factories/seed.ts --mode=production` to upsert required baseline rows (for example tags and constants) without deleting existing data.
 
 - mock data generation uses `@faker-js/faker`
 - seed runner uses `better-sqlite3`
@@ -308,6 +312,12 @@ Run seed script:
 
 ```bash
 npm run db:seed
+```
+
+Run production bootstrap seed script:
+
+```bash
+npm run db:seed:production
 ```
 
 Optional overrides:
@@ -353,6 +363,7 @@ npm run typecheck
 npm run test:run
 npm run test:coverage
 npm run db:seed
+npm run db:seed:production
 ```
 
 ## Nuxt Dev Stability

@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS contacts (
   phone TEXT,
   linkedin_url TEXT,
   type TEXT NOT NULL CHECK (type IN ('company', 'recruiter')),
+  location_text TEXT,
+  location_lat REAL,
+  location_lng REAL,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -17,6 +20,3 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 CREATE INDEX IF NOT EXISTS idx_contacts_company_id
 ON contacts (company_id);
-
-CREATE INDEX IF NOT EXISTS idx_contacts_type
-ON contacts (type);

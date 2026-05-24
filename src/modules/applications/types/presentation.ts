@@ -42,6 +42,7 @@ export type ApplicationFormSubmitPayload = Omit<
   "id"
 > & {
   flowSteps?: ApplicationDraftFlowStep[];
+  pendingTagNames?: string[];
 };
 
 /**
@@ -66,6 +67,7 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
     description: "",
     interviewProcess: "",
     benefits: "",
+    tagIds: [],
     priority: 3,
     isArchived: false,
   };

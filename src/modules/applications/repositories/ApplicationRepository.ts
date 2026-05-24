@@ -28,6 +28,10 @@ import {
   resolveOrderByClause,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
+import {
+  listTagIdsForEntity,
+  syncTagIdsForEntity,
+} from "@shared/utils/tagAssociations";
 
 /**
  * Defines iapplication repository.
@@ -48,6 +52,13 @@ export interface IApplicationRepository extends IRepository<
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
+  private async withTags(application: Application): Promise<Application> {
+    return {
+      ...application,
+      tagIds: await listTagIdsForEntity(this.db, "application", application.id),
+    };
+  }
+
   async list(): Promise<Application[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       buildSelectAllOrderedQuery({
@@ -57,7 +68,9 @@ export class ApplicationRepository implements IApplicationRepository {
       }),
     );
 
-    return rows.map((row) => mapApplicationRowToEntity(row));
+    return Promise.all(
+      rows.map(async (row) => this.withTags(mapApplicationRowToEntity(row))),
+    );
   }
 
   async listPage(
@@ -114,7 +127,11 @@ export class ApplicationRepository implements IApplicationRepository {
         );
 
     return {
-      items: listRows.map((row) => mapApplicationRowToEntity(row)),
+      items: await Promise.all(
+        listRows.map(async (row) =>
+          this.withTags(mapApplicationRowToEntity(row)),
+        ),
+      ),
       total: totalRows[0]?.total ?? 0,
     };
   }
@@ -206,6 +223,9 @@ export class ApplicationRepository implements IApplicationRepository {
         payload.isArchived ? 1 : 0,
       ],
     );
+
+    await syncTagIdsForEntity(this.db, "application", id, payload.tagIds);
+
     return id;
   }
 
@@ -258,6 +278,13 @@ export class ApplicationRepository implements IApplicationRepository {
         payload.isArchived ? 1 : 0,
         payload.id,
       ],
+    );
+
+    await syncTagIdsForEntity(
+      this.db,
+      "application",
+      payload.id,
+      payload.tagIds,
     );
   }
 

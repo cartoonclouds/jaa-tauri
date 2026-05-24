@@ -27,9 +27,10 @@
     type ApplicationFormValues,
     type ApplicationSelectOption,
   } from "@modules/applications/types/presentation";
+  import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
-  import { computed } from "vue";
+  import { computed, ref, watch } from "vue";
 
   /**
    * Defines props.
@@ -55,6 +56,18 @@
     cancel: [];
   }>();
 
+  const selectedTagIds = ref<string[]>([]);
+  const pendingTagNames = ref<string[]>([]);
+
+  watch(
+    () => props.initialValues.tagIds,
+    (tagIds) => {
+      selectedTagIds.value = [...(tagIds ?? [])];
+      pendingTagNames.value = [];
+    },
+    { immediate: true },
+  );
+
   const formValues = computed(() => {
     return {
       companyId: props.initialValues.companyId ?? null,
@@ -76,6 +89,7 @@
       description: props.initialValues.description ?? "",
       interviewProcess: props.initialValues.interviewProcess ?? "",
       benefits: props.initialValues.benefits ?? "",
+      tagIds: props.initialValues.tagIds ?? [],
       priority: props.initialValues.priority ?? 3,
       isArchived: props.initialValues.isArchived ?? false,
     };
@@ -157,6 +171,8 @@
         ? (values.interviewProcess as string).trim()
         : null,
       benefits: values.benefits ? (values.benefits as string).trim() : null,
+      tagIds: selectedTagIds.value.filter(Boolean),
+      pendingTagNames: [...pendingTagNames.value],
       priority: values.priority as number,
       isArchived: values.isArchived as boolean,
     });
@@ -228,6 +244,16 @@
         >
           {{ $form.title?.error?.message }}
         </Message>
+      </div>
+
+      <div class="space-y-1 md:col-span-2">
+        <label class="text-sm font-medium text-surface-700">Tags</label>
+        <TagMultiSelect
+          v-model="selectedTagIds"
+          v-model:pending-tag-names="pendingTagNames"
+          placeholder="Select tags"
+          class="w-full"
+        />
       </div>
 
       <div class="space-y-1">

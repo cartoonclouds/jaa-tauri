@@ -19,6 +19,7 @@ export const CompanySchema = z.object({
   locationLat: NullableLatitudeSchema,
   locationLng: NullableLongitudeSchema,
   notes: NullableStringSchema,
+  tagIds: z.array(UuidSchema),
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
@@ -40,11 +41,3 @@ export type Company = z.infer<typeof CompanySchema>;
  * Type alias for create company input.
  */
 export type CreateCompanyInput = z.infer<typeof CreateCompanySchema>;
-
-
-
-
-
-
-
-

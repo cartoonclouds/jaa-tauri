@@ -17,10 +17,8 @@ export function mapCompanyRowToEntity(row: Record<string, unknown>): Company {
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
     notes: (row.notes as string | null) ?? null,
+    tagIds: [],
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),
   };
 }
-
-
-

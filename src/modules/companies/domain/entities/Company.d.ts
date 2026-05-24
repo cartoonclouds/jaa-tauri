@@ -22,6 +22,8 @@ export interface Company {
   locationLng: number | null;
   /** Additional notes about the company. */
   notes: string | null;
+  /** Associated tag identifiers. */
+  tagIds: string[];
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -41,6 +43,3 @@ export interface CreateCompanyInput {
   /** Longitude for geocoded location data. */
   locationLng?: number | null;
 }
-
-
-

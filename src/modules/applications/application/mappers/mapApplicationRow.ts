@@ -44,6 +44,7 @@ export function mapApplicationRowToEntity(
     description: (row.description as string | null) ?? null,
     interviewProcess: (row.interview_process as string | null) ?? null,
     benefits: (row.benefits as string | null) ?? null,
+    tagIds: [],
     priority: Number(row.priority ?? 3),
     isArchived: Number(row.is_archived ?? 0) === 1,
     isDeleted: Number(row.is_deleted ?? 0) === 1,

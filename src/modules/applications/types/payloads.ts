@@ -43,6 +43,8 @@ export interface ApplicationBasePayload {
   interviewProcess?: string | null;
   /** Additional benefits or compensation notes. */
   benefits?: string | null;
+  /** Associated tag identifiers. */
+  tagIds: string[];
   /** Priority score used for sorting and emphasis. */
   priority: number;
   /** Whether the application is archived. */

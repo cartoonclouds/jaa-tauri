@@ -2,9 +2,14 @@ import { ContactRepository } from "@modules/contacts";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
-  return {
+  const db = {
     execute: vi.fn(async () => ({ rowsAffected: 1 })),
+    transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+      callback(db),
+    ),
   };
+
+  return db;
 }
 
 describe("ContactRepository.create", () => {
@@ -45,6 +50,6 @@ describe("ContactRepository.create", () => {
       notes: null,
     });
 
-    expect(db.execute).toHaveBeenCalledOnce();
+    expect(db.execute).toHaveBeenCalledTimes(2);
   });
 });

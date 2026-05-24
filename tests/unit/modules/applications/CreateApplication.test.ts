@@ -3,9 +3,14 @@ import { ApplicationEventFlowStatus } from "@modules/applications/types/enums";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
-  return {
-    execute: vi.fn(async () => ({ rowsAffected: 1 })),
+  const db = {
+    execute: vi.fn(async (..._args: unknown[]) => ({ rowsAffected: 1 })),
+    transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+      callback(db),
+    ),
   };
+
+  return db;
 }
 
 describe("ApplicationRepository.create", () => {
@@ -24,11 +29,12 @@ describe("ApplicationRepository.create", () => {
 
     await repository.create({ title: "Frontend Engineer" });
 
-    expect(db.execute).toHaveBeenCalledOnce();
-    const executeArguments = vi.mocked(db.execute).mock.calls[0];
-    const values = executeArguments?.[1] as unknown[];
+    expect(db.execute).toHaveBeenCalledTimes(2);
+    const values = vi.mocked(db.execute).mock.calls[0]?.[1];
 
-    expect(values).toBeDefined();
-    expect(values[4]).toBe(ApplicationEventFlowStatus.Applied.value);
+    expect(Array.isArray(values)).toBe(true);
+    expect((values as unknown[])[4]).toBe(
+      ApplicationEventFlowStatus.Applied.value,
+    );
   });
 });

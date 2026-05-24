@@ -31,9 +31,6 @@ CREATE TABLE IF NOT EXISTS applications (
 CREATE INDEX IF NOT EXISTS idx_applications_company_id
 ON applications (company_id);
 
-CREATE INDEX IF NOT EXISTS idx_applications_status
-ON applications (status);
-
 CREATE INDEX IF NOT EXISTS idx_applications_event_flow_status
 ON applications (event_flow_status);
 

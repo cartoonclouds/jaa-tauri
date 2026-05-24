@@ -14,6 +14,8 @@
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies/presentation/composables/useCompany";
   import { useEventService } from "@modules/events";
+  import { useTagService } from "@modules/tags";
+  import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
   import { ref } from "vue";
 
@@ -21,6 +23,7 @@
 
   const service = useApplicationService();
   const eventService = useEventService();
+  const tagService = useTagService();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -84,6 +87,7 @@
       description: application.description ?? "",
       interviewProcess: application.interviewProcess ?? "",
       benefits: application.benefits ?? "",
+      tagIds: application.tagIds,
       priority: application.priority,
       isArchived: application.isArchived,
     };
@@ -134,19 +138,10 @@
     /**
      * Checks whether cel edit mode is true.
      */
-    /**
-     * Checks whether cel edit mode is true.
-     */
     if (!selectedApplication.value) {
       drawerMode.value = "create";
       return;
     }
-
-    /**
-
- * Handles switch to edit mode.
-
- */
 
     drawerMode.value = "view";
   }
@@ -160,6 +155,12 @@
     isSubmitting.value = true;
 
     try {
+      const resolvedTagIds = await resolveTagIdsWithPendingTags({
+        selectedTagIds: payload.tagIds,
+        pendingTagNames: payload.pendingTagNames,
+        tagService,
+      });
+
       if (drawerMode.value === "edit" && selectedApplication.value) {
         await service.update({
           id: selectedApplication.value.id,
@@ -183,6 +184,7 @@
           description: payload.description,
           interviewProcess: payload.interviewProcess,
           benefits: payload.benefits,
+          tagIds: resolvedTagIds,
           priority: payload.priority,
           /**
            * Handles on drawer submit.
@@ -208,6 +210,7 @@
           description: payload.description,
           interviewProcess: payload.interviewProcess,
           benefits: payload.benefits,
+          tagIds: resolvedTagIds,
           priority: payload.priority,
           isArchived: payload.isArchived,
         });

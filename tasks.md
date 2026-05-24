@@ -26,3 +26,7 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 `tauri-apps/plugins-workspace`
 
 Review all files and make sure they follow the already established conventions/standards. Also add to these files docblocks.
+
+Add the ability to open a specific contact and allow editing in a modal. Add a link to this modal in applications.
+
+Add the ability to open a specific company and allow editing in a modal. Add a link to this modal in applications.

@@ -4,6 +4,9 @@
   import { useContactDatatable } from "@modules/contacts/presentation/composables/useContactDatatable";
   import { contactsSearchPlaceholder } from "@modules/contacts/presentation/constants/contactDatatable";
   import { useContactService } from "@modules/contacts/services/useContactService";
+  import { useTagService } from "@modules/tags";
+  import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
+  import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -14,6 +17,7 @@
   definePageMeta({ ssr: false });
 
   const service = useContactService();
+  const tagService = useTagService();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -28,6 +32,7 @@
     totalRecords,
   } = useContactDatatable();
   const editingId = ref<string | null>(null);
+  const pendingTagNames = ref<string[]>([]);
   const mapDialogVisible = ref(false);
   const selectedMapContact = ref<Contact | null>(null);
   const form = reactive({
@@ -37,6 +42,7 @@
     locationText: "",
     locationLat: "",
     locationLng: "",
+    tagIds: [] as string[],
   });
 
   /**
@@ -63,6 +69,7 @@
     form.locationText = row.locationText ?? "";
     form.locationLat = row.locationLat === null ? "" : String(row.locationLat);
     form.locationLng = row.locationLng === null ? "" : String(row.locationLng);
+    form.tagIds = [...row.tagIds];
   }
 
   /**
@@ -76,12 +83,20 @@
     form.locationText = "";
     form.locationLat = "";
     form.locationLng = "";
+    form.tagIds = [];
+    pendingTagNames.value = [];
   }
 
   /**
    * Handles submit.
    */
   async function submit(): Promise<void> {
+    const resolvedTagIds = await resolveTagIdsWithPendingTags({
+      selectedTagIds: form.tagIds,
+      pendingTagNames: pendingTagNames.value,
+      tagService,
+    });
+
     if (editingId.value) {
       await service.update({
         id: editingId.value,
@@ -91,6 +106,7 @@
         locationText: form.locationText || null,
         locationLat: toNullableNumber(form.locationLat),
         locationLng: toNullableNumber(form.locationLng),
+        tagIds: resolvedTagIds,
       });
     } else {
       await service.create({
@@ -100,6 +116,7 @@
         locationText: form.locationText || null,
         locationLat: toNullableNumber(form.locationLat),
         locationLng: toNullableNumber(form.locationLng),
+        tagIds: resolvedTagIds,
         companyId: null,
         phone: null,
         linkedinUrl: null,
@@ -145,6 +162,12 @@
       <InputText v-model="form.locationText" placeholder="Location" />
       <InputText v-model="form.locationLat" placeholder="Latitude" />
       <InputText v-model="form.locationLng" placeholder="Longitude" />
+      <TagMultiSelect
+        v-model="form.tagIds"
+        v-model:pending-tag-names="pendingTagNames"
+        placeholder="Tags"
+        class="md:col-span-3"
+      />
       <div class="flex gap-2 md:col-span-3">
         <Button type="submit" :label="editingId ? 'Update' : 'Create'" />
         <Button
@@ -251,12 +274,3 @@
     </Dialog>
   </div>
 </template>
-
-
-
-
-
-
-
-
-
