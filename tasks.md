@@ -25,7 +25,7 @@ Install and configure the Tauri plugin `@hypothesi/tauri-mcp-server`
 
 `tauri-apps/plugins-workspace`
 
-Review all files and make sure they follow the already established conventions/standards. Also add any missing docblocks.
+Review all files and make sure they follow the already established conventions/standards/patterns. Also add any missing docblocks.
 
 Review all files and fix any existing issues.
 

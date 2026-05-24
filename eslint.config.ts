@@ -25,6 +25,8 @@ export default defineConfig(
 
       "*.min.js",
 
+      "scripts/dev-clear.mjs",
+
       "src-tauri/target/**",
     ],
   },

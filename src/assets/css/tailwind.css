@@ -82,7 +82,7 @@
   }
 
   .flow-button-primary {
-    @apply rounded-flow-md bg-gradient-to-r from-flow-blue via-flow-violet to-flow-lilac px-4 py-2.5 font-semibold text-white shadow-flow-glow transition;
+    @apply rounded-flow-md bg-linear-to-r from-flow-blue via-flow-violet to-flow-lilac px-4 py-2.5 font-semibold text-white shadow-flow-glow transition;
     @apply hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
@@ -92,7 +92,7 @@
   }
 
   .flow-gradient-text {
-    @apply bg-gradient-to-r from-white via-flow-cyan to-flow-violet bg-clip-text text-transparent;
+    @apply bg-linear-to-r from-white via-flow-cyan to-flow-violet bg-clip-text text-transparent;
   }
 
   .flow-divider {
@@ -100,7 +100,7 @@
   }
 
   .flow-glow-line {
-    @apply h-px bg-gradient-to-r from-transparent via-flow-violet to-transparent;
+    @apply h-px bg-linear-to-r from-transparent via-flow-violet to-transparent;
   }
 
   .flow-orb {
@@ -199,7 +199,7 @@
   }
 
   .p-button:not(.p-button-outlined):not(.p-button-text) {
-    @apply bg-gradient-to-r from-flow-blue via-flow-violet to-flow-lilac text-white shadow-flow-glow;
+    @apply bg-linear-to-r from-flow-blue via-flow-violet to-flow-lilac text-white shadow-flow-glow;
   }
 
   .p-button:not(.p-disabled):hover {
