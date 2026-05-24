@@ -30,5 +30,3 @@ Review all files and make sure they follow the already established conventions/s
 When clicking on date input, some of the popup shown is being hidden behind the main window. Make sure this is alway on top and fully visible.
 
 Incorporate all constants module code into settings.
-
-Disable all browser hotkeys if ran in production mode.
