@@ -8,7 +8,8 @@
   } from "@modules/applications/types/presentation";
   import type { Company } from "@modules/companies/domain/entities/Company";
 
-  import { computed, defineAsyncComponent, ref, watch } from "vue";
+  import { scrollDrawerContentToTop } from "@modules/applications/presentation/utils/drawerScrollUtils";
+  import { computed, defineAsyncComponent, nextTick, ref, watch } from "vue";
 
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
@@ -106,6 +107,12 @@
       }
 
       activeTab.value = mode === "view" ? "summary" : "application";
+
+      if (mode === "create" || mode === "edit") {
+        void nextTick(() => {
+          scrollDrawerContentToTop("application-details-drawer");
+        });
+      }
     },
     { immediate: true },
   );
@@ -123,7 +130,7 @@
     v-model:visible="drawerVisible"
     position="right"
     :header="drawerHeader"
-    class="w-full! max-w-3xl"
+    class="application-details-drawer w-full! max-w-3xl"
   >
     <Tabs v-model:value="activeTab">
       <TabList>
