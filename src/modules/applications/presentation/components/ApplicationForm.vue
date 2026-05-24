@@ -7,17 +7,13 @@
   } from "@modules/applications/types/enums";
 
   import { ApplicationFormSchema } from "@modules/applications/domain/zod/application.schema";
+  import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import {
     APPLICATION_ATTENDANCE_OPTIONS,
     APPLICATION_EMPLOYMENT_OPTIONS,
     APPLICATION_EVENT_FLOW_STATUS_OPTIONS,
     APPLICATION_STATUS_OPTIONS,
   } from "@modules/applications/presentation/constants/applicationFormOptions";
-  import {
-    formatApplicationStatusLabel,
-    getApplicationPriorityClass,
-    getApplicationStatusClass,
-  } from "@modules/applications/presentation/utils/applicationVisualTokens";
   import {
     ApplicationEventFlowStatus as ApplicationEventFlowStatusEnum,
     ApplicationStatus as ApplicationStatusEnum,
@@ -95,47 +91,6 @@
       isArchived: props.initialValues.isArchived ?? false,
     };
   });
-
-  /**
-   * Handles get status preview class.
-   */
-  function getStatusPreviewClass(status: ApplicationStatus | undefined | null) {
-    /**
-     * Gets status preview class.
-     */
-    /**
-     * Gets status preview class.
-     */
-    return getApplicationStatusClass(status);
-  }
-
-  /**
-   * Handles get status preview label.
-   */
-  function getStatusPreviewLabel(status: ApplicationStatus | undefined | null) {
-    /**
-     * Gets status preview label.
-     */
-    /**
-     * Gets status preview label.
-     */
-    return formatApplicationStatusLabel(status);
-  }
-
-  /**
-   * Handles get priority preview class.
-   */
-  function getPriorityPreviewClass(priority: number | undefined | null) {
-    /**
-     * Gets priority preview class.
-     */
-    /**
-     * Gets priority preview class.
-     */
-    return priority
-      ? getApplicationPriorityClass(priority)
-      : "bg-slate-100 text-slate-800 ring-slate-200";
-  }
 
   /**
    * Handles on form submit.
@@ -316,12 +271,7 @@
           fluid
         />
         <div class="pt-1">
-          <span
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="getStatusPreviewClass($form.status?.value)"
-          >
-            {{ getStatusPreviewLabel($form.status?.value) }}
-          </span>
+          <ApplicationBadge kind="status" :status="$form.status?.value" />
         </div>
       </div>
 
@@ -529,12 +479,7 @@
           fluid
         />
         <div class="pt-1">
-          <span
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="getPriorityPreviewClass($form.priority?.value)"
-          >
-            P{{ $form.priority?.value || 3 }}
-          </span>
+          <ApplicationBadge kind="priority" :priority="$form.priority?.value" />
         </div>
       </div>
     </section>

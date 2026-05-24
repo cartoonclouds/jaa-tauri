@@ -2,13 +2,8 @@
   import type { Application } from "@modules/applications/domain/entities/Application";
   import type { Event } from "@modules/events/domain/entities/Event";
 
+  import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
-  import {
-    formatApplicationEventFlowStatusLabel,
-    formatApplicationStatusLabel,
-    getApplicationEventFlowStatusClass,
-    getApplicationStatusClass,
-  } from "@modules/applications/presentation/utils/applicationVisualTokens";
   import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
   import { useEvent } from "@modules/events/presentation/composables/useEvent";
   import {
@@ -350,25 +345,14 @@
       </ApplicationDetailsCard>
 
       <ApplicationDetailsCard title="Status" compact>
-        <span
-          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-          :class="getApplicationStatusClass(application.status)"
-        >
-          {{ formatApplicationStatusLabel(application.status) }}
-        </span>
+        <ApplicationBadge kind="status" :status="application.status" />
       </ApplicationDetailsCard>
 
       <ApplicationDetailsCard title="Event Flow" compact>
-        <span
-          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-          :class="
-            getApplicationEventFlowStatusClass(application.eventFlowStatus)
-          "
-        >
-          {{
-            formatApplicationEventFlowStatusLabel(application.eventFlowStatus)
-          }}
-        </span>
+        <ApplicationBadge
+          kind="event-flow"
+          :event-flow-status="application.eventFlowStatus"
+        />
       </ApplicationDetailsCard>
 
       <ApplicationDetailsCard title="Company" compact>

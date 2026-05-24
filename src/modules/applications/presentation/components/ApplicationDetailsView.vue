@@ -1,17 +1,8 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
 
+  import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
-  import {
-    formatApplicationAttendanceTypeLabel,
-    formatApplicationEmploymentTypeLabel,
-    formatApplicationStatusLabel,
-    getApplicationArchivedClass,
-    getApplicationAttendanceTypeClass,
-    getApplicationEmploymentTypeClass,
-    getApplicationPriorityClass,
-    getApplicationStatusClass,
-  } from "@modules/applications/presentation/utils/applicationVisualTokens";
 
   /**
    * Defines props.
@@ -57,12 +48,7 @@
       </ApplicationDetailsCard>
       <ApplicationDetailsCard title="Status" compact>
         <div class="mt-1">
-          <span
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="getApplicationStatusClass(application.status)"
-          >
-            {{ formatApplicationStatusLabel(application.status) }}
-          </span>
+          <ApplicationBadge kind="status" :status="application.status" />
         </div>
       </ApplicationDetailsCard>
       <ApplicationDetailsCard title="Applied At" compact>
@@ -72,12 +58,7 @@
       </ApplicationDetailsCard>
       <ApplicationDetailsCard title="Priority" compact>
         <div class="mt-1">
-          <span
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="getApplicationPriorityClass(application.priority)"
-          >
-            P{{ application.priority }}
-          </span>
+          <ApplicationBadge kind="priority" :priority="application.priority" />
         </div>
       </ApplicationDetailsCard>
     </div>
@@ -104,33 +85,21 @@
     <div class="grid gap-3 md:grid-cols-2">
       <ApplicationDetailsCard title="Attendance Type" compact>
         <div class="mt-1">
-          <span
+          <ApplicationBadge
             v-if="application.attendanceType"
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="
-              getApplicationAttendanceTypeClass(application.attendanceType)
-            "
-          >
-            {{
-              formatApplicationAttendanceTypeLabel(application.attendanceType)
-            }}
-          </span>
+            kind="attendance"
+            :attendance-type="application.attendanceType"
+          />
           <span v-else class="text-sm">-</span>
         </div>
       </ApplicationDetailsCard>
       <ApplicationDetailsCard title="Employment Type" compact>
         <div class="mt-1">
-          <span
+          <ApplicationBadge
             v-if="application.employmentType"
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="
-              getApplicationEmploymentTypeClass(application.employmentType)
-            "
-          >
-            {{
-              formatApplicationEmploymentTypeLabel(application.employmentType)
-            }}
-          </span>
+            kind="employment"
+            :employment-type="application.employmentType"
+          />
           <span v-else class="text-sm">-</span>
         </div>
       </ApplicationDetailsCard>
@@ -182,12 +151,7 @@
 
     <ApplicationDetailsCard title="Archived">
       <div class="mt-1">
-        <span
-          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-          :class="getApplicationArchivedClass(application.isArchived)"
-        >
-          {{ application.isArchived ? "Archived" : "Active" }}
-        </span>
+        <ApplicationBadge kind="archived" :archived="application.isArchived" />
       </div>
     </ApplicationDetailsCard>
 
