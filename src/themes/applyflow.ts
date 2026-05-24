@@ -3489,6 +3489,7 @@ const ApplyFlowPreset = definePreset(Aura, {
   },
 });
 
+/** PrimeVue theme export consumed by app-level PrimeVue configuration. */
 export const applyFlowPrimeVueTheme = {
   preset: ApplyFlowPreset,
   options: {

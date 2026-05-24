@@ -9,8 +9,10 @@ import {
 } from "@shared/domain/zod/fields";
 import { z } from "zod";
 
+/** Allowed contact categories persisted by the domain model. */
 export const ContactTypeSchema = z.enum(["company", "recruiter"]);
 
+/** Runtime schema for persisted contact entities. */
 export const ContactSchema = z.object({
   id: UuidSchema,
   companyId: NullableUuidSchema,
@@ -28,6 +30,7 @@ export const ContactSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
+/** Runtime schema for creating contacts from external input. */
 export const CreateContactSchema = ContactSchema.pick({
   companyId: true,
   fullName: true,
@@ -50,6 +53,7 @@ export const CreateContactSchema = ContactSchema.pick({
   notes: true,
 });
 
+/** Repository create payload schema for contact inserts. */
 export const ContactRepositoryCreateSchema = CreateContactSchema;
 
 /**

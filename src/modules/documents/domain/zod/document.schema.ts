@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Runtime schema for persisted document entities. */
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(1),
@@ -12,6 +13,7 @@ export const DocumentSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
+/** Runtime schema for creating documents from external input. */
 export const CreateDocumentSchema = DocumentSchema.pick({
   title: true,
   kind: true,
@@ -21,6 +23,7 @@ export const CreateDocumentSchema = DocumentSchema.pick({
   checksum: true,
 }).partial({ sizeBytes: true, checksum: true });
 
+/** Repository create payload schema for document inserts. */
 export const DocumentRepositoryCreateSchema = z.object({
   title: z.string(),
   kind: z.string(),
@@ -35,11 +38,3 @@ export type Document = z.infer<typeof DocumentSchema>;
  * Type alias for create document input.
  */
 export type CreateDocumentInput = z.infer<typeof CreateDocumentSchema>;
-
-
-
-
-
-
-
-

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Runtime schema for app-level persisted settings. */
 export const SettingsSchema = z.object({
   theme: z.enum(["light", "dark", "auto"]),
   notificationsEnabled: z.boolean(),
@@ -9,6 +10,7 @@ export const SettingsSchema = z.object({
   onboardingCompleted: z.boolean(),
 });
 
+/** Runtime schema for upserting settings records in the repository layer. */
 export const SettingRepositoryUpsertSchema = z.object({
   id: z.string().min(1).optional(),
   theme: z.enum(["system", "light", "dark"]).optional(),
@@ -21,11 +23,3 @@ export const SettingRepositoryUpsertSchema = z.object({
  * Type alias for app settings.
  */
 export type AppSettings = z.infer<typeof SettingsSchema>;
-
-
-
-
-
-
-
-

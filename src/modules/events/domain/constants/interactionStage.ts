@@ -1,3 +1,4 @@
+/** Canonical ordered list of supported interaction stage values. */
 export const INTERACTION_STAGES = [
   "Application/Saved",
   "Application/Submitted",
@@ -36,6 +37,7 @@ type StagePrefix<T extends string> = T extends `${infer Prefix}/${string}`
  */
 export type InteractionStagePrefix = StagePrefix<InteractionStage>;
 
+/** Default stage used when no explicit stage value is provided. */
 export const DEFAULT_INTERACTION_STAGE: InteractionStage = "Application/Saved";
 
 const INTERACTION_STAGE_SET: ReadonlySet<string> = new Set(INTERACTION_STAGES);
@@ -67,11 +69,3 @@ export function toInteractionStage(
   const normalized = value.trim();
   return isInteractionStage(normalized) ? normalized : fallback;
 }
-
-
-
-
-
-
-
-

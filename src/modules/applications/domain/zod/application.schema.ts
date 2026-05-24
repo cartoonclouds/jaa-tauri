@@ -90,6 +90,7 @@ function isApplicationEventFlowStatus(
   );
 }
 
+/** Runtime schema for persisted application entities. */
 export const ApplicationSchema = z.object({
   id: UuidSchema,
   companyId: NullableUuidSchema,
@@ -133,6 +134,7 @@ export const ApplicationSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
+/** Runtime schema for creating applications from external input. */
 export const CreateApplicationSchema = ApplicationSchema.pick({
   companyId: true,
   title: true,
@@ -150,8 +152,10 @@ export const CreateApplicationSchema = ApplicationSchema.pick({
   locationLng: true,
 });
 
+/** Repository create payload schema for application inserts. */
 export const ApplicationRepositoryCreateSchema = CreateApplicationSchema;
 
+/** Runtime schema for application form validation. */
 export const ApplicationFormSchema = z
   .object({
     companyId: NullableUuidSchema,

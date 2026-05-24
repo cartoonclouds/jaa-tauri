@@ -8,6 +8,7 @@ import {
 } from "@shared/domain/zod/fields";
 import { z } from "zod";
 
+/** Runtime schema for persisted company entities. */
 export const CompanySchema = z.object({
   id: UuidSchema,
   name: z.string().min(1),
@@ -24,6 +25,7 @@ export const CompanySchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
+/** Runtime schema for creating companies from external input. */
 export const CreateCompanySchema = CompanySchema.pick({
   name: true,
   locationText: true,
@@ -31,6 +33,7 @@ export const CreateCompanySchema = CompanySchema.pick({
   locationLng: true,
 }).partial({ locationText: true, locationLat: true, locationLng: true });
 
+/** Repository create payload schema for company inserts. */
 export const CompanyRepositoryCreateSchema = CreateCompanySchema;
 
 /**

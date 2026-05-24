@@ -50,6 +50,15 @@ export interface StatisticMetricDefinition {
   card?: StatisticCardDefinition;
 }
 
+const INTERVIEWING_STATUS_SQL_LIST =
+  "'phone-screening', 'technical', 'interview'";
+const RESPONDED_STATUS_SQL_LIST = `${INTERVIEWING_STATUS_SQL_LIST}, 'offer', 'rejected'`;
+const LAST_30_DAYS_APPLIED_SQL =
+  "applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-30 day')";
+const PREVIOUS_30_DAYS_APPLIED_SQL =
+  "applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-60 day') AND datetime(applied_at) < datetime('now', '-30 day')";
+const PREVIOUS_30_DAYS_TREND_LABEL = "vs previous 30 days";
+
 /**
  * Shared single-source metric definitions for repository aggregates and UI cards.
  */
@@ -77,8 +86,7 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
     },
     {
       id: "totalInterviewingApplications",
-      aggregateSql:
-        "SUM(CASE WHEN status IN ('phone-screening', 'technical', 'interview') THEN 1 ELSE 0 END)",
+      aggregateSql: `SUM(CASE WHEN status IN (${INTERVIEWING_STATUS_SQL_LIST}) THEN 1 ELSE 0 END)`,
       card: {
         title: "Interviewing",
         description: "Phone screening, technical, and interview",
@@ -115,7 +123,7 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
         description: "New opportunities added this month",
         icon: "heroicons:calendar-days",
         tone: "info",
-        trendLabel: "vs previous 30 days",
+        trendLabel: PREVIOUS_30_DAYS_TREND_LABEL,
         trendValueField: "applicationsCreatedDeltaPercent",
         trendToneField: "applicationsCreatedDelta30Days",
         trendValueFormat: "percent",
@@ -130,7 +138,7 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
         description: "Recent application cadence",
         icon: "heroicons:calendar",
         tone: "info",
-        trendLabel: "vs previous 30 days",
+        trendLabel: PREVIOUS_30_DAYS_TREND_LABEL,
         trendValueField: "applicationsAppliedDeltaPercent",
         trendToneField: "applicationsAppliedDelta30Days",
         trendValueFormat: "percent",
@@ -148,23 +156,19 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
     },
     {
       id: "applicationsRespondedLast30Days",
-      aggregateSql:
-        "SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-30 day') AND status IN ('phone-screening', 'technical', 'interview', 'offer', 'rejected') THEN 1 ELSE 0 END)",
+      aggregateSql: `SUM(CASE WHEN ${LAST_30_DAYS_APPLIED_SQL} AND status IN (${RESPONDED_STATUS_SQL_LIST}) THEN 1 ELSE 0 END)`,
     },
     {
       id: "applicationsRespondedPrevious30Days",
-      aggregateSql:
-        "SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-60 day') AND datetime(applied_at) < datetime('now', '-30 day') AND status IN ('phone-screening', 'technical', 'interview', 'offer', 'rejected') THEN 1 ELSE 0 END)",
+      aggregateSql: `SUM(CASE WHEN ${PREVIOUS_30_DAYS_APPLIED_SQL} AND status IN (${RESPONDED_STATUS_SQL_LIST}) THEN 1 ELSE 0 END)`,
     },
     {
       id: "applicationsOfferLast30Days",
-      aggregateSql:
-        "SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-30 day') AND status = 'offer' THEN 1 ELSE 0 END)",
+      aggregateSql: `SUM(CASE WHEN ${LAST_30_DAYS_APPLIED_SQL} AND status = 'offer' THEN 1 ELSE 0 END)`,
     },
     {
       id: "applicationsOfferPrevious30Days",
-      aggregateSql:
-        "SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-60 day') AND datetime(applied_at) < datetime('now', '-30 day') AND status = 'offer' THEN 1 ELSE 0 END)",
+      aggregateSql: `SUM(CASE WHEN ${PREVIOUS_30_DAYS_APPLIED_SQL} AND status = 'offer' THEN 1 ELSE 0 END)`,
     },
     {
       id: "activePipelineApplications",
@@ -214,11 +218,3 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
       },
     },
   ];
-
-
-
-
-
-
-
-

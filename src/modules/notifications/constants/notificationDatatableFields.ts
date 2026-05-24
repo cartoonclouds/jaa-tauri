@@ -1,3 +1,4 @@
+/** SQL columns included in notification repository text search. */
 export const NOTIFICATION_SEARCH_FIELDS = [
   "title",
   "body",
@@ -9,11 +10,3 @@ export const NOTIFICATION_SEARCH_FIELDS = [
  */
 export type NotificationSearchField =
   (typeof NOTIFICATION_SEARCH_FIELDS)[number];
-
-
-
-
-
-
-
-

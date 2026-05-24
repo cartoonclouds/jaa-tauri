@@ -15,13 +15,15 @@ import {
   APPLICATION_SEARCH_FIELDS,
   APPLICATION_SORTABLE_COLUMN_MAP,
 } from "@modules/applications/constants/applicationDatatableFields";
-import { APPLICATION_FLOW_STAGES_BY_STATUS } from "@modules/applications/constants/applicationEventFlowStages";
 import { ApplicationRepositoryCreateSchema } from "@modules/applications/domain/zod/application.schema";
 import {
   ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
-import { EVENT_COPY_BY_STAGE } from "@modules/events/presentation/constants/interactionStages";
+import {
+  EVENT_COPY_BY_STAGE,
+  EVENT_FLOW_BY_APPLICATION_STATUS,
+} from "@modules/events/presentation/constants/interactionStages";
 import {
   buildSearchWhereClause,
   DEFAULT_CREATED_AT_ORDER_BY,
@@ -53,6 +55,22 @@ export interface IApplicationRepository extends IRepository<
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
+  private readonly effectiveEventFlowStatusCaseExpression = `
+    CASE
+      WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
+      WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
+      WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
+      WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
+      WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
+      WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
+      WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
+      WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
+      WHEN latest_event.type = 'Application/Saved' THEN 'saved'
+      WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
+      ELSE applications.event_flow_status
+    END
+  `;
+
   private readonly latestEventJoinClause = `
     LEFT JOIN (
       SELECT
@@ -73,36 +91,11 @@ export class ApplicationRepository implements IApplicationRepository {
   `;
 
   private readonly effectiveEventFlowStatusSelectClause = `
-    CASE
-      WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
-      WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
-      WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
-      WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
-      WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
-      WHEN latest_event.type = 'Application/Saved' THEN 'saved'
-      WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
-      ELSE applications.event_flow_status
-    END AS event_flow_status
+    ${this.effectiveEventFlowStatusCaseExpression} AS event_flow_status
   `;
 
-  private readonly effectiveEventFlowStatusSearchExpression = `
-    CASE
-      WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
-      WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
-      WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
-      WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
-      WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
-      WHEN latest_event.type = 'Application/Saved' THEN 'saved'
-      WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
-      ELSE applications.event_flow_status
-    END
-  `;
+  private readonly effectiveEventFlowStatusSearchExpression =
+    this.effectiveEventFlowStatusCaseExpression;
 
   private resolveEffectiveSearchWhereClause(searchWhereClause: string): string {
     return searchWhereClause.replace(
@@ -115,8 +108,18 @@ export class ApplicationRepository implements IApplicationRepository {
     applicationId: string,
     eventFlowStatusValue: string,
   ): Promise<void> {
-    const requiredStages =
-      APPLICATION_FLOW_STAGES_BY_STATUS[eventFlowStatusValue] ?? [];
+    const normalizedStatusValue =
+      ApplicationEventFlowStatus.fromValue(eventFlowStatusValue)?.value;
+    if (
+      !normalizedStatusValue ||
+      !(normalizedStatusValue in EVENT_FLOW_BY_APPLICATION_STATUS)
+    ) {
+      return;
+    }
+
+    const normalizedStatus =
+      normalizedStatusValue as keyof typeof EVENT_FLOW_BY_APPLICATION_STATUS;
+    const requiredStages = EVENT_FLOW_BY_APPLICATION_STATUS[normalizedStatus];
     if (requiredStages.length === 0) {
       return;
     }

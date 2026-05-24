@@ -1,12 +1,14 @@
 import type { DatatablePageQuery, DatatableSortOrder } from "@shared/types";
 
+/** Default ORDER BY clause used by datatable-backed list queries. */
 export const DEFAULT_CREATED_AT_ORDER_BY = "created_at DESC" as const;
 
+/** Shared table min-width style applied to PrimeVue datatables. */
 export const DEFAULT_DATATABLE_TABLE_STYLE = "min-width: 50rem";
 
+/** Shared paginator template used across datatable pages. */
 export const DEFAULT_DATATABLE_PAGINATOR_TEMPLATE =
   "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown";
-
 
 /**
  * Defines build select all ordered query options.
@@ -116,11 +118,3 @@ export function buildSelectAllOrderedQuery({
   const whereSegment = whereClause ? ` WHERE ${whereClause}` : "";
   return `SELECT * FROM ${tableName}${whereSegment} ORDER BY ${orderByClause}`;
 }
-
-
-
-
-
-
-
-

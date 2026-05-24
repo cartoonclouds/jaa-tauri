@@ -8,6 +8,7 @@ import {
 } from "@shared/domain/zod/fields";
 import { z } from "zod";
 
+/** Runtime schema for persisted profile entities. */
 export const ProfileSchema = z.object({
   id: UuidSchema,
   fullName: z.string().min(1),
@@ -31,6 +32,7 @@ export const ProfileSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
+/** Runtime schema for creating profiles from external input. */
 export const CreateProfileSchema = ProfileSchema.pick({
   fullName: true,
   email: true,
@@ -62,6 +64,7 @@ export const CreateProfileSchema = ProfileSchema.pick({
   noticePeriodDays: true,
 });
 
+/** Repository create payload schema for profile inserts. */
 export const ProfileRepositoryCreateSchema = z.object({
   fullName: z.string(),
   email: z.string().nullable().optional(),
@@ -84,6 +87,7 @@ export const ProfileRepositoryCreateSchema = z.object({
   interviewAvailability: z.string().optional(),
 });
 
+/** Repository update payload schema for profile updates. */
 export const ProfileRepositoryUpdateSchema =
   CreateProfileSchema.partial().extend({
     id: z.string().uuid(),
@@ -97,11 +101,3 @@ export type Profile = z.infer<typeof ProfileSchema>;
  * Type alias for create profile input.
  */
 export type CreateProfileInput = z.infer<typeof CreateProfileSchema>;
-
-
-
-
-
-
-
-

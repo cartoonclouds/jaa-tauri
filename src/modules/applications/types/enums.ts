@@ -17,6 +17,16 @@ abstract class EnumValue {
   }
 }
 
+const APPLICATION_STATUS_LABELS: Readonly<Record<string, string>> = {
+  saved: "Saved",
+  applied: "Applied",
+  "phone-screening": "Phone Screening",
+  technical: "Technical",
+  interview: "Interview",
+  offer: "Offer",
+  rejected: "Rejected",
+};
+
 /**
  * PHP-style enum for application status.
  */
@@ -26,24 +36,7 @@ class ApplicationStatusEnum extends EnumValue {
   }
 
   toLabel(): string {
-    switch (this.value) {
-      case "saved":
-        return "Saved";
-      case "applied":
-        return "Applied";
-      case "phone-screening":
-        return "Phone Screening";
-      case "technical":
-        return "Technical";
-      case "interview":
-        return "Interview";
-      case "offer":
-        return "Offer";
-      case "rejected":
-        return "Rejected";
-      default:
-        return this.value;
-    }
+    return APPLICATION_STATUS_LABELS[this.value] ?? this.value;
   }
 
   static readonly Saved = new ApplicationStatusEnum("saved");
@@ -73,6 +66,7 @@ class ApplicationStatusEnum extends EnumValue {
   }
 }
 
+/** Public enum facade for application status values. */
 export const ApplicationStatus = ApplicationStatusEnum;
 
 /**
@@ -91,20 +85,7 @@ class ApplicationEventFlowStatusEnum extends EnumValue {
   }
 
   toLabel(): string {
-    switch (this.value) {
-      case "saved":
-        return "Saved";
-      case "applied":
-        return "Applied";
-      case "interview":
-        return "Interview";
-      case "offer":
-        return "Offer";
-      case "rejected":
-        return "Rejected";
-      default:
-        return this.value;
-    }
+    return APPLICATION_STATUS_LABELS[this.value] ?? this.value;
   }
 
   static readonly Saved = new ApplicationEventFlowStatusEnum("saved");
@@ -130,6 +111,7 @@ class ApplicationEventFlowStatusEnum extends EnumValue {
   }
 }
 
+/** Public enum facade for application event-flow status values. */
 export const ApplicationEventFlowStatus = ApplicationEventFlowStatusEnum;
 
 /**
@@ -188,6 +170,7 @@ class ApplicationAttendanceTypeEnum extends EnumValue {
   }
 }
 
+/** Public enum facade for application attendance type values. */
 export const ApplicationAttendanceType = ApplicationAttendanceTypeEnum;
 
 /**
@@ -260,6 +243,7 @@ class ApplicationEmploymentTypeEnum extends EnumValue {
   }
 }
 
+/** Public enum facade for application employment type values. */
 export const ApplicationEmploymentType = ApplicationEmploymentTypeEnum;
 
 /**

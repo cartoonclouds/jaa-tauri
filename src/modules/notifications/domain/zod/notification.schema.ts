@@ -6,8 +6,10 @@ import {
 } from "@shared/domain/zod/fields";
 import { z } from "zod";
 
+/** Allowed notification severity values. */
 export const SeveritySchema = z.enum(["info", "warning", "success", "error"]);
 
+/** Runtime schema for persisted notification entities. */
 export const NotificationSchema = z.object({
   id: UuidSchema,
   applicationId: NullableUuidSchema,
@@ -22,6 +24,7 @@ export const NotificationSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
+/** Runtime schema for creating notifications from external input. */
 export const CreateNotificationSchema = NotificationSchema.pick({
   applicationId: true,
   eventId: true,
@@ -39,6 +42,7 @@ export const CreateNotificationSchema = NotificationSchema.pick({
   sentAt: true,
 });
 
+/** Repository create payload schema for notification inserts. */
 export const NotificationRepositoryCreateSchema = z.object({
   applicationId: z.string().nullable().optional(),
   eventId: z.string().nullable().optional(),
@@ -55,11 +59,3 @@ export type Notification = z.infer<typeof NotificationSchema>;
  * Type alias for create notification input.
  */
 export type CreateNotificationInput = z.infer<typeof CreateNotificationSchema>;
-
-
-
-
-
-
-
-
