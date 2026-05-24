@@ -32,7 +32,3 @@ When clicking on date input, some of the popup shown is being hidden behind the 
 Incorporate all constants module code into settings.
 
 Disable all browser hotkeys if ran in production mode.
-
-
-
-

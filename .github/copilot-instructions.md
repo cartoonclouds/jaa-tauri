@@ -302,6 +302,7 @@ Do:
 - For date or date-time picking in forms, use PrimeVue `DatePicker` rather than raw text/date inputs.
 - Put business logic in `src/modules`, composables, stores, or shared utilities.
 - Use project aliases (`@`, `@modules`, `@shared`, `@infra`) instead of deep relative imports.
+- Keep feature UI containers (for example modals, dialogs, drawers, cards, and similar shells) inside the owning module under `src/modules/<feature>/presentation/components/` using type-oriented subfolders such as `modals/`, `dialogs/`, `drawers/`, and `cards/` when appropriate.
 - Add or update tests when changing business logic.
 - **Validate all payloads and object structures with Zod** — use feature schemas from `src/modules/<feature>/domain/zod/` and shared primitives from `src/shared/domain/zod/fields.ts`; never rely on TypeScript interfaces alone for runtime validation.
 - In mapper functions, when a field is typed as a class-based enum, convert raw values with the enum factory (for example `fromValue`) and return enum instances (or `null`) instead of plain strings.
