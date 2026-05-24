@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   interface ContactCreateFormState {
     fullName: string;
     type: ContactType;
@@ -41,6 +43,8 @@
   const selectedContactId = defineModel<string | null>("selectedContactId", {
     required: true,
   });
+
+  useBodyScrollLock(visible);
 </script>
 
 <template>

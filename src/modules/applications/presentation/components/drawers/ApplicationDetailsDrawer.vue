@@ -20,6 +20,8 @@
     watch,
   } from "vue";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
     isDeleting: false,
@@ -94,6 +96,8 @@
       emit("update:visible", value);
     },
   });
+
+  useBodyScrollLock(drawerVisible);
 
   const companyOptions = computed<ApplicationSelectOption[]>(() =>
     props.companies.map((company) => ({

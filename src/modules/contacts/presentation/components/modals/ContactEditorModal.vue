@@ -10,6 +10,8 @@
   import { computed, ref, watch } from "vue";
   import { z } from "zod";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
     applicationId: null,
@@ -80,6 +82,8 @@
       emit("update:visible", value);
     },
   });
+
+  useBodyScrollLock(modalVisible);
 
   const initialValues = computed(() => ({
     fullName: props.contact?.fullName ?? "",

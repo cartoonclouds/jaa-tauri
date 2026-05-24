@@ -15,6 +15,7 @@
   import { computed, reactive, ref } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   /**
    * Defines props.
@@ -44,6 +45,8 @@
     type: INTERACTION_STAGES[0],
     eventAt: null,
   });
+
+  useBodyScrollLock(isEditDialogVisible);
 
   /**
    * Formats timeline stage date in a short, readable form.

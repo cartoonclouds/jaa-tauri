@@ -11,6 +11,8 @@
   import { companiesSearchPlaceholder } from "@modules/companies/presentation/constants/companyDatatable";
   import { computed, ref } from "vue";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   interface Props {
     visible: boolean;
   }
@@ -45,6 +47,8 @@
       emit("update:visible", value);
     },
   });
+
+  useBodyScrollLock(modalVisible);
 
   /**
    * Handles open create company modal.

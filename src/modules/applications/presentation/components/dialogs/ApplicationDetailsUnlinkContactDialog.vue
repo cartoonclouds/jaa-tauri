@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   interface Props {
     contactName: string;
   }
@@ -8,6 +10,8 @@
     confirm: [];
   }>();
   const visible = defineModel<boolean>("visible", { required: true });
+
+  useBodyScrollLock(visible);
 </script>
 
 <template>

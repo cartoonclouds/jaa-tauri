@@ -22,6 +22,8 @@
   } from "@modules/events/presentation/constants/interactionStages";
   import { computed, reactive, ref, watch } from "vue";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   /**
    * Defines props.
    */
@@ -72,6 +74,8 @@
   const createFlowSteps = ref<(ApplicationDraftFlowStep & { id: string })[]>(
     [],
   );
+
+  useBodyScrollLock(isStageDialogVisible);
 
   const editableStageEvents = computed<Event[]>(() => {
     const applicationId = props.application?.id;

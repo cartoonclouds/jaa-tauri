@@ -16,6 +16,8 @@
   import { computed, ref, watch } from "vue";
   import { z } from "zod";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
     showJobsAppliedForSection: true,
@@ -69,6 +71,8 @@
       emit("update:visible", value);
     },
   });
+
+  useBodyScrollLock(modalVisible);
 
   const isEditMode = computed(() => Boolean(props.company));
 

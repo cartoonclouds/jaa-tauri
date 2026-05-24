@@ -10,6 +10,8 @@
   import { computed, reactive, ref, watch } from "vue";
   import { z } from "zod";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   /**
    * Props accepted by the settings modal.
    */
@@ -79,6 +81,8 @@
       emit("update:visible", value);
     },
   });
+
+  useBodyScrollLock(modalVisible);
 
   const constantGroups = computed<ConstantGroup[]>(() => {
     const seen = new Set<string>();

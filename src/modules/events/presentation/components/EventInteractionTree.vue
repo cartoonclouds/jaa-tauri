@@ -16,6 +16,8 @@
   } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   /**
    * Defines event tree node data.
    */
@@ -67,6 +69,8 @@
     description: "",
     eventAt: "",
   });
+
+  useBodyScrollLock(isEditDialogVisible);
 
   const expandedKeys = ref<Record<string, boolean>>({});
 
@@ -659,12 +663,3 @@
     </Dialog>
   </div>
 </template>
-
-
-
-
-
-
-
-
-

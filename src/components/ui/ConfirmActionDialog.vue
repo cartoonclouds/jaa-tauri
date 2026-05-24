@@ -1,4 +1,8 @@
 <script setup lang="ts">
+  import { computed } from "vue";
+
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
   interface Props {
     visible: boolean;
     title: string;
@@ -30,6 +34,8 @@
     confirm: [];
     cancel: [];
   }>();
+
+  useBodyScrollLock(computed(() => props.visible));
 
   function onCancel(): void {
     emit("cancel");

@@ -1,16 +1,20 @@
 <script setup lang="ts">
+  import type {
+    ContactCreatePayload,
+    ContactUpdatePayload,
+  } from "@modules/contacts";
   import type { Contact } from "@modules/contacts/domain/entities/Contact";
+  import type { EditableContact } from "@modules/contacts/types/presentation";
 
+  import { useContactService } from "@modules/contacts";
+  import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
   import { useContactDatatable } from "@modules/contacts/presentation/composables/useContactDatatable";
   import { contactsSearchPlaceholder } from "@modules/contacts/presentation/constants/contactDatatable";
-  import { useContactService } from "@modules/contacts/services/useContactService";
-  import { useTagService } from "@modules/tags";
-  import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
-  import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
-  import { computed, reactive, ref } from "vue";
+  import { computed, ref } from "vue";
 
   import LocationMapFull from "@/components/ui/LocationMapFull.vue";
   import LocationMapPreview from "@/components/ui/LocationMapPreview.vue";
+  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   interface Props {
     visible: boolean;
@@ -23,7 +27,6 @@
   }>();
 
   const service = useContactService();
-  const tagService = useTagService();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -37,19 +40,11 @@
     rowsPerPageOptions,
     totalRecords,
   } = useContactDatatable();
-  const editingId = ref<string | null>(null);
-  const pendingTagNames = ref<string[]>([]);
+  const selectedContact = ref<EditableContact | null>(null);
+  const isEditorModalVisible = ref(false);
+  const isSavingContact = ref(false);
   const mapDialogVisible = ref(false);
   const selectedMapContact = ref<Contact | null>(null);
-  const form = reactive({
-    fullName: "",
-    type: "company",
-    email: "",
-    locationText: "",
-    locationLat: "",
-    locationLng: "",
-    tagIds: [] as string[],
-  });
 
   const modalVisible = computed({
     get: () => props.visible,
@@ -58,86 +53,64 @@
     },
   });
 
+  useBodyScrollLock(modalVisible);
+  useBodyScrollLock(mapDialogVisible);
+
   /**
-   * Handles to nullable number.
+   * Maps a persisted contact entity to an editable snapshot.
    */
-  function toNullableNumber(value: string): number | null {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      return null;
+  function toEditableContact(contact: Contact): EditableContact {
+    return {
+      id: contact.id,
+      fullName: contact.fullName,
+      type: contact.type,
+      email: contact.email,
+      phone: contact.phone,
+      linkedinUrl: contact.linkedinUrl,
+      locationText: contact.locationText,
+      locationLat: contact.locationLat,
+      locationLng: contact.locationLng,
+      notes: contact.notes,
+    };
+  }
+
+  /**
+   * Handles opening the create contact modal.
+   */
+  function openCreateContactModal(): void {
+    selectedContact.value = null;
+    isEditorModalVisible.value = true;
+  }
+
+  /**
+   * Handles opening the edit contact modal.
+   */
+  function openEditContactModal(contact: Contact): void {
+    selectedContact.value = toEditableContact(contact);
+    isEditorModalVisible.value = true;
+  }
+
+  /**
+   * Handles contact editor submit.
+   */
+  async function onContactEditorSubmit(
+    payload: ContactCreatePayload | ContactUpdatePayload,
+  ): Promise<void> {
+    isSavingContact.value = true;
+
+    try {
+      if ("id" in payload) {
+        await service.update(payload);
+      } else {
+        await service.create(payload);
+      }
+
+      await refresh();
+      isEditorModalVisible.value = false;
+      selectedContact.value = null;
+    } finally {
+      isSavingContact.value = false;
     }
-
-    const numeric = Number(trimmed);
-    return Number.isFinite(numeric) ? numeric : null;
-  }
-
-  /**
-   * Handles edit.
-   */
-  function edit(row: Contact): void {
-    editingId.value = row.id;
-    form.fullName = row.fullName;
-    form.type = row.type;
-    form.email = row.email ?? "";
-    form.locationText = row.locationText ?? "";
-    form.locationLat = row.locationLat === null ? "" : String(row.locationLat);
-    form.locationLng = row.locationLng === null ? "" : String(row.locationLng);
-    form.tagIds = [...row.tagIds];
-  }
-
-  /**
-   * Handles reset form.
-   */
-  function resetForm(): void {
-    editingId.value = null;
-    form.fullName = "";
-    form.type = "company";
-    form.email = "";
-    form.locationText = "";
-    form.locationLat = "";
-    form.locationLng = "";
-    form.tagIds = [];
-    pendingTagNames.value = [];
-  }
-
-  /**
-   * Handles submit.
-   */
-  async function submit(): Promise<void> {
-    const resolvedTagIds = await resolveTagIdsWithPendingTags({
-      selectedTagIds: form.tagIds,
-      pendingTagNames: pendingTagNames.value,
-      tagService,
-    });
-
-    if (editingId.value) {
-      await service.update({
-        id: editingId.value,
-        fullName: form.fullName,
-        type: form.type as Contact["type"],
-        email: form.email || null,
-        locationText: form.locationText || null,
-        locationLat: toNullableNumber(form.locationLat),
-        locationLng: toNullableNumber(form.locationLng),
-        tagIds: resolvedTagIds,
-      });
-    } else {
-      await service.create({
-        fullName: form.fullName,
-        type: form.type as Contact["type"],
-        email: form.email || null,
-        locationText: form.locationText || null,
-        locationLat: toNullableNumber(form.locationLat),
-        locationLng: toNullableNumber(form.locationLng),
-        tagIds: resolvedTagIds,
-        companyId: null,
-        phone: null,
-        linkedinUrl: null,
-        notes: null,
-      });
-    }
-    await refresh();
-    resetForm();
   }
 
   /**
@@ -173,31 +146,13 @@
     class="w-[95vw]! max-w-6xl"
   >
     <div class="space-y-6 p-2 md:p-3">
-      <h2 class="text-2xl font-semibold">Contacts</h2>
-      <form class="grid gap-3 md:grid-cols-3" @submit.prevent="submit">
-        <InputText v-model="form.fullName" placeholder="Full name" />
-        <InputText v-model="form.type" placeholder="Type" />
-        <InputText v-model="form.email" placeholder="Email" />
-        <InputText v-model="form.locationText" placeholder="Location" />
-        <InputText v-model="form.locationLat" placeholder="Latitude" />
-        <InputText v-model="form.locationLng" placeholder="Longitude" />
-        <TagMultiSelect
-          v-model="form.tagIds"
-          v-model:pending-tag-names="pendingTagNames"
-          placeholder="Tags"
-          class="md:col-span-3"
-        />
-        <div class="flex gap-2 md:col-span-3">
-          <Button type="submit" :label="editingId ? 'Update' : 'Create'" />
-          <Button
-            v-if="editingId"
-            type="button"
-            severity="secondary"
-            label="Cancel"
-            @click="resetForm"
-          />
-        </div>
-      </form>
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-2xl font-semibold">Contacts</h2>
+        <Button type="button" @click="openCreateContactModal">
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          <span>New Contact</span>
+        </Button>
+      </div>
 
       <DataTable
         :value="items"
@@ -258,7 +213,7 @@
               <Button
                 size="small"
                 label="Edit"
-                @click="edit(slotProps.data as Contact)"
+                @click="openEditContactModal(slotProps.data as Contact)"
               />
               <Button
                 size="small"
@@ -292,6 +247,13 @@
           height-class="h-[26rem]"
         />
       </Dialog>
+
+      <ContactEditorModal
+        v-model:visible="isEditorModalVisible"
+        :contact="selectedContact"
+        :busy="isSavingContact"
+        @submit="onContactEditorSubmit"
+      />
     </div>
   </Dialog>
 </template>
