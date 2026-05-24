@@ -3,6 +3,8 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Menu, MenuItem, Submenu } from "@tauri-apps/api/menu";
 import { defineNuxtPlugin } from "nuxt/app";
 
+import { useCompaniesModal } from "@/composables/useCompaniesModal";
+import { useContactsModal } from "@/composables/useContactsModal";
 import { useSettingsModal } from "@/composables/useSettingsModal";
 
 /**
@@ -14,9 +16,27 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
 
+    const { openCompaniesModal } = useCompaniesModal();
+    const { openContactsModal } = useContactsModal();
     const { openSettingsModal } = useSettingsModal();
 
     try {
+      const companiesItem = await MenuItem.new({
+        id: "open-companies",
+        text: "Companies",
+        action: () => {
+          openCompaniesModal();
+        },
+      });
+
+      const contactsItem = await MenuItem.new({
+        id: "open-contacts",
+        text: "Contacts",
+        action: () => {
+          openContactsModal();
+        },
+      });
+
       const settingsItem = await MenuItem.new({
         id: "open-settings",
         text: "Settings",
@@ -37,7 +57,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       const appSubmenu = await Submenu.new({
         text: "App",
-        items: [settingsItem, exitItem],
+        items: [companiesItem, contactsItem, settingsItem, exitItem],
       });
 
       const appMenu = await Menu.new({
@@ -50,6 +70,3 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   });
 });
-
-
-

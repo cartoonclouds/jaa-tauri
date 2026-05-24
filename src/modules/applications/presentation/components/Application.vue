@@ -11,7 +11,7 @@
     CompanyUpdatePayload,
   } from "@modules/companies";
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
-  import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/ContactEditorModal.vue";
+  import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
   import type {
     ContactCreatePayload,
     ContactUpdatePayload,
@@ -20,13 +20,13 @@
 
   import { useApplicationService } from "@modules/applications";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
-  import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
+  import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
   import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany, useCompanyService } from "@modules/companies";
-  import CompanyEditorModal from "@modules/companies/presentation/components/CompanyEditorModal.vue";
+  import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
   import { useContactService } from "@modules/contacts";
-  import ContactEditorModal from "@modules/contacts/presentation/components/ContactEditorModal.vue";
+  import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
   import { useEventService } from "@modules/events";
   import { useTagService } from "@modules/tags";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
@@ -531,6 +531,7 @@
       v-model:visible="isCompanyEditorVisible"
       :company="selectedCompany"
       :busy="isSavingCompany"
+      :show-jobs-applied-for-section="false"
       @submit="onCompanyEditorSubmit"
       @request-open-contact="openContactEditorById"
     />

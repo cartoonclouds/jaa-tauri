@@ -66,6 +66,16 @@ export interface CompanyAssociatedContact {
 }
 
 /**
+ * Lightweight application row associated with a company.
+ */
+export interface CompanyAssociatedApplication {
+  id: string;
+  title: string;
+  status: string;
+  appliedAt: string | null;
+}
+
+/**
  * Defines icompany repository.
  */
 export interface ICompanyRepository extends IRepository<
@@ -77,6 +87,9 @@ export interface ICompanyRepository extends IRepository<
   listAssociatedContacts(
     companyId: string,
   ): Promise<CompanyAssociatedContact[]>;
+  listAssociatedApplications(
+    companyId: string,
+  ): Promise<CompanyAssociatedApplication[]>;
 }
 
 /**
@@ -265,6 +278,29 @@ export class CompanyRepository implements ICompanyRepository {
       email: (row.email as string | null) ?? null,
       phone: (row.phone as string | null) ?? null,
       type: typeof row.type === "string" ? row.type : "company",
+    }));
+  }
+
+  async listAssociatedApplications(
+    companyId: string,
+  ): Promise<CompanyAssociatedApplication[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT
+         id,
+         title,
+         status,
+         applied_at
+       FROM applications
+       WHERE company_id = $1
+       ORDER BY applied_at DESC, updated_at DESC`,
+      [companyId],
+    );
+
+    return rows.map((row) => ({
+      id: String(row.id),
+      title: typeof row.title === "string" ? row.title : "",
+      status: typeof row.status === "string" ? row.status : "saved",
+      appliedAt: typeof row.applied_at === "string" ? row.applied_at : null,
     }));
   }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
 
-  import ApplicationDetailsCard from "@modules/applications/presentation/components/ApplicationDetailsCard.vue";
+  import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
 
   import LocationMapFull from "@/components/ui/LocationMapFull.vue";
 

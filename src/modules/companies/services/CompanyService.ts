@@ -2,6 +2,7 @@ import type { DatatablePageQuery } from "@shared/types";
 
 import { CompanySchema } from "@modules/companies/domain/zod/company.schema";
 import {
+  type CompanyAssociatedApplication,
   type CompanyAssociatedContact,
   type CompanyCreatePayload,
   type CompanyUpdatePayload,
@@ -26,6 +27,12 @@ export class CompanyService {
     companyId: string,
   ): Promise<CompanyAssociatedContact[]> {
     return this.repository.listAssociatedContacts(companyId);
+  }
+
+  listAssociatedApplications(
+    companyId: string,
+  ): Promise<CompanyAssociatedApplication[]> {
+    return this.repository.listAssociatedApplications(companyId);
   }
 
   create(payload: CompanyCreatePayload) {

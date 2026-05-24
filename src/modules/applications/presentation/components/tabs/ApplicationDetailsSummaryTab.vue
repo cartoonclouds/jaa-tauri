@@ -2,7 +2,7 @@
   import type { Application } from "@modules/applications/domain/entities/Application";
   import type { Event } from "@modules/events/domain/entities/Event";
 
-  import ApplicationDetailsCard from "@modules/applications/presentation/components/ApplicationDetailsCard.vue";
+  import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
   import {
     formatApplicationEventFlowStatusLabel,
     formatApplicationStatusLabel,

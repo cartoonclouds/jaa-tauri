@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import type { StatisticsOverview } from "@modules/statistics/repositories/StatisticRepository";
 
-  import StatisticCard from "@modules/statistics/presentation/components/StatisticCard.vue";
+  import StatisticCard from "@modules/statistics/presentation/components/cards/StatisticCard.vue";
   import { statisticMetricDefinitions } from "@modules/statistics/presentation/utils/statisticMetricUtils";
 
   /**

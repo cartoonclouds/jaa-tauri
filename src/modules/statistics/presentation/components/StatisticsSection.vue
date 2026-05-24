@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import StatisticCardsSection from "@modules/statistics/presentation/components/StatisticCardsSection.vue";
+  import StatisticCardsSection from "@modules/statistics/presentation/components/cards/StatisticCardsSection.vue";
   import StatisticsMomentumSummary from "@modules/statistics/presentation/components/StatisticsMomentumSummary.vue";
   import { useStatistic } from "@modules/statistics/presentation/composables/useStatistic";
 

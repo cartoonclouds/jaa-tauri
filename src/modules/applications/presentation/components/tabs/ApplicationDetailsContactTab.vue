@@ -4,9 +4,9 @@
   import type { ContactCreatePayload } from "@modules/contacts/repositories/ContactRepository";
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
-  import ApplicationDetailsCard from "@modules/applications/presentation/components/ApplicationDetailsCard.vue";
-  import ApplicationDetailsManageContactDialog from "@modules/applications/presentation/components/tabs/ApplicationDetailsManageContactDialog.vue";
-  import ApplicationDetailsUnlinkContactDialog from "@modules/applications/presentation/components/tabs/ApplicationDetailsUnlinkContactDialog.vue";
+  import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
+  import ApplicationDetailsManageContactDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsManageContactDialog.vue";
+  import ApplicationDetailsUnlinkContactDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsUnlinkContactDialog.vue";
   import { useContactService } from "@modules/contacts";
   import { computed, ref, watch } from "vue";
 

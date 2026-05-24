@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { Company } from "@modules/companies/domain/entities/Company";
   import type {
+    CompanyAssociatedApplication,
     CompanyAssociatedContact,
     CompanyCreatePayload,
     CompanyUpdatePayload,
@@ -17,6 +18,7 @@
 
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
+    showJobsAppliedForSection: true,
   });
 
   const emit = defineEmits<{
@@ -46,6 +48,7 @@
     visible: boolean;
     company: Company | null;
     busy?: boolean;
+    showJobsAppliedForSection?: boolean;
   }
 
   const tagService = useTagService();
@@ -54,8 +57,11 @@
   const selectedTagIds = ref<string[]>([]);
   const pendingTagNames = ref<string[]>([]);
   const associatedContacts = ref<CompanyAssociatedContact[]>([]);
+  const associatedApplications = ref<CompanyAssociatedApplication[]>([]);
   const isLoadingAssociatedContacts = ref(false);
   const associatedContactsError = ref<string | null>(null);
+  const isLoadingAssociatedApplications = ref(false);
+  const associatedApplicationsError = ref<string | null>(null);
 
   const modalVisible = computed({
     get: () => props.visible,
@@ -91,24 +97,34 @@
     async ([visible, companyId]) => {
       if (!visible || typeof companyId !== "string") {
         associatedContacts.value = [];
+        associatedApplications.value = [];
         associatedContactsError.value = null;
+        associatedApplicationsError.value = null;
         isLoadingAssociatedContacts.value = false;
+        isLoadingAssociatedApplications.value = false;
         return;
       }
 
       isLoadingAssociatedContacts.value = true;
+      isLoadingAssociatedApplications.value = true;
       associatedContactsError.value = null;
+      associatedApplicationsError.value = null;
 
       try {
         associatedContacts.value =
           await companyService.listAssociatedContacts(companyId);
+        associatedApplications.value =
+          await companyService.listAssociatedApplications(companyId);
       } catch (error: unknown) {
         associatedContacts.value = [];
+        associatedApplications.value = [];
         const message =
           error instanceof Error ? error.message : "Unknown error";
         associatedContactsError.value = `Unable to load associated contacts: ${message}`;
+        associatedApplicationsError.value = `Unable to load jobs applied for: ${message}`;
       } finally {
         isLoadingAssociatedContacts.value = false;
+        isLoadingAssociatedApplications.value = false;
       }
     },
     { immediate: true },
@@ -337,6 +353,66 @@
                       <span>Open</span>
                     </Button>
                   </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div
+          v-if="isEditMode && showJobsAppliedForSection"
+          class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4"
+        >
+          <h4 class="text-sm font-semibold text-surface-900">
+            Jobs Applied For
+          </h4>
+
+          <Message
+            v-if="associatedApplicationsError"
+            severity="error"
+            size="small"
+          >
+            {{ associatedApplicationsError }}
+          </Message>
+
+          <Message
+            v-else-if="isLoadingAssociatedApplications"
+            severity="info"
+            size="small"
+          >
+            Loading jobs applied for...
+          </Message>
+
+          <Message
+            v-else-if="associatedApplications.length === 0"
+            severity="info"
+            size="small"
+          >
+            No jobs are associated with this company yet.
+          </Message>
+
+          <div
+            v-else
+            class="overflow-x-auto rounded-lg border border-surface-200"
+          >
+            <table class="min-w-full divide-y divide-surface-200 text-sm">
+              <thead class="bg-surface-50 text-left text-surface-600">
+                <tr>
+                  <th class="px-3 py-2 font-medium">Job Title</th>
+                  <th class="px-3 py-2 font-medium">Status</th>
+                  <th class="px-3 py-2 font-medium">Applied At</th>
+                </tr>
+              </thead>
+              <tbody
+                class="divide-y divide-surface-200 bg-surface-0 text-surface-700"
+              >
+                <tr
+                  v-for="application in associatedApplications"
+                  :key="application.id"
+                >
+                  <td class="px-3 py-2">{{ application.title }}</td>
+                  <td class="px-3 py-2 capitalize">{{ application.status }}</td>
+                  <td class="px-3 py-2">{{ application.appliedAt || "-" }}</td>
                 </tr>
               </tbody>
             </table>
