@@ -1,4 +1,8 @@
-import type { ApplicationFlowStatus } from "../../src/modules/events/presentation/constants/interactionStages";
+import type {
+  ApplicationFlowStatus,
+  EventStageCopy,
+  InteractionStage,
+} from "../../src/modules/events/presentation/constants/interactionStages";
 
 import { faker } from "@faker-js/faker";
 
@@ -33,7 +37,7 @@ interface EventContactInput {
 function getEventFlowStages(
   status: string,
   eventsPerApplication: number,
-): string[] {
+): InteractionStage[] {
   const resolvedStatus =
     status in EVENT_FLOW_BY_APPLICATION_STATUS
       ? (status as ApplicationFlowStatus)
@@ -48,7 +52,7 @@ function getEventFlowStages(
     return [flowStages[flowStages.length - 1] ?? "Application/Submitted"];
   }
 
-  const selectedStages: string[] = [];
+  const selectedStages: InteractionStage[] = [];
 
   for (let index = 0; index < eventsPerApplication; index += 1) {
     const position = Math.round(
@@ -62,15 +66,6 @@ function getEventFlowStages(
   }
 
   return selectedStages;
-}
-
-function getFallbackStageTitle(type: string): string {
-  const segments = type.split("/");
-  const lastSegment = segments[segments.length - 1];
-
-  return lastSegment && lastSegment.length > 0
-    ? lastSegment
-    : "Application update";
 }
 
 function getRejectedEventTitle(): string {
@@ -98,10 +93,7 @@ export function createEventRows(
         const companyContacts = contacts.filter(
           (contact) => contact.company_id === application.company_id,
         );
-        const stageCopy = EVENT_COPY_BY_STAGE[type] ?? {
-          title: getFallbackStageTitle(type),
-          description: "Recorded a new application flow milestone.",
-        };
+        const stageCopy: EventStageCopy = EVENT_COPY_BY_STAGE[type];
 
         eventAt.setDate(
           eventAt.getDate() + index * faker.number.int({ min: 2, max: 6 }),
