@@ -26,7 +26,7 @@ export interface ApplicationRow {
   benefits: string;
   priority: number;
   is_archived: number;
-  is_deleted: number;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,6 +34,8 @@ export interface ApplicationRow {
 type ApplicationSeedStatus =
   | "saved"
   | "applied"
+  | "phone-screening"
+  | "technical"
   | "interview"
   | "offer"
   | "rejected";
@@ -63,6 +65,18 @@ const APPLICATION_LIFECYCLE_PROFILES: ApplicationLifecycleProfile[] = [
     isArchived: 0,
     priorityRange: { min: 2, max: 3 },
     appliedAtOffsetDays: { min: 1, max: 5 },
+  },
+  {
+    status: "phone-screening",
+    isArchived: 0,
+    priorityRange: { min: 3, max: 4 },
+    appliedAtOffsetDays: { min: 2, max: 8 },
+  },
+  {
+    status: "technical",
+    isArchived: 0,
+    priorityRange: { min: 3, max: 5 },
+    appliedAtOffsetDays: { min: 3, max: 10 },
   },
   {
     status: "interview",
@@ -99,9 +113,11 @@ export function createApplicationRows(
       const salaryMin = faker.number.int({ min: 30000, max: 90000 });
       const salaryMax =
         salaryMin + faker.number.int({ min: 10000, max: 30000 });
-      const lifecycle = faker.helpers.arrayElement(
-        APPLICATION_LIFECYCLE_PROFILES,
-      );
+      const lifecycle =
+        APPLICATION_LIFECYCLE_PROFILES[
+          (companyIndex * applicationsPerCompany + index) %
+            APPLICATION_LIFECYCLE_PROFILES.length
+        ] ?? APPLICATION_LIFECYCLE_PROFILES[0];
       const appliedAt = lifecycle.appliedAtOffsetDays
         ? new Date(createdAt)
         : null;
@@ -148,7 +164,7 @@ export function createApplicationRows(
         benefits: faker.lorem.sentence(),
         priority: faker.number.int(lifecycle.priorityRange),
         is_archived: lifecycle.isArchived,
-        is_deleted: 0,
+        deleted_at: null,
         created_at: createdAt.toISOString(),
         updated_at: createdAt.toISOString(),
       };

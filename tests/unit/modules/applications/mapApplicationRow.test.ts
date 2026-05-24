@@ -32,7 +32,7 @@ describe("mapApplicationRowToEntity", () => {
       benefits: null,
       priority: 3,
       is_archived: 0,
-      is_deleted: 0,
+      deleted_at: null,
       created_at: now,
       updated_at: now,
     });
@@ -67,7 +67,7 @@ describe("mapApplicationRowToEntity", () => {
       benefits: null,
       priority: 3,
       is_archived: 0,
-      is_deleted: 0,
+      deleted_at: null,
       created_at: now,
       updated_at: now,
     });

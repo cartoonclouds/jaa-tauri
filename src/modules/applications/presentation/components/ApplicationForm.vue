@@ -58,6 +58,7 @@
 
   const selectedTagIds = ref<string[]>([]);
   const pendingTagNames = ref<string[]>([]);
+  const isEditMode = computed(() => props.mode === "edit");
 
   watch(
     () => props.initialValues.tagIds,
@@ -155,8 +156,12 @@
       locationText: values.locationText
         ? (values.locationText as string).trim()
         : null,
-      locationLat: values.locationLat as number | null,
-      locationLng: values.locationLng as number | null,
+      locationLat: isEditMode.value
+        ? (props.initialValues.locationLat ?? null)
+        : ((values.locationLat as number | null) ?? null),
+      locationLng: isEditMode.value
+        ? (props.initialValues.locationLng ?? null)
+        : ((values.locationLng as number | null) ?? null),
       attendanceType: values.attendanceType as ApplicationAttendanceType | null,
       employmentType: values.employmentType as ApplicationEmploymentType | null,
       salaryMin: values.salaryMin as number | null,
@@ -405,6 +410,7 @@
           Latitude
         </label>
         <InputNumber
+          v-if="!isEditMode"
           name="locationLat"
           :use-grouping="false"
           :min="-90"
@@ -414,8 +420,14 @@
           fluid
           :invalid="$form.locationLat?.invalid"
         />
+        <p
+          v-else
+          class="rounded-md border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-surface-700"
+        >
+          {{ props.initialValues.locationLat ?? "-" }}
+        </p>
         <Message
-          v-if="$form.locationLat?.invalid"
+          v-if="!isEditMode && $form.locationLat?.invalid"
           severity="error"
           size="small"
           variant="simple"
@@ -432,6 +444,7 @@
           Longitude
         </label>
         <InputNumber
+          v-if="!isEditMode"
           name="locationLng"
           :use-grouping="false"
           :min="-180"
@@ -441,8 +454,14 @@
           fluid
           :invalid="$form.locationLng?.invalid"
         />
+        <p
+          v-else
+          class="rounded-md border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-surface-700"
+        >
+          {{ props.initialValues.locationLng ?? "-" }}
+        </p>
         <Message
-          v-if="$form.locationLng?.invalid"
+          v-if="!isEditMode && $form.locationLng?.invalid"
           severity="error"
           size="small"
           variant="simple"

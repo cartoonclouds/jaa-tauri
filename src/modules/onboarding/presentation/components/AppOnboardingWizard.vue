@@ -6,7 +6,6 @@
   import {
     Button,
     Card,
-    Dialog,
     FileUpload,
     InputNumber,
     InputText,
@@ -16,6 +15,7 @@
     Tag,
     Textarea,
   } from "#components";
+  import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
 
   /**
    * Defines app onboarding wizard props.
@@ -173,33 +173,16 @@
     </template>
 
     <template #content>
-      <Dialog
+      <ConfirmActionDialog
         v-model:visible="showCancelConfirmDialog"
-        modal
-        header="Discard onboarding changes?"
-        :style="{ width: '28rem' }"
-      >
-        <p class="text-sm text-surface-600">
-          You have unsaved onboarding changes. Closing now will discard your
-          current progress.
-        </p>
-
-        <template #footer>
-          <div class="flex justify-end gap-2">
-            <Button
-              label="Stay"
-              severity="secondary"
-              text
-              @click="onDismissCancelDialog"
-            />
-            <Button
-              label="Discard & Close"
-              severity="danger"
-              @click="onConfirmCancel"
-            />
-          </div>
-        </template>
-      </Dialog>
+        title="Discard onboarding changes?"
+        message="You have unsaved onboarding changes. Closing now will discard your current progress."
+        confirm-label="Discard & Close"
+        cancel-label="Stay"
+        confirm-severity="danger"
+        @confirm="onConfirmCancel"
+        @cancel="onDismissCancelDialog"
+      />
 
       <Message v-if="hydrating" severity="info" class="mb-4">
         Loading existing onboarding details...
@@ -455,12 +438,3 @@
     </template>
   </Card>
 </template>
-
-
-
-
-
-
-
-
-

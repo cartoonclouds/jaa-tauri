@@ -1744,7 +1744,7 @@ const ApplyFlowPreset = definePreset(Aura, {
         size: "2px",
       },
       step: {
-        padding: "0.5rem 0",
+        padding: "0",
         gap: "0.75rem",
       },
       stepHeader: {
@@ -3499,6 +3499,3 @@ export const applyFlowPrimeVueTheme = {
 } as const;
 
 export default applyFlowPrimeVueTheme;
-
-
-

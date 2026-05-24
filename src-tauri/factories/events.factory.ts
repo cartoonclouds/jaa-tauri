@@ -1,5 +1,6 @@
 import type {
   ApplicationFlowStatus,
+  ApplicationProgressStatus,
   EventStageCopy,
   InteractionStage,
 } from "../../src/modules/events/presentation/constants/interactionStages";
@@ -9,6 +10,7 @@ import { faker } from "@faker-js/faker";
 import {
   EVENT_COPY_BY_STAGE,
   EVENT_FLOW_BY_APPLICATION_STATUS,
+  FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS,
 } from "../../src/modules/events/presentation/constants/interactionStages";
 
 export interface EventRow {
@@ -18,7 +20,7 @@ export interface EventRow {
   type: string;
   title: string;
   description: string;
-  event_at: string;
+  event_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,38 +36,28 @@ interface EventContactInput {
   company_id: string;
 }
 
-function getEventFlowStages(
-  status: string,
-  eventsPerApplication: number,
-): InteractionStage[] {
+function getCompletedStages(status: string): InteractionStage[] {
   const resolvedStatus =
     status in EVENT_FLOW_BY_APPLICATION_STATUS
       ? (status as ApplicationFlowStatus)
       : "applied";
-  const flowStages = EVENT_FLOW_BY_APPLICATION_STATUS[resolvedStatus];
 
-  if (eventsPerApplication >= flowStages.length) {
-    return flowStages;
+  return EVENT_FLOW_BY_APPLICATION_STATUS[resolvedStatus];
+}
+
+function getFutureStages(status: string): InteractionStage[] {
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS,
+      status,
+    )
+  ) {
+    return [];
   }
 
-  if (eventsPerApplication <= 1) {
-    return [flowStages[flowStages.length - 1] ?? "Application/Submitted"];
-  }
-
-  const selectedStages: InteractionStage[] = [];
-
-  for (let index = 0; index < eventsPerApplication; index += 1) {
-    const position = Math.round(
-      (index * (flowStages.length - 1)) / (eventsPerApplication - 1),
-    );
-    const stage = flowStages[position];
-
-    if (stage && !selectedStages.includes(stage)) {
-      selectedStages.push(stage);
-    }
-  }
-
-  return selectedStages;
+  return FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS[
+    status as ApplicationProgressStatus
+  ];
 }
 
 function getRejectedEventTitle(): string {
@@ -77,46 +69,56 @@ function getRejectedEventTitle(): string {
 export function createEventRows(
   applications: EventApplicationInput[],
   contacts: EventContactInput[],
-  eventsPerApplication = 2,
+  _eventsPerApplication = 2,
   seed = 1500,
 ): EventRow[] {
   faker.seed(seed);
   faker.setDefaultRefDate("2026-01-01T00:00:00.000Z");
 
-  return applications.flatMap((application, applicationIndex) =>
-    getEventFlowStages(application.status, eventsPerApplication).map(
-      (type, index, flowStages) => {
-        faker.seed(seed + applicationIndex * 100 + index);
-        const anchorDate = faker.date.recent({ days: 60 });
-        const createdAt = new Date(anchorDate);
-        const eventAt = new Date(anchorDate);
-        const companyContacts = contacts.filter(
-          (contact) => contact.company_id === application.company_id,
-        );
-        const stageCopy: EventStageCopy = EVENT_COPY_BY_STAGE[type];
+  return applications.flatMap((application, applicationIndex) => {
+    const completedStages = getCompletedStages(application.status);
+    const futureStages = getFutureStages(application.status);
+    const flowStages = [
+      ...completedStages,
+      ...futureStages.filter((stage) => !completedStages.includes(stage)),
+    ];
 
-        eventAt.setDate(
-          eventAt.getDate() + index * faker.number.int({ min: 2, max: 6 }),
-        );
+    return flowStages.map((type, index) => {
+      faker.seed(seed + applicationIndex * 100 + index);
+      const anchorDate = faker.date.recent({ days: 60 });
+      const createdAt = new Date(anchorDate);
+      const eventAt = new Date(anchorDate);
+      const companyContacts = contacts.filter(
+        (contact) => contact.company_id === application.company_id,
+      );
+      const stageCopy: EventStageCopy = EVENT_COPY_BY_STAGE[type];
+      const isCompletedStage = completedStages.includes(type);
 
-        return {
-          id: faker.string.uuid(),
-          application_id: application.id,
-          contact_id:
-            companyContacts.length > 0 && type !== "Application/Saved"
-              ? faker.helpers.arrayElement(companyContacts).id
-              : null,
-          type,
-          title:
-            index === flowStages.length - 1 && type === "Decision/Rejected"
-              ? getRejectedEventTitle()
-              : stageCopy.title,
-          description: stageCopy.description,
-          event_at: eventAt.toISOString(),
-          created_at: createdAt.toISOString(),
-          updated_at: createdAt.toISOString(),
-        };
-      },
-    ),
-  );
+      eventAt.setDate(
+        eventAt.getDate() + index * faker.number.int({ min: 2, max: 6 }),
+      );
+
+      return {
+        id: faker.string.uuid(),
+        application_id: application.id,
+        contact_id:
+          isCompletedStage &&
+          companyContacts.length > 0 &&
+          type !== "Application/Saved"
+            ? faker.helpers.arrayElement(companyContacts).id
+            : null,
+        type,
+        title:
+          isCompletedStage &&
+          type === "Decision/Rejected" &&
+          completedStages[completedStages.length - 1] === type
+            ? getRejectedEventTitle()
+            : stageCopy.title,
+        description: stageCopy.description,
+        event_at: isCompletedStage ? eventAt.toISOString() : null,
+        created_at: createdAt.toISOString(),
+        updated_at: createdAt.toISOString(),
+      };
+    });
+  });
 }

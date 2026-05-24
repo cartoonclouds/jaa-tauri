@@ -61,6 +61,14 @@ export interface IContactRepository extends IRepository<
   listByApplicationId(
     applicationId: string,
   ): Promise<ApplicationLinkedContact[]>;
+  listAssociatedCompanies(
+    contactId: string,
+  ): Promise<ContactAssociatedCompany[]>;
+  linkToApplication(applicationId: string, contactId: string): Promise<void>;
+  unlinkFromApplication(
+    applicationId: string,
+    contactId: string,
+  ): Promise<void>;
 }
 
 /**
@@ -69,6 +77,17 @@ export interface IContactRepository extends IRepository<
 export interface ApplicationLinkedContact {
   contact: Contact;
   companyName: string | null;
+}
+
+/**
+ * Lightweight company row associated with a contact.
+ */
+export interface ContactAssociatedCompany {
+  id: string;
+  name: string;
+  industry: string | null;
+  websiteUrl: string | null;
+  locationText: string | null;
 }
 
 /**
@@ -164,6 +183,55 @@ export class ContactRepository implements IContactRepository {
       contact: mapContactRowToEntity(row),
       companyName: (row.company_name as string | null) ?? null,
     }));
+  }
+
+  async listAssociatedCompanies(
+    contactId: string,
+  ): Promise<ContactAssociatedCompany[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT
+         co.id,
+         co.name,
+         co.industry,
+         co.website_url,
+         co.location_text
+       FROM contacts c
+       INNER JOIN companies co ON co.id = c.company_id
+       WHERE c.id = $1
+       ORDER BY co.updated_at DESC`,
+      [contactId],
+    );
+
+    return rows.map((row) => ({
+      id: String(row.id),
+      name: typeof row.name === "string" ? row.name : "",
+      industry: (row.industry as string | null) ?? null,
+      websiteUrl: (row.website_url as string | null) ?? null,
+      locationText: (row.location_text as string | null) ?? null,
+    }));
+  }
+
+  async linkToApplication(
+    applicationId: string,
+    contactId: string,
+  ): Promise<void> {
+    await this.db.execute(
+      `INSERT INTO application_contacts (application_id, contact_id)
+       VALUES ($1, $2)
+       ON CONFLICT(application_id, contact_id) DO NOTHING`,
+      [applicationId, contactId],
+    );
+  }
+
+  async unlinkFromApplication(
+    applicationId: string,
+    contactId: string,
+  ): Promise<void> {
+    await this.db.execute(
+      `DELETE FROM application_contacts
+       WHERE application_id = $1 AND contact_id = $2`,
+      [applicationId, contactId],
+    );
   }
 
   async create(payload: ContactCreatePayload): Promise<string> {

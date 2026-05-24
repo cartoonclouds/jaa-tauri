@@ -3,6 +3,7 @@ import type { DatatablePageQuery } from "@shared/types";
 import { ContactSchema } from "@modules/contacts/domain/zod/contact.schema";
 import {
   type ApplicationLinkedContact,
+  type ContactAssociatedCompany,
   type ContactCreatePayload,
   type ContactUpdatePayload,
   type IContactRepository,
@@ -26,6 +27,23 @@ export class ContactService {
     applicationId: string,
   ): Promise<ApplicationLinkedContact[]> {
     return this.repository.listByApplicationId(applicationId);
+  }
+
+  listAssociatedCompanies(
+    contactId: string,
+  ): Promise<ContactAssociatedCompany[]> {
+    return this.repository.listAssociatedCompanies(contactId);
+  }
+
+  linkToApplication(applicationId: string, contactId: string): Promise<void> {
+    return this.repository.linkToApplication(applicationId, contactId);
+  }
+
+  unlinkFromApplication(
+    applicationId: string,
+    contactId: string,
+  ): Promise<void> {
+    return this.repository.unlinkFromApplication(applicationId, contactId);
   }
 
   create(payload: ContactCreatePayload) {
@@ -77,11 +95,3 @@ export class ContactService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

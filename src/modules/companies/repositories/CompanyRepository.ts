@@ -55,6 +55,17 @@ export interface CompanyUpdatePayload {
 }
 
 /**
+ * Lightweight contact row associated with a company.
+ */
+export interface CompanyAssociatedContact {
+  id: string;
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  type: string;
+}
+
+/**
  * Defines icompany repository.
  */
 export interface ICompanyRepository extends IRepository<
@@ -63,6 +74,9 @@ export interface ICompanyRepository extends IRepository<
   CompanyUpdatePayload
 > {
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Company>>;
+  listAssociatedContacts(
+    companyId: string,
+  ): Promise<CompanyAssociatedContact[]>;
 }
 
 /**
@@ -227,5 +241,30 @@ export class CompanyRepository implements ICompanyRepository {
 
   async delete(id: string): Promise<void> {
     await this.db.execute("DELETE FROM companies WHERE id = $1", [id]);
+  }
+
+  async listAssociatedContacts(
+    companyId: string,
+  ): Promise<CompanyAssociatedContact[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT
+         id,
+         full_name,
+         email,
+         phone,
+         type
+       FROM contacts
+       WHERE company_id = $1
+       ORDER BY updated_at DESC`,
+      [companyId],
+    );
+
+    return rows.map((row) => ({
+      id: String(row.id),
+      fullName: typeof row.full_name === "string" ? row.full_name : "",
+      email: (row.email as string | null) ?? null,
+      phone: (row.phone as string | null) ?? null,
+      type: typeof row.type === "string" ? row.type : "company",
+    }));
   }
 }

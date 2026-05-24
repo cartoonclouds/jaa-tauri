@@ -47,7 +47,7 @@ export function mapApplicationRowToEntity(
     tagIds: [],
     priority: Number(row.priority ?? 3),
     isArchived: Number(row.is_archived ?? 0) === 1,
-    isDeleted: Number(row.is_deleted ?? 0) === 1,
+    isDeleted: row.deleted_at != null,
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),
   };

@@ -11,12 +11,17 @@
     stages: InteractionStage[];
     futureStages?: InteractionStage[];
     activeStepIndex?: number;
+    stageHoverLabels?: Partial<Record<InteractionStage, string>>;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     futureStages: () => [],
     activeStepIndex: 1,
+    stageHoverLabels: () => ({}),
   });
+  const emit = defineEmits<{
+    "stage-dblclick": [stage: InteractionStage];
+  }>();
 
   const displayedStages = computed<InteractionStage[]>(() => {
     return [
@@ -48,9 +53,6 @@
     /**
      * Checks whether future step is true.
      */
-    /**
-     * Checks whether future step is true.
-     */
     return stepValue > props.stages.length;
   }
 
@@ -58,9 +60,6 @@
    * Handles get step number style.
    */
   function getStepNumberStyle(stepValue: number): CSSProperties {
-    /**
-     * Gets step number style.
-     */
     /**
      * Gets step number style.
      */
@@ -89,9 +88,6 @@
     /**
      * Gets step title style.
      */
-    /**
-     * Gets step title style.
-     */
     const isActive = stepValue <= normalizedActiveStepIndex.value;
     const isFuture = isFutureStep(stepValue);
 
@@ -110,9 +106,6 @@
     /**
      * Gets connector style.
      */
-    /**
-     * Gets connector style.
-     */
     const isFuture = stepValue >= props.stages.length;
 
     return {
@@ -124,11 +117,35 @@
       opacity: isFuture ? 0.55 : 1,
     };
   }
+
+  /**
+   * Handles get hover text.
+   */
+  function getHoverText(stage: InteractionStage): string {
+    const eventAt = props.stageHoverLabels[stage];
+    if (!eventAt) {
+      return "";
+    }
+
+    return `Event at: ${eventAt}`;
+  }
+
+  /**
+   * Handles on stage double click.
+   */
+  function onStageDoubleClick(stage: InteractionStage): void {
+    emit("stage-dblclick", stage);
+  }
 </script>
 
 <template>
-  <Stepper :value="normalizedActiveStepIndex.toString()" class="w-full">
-    <StepList class="overflow-x-auto pb-1">
+  <Stepper
+    :value="normalizedActiveStepIndex.toString()"
+    class="h-auto! min-h-0! w-full"
+  >
+    <StepList
+      class="h-auto! min-h-0! max-h-none! items-start! overflow-x-auto overflow-y-hidden pb-1"
+    >
       <Step
         v-for="(stage, index) in displayedStages"
         :key="stage"
@@ -136,10 +153,18 @@
         :value="index + 1"
       >
         <template #default="{ activateCallback, value, a11yAttrs }">
-          <div class="flex flex-row flex-auto gap-2" v-bind="a11yAttrs.root">
+          <div
+            class="flex flex-row flex-auto self-start items-start gap-2"
+            v-bind="a11yAttrs.root"
+          >
             <button
-              class="bg-transparent border-0 inline-flex flex-col items-center gap-2"
+              v-tooltip.top="{
+                value: getHoverText(stage),
+                disabled: !getHoverText(stage),
+              }"
+              class="inline-flex h-auto min-h-20 self-start hover:cursor-pointer flex-col items-center gap-2 border-0 bg-transparent align-top"
               v-bind="a11yAttrs.header"
+              @dblclick="onStageDoubleClick(stage)"
               @click="activateCallback"
             >
               <span
@@ -154,16 +179,11 @@
               >
                 {{ EVENT_COPY_BY_STAGE[stage]?.title ?? stage }}
               </span>
-              <span
-                v-if="isFutureStep(Number(value))"
-                class="rounded-full border border-dashed border-surface-300 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-surface-500"
-              >
-                Future
-              </span>
             </button>
             <div
               v-if="index < displayedStages.length - 1"
-              class="hidden sm:block w-full self-center border-t"
+              class="hidden w-full self-start border-t sm:block"
+              style="margin-top: 1.25rem"
               :style="getConnectorStyle(index + 1)"
             />
           </div>
@@ -172,12 +192,3 @@
     </StepList>
   </Stepper>
 </template>
-
-
-
-
-
-
-
-
-

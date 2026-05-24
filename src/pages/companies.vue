@@ -1,13 +1,12 @@
 <script setup lang="ts">
   import type { Company } from "@modules/companies/domain/entities/Company";
+  import type { CompanyEditorSubmitPayload } from "@modules/companies/presentation/components/CompanyEditorModal.vue";
 
+  import CompanyEditorModal from "@modules/companies/presentation/components/CompanyEditorModal.vue";
   import { useCompanyDatatable } from "@modules/companies/presentation/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/presentation/constants/companyDatatable";
   import { useCompanyService } from "@modules/companies/services/useCompanyService";
-  import { useTagService } from "@modules/tags";
-  import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
-  import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
-  import { reactive, ref } from "vue";
+  import { ref } from "vue";
 
   import { definePageMeta } from "#imports";
 
@@ -15,7 +14,6 @@
   definePageMeta({ ssr: false });
 
   const service = useCompanyService();
-  const tagService = useTagService();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -29,78 +27,46 @@
     rowsPerPageOptions,
     totalRecords,
   } = useCompanyDatatable();
-  const editingId = ref<string | null>(null);
-  const pendingTagNames = ref<string[]>([]);
-  const form = reactive({
-    name: "",
-    locationText: "",
-    locationLat: "",
-    locationLng: "",
-    tagIds: [] as string[],
-  });
+  const selectedCompany = ref<Company | null>(null);
+  const isEditorModalVisible = ref(false);
+  const isSavingCompany = ref(false);
 
   /**
-   * Handles hydrate for edit.
+   * Handles open create company modal.
    */
-  function hydrateForEdit(row: Company): void {
-    editingId.value = row.id;
-    form.name = row.name;
-    form.locationText = row.locationText ?? "";
-    form.locationLat = row.locationLat?.toString() ?? "";
-    form.locationLng = row.locationLng?.toString() ?? "";
-    form.tagIds = [...row.tagIds];
+  function openCreateCompanyModal(): void {
+    selectedCompany.value = null;
+    isEditorModalVisible.value = true;
   }
 
   /**
-   * Handles reset form.
+   * Handles open edit company modal.
    */
-  function resetForm(): void {
-    editingId.value = null;
-    form.name = "";
-    form.locationText = "";
-    form.locationLat = "";
-    form.locationLng = "";
-    form.tagIds = [];
-    pendingTagNames.value = [];
+  function openEditCompanyModal(company: Company): void {
+    selectedCompany.value = company;
+    isEditorModalVisible.value = true;
   }
 
   /**
-   * Handles on submit.
+   * Handles company editor submit.
    */
-  async function onSubmit(): Promise<void> {
-    if (!form.name.trim()) {
-      return;
+  async function onCompanyEditorSubmit(
+    payload: CompanyEditorSubmitPayload,
+  ): Promise<void> {
+    isSavingCompany.value = true;
+
+    try {
+      if ("id" in payload) {
+        await service.update(payload);
+      } else {
+        await service.create(payload);
+      }
+
+      await refresh();
+      isEditorModalVisible.value = false;
+    } finally {
+      isSavingCompany.value = false;
     }
-
-    const resolvedTagIds = await resolveTagIdsWithPendingTags({
-      selectedTagIds: form.tagIds,
-      pendingTagNames: pendingTagNames.value,
-      tagService,
-    });
-    const locationLat = form.locationLat ? Number(form.locationLat) : null;
-    const locationLng = form.locationLng ? Number(form.locationLng) : null;
-
-    if (editingId.value) {
-      await service.update({
-        id: editingId.value,
-        name: form.name,
-        locationText: form.locationText || null,
-        locationLat,
-        locationLng,
-        tagIds: resolvedTagIds,
-      });
-    } else {
-      await service.create({
-        name: form.name,
-        locationText: form.locationText || null,
-        locationLat,
-        locationLng,
-        tagIds: resolvedTagIds,
-      });
-    }
-
-    await refresh();
-    resetForm();
   }
 
   /**
@@ -114,30 +80,13 @@
 
 <template>
   <div class="space-y-6 p-6">
-    <h1 class="text-2xl font-semibold">Companies</h1>
-
-    <form class="grid gap-3 md:grid-cols-4" @submit.prevent="onSubmit">
-      <InputText v-model="form.name" placeholder="Company name" />
-      <InputText v-model="form.locationText" placeholder="Location" />
-      <InputText v-model="form.locationLat" placeholder="Lat" />
-      <InputText v-model="form.locationLng" placeholder="Lng" />
-      <TagMultiSelect
-        v-model="form.tagIds"
-        v-model:pending-tag-names="pendingTagNames"
-        placeholder="Tags"
-        class="md:col-span-4"
-      />
-      <div class="flex gap-2 md:col-span-4">
-        <Button type="submit" :label="editingId ? 'Update' : 'Create'" />
-        <Button
-          v-if="editingId"
-          type="button"
-          severity="secondary"
-          label="Cancel"
-          @click="resetForm"
-        />
-      </div>
-    </form>
+    <div class="flex items-center justify-between gap-3">
+      <h1 class="text-2xl font-semibold">Companies</h1>
+      <Button type="button" @click="openCreateCompanyModal">
+        <Icon name="heroicons:plus" class="h-4 w-4" />
+        <span>New Company</span>
+      </Button>
+    </div>
 
     <DataTable
       :value="items"
@@ -178,7 +127,7 @@
             <Button
               size="small"
               label="Edit"
-              @click="hydrateForEdit(slotProps.data as Company)"
+              @click="openEditCompanyModal(slotProps.data as Company)"
             />
             <Button
               size="small"
@@ -190,5 +139,12 @@
         </template>
       </Column>
     </DataTable>
+
+    <CompanyEditorModal
+      v-model:visible="isEditorModalVisible"
+      :company="selectedCompany"
+      :busy="isSavingCompany"
+      @submit="onCompanyEditorSubmit"
+    />
   </div>
 </template>

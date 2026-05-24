@@ -42,7 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_settings_theme ON settings(theme);
 CREATE INDEX IF NOT EXISTS idx_settings_locale ON settings(locale);
 
 -- applications
-CREATE INDEX IF NOT EXISTS idx_applications_deleted_created_at ON applications(is_deleted, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_deleted_created_at ON applications(deleted_at, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_applications_title ON applications(title);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
 CREATE INDEX IF NOT EXISTS idx_applications_location_text ON applications(location_text);

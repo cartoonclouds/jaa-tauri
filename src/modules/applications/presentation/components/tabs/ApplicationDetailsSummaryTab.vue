@@ -2,24 +2,24 @@
   import type { Application } from "@modules/applications/domain/entities/Application";
   import type { Event } from "@modules/events/domain/entities/Event";
 
+  import ApplicationDetailsCard from "@modules/applications/presentation/components/ApplicationDetailsCard.vue";
   import {
     formatApplicationEventFlowStatusLabel,
     formatApplicationStatusLabel,
     getApplicationEventFlowStatusClass,
     getApplicationStatusClass,
   } from "@modules/applications/presentation/utils/applicationVisualTokens";
+  import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
   import { useEvent } from "@modules/events/presentation/composables/useEvent";
   import {
-    type ApplicationFlowStatus,
     EVENT_COPY_BY_STAGE,
-    EVENT_FLOW_BY_APPLICATION_STATUS,
-    getFutureEventFlowStages,
     INTERACTION_STAGES,
     type InteractionStage,
-    isApplicationProgressStatus,
     isInteractionStage,
   } from "@modules/events/presentation/constants/interactionStages";
   import { computed, reactive, ref } from "vue";
+
+  import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
 
   /**
    * Defines props.
@@ -33,12 +33,13 @@
   const props = defineProps<Props>();
   const {
     items: eventItems,
-    update,
+    create,
     remove,
+    update,
     isLoading: isMutatingEvent,
   } = useEvent();
-
   const isEditDialogVisible = ref(false);
+  const isDeleteConfirmVisible = ref(false);
   const editForm = reactive<{
     id: string;
     type: InteractionStage;
@@ -60,35 +61,6 @@
       hour: "2-digit",
       minute: "2-digit",
     });
-  }
-
-  /**
-   * Handles map event-flow value to flow status.
-   */
-  function mapEventFlowValueToFlowStatus(
-    value: string | null | undefined,
-  ): ApplicationFlowStatus {
-    if (value === "saved") {
-      return "saved";
-    }
-
-    if (value === "applied") {
-      return "applied";
-    }
-
-    if (value === "interview") {
-      return "interview";
-    }
-
-    if (value === "offer") {
-      return "offer";
-    }
-
-    if (value === "rejected") {
-      return "rejected";
-    }
-
-    return "saved";
   }
 
   const summaryFlowStages = computed<InteractionStage[]>(() => {
@@ -116,22 +88,69 @@
       }
     }
 
-    if (stagesFromEvents.length > 0) {
-      return stagesFromEvents;
-    }
-
-    const flowStatus = mapEventFlowValueToFlowStatus(
-      application.eventFlowStatus.value,
-    );
-    return EVENT_FLOW_BY_APPLICATION_STATUS[flowStatus];
+    return stagesFromEvents;
   });
 
   const futureFlowStages = computed<InteractionStage[]>(() => {
-    const statusValue = props.application?.status.value;
+    const applicationId = props.application?.id;
+    if (!applicationId) {
+      return [];
+    }
 
-    return isApplicationProgressStatus(statusValue)
-      ? getFutureEventFlowStages(statusValue)
-      : [];
+    const stageEventByType = new Map<InteractionStage, Event>();
+    const sortedApplicationEvents = eventItems.value
+      .filter((event) => event.applicationId === applicationId)
+      .sort((left, right) => {
+        const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
+        const rightTime = right.eventAt?.getTime() ?? right.createdAt.getTime();
+        return leftTime - rightTime;
+      });
+
+    for (const event of sortedApplicationEvents) {
+      if (!isInteractionStage(event.type)) {
+        continue;
+      }
+
+      if (!stageEventByType.has(event.type)) {
+        stageEventByType.set(event.type, event);
+      }
+    }
+
+    return summaryFlowStages.value.filter((stage) => {
+      const stageEvent = stageEventByType.get(stage) ?? null;
+      return !stageEvent?.eventAt;
+    });
+  });
+
+  const completedFlowStages = computed<InteractionStage[]>(() => {
+    const applicationId = props.application?.id;
+    if (!applicationId) {
+      return [];
+    }
+
+    const stageEventByType = new Map<InteractionStage, Event>();
+    const sortedApplicationEvents = eventItems.value
+      .filter((event) => event.applicationId === applicationId)
+      .sort((left, right) => {
+        const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
+        const rightTime = right.eventAt?.getTime() ?? right.createdAt.getTime();
+        return leftTime - rightTime;
+      });
+
+    for (const event of sortedApplicationEvents) {
+      if (!isInteractionStage(event.type)) {
+        continue;
+      }
+
+      if (!stageEventByType.has(event.type)) {
+        stageEventByType.set(event.type, event);
+      }
+    }
+
+    return summaryFlowStages.value.filter((stage) => {
+      const stageEvent = stageEventByType.get(stage) ?? null;
+      return Boolean(stageEvent?.eventAt);
+    });
   });
 
   const displayedFlowStages = computed(() => {
@@ -159,271 +178,210 @@
       }
     }
 
-    return [
-      ...summaryFlowStages.value.map((stage) => {
-        const event = stageEventByType.get(stage) ?? null;
-        const eventAt = event?.eventAt ?? null;
-        return {
-          eventId: event?.id ?? null,
-          stage,
-          isFuture: false,
-          eventAtLabel: eventAt ? formatTimelineStageDate(eventAt) : null,
-        };
-      }),
-      ...futureFlowStages.value
-        .filter((stage) => !summaryFlowStages.value.includes(stage))
-        .map((stage) => ({
-          eventId: null,
-          stage,
-          isFuture: true,
-          eventAtLabel: null,
-        })),
-    ];
+    return summaryFlowStages.value.map((stage) => {
+      const event = stageEventByType.get(stage) ?? null;
+      const eventAt = event?.eventAt ?? null;
+      return {
+        eventId: event?.id ?? null,
+        stage,
+        isFuture: !eventAt,
+        eventAtLabel: eventAt ? formatTimelineStageDate(eventAt) : null,
+      };
+    });
   });
 
-  const summaryTimelineActiveValue = computed(() => {
+  const stageHoverLabels = computed<Partial<Record<InteractionStage, string>>>(
+    () => {
+      const labels: Partial<Record<InteractionStage, string>> = {};
+
+      for (const item of displayedFlowStages.value) {
+        if (item.eventAtLabel) {
+          labels[item.stage] = item.eventAtLabel;
+        }
+      }
+
+      return labels;
+    },
+  );
+
+  const summaryTimelineActiveStepIndex = computed(() => {
     const displayedCount = displayedFlowStages.value.length;
     if (displayedCount === 0) {
-      return "1";
+      return 1;
     }
 
-    const completedCount = summaryFlowStages.value.length;
-    const activeIndex = Math.min(Math.max(completedCount, 1), displayedCount);
-    return String(activeIndex);
+    const completedCount = completedFlowStages.value.length;
+    return Math.min(Math.max(completedCount, 1), displayedCount);
+  });
+
+  const selectedStageEventId = computed<string | null>(() => {
+    const applicationId = props.application?.id;
+    if (!applicationId) {
+      return null;
+    }
+
+    const selectedEvent = eventItems.value.find(
+      (entry) =>
+        entry.applicationId === applicationId && entry.type === editForm.type,
+    );
+
+    return selectedEvent?.id ?? null;
   });
 
   /**
-   * Opens flow step edit for the selected stage.
+   * Handles open stage edit by step double-click.
    */
-  function openStageEdit(item: {
-    eventId: string | null;
-    stage: InteractionStage;
-  }): void {
-    if (!item.eventId) {
-      return;
+  function onStageDoubleClick(stage: InteractionStage): void {
+    const applicationId = props.application?.id;
+    const event = applicationId
+      ? eventItems.value.find(
+          (entry) =>
+            entry.applicationId === applicationId && entry.type === stage,
+        )
+      : null;
+
+    if (event) {
+      editForm.id = event.id;
+      editForm.type = event.type;
+      editForm.eventAt = event.eventAt;
+    } else {
+      editForm.id = "";
+      editForm.type = stage;
+      editForm.eventAt = null;
     }
 
-    const event = eventItems.value.find((entry) => entry.id === item.eventId);
-    if (!event) {
-      return;
-    }
-
-    editForm.id = event.id;
-    editForm.type = event.type;
-    editForm.eventAt = event.eventAt;
     isEditDialogVisible.value = true;
   }
 
   /**
-   * Saves flow step edits for this application.
+   * Handles save stage edit.
    */
   async function saveStageEdit(): Promise<void> {
-    if (!editForm.id) {
-      return;
+    if (editForm.id) {
+      await update({
+        id: editForm.id,
+        type: editForm.type,
+        eventAt: editForm.eventAt,
+      });
+    } else if (props.application) {
+      await create({
+        applicationId: props.application.id,
+        contactId: null,
+        type: editForm.type,
+        title: EVENT_COPY_BY_STAGE[editForm.type].title,
+        description: null,
+        eventAt: editForm.eventAt,
+      });
     }
-
-    await update({
-      id: editForm.id,
-      type: editForm.type,
-      eventAt: editForm.eventAt,
-    });
 
     isEditDialogVisible.value = false;
   }
 
   /**
-   * Removes a flow step from the current application timeline.
+   * Handles delete current stage event from this application flow.
    */
-  async function deleteStage(item: { eventId: string | null }): Promise<void> {
-    if (!item.eventId) {
+  async function deleteStageEdit(): Promise<void> {
+    if (!props.application || !selectedStageEventId.value) {
       return;
     }
 
-    await remove(item.eventId);
+    const event = eventItems.value.find(
+      (entry) => entry.id === selectedStageEventId.value,
+    );
+    if (event?.applicationId !== props.application.id) {
+      return;
+    }
+
+    await remove(selectedStageEventId.value);
+    isDeleteConfirmVisible.value = false;
+    isEditDialogVisible.value = false;
   }
 
   /**
-   * Returns connector classes for timeline transitions.
+   * Handles request delete stage edit.
    */
-  function getStageConnectorClass(index: number): string {
-    const nextItem = displayedFlowStages.value[index + 1];
-    if (!nextItem) {
-      return "";
+  function requestDeleteStageEdit(): void {
+    if (!selectedStageEventId.value) {
+      return;
     }
 
-    return nextItem.isFuture
-      ? "border-l-2 border-dashed border-surface-300"
-      : "border-l-2 border-solid border-surface-300";
+    isDeleteConfirmVisible.value = true;
   }
 </script>
 
 <template>
   <div v-if="application" class="space-y-4">
-    <Card>
-      <template #title>
-        <span class="text-xs uppercase tracking-wide text-surface-500"
-          >Application Flow</span
+    <ApplicationDetailsCard title="Application Flow">
+      <div class="rounded-lg border border-surface-200 bg-surface-0 px-3 py-2">
+        <p
+          class="mb-2 text-xs font-semibold uppercase tracking-wide text-surface-500"
         >
-      </template>
-      <template #content>
+          Timeline
+        </p>
+
         <div
-          class="rounded-lg border border-surface-200 bg-surface-0 px-3 py-2"
+          v-if="displayedFlowStages.length === 0"
+          class="text-sm text-surface-500"
         >
-          <p
-            class="mb-2 text-xs font-semibold uppercase tracking-wide text-surface-500"
-          >
-            Timeline
-          </p>
-
-          <div
-            v-if="displayedFlowStages.length === 0"
-            class="text-sm text-surface-500"
-          >
-            No flow stages available.
-          </div>
-
-          <Stepper v-else :value="summaryTimelineActiveValue">
-            <StepItem
-              v-for="(item, index) in displayedFlowStages"
-              :key="`${item.stage}-${index}`"
-              :value="String(index + 1)"
-              class="group"
-            >
-              <Step class="pointer-events-none">
-                <div class="flex w-full justify-start gap-3 text-left">
-                  <div class="min-w-0">
-                    <span class="block text-sm font-semibold text-surface-900">
-                      {{ EVENT_COPY_BY_STAGE[item.stage]?.title ?? item.stage }}
-                    </span>
-                    <p
-                      v-if="item.eventAtLabel"
-                      class="pt-0.5 text-[11px] font-medium uppercase tracking-wide text-surface-500"
-                    >
-                      {{ item.eventAtLabel }}
-                    </p>
-                  </div>
-
-                  <div
-                    v-if="!item.isFuture && item.eventId"
-                    class="pointer-events-none ml-auto flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
-                  >
-                    <Button
-                      type="button"
-                      severity="secondary"
-                      text
-                      size="small"
-                      :disabled="isMutatingEvent"
-                      @click="openStageEdit(item)"
-                    >
-                      <Icon name="heroicons:pencil-square" class="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      type="button"
-                      severity="danger"
-                      text
-                      size="small"
-                      :disabled="isMutatingEvent"
-                      @click="deleteStage(item)"
-                    >
-                      <Icon name="heroicons:trash" class="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Step>
-
-              <div
-                v-if="index < displayedFlowStages.length - 1"
-                class="my-1 h-4"
-                style="
-                  margin-left: calc(
-                    0.75rem + (var(--p-stepper-step-number-size, 2rem) / 2) -
-                      1px
-                  );
-                "
-                :class="getStageConnectorClass(index)"
-              />
-            </StepItem>
-          </Stepper>
+          No flow stages available.
         </div>
-      </template>
-    </Card>
+
+        <div v-else class="space-y-3">
+          <EventFlowStepper
+            :stages="completedFlowStages"
+            :future-stages="futureFlowStages"
+            :active-step-index="summaryTimelineActiveStepIndex"
+            :stage-hover-labels="stageHoverLabels"
+            @stage-dblclick="onStageDoubleClick"
+          />
+
+          <p class="text-xs text-surface-500">
+            Tip: Double-click any step to edit an event.
+          </p>
+        </div>
+      </div>
+    </ApplicationDetailsCard>
 
     <div class="grid gap-3 md:grid-cols-2">
-      <Card :pt="{ root: 'p-3' }">
-        <template #title>
-          <span class="text-xs uppercase tracking-wide text-surface-500"
-            >Title</span
-          >
-        </template>
-        <template #content>
-          <p class="text-sm font-medium text-surface-900">
-            {{ application.title }}
-          </p>
-        </template>
-      </Card>
+      <ApplicationDetailsCard title="Title" compact>
+        <p class="text-sm font-medium text-surface-900">
+          {{ application.title }}
+        </p>
+      </ApplicationDetailsCard>
 
-      <Card :pt="{ root: 'p-3' }">
-        <template #title>
-          <span class="text-xs uppercase tracking-wide text-surface-500"
-            >Status</span
-          >
-        </template>
-        <template #content>
-          <span
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="getApplicationStatusClass(application.status)"
-          >
-            {{ formatApplicationStatusLabel(application.status) }}
-          </span>
-        </template>
-      </Card>
+      <ApplicationDetailsCard title="Status" compact>
+        <span
+          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          :class="getApplicationStatusClass(application.status)"
+        >
+          {{ formatApplicationStatusLabel(application.status) }}
+        </span>
+      </ApplicationDetailsCard>
 
-      <Card :pt="{ root: 'p-3' }">
-        <template #title>
-          <span class="text-xs uppercase tracking-wide text-surface-500"
-            >Event Flow</span
-          >
-        </template>
-        <template #content>
-          <span
-            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="
-              getApplicationEventFlowStatusClass(application.eventFlowStatus)
-            "
-          >
-            {{
-              formatApplicationEventFlowStatusLabel(application.eventFlowStatus)
-            }}
-          </span>
-        </template>
-      </Card>
+      <ApplicationDetailsCard title="Event Flow" compact>
+        <span
+          class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          :class="
+            getApplicationEventFlowStatusClass(application.eventFlowStatus)
+          "
+        >
+          {{
+            formatApplicationEventFlowStatusLabel(application.eventFlowStatus)
+          }}
+        </span>
+      </ApplicationDetailsCard>
 
-      <Card :pt="{ root: 'p-3' }">
-        <template #title>
-          <span class="text-xs uppercase tracking-wide text-surface-500"
-            >Company</span
-          >
-        </template>
-        <template #content>
-          <p class="text-sm font-medium text-surface-900">
-            {{ companyName }}
-          </p>
-        </template>
-      </Card>
+      <ApplicationDetailsCard title="Company" compact>
+        <p class="text-sm font-medium text-surface-900">
+          {{ companyName }}
+        </p>
+      </ApplicationDetailsCard>
 
-      <Card :pt="{ root: 'p-3' }">
-        <template #title>
-          <span class="text-xs uppercase tracking-wide text-surface-500"
-            >Applied At</span
-          >
-        </template>
-        <template #content>
-          <p class="text-sm font-medium text-surface-900">
-            {{ appliedAtLabel }}
-          </p>
-        </template>
-      </Card>
+      <ApplicationDetailsCard title="Applied At" compact>
+        <p class="text-sm font-medium text-surface-900">
+          {{ appliedAtLabel }}
+        </p>
+      </ApplicationDetailsCard>
     </div>
   </div>
 
@@ -460,7 +418,17 @@
     </div>
 
     <template #footer>
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-end gap-2 w-full">
+        <Button
+          v-if="selectedStageEventId"
+          type="button"
+          label="Delete"
+          severity="danger"
+          text
+          :disabled="isMutatingEvent"
+          class="mr-auto"
+          @click="requestDeleteStageEdit"
+        />
         <Button
           type="button"
           label="Cancel"
@@ -478,4 +446,14 @@
       </div>
     </template>
   </Dialog>
+
+  <ConfirmActionDialog
+    v-model:visible="isDeleteConfirmVisible"
+    title="Delete Flow Step"
+    message="Are you sure you want to delete this flow step from the current application?"
+    confirm-label="Delete"
+    confirm-severity="danger"
+    :busy="isMutatingEvent"
+    @confirm="deleteStageEdit"
+  />
 </template>

@@ -180,17 +180,9 @@ export class StatisticRepository implements IStatisticRepository {
       `SELECT
 ${selectClause}
 FROM applications
-WHERE is_deleted = 0`,
+WHERE deleted_at IS NULL`,
     );
 
     return mapOverviewAggregateRow(rows[0]);
   }
 }
-
-
-
-
-
-
-
-

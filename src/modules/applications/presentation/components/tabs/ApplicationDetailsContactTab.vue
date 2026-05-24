@@ -1,6 +1,12 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
+  import type { ContactType } from "@modules/contacts/domain/entities/Contact";
+  import type { ContactCreatePayload } from "@modules/contacts/repositories/ContactRepository";
+  import type { EditableContact } from "@modules/contacts/types/presentation";
 
+  import ApplicationDetailsCard from "@modules/applications/presentation/components/ApplicationDetailsCard.vue";
+  import ApplicationDetailsManageContactDialog from "@modules/applications/presentation/components/tabs/ApplicationDetailsManageContactDialog.vue";
+  import ApplicationDetailsUnlinkContactDialog from "@modules/applications/presentation/components/tabs/ApplicationDetailsUnlinkContactDialog.vue";
   import { useContactService } from "@modules/contacts";
   import { computed, ref, watch } from "vue";
 
@@ -30,11 +36,42 @@
     companyName: string | null;
   }
 
+  interface ContactLinkOption {
+    label: string;
+    value: string;
+    relationType: ContactType;
+  }
+
   /**
    * Defines contact lookup service.
    */
   interface ContactLookupService {
+    list(): Promise<LinkedContact[]>;
     listByApplicationId(applicationId: string): Promise<LinkedContactSection[]>;
+  }
+
+  /**
+   * Payload for creating a new contact from the application contacts tab.
+   */
+  export type ApplicationContactCreatePayload = Pick<
+    ContactCreatePayload,
+    | "fullName"
+    | "type"
+    | "email"
+    | "phone"
+    | "linkedinUrl"
+    | "locationText"
+    | "notes"
+  >;
+
+  interface ContactCreateFormState {
+    fullName: string;
+    type: ContactType;
+    email: string;
+    phone: string;
+    linkedinUrl: string;
+    locationText: string;
+    notes: string;
   }
 
   /**
@@ -43,17 +80,58 @@
   interface Props {
     application: Application | null;
     companyName: string;
+    refreshKey?: number;
   }
 
   const props = defineProps<Props>();
+  const emit = defineEmits<{
+    "request-open-contact": [contact: EditableContact];
+    "request-create-contact": [payload: ApplicationContactCreatePayload];
+    "request-link-contact": [contactId: string];
+    "request-unlink-contact": [contactId: string];
+  }>();
 
   const contactService = useContactService() as ContactLookupService;
 
   const linkedContacts = ref<LinkedContactSection[]>([]);
   const loading = ref(false);
   const errorMessage = ref<string | null>(null);
+  const isManageContactDialogVisible = ref(false);
+  const isUnlinkConfirmVisible = ref(false);
+  const isLoadingAvailableContacts = ref(false);
+  const availableContactsError = ref<string | null>(null);
+  const pendingUnlinkContactId = ref<string | null>(null);
+  const pendingUnlinkContactName = ref<string>("");
+  const selectedContactId = ref<string | null>(null);
+  const availableContacts = ref<LinkedContact[]>([]);
+  const contactActionMode = ref<"create" | "link">("create");
+  const createForm = ref<ContactCreateFormState>({
+    fullName: "",
+    type: "company",
+    email: "",
+    phone: "",
+    linkedinUrl: "",
+    locationText: "",
+    notes: "",
+  });
 
   const hasApplication = computed(() => Boolean(props.application?.id));
+
+  const unlinkedContactOptions = computed<ContactLinkOption[]>(() => {
+    const linkedIds = new Set(
+      linkedContacts.value.map((item) => item.contact.id),
+    );
+
+    return availableContacts.value
+      .filter((contact) => !linkedIds.has(contact.id))
+      .map((contact) => ({
+        label: contact.email
+          ? `${contact.fullName} (${contact.email})`
+          : contact.fullName,
+        value: contact.id,
+        relationType: contact.type,
+      }));
+  });
 
   /**
    * Handles load contacts.
@@ -75,9 +153,9 @@
   }
 
   watch(
-    () => props.application?.id,
-    async (applicationId) => {
-      if (!applicationId) {
+    () => [props.application?.id, props.refreshKey],
+    async ([applicationId]) => {
+      if (typeof applicationId !== "string") {
         linkedContacts.value = [];
         errorMessage.value = null;
         return;
@@ -87,10 +165,107 @@
     },
     { immediate: true },
   );
+
+  /**
+   * Handles open add contact modal.
+   */
+  async function openManageContactDialog(): Promise<void> {
+    if (!props.application?.id) {
+      return;
+    }
+
+    isManageContactDialogVisible.value = true;
+    contactActionMode.value = "create";
+    selectedContactId.value = null;
+    createForm.value = {
+      fullName: "",
+      type: "company",
+      email: "",
+      phone: "",
+      linkedinUrl: "",
+      locationText: "",
+      notes: "",
+    };
+    availableContactsError.value = null;
+    isLoadingAvailableContacts.value = true;
+
+    try {
+      availableContacts.value = await contactService.list();
+    } catch (error: unknown) {
+      availableContacts.value = [];
+      const message = error instanceof Error ? error.message : "Unknown error";
+      availableContactsError.value = `Unable to load contacts: ${message}`;
+    } finally {
+      isLoadingAvailableContacts.value = false;
+    }
+  }
+
+  /**
+   * Handles submit add contact modal.
+   */
+  function submitManageContact(): void {
+    if (contactActionMode.value === "link") {
+      if (!selectedContactId.value) {
+        return;
+      }
+
+      emit("request-link-contact", selectedContactId.value);
+      isManageContactDialogVisible.value = false;
+      selectedContactId.value = null;
+      return;
+    }
+
+    const fullName = createForm.value.fullName.trim();
+    if (!fullName) {
+      return;
+    }
+
+    emit("request-create-contact", {
+      fullName,
+      type: createForm.value.type,
+      email: createForm.value.email.trim() || null,
+      phone: createForm.value.phone.trim() || null,
+      linkedinUrl: createForm.value.linkedinUrl.trim() || null,
+      locationText: createForm.value.locationText.trim() || null,
+      notes: createForm.value.notes.trim() || null,
+    });
+
+    isManageContactDialogVisible.value = false;
+  }
+
+  /**
+   * Opens the unlink confirmation modal for a contact.
+   */
+  function requestUnlinkContact(contact: LinkedContact): void {
+    pendingUnlinkContactId.value = contact.id;
+    pendingUnlinkContactName.value = contact.fullName;
+    isUnlinkConfirmVisible.value = true;
+  }
+
+  /**
+   * Confirms contact unlink action.
+   */
+  function confirmUnlinkContact(): void {
+    if (!pendingUnlinkContactId.value) {
+      return;
+    }
+
+    emit("request-unlink-contact", pendingUnlinkContactId.value);
+    isUnlinkConfirmVisible.value = false;
+    pendingUnlinkContactId.value = null;
+    pendingUnlinkContactName.value = "";
+  }
 </script>
 
 <template>
   <div class="space-y-4">
+    <div v-if="hasApplication" class="flex justify-end">
+      <Button type="button" size="small" @click="openManageContactDialog">
+        <Icon name="heroicons:plus" class="h-4 w-4" />
+        <span>Add Contact</span>
+      </Button>
+    </div>
+
     <Message v-if="!hasApplication" severity="info">
       Contact information is available after selecting an application.
     </Message>
@@ -113,9 +288,32 @@
       >
         <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 class="text-base font-semibold text-surface-900">
-              {{ item.contact.fullName }}
-            </h3>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-semibold text-surface-900">
+                {{ item.contact.fullName }}
+              </h3>
+              <Button
+                type="button"
+                text
+                size="small"
+                aria-label="Edit contact"
+                @click="emit('request-open-contact', item.contact)"
+              >
+                <Icon name="heroicons:pencil-square" class="h-4 w-4" />
+                <span>Edit</span>
+              </Button>
+              <Button
+                type="button"
+                text
+                size="small"
+                severity="danger"
+                aria-label="Remove contact"
+                @click="requestUnlinkContact(item.contact)"
+              >
+                <Icon name="heroicons:trash" class="h-4 w-4" />
+                <span>Remove</span>
+              </Button>
+            </div>
             <p class="text-sm text-surface-600">
               {{ item.companyName || companyName || "-" }}
             </p>
@@ -124,64 +322,36 @@
         </div>
 
         <div class="grid gap-3 md:grid-cols-2">
-          <Card :pt="{ root: 'p-3' }">
-            <template #title>
-              <span class="text-xs uppercase tracking-wide text-surface-500"
-                >Email</span
-              >
-            </template>
-            <template #content>
-              <p class="text-sm text-surface-700">
-                {{ item.contact.email || "-" }}
-              </p>
-            </template>
-          </Card>
+          <ApplicationDetailsCard title="Email" compact>
+            <p class="text-sm text-surface-700">
+              {{ item.contact.email || "-" }}
+            </p>
+          </ApplicationDetailsCard>
 
-          <Card :pt="{ root: 'p-3' }">
-            <template #title>
-              <span class="text-xs uppercase tracking-wide text-surface-500"
-                >Phone</span
-              >
-            </template>
-            <template #content>
-              <p class="text-sm text-surface-700">
-                {{ item.contact.phone || "-" }}
-              </p>
-            </template>
-          </Card>
+          <ApplicationDetailsCard title="Phone" compact>
+            <p class="text-sm text-surface-700">
+              {{ item.contact.phone || "-" }}
+            </p>
+          </ApplicationDetailsCard>
 
-          <Card :pt="{ root: 'p-3' }">
-            <template #title>
-              <span class="text-xs uppercase tracking-wide text-surface-500"
-                >LinkedIn</span
-              >
-            </template>
-            <template #content>
-              <a
-                v-if="item.contact.linkedinUrl"
-                :href="item.contact.linkedinUrl"
-                target="_blank"
-                rel="noreferrer"
-                class="text-sm font-medium text-primary-600 hover:underline"
-              >
-                {{ item.contact.linkedinUrl }}
-              </a>
-              <p v-else class="text-sm text-surface-700">-</p>
-            </template>
-          </Card>
+          <ApplicationDetailsCard title="LinkedIn" compact>
+            <a
+              v-if="item.contact.linkedinUrl"
+              :href="item.contact.linkedinUrl"
+              target="_blank"
+              rel="noreferrer"
+              class="text-sm font-medium text-primary-600 hover:underline"
+            >
+              {{ item.contact.linkedinUrl }}
+            </a>
+            <p v-else class="text-sm text-surface-700">-</p>
+          </ApplicationDetailsCard>
 
-          <Card :pt="{ root: 'p-3' }">
-            <template #title>
-              <span class="text-xs uppercase tracking-wide text-surface-500"
-                >Location</span
-              >
-            </template>
-            <template #content>
-              <p class="text-sm text-surface-700">
-                {{ item.contact.locationText || "-" }}
-              </p>
-            </template>
-          </Card>
+          <ApplicationDetailsCard title="Location" compact>
+            <p class="text-sm text-surface-700">
+              {{ item.contact.locationText || "-" }}
+            </p>
+          </ApplicationDetailsCard>
         </div>
 
         <LocationMapFull
@@ -193,28 +363,34 @@
           height-class="h-56"
         />
 
-        <Card v-if="item.contact.notes" class="mt-3" :pt="{ root: 'p-3' }">
-          <template #title>
-            <span class="text-xs uppercase tracking-wide text-surface-500"
-              >Notes</span
-            >
-          </template>
-          <template #content>
-            <p class="whitespace-pre-line text-sm text-surface-700">
-              {{ item.contact.notes }}
-            </p>
-          </template>
-        </Card>
+        <ApplicationDetailsCard
+          v-if="item.contact.notes"
+          class="mt-3"
+          title="Notes"
+          compact
+        >
+          <p class="whitespace-pre-line text-sm text-surface-700">
+            {{ item.contact.notes }}
+          </p>
+        </ApplicationDetailsCard>
       </section>
     </div>
+
+    <ApplicationDetailsManageContactDialog
+      v-model:visible="isManageContactDialogVisible"
+      v-model:contact-action-mode="contactActionMode"
+      v-model:create-form="createForm"
+      v-model:selected-contact-id="selectedContactId"
+      :available-contacts-error="availableContactsError"
+      :is-loading-available-contacts="isLoadingAvailableContacts"
+      :unlinked-contact-options="unlinkedContactOptions"
+      @submit="submitManageContact"
+    />
+
+    <ApplicationDetailsUnlinkContactDialog
+      v-model:visible="isUnlinkConfirmVisible"
+      :contact-name="pendingUnlinkContactName"
+      @confirm="confirmUnlinkContact"
+    />
   </div>
 </template>
-
-
-
-
-
-
-
-
-

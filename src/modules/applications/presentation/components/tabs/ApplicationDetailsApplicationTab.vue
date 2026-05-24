@@ -43,8 +43,8 @@
 
   const emit = defineEmits<{
     submit: [payload: ApplicationFormSubmitPayload];
-    "request-edit": [];
     "request-delete": [id: string];
+    "request-open-company": [companyId: string];
     "cancel-edit": [];
   }>();
 
@@ -441,8 +441,8 @@
     :company-name="companyName"
     :applied-at-label="appliedAtLabel"
     :is-deleting="isDeleting"
-    @request-edit="emit('request-edit')"
     @request-delete="onDelete(application)"
+    @request-open-company="emit('request-open-company', $event)"
   />
 
   <Message v-else severity="info">

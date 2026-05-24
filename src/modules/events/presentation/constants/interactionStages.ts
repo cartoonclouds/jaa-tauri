@@ -142,35 +142,6 @@ export const FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS: Record<
   rejected: [],
 };
 
-/**
- * Checks whether application progress status is true.
- */
-export function isApplicationProgressStatus(
-  value: string | null | undefined,
-): value is ApplicationProgressStatus {
-  if (!value) {
-    return false;
-  }
-
-  return Object.prototype.hasOwnProperty.call(
-    FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS,
-    value,
-  );
-}
-
-/**
- * Gets future event flow stages.
- */
-export function getFutureEventFlowStages(
-  status: ApplicationProgressStatus | null | undefined,
-): InteractionStage[] {
-  if (!status) {
-    return [];
-  }
-
-  return FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS[status];
-}
-
 export const EVENT_COPY_BY_STAGE: Record<InteractionStage, EventStageCopy> = {
   "Application/Saved": {
     title: "Application saved",

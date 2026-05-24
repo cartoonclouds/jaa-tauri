@@ -5,14 +5,28 @@
     ApplicationFormSubmitPayload,
     ApplicationFormValues,
   } from "@modules/applications/types/presentation";
-  import type { Company } from "@modules/companies/domain/entities/Company";
+  import type {
+    Company,
+    CompanyCreatePayload,
+    CompanyUpdatePayload,
+  } from "@modules/companies";
+  import type { ContactType } from "@modules/contacts/domain/entities/Contact";
+  import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/ContactEditorModal.vue";
+  import type {
+    ContactCreatePayload,
+    ContactUpdatePayload,
+  } from "@modules/contacts/repositories/ContactRepository";
+  import type { EditableContact } from "@modules/contacts/types/presentation";
 
   import { useApplicationService } from "@modules/applications";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/ApplicationDetailsDrawer.vue";
   import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
-  import { useCompany } from "@modules/companies/presentation/composables/useCompany";
+  import { useCompany, useCompanyService } from "@modules/companies";
+  import CompanyEditorModal from "@modules/companies/presentation/components/CompanyEditorModal.vue";
+  import { useContactService } from "@modules/contacts";
+  import ContactEditorModal from "@modules/contacts/presentation/components/ContactEditorModal.vue";
   import { useEventService } from "@modules/events";
   import { useTagService } from "@modules/tags";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
@@ -21,7 +35,19 @@
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
+  interface ApplicationContactCreatePayload {
+    fullName: string;
+    type: ContactType;
+    email: string | null;
+    phone: string | null;
+    linkedinUrl: string | null;
+    locationText: string | null;
+    notes: string | null;
+  }
+
   const service = useApplicationService();
+  const companyService = useCompanyService();
+  const contactService = useContactService();
   const eventService = useEventService();
   const tagService = useTagService();
   const {
@@ -43,13 +69,20 @@
     sortOrder,
     totalRecords,
   } = useApplicationDatatable();
-  const { items: companyItems } = useCompany();
+  const { items: companyItems, refresh: refreshCompanies } = useCompany();
 
   const drawerMode = ref<ApplicationDrawerMode>("view");
   const isDrawerOpen = ref(false);
   const isSubmitting = ref(false);
   const isDeleting = ref(false);
+  const isCompanyEditorVisible = ref(false);
+  const isContactEditorVisible = ref(false);
+  const isSavingCompany = ref(false);
+  const isSavingContact = ref(false);
   const selectedApplication = ref<ApplicationEntity | null>(null);
+  const selectedCompany = ref<Company | null>(null);
+  const selectedContact = ref<EditableContact | null>(null);
+  const contactRefreshKey = ref(0);
   const initialFormValues = ref<ApplicationFormValues>(
     createEmptyApplicationFormValues(),
   );
@@ -272,6 +305,175 @@
   function onRowClick(application: ApplicationEntity): void {
     openViewDrawer(application);
   }
+
+  /**
+   * Handles open company editor for a specific id.
+   */
+  function openCompanyEditor(companyId: string): void {
+    const company = companyItems.value.find((entry) => entry.id === companyId);
+    if (!company) {
+      return;
+    }
+
+    selectedCompany.value = company;
+    isCompanyEditorVisible.value = true;
+  }
+
+  /**
+   * Handles company editor submit.
+   */
+  async function onCompanyEditorSubmit(
+    payload: CompanyCreatePayload | CompanyUpdatePayload,
+  ): Promise<void> {
+    isSavingCompany.value = true;
+
+    try {
+      if ("id" in payload) {
+        await companyService.update(payload);
+      } else {
+        await companyService.create(payload);
+      }
+
+      await refreshCompanies();
+      isCompanyEditorVisible.value = false;
+    } finally {
+      isSavingCompany.value = false;
+    }
+  }
+
+  /**
+   * Handles open contact editor.
+   */
+  function openContactEditor(contact: EditableContact): void {
+    selectedContact.value = contact;
+    isContactEditorVisible.value = true;
+  }
+
+  /**
+   * Handles open contact editor by id.
+   */
+  async function openContactEditorById(contactId: string): Promise<void> {
+    const contacts = await contactService.list();
+    const contact = contacts.find((entry) => entry.id === contactId);
+    if (!contact) {
+      return;
+    }
+
+    selectedContact.value = {
+      id: contact.id,
+      fullName: contact.fullName,
+      type: contact.type,
+      email: contact.email,
+      phone: contact.phone,
+      linkedinUrl: contact.linkedinUrl,
+      locationText: contact.locationText,
+      locationLat: contact.locationLat,
+      locationLng: contact.locationLng,
+      notes: contact.notes,
+    };
+    isCompanyEditorVisible.value = false;
+    isContactEditorVisible.value = true;
+  }
+
+  /**
+   * Handles open company editor from contact modal table.
+   */
+  function openCompanyEditorFromContactModal(companyId: string): void {
+    isContactEditorVisible.value = false;
+    openCompanyEditor(companyId);
+  }
+
+  /**
+   * Handles link existing contact to current application.
+   */
+  async function onRequestLinkContact(contactId: string): Promise<void> {
+    if (!selectedApplication.value?.id) {
+      return;
+    }
+
+    await contactService.linkToApplication(
+      selectedApplication.value.id,
+      contactId,
+    );
+    contactRefreshKey.value += 1;
+  }
+
+  /**
+   * Handles remove linked contact from current application.
+   */
+  async function onRequestUnlinkContact(contactId: string): Promise<void> {
+    if (!selectedApplication.value?.id) {
+      return;
+    }
+
+    await contactService.unlinkFromApplication(
+      selectedApplication.value.id,
+      contactId,
+    );
+    contactRefreshKey.value += 1;
+  }
+
+  /**
+   * Handles create new contact and link it to current application.
+   */
+  async function onRequestCreateContact(
+    payload: ApplicationContactCreatePayload,
+  ): Promise<void> {
+    if (!selectedApplication.value?.id) {
+      return;
+    }
+
+    const contactId = await contactService.create({
+      companyId: selectedApplication.value.companyId,
+      fullName: payload.fullName,
+      type: payload.type,
+      email: payload.email,
+      phone: payload.phone,
+      linkedinUrl: payload.linkedinUrl,
+      locationText: payload.locationText,
+      locationLat: null,
+      locationLng: null,
+      notes: payload.notes,
+      tagIds: [],
+    });
+
+    await contactService.linkToApplication(
+      selectedApplication.value.id,
+      contactId,
+    );
+    contactRefreshKey.value += 1;
+  }
+
+  /**
+   * Handles contact editor submit.
+   */
+  async function onContactEditorSubmit(
+    payload: ContactEditorSubmitPayload,
+  ): Promise<void> {
+    isSavingContact.value = true;
+
+    try {
+      if ("id" in payload) {
+        await contactService.update(payload as ContactUpdatePayload);
+      } else {
+        const contactId = await contactService.create(
+          payload as ContactCreatePayload,
+        );
+
+        if (selectedApplication.value?.id) {
+          await contactService.linkToApplication(
+            selectedApplication.value.id,
+            contactId,
+          );
+        }
+      }
+
+      contactRefreshKey.value += 1;
+      isContactEditorVisible.value = false;
+    } finally {
+      isSavingContact.value = false;
+    }
+  }
 </script>
 
 <template>
@@ -312,11 +514,35 @@
       :companies="companyItems as Company[]"
       :busy="isSubmitting"
       :is-deleting="isDeleting"
+      :contact-refresh-key="contactRefreshKey"
       @update:visible="onDrawerVisibilityChange"
       @submit="onDrawerSubmit"
       @request-edit="switchToEditMode"
       @cancel-edit="cancelEditMode"
       @request-delete="onRequestDelete"
+      @request-open-company="openCompanyEditor"
+      @request-open-contact="openContactEditor"
+      @request-create-contact="onRequestCreateContact"
+      @request-link-contact="onRequestLinkContact"
+      @request-unlink-contact="onRequestUnlinkContact"
+    />
+
+    <CompanyEditorModal
+      v-model:visible="isCompanyEditorVisible"
+      :company="selectedCompany"
+      :busy="isSavingCompany"
+      @submit="onCompanyEditorSubmit"
+      @request-open-contact="openContactEditorById"
+    />
+
+    <ContactEditorModal
+      v-model:visible="isContactEditorVisible"
+      :contact="selectedContact"
+      :application-id="selectedApplication?.id ?? null"
+      :initial-company-id="selectedApplication?.companyId ?? null"
+      :busy="isSavingContact"
+      @submit="onContactEditorSubmit"
+      @request-open-company="openCompanyEditorFromContactModal"
     />
   </div>
 </template>

@@ -1,11 +1,12 @@
 import type { DatatablePageQuery } from "@shared/types";
 
+import { CompanySchema } from "@modules/companies/domain/zod/company.schema";
 import {
+  type CompanyAssociatedContact,
   type CompanyCreatePayload,
   type CompanyUpdatePayload,
   type ICompanyRepository,
 } from "@modules/companies/repositories/CompanyRepository";
-import { CompanySchema } from "@modules/companies/domain/zod/company.schema";
 
 /**
  * Implements company service.
@@ -19,6 +20,12 @@ export class CompanyService {
 
   listPage(query: DatatablePageQuery) {
     return this.repository.listPage(query);
+  }
+
+  listAssociatedContacts(
+    companyId: string,
+  ): Promise<CompanyAssociatedContact[]> {
+    return this.repository.listAssociatedContacts(companyId);
   }
 
   create(payload: CompanyCreatePayload) {
@@ -47,11 +54,3 @@ export class CompanyService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-
