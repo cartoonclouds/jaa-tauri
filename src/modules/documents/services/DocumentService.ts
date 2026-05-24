@@ -1,11 +1,12 @@
 import type { DatatablePageQuery } from "@shared/types";
 
+import { DocumentSchema } from "@modules/documents/domain/zod/document.schema";
 import {
+  type ApplicationLinkedDocument,
   type DocumentCreatePayload,
   type DocumentUpdatePayload,
   type IDocumentRepository,
 } from "@modules/documents/repositories/DocumentRepository";
-import { DocumentSchema } from "@modules/documents/domain/zod/document.schema";
 
 /**
  * Implements document service.
@@ -19,6 +20,24 @@ export class DocumentService {
 
   listPage(query: DatatablePageQuery) {
     return this.repository.listPage(query);
+  }
+
+  listByApplicationId(
+    applicationId: string,
+  ): Promise<ApplicationLinkedDocument[]> {
+    return this.repository.listByApplicationId(applicationId);
+  }
+
+  linkToApplication(
+    applicationId: string,
+    documentId: string,
+    relationType = "attachment",
+  ): Promise<void> {
+    return this.repository.linkToApplication(
+      applicationId,
+      documentId,
+      relationType,
+    );
   }
 
   create(payload: DocumentCreatePayload) {
@@ -56,11 +75,3 @@ export class DocumentService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

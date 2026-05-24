@@ -34,6 +34,10 @@
     () =>
       import("@modules/applications/presentation/components/tabs/ApplicationDetailsMapTab.vue"),
   );
+  const ApplicationDetailsFilesTab = defineAsyncComponent(
+    () =>
+      import("@modules/applications/presentation/components/tabs/ApplicationDetailsFilesTab.vue"),
+  );
   const ApplicationDetailsSummaryTab = defineAsyncComponent(
     () =>
       import("@modules/applications/presentation/components/tabs/ApplicationDetailsSummaryTab.vue"),
@@ -137,6 +141,7 @@
         <Tab value="summary">Summary</Tab>
         <Tab value="application">Application</Tab>
         <Tab value="contact">Contacts</Tab>
+        <Tab value="files">Files</Tab>
         <Tab value="map">Map</Tab>
       </TabList>
 
@@ -171,6 +176,10 @@
             :application="application"
             :company-name="companyName"
           />
+        </TabPanel>
+
+        <TabPanel value="files">
+          <ApplicationDetailsFilesTab :application="application" />
         </TabPanel>
 
         <TabPanel value="map">

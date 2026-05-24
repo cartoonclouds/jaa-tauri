@@ -32,6 +32,14 @@ export type DocumentUpdatePayload = Partial<DocumentCreatePayload> & {
 };
 
 /**
+ * Linked document entry for a specific application.
+ */
+export interface ApplicationLinkedDocument {
+  document: Document;
+  relationType: string;
+}
+
+/**
  * Defines idocument repository.
  */
 export interface IDocumentRepository extends IRepository<
@@ -40,6 +48,14 @@ export interface IDocumentRepository extends IRepository<
   DocumentUpdatePayload
 > {
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Document>>;
+  listByApplicationId(
+    applicationId: string,
+  ): Promise<ApplicationLinkedDocument[]>;
+  linkToApplication(
+    applicationId: string,
+    documentId: string,
+    relationType?: string,
+  ): Promise<void>;
 }
 
 /**
@@ -134,6 +150,38 @@ export class DocumentRepository implements IDocumentRepository {
     return id;
   }
 
+  async listByApplicationId(
+    applicationId: string,
+  ): Promise<ApplicationLinkedDocument[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT
+         d.*,
+         ad.relation_type
+       FROM application_documents ad
+       INNER JOIN documents d ON d.id = ad.document_id
+       WHERE ad.application_id = $1
+       ORDER BY ad.created_at DESC`,
+      [applicationId],
+    );
+
+    return rows.map((row) => ({
+      document: mapDocumentRowToEntity(row),
+      relationType: String(row.relation_type ?? "attachment"),
+    }));
+  }
+
+  async linkToApplication(
+    applicationId: string,
+    documentId: string,
+    relationType = "attachment",
+  ): Promise<void> {
+    await this.db.execute(
+      `INSERT OR IGNORE INTO application_documents (application_id, document_id, relation_type)
+       VALUES ($1, $2, $3)`,
+      [applicationId, documentId, relationType],
+    );
+  }
+
   async update(payload: DocumentUpdatePayload): Promise<void> {
     await this.db.execute(
       `UPDATE documents
@@ -161,11 +209,3 @@ export class DocumentRepository implements IDocumentRepository {
     await this.db.execute("DELETE FROM documents WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

@@ -20,6 +20,8 @@
     "sql:allow-execute",
     "sql:allow-select",
     "sql:allow-close",
+    "opener:allow-open-path",
+    "opener:allow-reveal-item-in-dir",
     "fs:default",
     {
       "identifier": "fs:allow-exists",
