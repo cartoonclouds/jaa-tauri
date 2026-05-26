@@ -4,6 +4,7 @@ import type { Statistic } from "@modules/statistics/domain/entities/Statistic";
 import { mapStatisticRowToEntity } from "@modules/statistics/application/mappers/mapStatisticRow";
 import { StatisticSchema } from "@modules/statistics/domain/zod/statistic.schema";
 import { STATISTIC_METRIC_DEFINITIONS } from "@modules/statistics/statisticMetricDefinitions";
+import { toFiniteNumber } from "@shared/utils/numberValueUtils";
 
 /**
  * Aggregated read model returned by statistics queries.
@@ -114,22 +115,6 @@ const STATISTICS_OVERVIEW_AGGREGATES: readonly StatisticsOverviewAggregateDefini
   });
 
 /**
- * Handles to numeric statistic.
- */
-function toNumericStatistic(value: unknown): number {
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : 0;
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-
-  return 0;
-}
-
-/**
  * Handles map overview aggregate row.
  */
 function mapOverviewAggregateRow(
@@ -138,7 +123,7 @@ function mapOverviewAggregateRow(
   const overview = {} as Record<StatisticsOverviewBaseField, number>;
 
   for (const aggregate of STATISTICS_OVERVIEW_AGGREGATES) {
-    overview[aggregate.field] = toNumericStatistic(row?.[aggregate.field]);
+    overview[aggregate.field] = toFiniteNumber(row?.[aggregate.field], 0);
   }
 
   return overview;

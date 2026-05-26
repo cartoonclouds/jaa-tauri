@@ -1,6 +1,9 @@
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
+import { normalizeLiteralValue } from "@shared/utils/normalizationUtils";
 import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
+
+const CONTACT_TYPE_VALUES = ["company", "recruiter"] as const;
 
 /**
  * Map a raw database row into a typed contact entity.
@@ -21,7 +24,7 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
     locationText: (row.location_text as string | null) ?? null,
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
-    type: row.type === "recruiter" ? "recruiter" : "company",
+    type: normalizeLiteralValue(row.type, CONTACT_TYPE_VALUES, "company"),
     notes: (row.notes as string | null) ?? null,
     tagIds: [],
     ...timestamps,

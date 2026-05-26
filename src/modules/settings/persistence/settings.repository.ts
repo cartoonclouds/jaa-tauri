@@ -17,6 +17,7 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import { logError } from "@infra/logging/appLogger";
 import { toErrorMessage } from "@shared/utils/error";
 import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
+import { normalizeAliasedLiteralValue } from "@shared/utils/normalizationUtils";
 import { parseStringArray } from "@shared/utils/parse";
 import {
   fromDbBoolean,
@@ -45,6 +46,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   onboardingCompleted: false,
 };
 
+const THEME_VALUES = ["light", "dark", "auto"] as const;
+
 /**
  * Raw settings row shape returned by the persistence layer.
  */
@@ -67,15 +70,12 @@ function cloneSettings(settings: AppSettings): AppSettings {
  * Normalizes persisted theme values to the supported app enum.
  */
 function normalizeTheme(value: unknown): AppSettings["theme"] {
-  if (value === "light" || value === "dark" || value === "auto") {
-    return value;
-  }
-
-  if (value === "system") {
-    return "auto";
-  }
-
-  return DEFAULT_SETTINGS.theme;
+  return normalizeAliasedLiteralValue(
+    value,
+    THEME_VALUES,
+    { system: "auto" },
+    DEFAULT_SETTINGS.theme,
+  );
 }
 
 /**

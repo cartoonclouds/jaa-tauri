@@ -7,6 +7,7 @@ import {
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 import { mapEnumFromDbValue } from "@shared/utils/enum";
+import { toFiniteNumber } from "@shared/utils/numberValueUtils";
 import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
 import {
   mapAuditTimestamps,
@@ -54,7 +55,7 @@ export function mapApplicationRowToEntity(
     interviewProcess: (row.interview_process as string | null) ?? null,
     benefits: (row.benefits as string | null) ?? null,
     tagIds: [],
-    priority: Number(row.priority ?? 3),
+    priority: toFiniteNumber(row.priority, 3),
     isArchived: fromDbBoolean(row.is_archived, false),
     isDeleted: row.deleted_at !== null,
     ...timestamps,
