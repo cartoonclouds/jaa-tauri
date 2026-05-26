@@ -13,6 +13,7 @@ import {
   CONSTANT_MODULE_SOURCES,
   type PersistedConstantSourceType,
 } from "@shared/constants/persistedConstants";
+import { normalizeConstantValue } from "@shared/utils/constantValue";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -136,7 +137,7 @@ export class SettingRepository implements ISettingRepository {
     const visibility = row.is_visible;
     return {
       type: row.type,
-      value: row.value,
+      value: normalizeConstantValue(row.value),
       label: row.label,
       isVisible: visibility === true || Number(visibility) === 1,
     };
@@ -249,6 +250,7 @@ export class SettingRepository implements ISettingRepository {
     type: PersistedConstantSourceType,
     value: string,
   ): Promise<ConstantEntryRow | null> {
+    const normalizedLookupValue = normalizeConstantValue(value);
     const rows = await this.db.select<{
       type: string;
       value: string;
@@ -259,7 +261,7 @@ export class SettingRepository implements ISettingRepository {
        FROM constants
        WHERE type = $1 AND value = $2
        LIMIT 1`,
-      [type, value],
+      [type, normalizedLookupValue],
     );
 
     const row = rows[0];
@@ -292,7 +294,7 @@ export class SettingRepository implements ISettingRepository {
   }
 
   async upsertConstantRow(payload: ConstantEntryUpsertPayload): Promise<void> {
-    const normalizedValue = payload.value.trim();
+    const normalizedValue = normalizeConstantValue(payload.value);
     const normalizedLabel = payload.label?.trim() ? payload.label.trim() : null;
     const normalizedIsVisible = payload.isVisible !== false;
     const settingsLabel = resolveSettingsLabel(payload.type);
@@ -301,7 +303,9 @@ export class SettingRepository implements ISettingRepository {
       throw new Error("Constant value cannot be empty");
     }
 
-    const previousValue = payload.previousValue?.trim();
+    const previousValue = payload.previousValue
+      ? normalizeConstantValue(payload.previousValue)
+      : undefined;
 
     if (previousValue && previousValue !== normalizedValue) {
       await this.db.transaction(async (tx) => {
@@ -350,10 +354,11 @@ export class SettingRepository implements ISettingRepository {
     type: PersistedConstantSourceType,
     value: string,
   ): Promise<void> {
+    const normalizedValue = normalizeConstantValue(value);
     await this.db.execute(
       `DELETE FROM constants
        WHERE type = $1 AND value = $2`,
-      [type, value],
+      [type, normalizedValue],
     );
   }
 
@@ -369,11 +374,3 @@ export class SettingRepository implements ISettingRepository {
     await this.db.execute("DELETE FROM settings WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

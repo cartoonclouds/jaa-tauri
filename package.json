@@ -21,6 +21,7 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "db:normalize-constants": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/normalize-constants.ts",
     "db:seed": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts",
     "db:seed:production": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts --mode=production"
   },

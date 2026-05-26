@@ -108,17 +108,15 @@ export class ApplicationRepository implements IApplicationRepository {
     applicationId: string,
     eventFlowStatusValue: string,
   ): Promise<void> {
-    const normalizedStatusValue =
-      ApplicationEventFlowStatus.fromValue(eventFlowStatusValue)?.value;
     if (
-      !normalizedStatusValue ||
-      !(normalizedStatusValue in EVENT_FLOW_BY_APPLICATION_STATUS)
+      !eventFlowStatusValue ||
+      !(eventFlowStatusValue in EVENT_FLOW_BY_APPLICATION_STATUS)
     ) {
       return;
     }
 
     const normalizedStatus =
-      normalizedStatusValue as keyof typeof EVENT_FLOW_BY_APPLICATION_STATUS;
+      eventFlowStatusValue as keyof typeof EVENT_FLOW_BY_APPLICATION_STATUS;
     const requiredStages = EVENT_FLOW_BY_APPLICATION_STATUS[normalizedStatus];
     if (requiredStages.length === 0) {
       return;
@@ -324,16 +322,18 @@ export class ApplicationRepository implements IApplicationRepository {
         id,
         parseResult.data.companyId ?? null,
         title,
-        parseResult.data.status?.value ?? ApplicationStatus.Saved.value,
-        parseResult.data.eventFlowStatus?.value ??
-          ApplicationEventFlowStatus.Applied.value,
+        String(parseResult.data.status ?? ApplicationStatus.Saved),
+        String(
+          parseResult.data.eventFlowStatus ??
+            ApplicationEventFlowStatus.Applied,
+        ),
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         parseResult.data.locationText ?? null,
         parseResult.data.locationLat ?? null,
         parseResult.data.locationLng ?? null,
-        payload.attendanceType?.value ?? null,
-        payload.employmentType?.value ?? null,
+        payload.attendanceType ? String(payload.attendanceType) : null,
+        payload.employmentType ? String(payload.employmentType) : null,
         payload.salaryMin ?? null,
         payload.salaryMax ?? null,
         payload.currency ?? null,
@@ -348,8 +348,9 @@ export class ApplicationRepository implements IApplicationRepository {
     await syncTagIdsForEntity(this.db, "application", id, payload.tagIds);
     await this.ensureFlowEventsLinked(
       id,
-      parseResult.data.eventFlowStatus?.value ??
-        ApplicationEventFlowStatus.Applied.value,
+      String(
+        parseResult.data.eventFlowStatus ?? ApplicationEventFlowStatus.Applied,
+      ),
     );
 
     return id;
@@ -392,15 +393,15 @@ export class ApplicationRepository implements IApplicationRepository {
       [
         payload.companyId ?? null,
         payload.title,
-        payload.status.value,
-        payload.eventFlowStatus.value,
+        String(payload.status),
+        String(payload.eventFlowStatus),
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         payload.locationText ?? null,
         payload.locationLat ?? null,
         payload.locationLng ?? null,
-        payload.attendanceType?.value ?? null,
-        payload.employmentType?.value ?? null,
+        payload.attendanceType ? String(payload.attendanceType) : null,
+        payload.employmentType ? String(payload.employmentType) : null,
         payload.salaryMin ?? null,
         payload.salaryMax ?? null,
         payload.currency ?? null,
@@ -420,10 +421,10 @@ export class ApplicationRepository implements IApplicationRepository {
       payload.tagIds,
     );
 
-    if (currentEventFlowStatus !== payload.eventFlowStatus.value) {
+    if (currentEventFlowStatus !== String(payload.eventFlowStatus)) {
       await this.ensureFlowEventsLinked(
         payload.id,
-        payload.eventFlowStatus.value,
+        String(payload.eventFlowStatus),
       );
     }
   }
