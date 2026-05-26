@@ -304,7 +304,6 @@
             :applied-at-label="appliedAtLabel"
             @submit="onSubmit"
             @cancel-edit="emit('cancel-edit')"
-            @request-edit="emit('request-edit')"
             @request-delete="emit('request-delete', $event)"
             @request-open-company="emit('request-open-company', $event)"
           />
