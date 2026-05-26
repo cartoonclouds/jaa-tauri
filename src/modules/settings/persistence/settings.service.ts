@@ -97,10 +97,12 @@ export class SettingsService {
     clear: clearRecentSearches,
   };
 
+  /** Returns whether onboarding has already been completed. */
   async getOnboardingCompleted(): Promise<boolean> {
     return await getOnboardingCompleted();
   }
 
+  /** Persists onboarding completion state. */
   async setOnboardingCompleted(value: boolean): Promise<void> {
     await setOnboardingCompleted(value);
   }
@@ -109,18 +111,10 @@ export class SettingsService {
 let settingsServiceInstance: SettingsService | null = null;
 
 /**
- * Handles use settings service.
+ * Returns the module-level singleton settings service instance.
  */
 export function useSettingsService(): SettingsService {
   settingsServiceInstance ??= new SettingsService();
 
   return settingsServiceInstance;
 }
-
-
-
-
-
-
-
-

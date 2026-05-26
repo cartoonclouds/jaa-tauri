@@ -1,14 +1,14 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 
 /**
- * Defines sqlite master row.
+ * Row shape returned by sqlite_master existence checks.
  */
 interface SqliteMasterRow {
   name: string;
 }
 
 /**
- * Defines sqlite column info row.
+ * Row shape returned by PRAGMA table_info queries.
  */
 interface SqliteColumnInfoRow {
   name: string;

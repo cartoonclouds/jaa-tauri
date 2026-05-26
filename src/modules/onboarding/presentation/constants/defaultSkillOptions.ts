@@ -1,3 +1,6 @@
+/**
+ * Curated default skill options shown in the onboarding flow.
+ */
 export const defaultSkillOptions = [
   "Communication",
   "Customer Service",
@@ -15,6 +18,3 @@ export const defaultSkillOptions = [
   "TypeScript",
   "Vue",
 ] as const;
-
-
-

@@ -41,14 +41,14 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 /**
- * Type alias for settings row.
+ * Raw settings row shape returned by the persistence layer.
  */
 type SettingsRow = Record<string, unknown>;
 
 let database: DatabaseDriver | null = null;
 
 /**
- * Handles clone settings.
+ * Creates a defensive deep-ish clone of mutable settings fields.
  */
 function cloneSettings(settings: AppSettings): AppSettings {
   return {
@@ -59,14 +59,14 @@ function cloneSettings(settings: AppSettings): AppSettings {
 }
 
 /**
- * Handles to int.
+ * Maps a boolean setting value to SQLite integer representation.
  */
 function toInt(value: boolean): number {
   return value ? 1 : 0;
 }
 
 /**
- * Handles parse boolean record.
+ * Parses a JSON object string into a boolean record with fallback support.
  */
 function parseBooleanRecord(
   value: unknown,
@@ -95,7 +95,7 @@ function parseBooleanRecord(
 }
 
 /**
- * Handles normalize theme.
+ * Normalizes persisted theme values to the supported app enum.
  */
 function normalizeTheme(value: unknown): AppSettings["theme"] {
   if (value === "light" || value === "dark" || value === "auto") {
@@ -110,7 +110,7 @@ function normalizeTheme(value: unknown): AppSettings["theme"] {
 }
 
 /**
- * Handles map row to settings.
+ * Maps a raw database row into a normalized AppSettings object.
  */
 function mapRowToSettings(row: SettingsRow): AppSettings {
   return {
@@ -140,7 +140,7 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
 }
 
 /**
- * Gets database.
+ * Resolves and memoizes the active settings database driver.
  */
 function getDatabase(): DatabaseDriver {
   if (database) {
@@ -154,7 +154,7 @@ function getDatabase(): DatabaseDriver {
 }
 
 /**
- * Handles upsert settings row.
+ * Inserts or updates the single persisted settings row.
  */
 async function upsertSettingsRow(
   db: DatabaseDriver,
@@ -198,7 +198,7 @@ async function upsertSettingsRow(
 }
 
 /**
- * Handles read settings row.
+ * Reads the persisted settings row or seeds defaults when missing.
  */
 async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
   const rows = await db.select<SettingsRow>(
@@ -429,11 +429,3 @@ export async function resetSettings(): Promise<void> {
 }
 
 export { DEFAULT_SETTINGS };
-
-
-
-
-
-
-
-

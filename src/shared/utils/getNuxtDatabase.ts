@@ -6,7 +6,7 @@ import { useNuxtApp } from "nuxt/app";
 const databaseByApp = new WeakMap<NuxtApp, DatabaseDriver>();
 
 /**
- * Checks whether database driver is true.
+ * Type guard for the Nuxt-injected database driver.
  */
 function isDatabaseDriver(value: unknown): value is DatabaseDriver {
   if (!value || typeof value !== "object") {
@@ -53,7 +53,3 @@ export function getNuxtDatabase(): DatabaseDriver {
 
   return database;
 }
-
-
-
-

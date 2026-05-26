@@ -15,7 +15,7 @@ import {
 } from "../utils/onboardingUtils";
 
 /**
- * Handles user profile to profile create payload.
+ * Maps onboarding profile input to the profile create payload shape.
  */
 function userProfileToProfileCreatePayload(
   profile: UserProfile,
@@ -42,7 +42,7 @@ function userProfileToProfileCreatePayload(
 }
 
 /**
- * Defines complete onboarding input.
+ * Input contract for completing onboarding and optional resume import.
  */
 export interface CompleteOnboardingInput {
   profile: UserProfile;
@@ -51,7 +51,7 @@ export interface CompleteOnboardingInput {
 }
 
 /**
- * Implements onboarding repository.
+ * Coordinates onboarding persistence across profile, document, and settings modules.
  */
 export class OnboardingRepository {
   async complete(input: CompleteOnboardingInput): Promise<void> {
@@ -93,10 +93,11 @@ export class OnboardingRepository {
   }
 }
 
+/** Shared singleton repository instance for onboarding flows. */
 export const onboardingRepository = new OnboardingRepository();
 
 /**
- * Handles complete onboarding.
+ * Completes onboarding using the shared repository instance.
  */
 export async function completeOnboarding(
   input: CompleteOnboardingInput,
