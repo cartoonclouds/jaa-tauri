@@ -8,6 +8,39 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import vueParser from "vue-eslint-parser";
 
+const moduleNames = [
+  "applications",
+  "companies",
+  "contacts",
+  "documents",
+  "events",
+  "notifications",
+  "onboarding",
+  "profile",
+  "settings",
+  "statistics",
+  "tags",
+] as const;
+
+const moduleScopedServiceImportRules = moduleNames.map((moduleName) => ({
+  files: [`src/modules/${moduleName}/**/*.{ts,tsx,vue}`],
+
+  rules: {
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: [`@modules/!(${moduleName})/services/[A-Z]*Service`],
+            message:
+              "Do not import service classes from other modules. Import services from within the same module only.",
+          },
+        ],
+      },
+    ],
+  },
+}));
+
 export default defineConfig(
   {
     ignores: [
@@ -245,6 +278,8 @@ export default defineConfig(
     },
   },
 
+  ...moduleScopedServiceImportRules,
+
   {
     files: ["**/*.spec.ts", "**/*.test.ts"],
 
@@ -258,14 +293,6 @@ export default defineConfig(
 
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
-    },
-  },
-
-  {
-    files: ["src/modules/**/services/use*Service.ts"],
-
-    rules: {
-      "no-restricted-imports": "off",
     },
   },
 
