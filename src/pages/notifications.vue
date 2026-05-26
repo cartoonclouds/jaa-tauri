@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
-  import { useNotificationDatatable } from "@modules/notifications/presentation/composables/useNotificationDatatable";
+  import { useNotification } from "@modules/notifications/composables/useNotification";
+  import { useNotificationDatatable } from "@modules/notifications/composables/useNotificationDatatable";
   import { notificationsSearchPlaceholder } from "@modules/notifications/presentation/constants/notificationDatatable";
-  import { useNotificationService } from "@modules/notifications/services/useNotificationService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -11,7 +11,7 @@
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const service = useNotificationService();
+  const { create, update, remove } = useNotification();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -53,14 +53,14 @@
    */
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await service.update({
+      await update({
         id: editingId.value,
         title: form.title,
         body: form.body,
         severity: form.severity as Notification["severity"],
       });
     } else {
-      await service.create({
+      await create({
         title: form.title,
         body: form.body,
         severity: form.severity as Notification["severity"],
@@ -79,7 +79,7 @@
    * Handles remove notification.
    */
   async function removeNotification(id: string): Promise<void> {
-    await service.delete(id);
+    await remove(id);
     await refresh();
   }
 </script>
@@ -157,12 +157,4 @@
     </DataTable>
   </div>
 </template>
-
-
-
-
-
-
-
-
 

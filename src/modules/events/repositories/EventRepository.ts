@@ -10,7 +10,7 @@ import { EventRepositoryCreateSchema } from "@modules/events/domain/zod/event.sc
  */
 export type EventCreatePayload = Pick<
   Event,
-  "applicationId" | "contactId" | "type" | "title" | "description" | "eventAt"
+  "applicationId" | "type" | "title" | "description"
 >;
 /**
  * Type alias for event update payload.
@@ -37,11 +37,9 @@ export class EventRepository implements IEventRepository {
       `SELECT
          e.id,
          ae.application_id,
-         e.contact_id,
          e.type,
          e.title,
          e.description,
-         e.event_at,
          e.created_at,
          e.updated_at
        FROM events e
@@ -69,15 +67,8 @@ export class EventRepository implements IEventRepository {
 
     const id = crypto.randomUUID();
     await this.db.execute(
-      "INSERT INTO events (id, contact_id, type, title, description, event_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-      [
-        id,
-        parseResult.data.contactId ?? null,
-        parseResult.data.type,
-        title,
-        payload.description ?? null,
-        payload.eventAt ? payload.eventAt.toISOString() : null,
-      ],
+      "INSERT INTO events (id, type, title, description, created_at, updated_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+      [id, parseResult.data.type, title, payload.description ?? null],
     );
 
     await this.db.execute(
@@ -94,14 +85,12 @@ export class EventRepository implements IEventRepository {
        SET type = COALESCE($1, type),
            title = COALESCE($2, title),
            description = COALESCE($3, description),
-           event_at = COALESCE($4, event_at),
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5`,
+       WHERE id = $4`,
       [
         payload.type ?? null,
         payload.title ?? null,
         payload.description ?? null,
-        payload.eventAt ? payload.eventAt.toISOString() : null,
         payload.id,
       ],
     );

@@ -5,9 +5,9 @@
   } from "@modules/companies";
   import type { Company } from "@modules/companies/domain/entities/Company";
 
-  import { useCompanyService } from "@modules/companies";
+  import { useCompany } from "@modules/companies";
   import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
-  import { useCompanyDatatable } from "@modules/companies/presentation/composables/useCompanyDatatable";
+  import { useCompanyDatatable } from "@modules/companies/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/presentation/constants/companyDatatable";
   import { computed, ref } from "vue";
 
@@ -23,7 +23,7 @@
     "update:visible": [value: boolean];
   }>();
 
-  const service = useCompanyService();
+  const { service } = useCompany();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -175,3 +175,4 @@
     </div>
   </Dialog>
 </template>
+

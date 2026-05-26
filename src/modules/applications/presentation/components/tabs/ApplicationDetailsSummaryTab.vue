@@ -5,7 +5,7 @@
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
   import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
-  import { useEvent } from "@modules/events/presentation/composables/useEvent";
+  import { useEvent } from "@modules/events/composables/useEvent";
   import {
     EVENT_COPY_BY_STAGE,
     INTERACTION_STAGES,
@@ -39,19 +39,17 @@
   const editForm = reactive<{
     id: string;
     type: InteractionStage;
-    eventAt: Date | null;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
-    eventAt: null,
   });
 
   useBodyScrollLock(isEditDialogVisible);
 
   /**
-   * Formats timeline stage date in a short, readable form.
+   * Formats stage timestamp in a short, readable form.
    */
-  function formatTimelineStageDate(value: Date): string {
+  function formatStageDate(value: Date): string {
     return value.toLocaleString(undefined, {
       year: "numeric",
       month: "short",
@@ -70,8 +68,8 @@
     const sortedApplicationEvents = eventItems.value
       .filter((event) => event.applicationId === application.id)
       .sort((left, right) => {
-        const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
-        const rightTime = right.eventAt?.getTime() ?? right.createdAt.getTime();
+        const leftTime = left.createdAt.getTime();
+        const rightTime = right.createdAt.getTime();
         return leftTime - rightTime;
       });
 
@@ -89,67 +87,11 @@
     return stagesFromEvents;
   });
 
-  const futureFlowStages = computed<InteractionStage[]>(() => {
-    const applicationId = props.application?.id;
-    if (!applicationId) {
-      return [];
-    }
+  const futureFlowStages = computed<InteractionStage[]>(() => []);
 
-    const stageEventByType = new Map<InteractionStage, Event>();
-    const sortedApplicationEvents = eventItems.value
-      .filter((event) => event.applicationId === applicationId)
-      .sort((left, right) => {
-        const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
-        const rightTime = right.eventAt?.getTime() ?? right.createdAt.getTime();
-        return leftTime - rightTime;
-      });
-
-    for (const event of sortedApplicationEvents) {
-      if (!isInteractionStage(event.type)) {
-        continue;
-      }
-
-      if (!stageEventByType.has(event.type)) {
-        stageEventByType.set(event.type, event);
-      }
-    }
-
-    return summaryFlowStages.value.filter((stage) => {
-      const stageEvent = stageEventByType.get(stage) ?? null;
-      return !stageEvent?.eventAt;
-    });
-  });
-
-  const completedFlowStages = computed<InteractionStage[]>(() => {
-    const applicationId = props.application?.id;
-    if (!applicationId) {
-      return [];
-    }
-
-    const stageEventByType = new Map<InteractionStage, Event>();
-    const sortedApplicationEvents = eventItems.value
-      .filter((event) => event.applicationId === applicationId)
-      .sort((left, right) => {
-        const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
-        const rightTime = right.eventAt?.getTime() ?? right.createdAt.getTime();
-        return leftTime - rightTime;
-      });
-
-    for (const event of sortedApplicationEvents) {
-      if (!isInteractionStage(event.type)) {
-        continue;
-      }
-
-      if (!stageEventByType.has(event.type)) {
-        stageEventByType.set(event.type, event);
-      }
-    }
-
-    return summaryFlowStages.value.filter((stage) => {
-      const stageEvent = stageEventByType.get(stage) ?? null;
-      return Boolean(stageEvent?.eventAt);
-    });
-  });
+  const completedFlowStages = computed<InteractionStage[]>(
+    () => summaryFlowStages.value,
+  );
 
   const displayedFlowStages = computed(() => {
     const application = props.application;
@@ -159,9 +101,8 @@
       const sortedApplicationEvents = eventItems.value
         .filter((event) => event.applicationId === application.id)
         .sort((left, right) => {
-          const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
-          const rightTime =
-            right.eventAt?.getTime() ?? right.createdAt.getTime();
+          const leftTime = left.createdAt.getTime();
+          const rightTime = right.createdAt.getTime();
           return leftTime - rightTime;
         });
 
@@ -178,12 +119,12 @@
 
     return summaryFlowStages.value.map((stage) => {
       const event = stageEventByType.get(stage) ?? null;
-      const eventAt = event?.eventAt ?? null;
+      const createdAt = event?.createdAt ?? null;
       return {
         eventId: event?.id ?? null,
         stage,
-        isFuture: !eventAt,
-        eventAtLabel: eventAt ? formatTimelineStageDate(eventAt) : null,
+        isFuture: false,
+        eventAtLabel: createdAt ? formatStageDate(createdAt) : null,
       };
     });
   });
@@ -241,11 +182,9 @@
     if (event) {
       editForm.id = event.id;
       editForm.type = event.type;
-      editForm.eventAt = event.eventAt;
     } else {
       editForm.id = "";
       editForm.type = stage;
-      editForm.eventAt = null;
     }
 
     isEditDialogVisible.value = true;
@@ -259,16 +198,13 @@
       await update({
         id: editForm.id,
         type: editForm.type,
-        eventAt: editForm.eventAt,
       });
     } else if (props.application) {
       await create({
         applicationId: props.application.id,
-        contactId: null,
         type: editForm.type,
         title: EVENT_COPY_BY_STAGE[editForm.type].title,
         description: null,
-        eventAt: editForm.eventAt,
       });
     }
 
@@ -391,17 +327,6 @@
           fluid
         />
       </div>
-
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700">Event At</label>
-        <DatePicker
-          v-model="editForm.eventAt"
-          show-time
-          hour-format="24"
-          date-format="yy-mm-dd"
-          fluid
-        />
-      </div>
     </div>
 
     <template #footer>
@@ -444,3 +369,4 @@
     @confirm="deleteStageEdit"
   />
 </template>
+

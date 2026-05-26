@@ -15,11 +15,9 @@ describe("EventRepository.create", () => {
     await expect(
       repository.create({
         applicationId: "",
-        contactId: null,
         type: "" as never,
         title: "",
         description: null,
-        eventAt: null,
       }),
     ).rejects.toThrow("Event applicationId, type, and title are required");
   });
@@ -30,11 +28,9 @@ describe("EventRepository.create", () => {
 
     await repository.create({
       applicationId: "11111111-1111-4111-8111-111111111111",
-      contactId: null,
       type: "Interview/Technical Interview",
       title: "Tech interview",
       description: null,
-      eventAt: null,
     });
 
     expect(db.execute).toHaveBeenCalledTimes(2);

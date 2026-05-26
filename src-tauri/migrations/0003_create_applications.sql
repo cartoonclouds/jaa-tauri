@@ -2,10 +2,8 @@ CREATE TABLE IF NOT EXISTS applications (
   id TEXT PRIMARY KEY NOT NULL,
   company_id TEXT,
   title TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'saved',
-  event_flow_status TEXT NOT NULL DEFAULT 'saved' CHECK (event_flow_status IN ('saved', 'applied', 'interview', 'offer', 'rejected')),
   source_url TEXT,
-  applied_at TEXT,
+  applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   location_text TEXT,
   location_lat REAL,
   location_lng REAL,
@@ -31,9 +29,6 @@ CREATE TABLE IF NOT EXISTS applications (
 CREATE INDEX IF NOT EXISTS idx_applications_company_id
 ON applications (company_id);
 
-CREATE INDEX IF NOT EXISTS idx_applications_event_flow_status
-ON applications (event_flow_status);
-
 CREATE INDEX IF NOT EXISTS idx_applications_location_coords
 ON applications (location_lat, location_lng);
 
@@ -42,9 +37,6 @@ ON applications (deleted_at, created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_applications_title
 ON applications (title);
-
-CREATE INDEX IF NOT EXISTS idx_applications_status
-ON applications (status);
 
 CREATE INDEX IF NOT EXISTS idx_applications_location_text
 ON applications (location_text);

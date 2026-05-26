@@ -2,7 +2,7 @@
   import { logError, logInfo } from "@infra/logging/tauriLog.client";
   import CompaniesModal from "@modules/companies/presentation/components/modals/CompaniesModal.vue";
   import ContactsModal from "@modules/contacts/presentation/components/modals/ContactsModal.vue";
-  import { useProfileService } from "@modules/profile";
+  import { useProfile } from "@modules/profile";
   import {
     getOnboardingCompleted,
     setOnboardingCompleted,
@@ -21,7 +21,7 @@
   const { isCompaniesModalVisible } = useCompaniesModal();
   const { isContactsModalVisible } = useContactsModal();
   const { isSettingsModalVisible } = useSettingsModal();
-  const profileService = useProfileService();
+  const { service: profileService } = useProfile();
 
   onMounted(async () => {
     if (import.meta.client && isTauri()) {

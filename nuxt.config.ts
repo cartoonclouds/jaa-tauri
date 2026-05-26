@@ -59,7 +59,7 @@ export default defineNuxtConfig({
     dirs: [
       "modules/**/application/actions",
       "modules/**/application/services",
-      "modules/**/presentation/composables",
+      "modules/**/composables",
       "modules/**/stores",
       "services/**",
     ],

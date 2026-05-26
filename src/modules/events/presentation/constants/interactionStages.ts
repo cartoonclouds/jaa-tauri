@@ -9,28 +9,6 @@ export { INTERACTION_STAGES, isInteractionStage };
 export type { InteractionStage, InteractionStagePrefix };
 
 /**
- * Type alias for application flow status.
- */
-export type ApplicationFlowStatus =
-  | "saved"
-  | "applied"
-  | "interview"
-  | "offer"
-  | "rejected";
-
-/**
- * Type alias for application progress status.
- */
-export type ApplicationProgressStatus =
-  | "saved"
-  | "applied"
-  | "phone-screening"
-  | "technical"
-  | "interview"
-  | "offer"
-  | "rejected";
-
-/**
  * Defines event stage copy.
  */
 export interface EventStageCopy {
@@ -47,100 +25,12 @@ export type EventNotificationSeverity =
   | "success"
   | "error";
 
-export const EVENT_FLOW_BY_APPLICATION_STATUS: Record<
-  ApplicationFlowStatus,
-  InteractionStage[]
-> = {
-  saved: ["Application/Saved"],
-  applied: [
-    "Application/Saved",
-    "Application/Submitted",
-    "Screening/Recruiter Outreach",
-    "Screening/Phone Screen",
-  ],
-  interview: [
-    "Application/Saved",
-    "Application/Submitted",
-    "Screening/Recruiter Outreach",
-    "Screening/Phone Screen",
-    "Screening/Hiring Manager Review",
-    "Interview/Technical Interview",
-    "Interview/Panel Interview",
-  ],
-  offer: [
-    "Application/Saved",
-    "Application/Submitted",
-    "Screening/Recruiter Outreach",
-    "Screening/Phone Screen",
-    "Screening/Hiring Manager Review",
-    "Interview/Technical Interview",
-    "Interview/Panel Interview",
-    "Interview/Final Round",
-    "Assessment/Take-home Assignment",
-    "Offer/Written Offer",
-    "Negotiation/Compensation Negotiation",
-  ],
-  rejected: [
-    "Application/Saved",
-    "Application/Submitted",
-    "Screening/Recruiter Outreach",
-    "Screening/Phone Screen",
-    "Interview/Technical Interview",
-    "Decision/Rejected",
-  ],
-};
-
-export const FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS: Record<
-  ApplicationProgressStatus,
-  InteractionStage[]
-> = {
-  saved: [
-    "Application/Submitted",
-    "Screening/Recruiter Outreach",
-    "Screening/Phone Screen",
-    "Screening/Hiring Manager Review",
-    "Interview/Technical Interview",
-    "Interview/Panel Interview",
-    "Interview/Final Round",
-    "Offer/Written Offer",
-    "Decision/Accepted",
-    "Post-Offer/Onboarding",
-  ],
-  applied: [
-    "Screening/Recruiter Outreach",
-    "Screening/Phone Screen",
-    "Screening/Hiring Manager Review",
-    "Interview/Technical Interview",
-    "Interview/Panel Interview",
-    "Interview/Final Round",
-    "Offer/Written Offer",
-    "Decision/Accepted",
-    "Post-Offer/Onboarding",
-  ],
-  "phone-screening": [
-    "Screening/Hiring Manager Review",
-    "Interview/Technical Interview",
-    "Interview/Panel Interview",
-    "Interview/Final Round",
-    "Offer/Written Offer",
-    "Decision/Accepted",
-    "Post-Offer/Onboarding",
-  ],
-  technical: [
-    "Interview/Panel Interview",
-    "Interview/Final Round",
-    "Offer/Written Offer",
-    "Decision/Accepted",
-    "Post-Offer/Onboarding",
-  ],
-  interview: [
-    "Offer/Written Offer",
-    "Decision/Accepted",
-    "Post-Offer/Onboarding",
-  ],
-  offer: ["Decision/Accepted", "Post-Offer/Onboarding"],
-  rejected: [],
-};
+/**
+ * Canonical set of event flow stages available for applications.
+ */
+export const EVENT_FLOW_STAGE_SET: ReadonlySet<InteractionStage> = new Set(
+  INTERACTION_STAGES,
+);
 
 export const EVENT_COPY_BY_STAGE: Record<InteractionStage, EventStageCopy> = {
   "Application/Saved": {

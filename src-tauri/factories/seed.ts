@@ -477,11 +477,6 @@ function main(): void {
       applications.map((application) => ({
         id: application.id,
         company_id: application.company_id,
-        status: application.status,
-      })),
-      contacts.map((contact) => ({
-        id: contact.id,
-        company_id: contact.company_id,
       })),
       seedConfig.eventsPerApplication,
       seed + 120,

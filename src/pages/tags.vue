@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import type { Tag } from "@modules/tags/domain/entities/Tag";
 
-  import { useTagDatatable } from "@modules/tags/presentation/composables/useTagDatatable";
+  import { useTag } from "@modules/tags/composables/useTag";
+  import { useTagDatatable } from "@modules/tags/composables/useTagDatatable";
   import { tagsSearchPlaceholder } from "@modules/tags/presentation/constants/tagDatatable";
-  import { useTagService } from "@modules/tags/services/useTagService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -11,7 +11,7 @@
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const service = useTagService();
+  const { create, update, remove } = useTag();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -51,13 +51,13 @@
    */
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await service.update({
+      await update({
         id: editingId.value,
         name: form.name,
         color: form.color || null,
       });
     } else {
-      await service.create({ name: form.name, color: form.color || null });
+      await create({ name: form.name, color: form.color || null });
     }
     await refresh();
     resetForm();
@@ -67,7 +67,7 @@
    * Handles remove tag.
    */
   async function removeTag(id: string): Promise<void> {
-    await service.delete(id);
+    await remove(id);
     await refresh();
   }
 </script>
@@ -143,12 +143,4 @@
     </DataTable>
   </div>
 </template>
-
-
-
-
-
-
-
-
 

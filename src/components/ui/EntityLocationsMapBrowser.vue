@@ -3,8 +3,8 @@
   import type { Contact } from "@modules/contacts";
   import type { MappableEntity } from "@shared/utils/entityLocationsLeaflet";
 
-  import { useApplicationService } from "@modules/applications";
-  import { useContactService } from "@modules/contacts";
+  import { useApplication } from "@modules/applications";
+  import { useContact } from "@modules/contacts";
   import { createEntityLocationsLeafletManager } from "@shared/utils/entityLocationsLeaflet";
   import {
     computed,
@@ -37,8 +37,8 @@
   const SEARCH_DEBOUNCE_MS = 200;
   let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const contactService = useContactService();
-  const applicationService = useApplicationService();
+  const { service: contactService } = useContact();
+  const { service: applicationService } = useApplication();
   const mapManager = createEntityLocationsLeafletManager({
     onError: (message) => {
       loadingError.value = message;

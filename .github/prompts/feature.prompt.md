@@ -6,14 +6,16 @@ Create a new feature module in the DDD architecture for a Nuxt 4 + Tauri 2 deskt
 - The feature should be named `<FeatureName>` (replace with the actual feature).
 - Generate boilerplate for CRUD actions (Create, Read, Update, Delete) in a repository.
 - Use service classes/repositories for data access and composables for UI state.
-- Generate `use*Service` factories as singleton-backed helpers (do not create a new service instance on each call).
+- Do not generate service-level `use*Service` factories.
+- Expose singleton-backed service access from the feature composable in `src/modules/<feature>/composables/`.
 - Create Zod schemas in `src/modules/<feature>/domain/zod/` and reuse shared validators from `src/shared/domain/zod/fields.ts` when applicable.
 - Validate all API inputs and outputs with Zod.
 - Add concise docblocks to generated exported functions, classes, interfaces, and type aliases.
 - Include:
   - Domain entity and type definition
   - Application actions for each CRUD action
-  - Presentation layer (composables, minimal page/component)
+  - Module composables layer (`src/modules/<feature>/composables/`)
+  - Presentation layer (minimal page/component)
   - Service or repository for infrastructure/data access
   - Zod schemas for validation
   - Barrel file (`index.ts`) for the module
@@ -39,9 +41,11 @@ src/
           <Feature>Type.ts
         zod/
           <feature>.schema.ts
-      presentation/
+      composables/
         use<Feature>.ts
-        <feature>Page.vue
+      presentation/
+        components/
+          <Feature>Page.vue
       index.ts
   infrastructure/
     <feature>Repository.ts

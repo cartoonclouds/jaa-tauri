@@ -1,6 +1,4 @@
 import type {
-  ApplicationFlowStatus,
-  ApplicationProgressStatus,
   EventStageCopy,
   InteractionStage,
 } from "../../src/modules/events/presentation/constants/interactionStages";
@@ -9,18 +7,15 @@ import { faker } from "@faker-js/faker";
 
 import {
   EVENT_COPY_BY_STAGE,
-  EVENT_FLOW_BY_APPLICATION_STATUS,
-  FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS,
+  EVENT_FLOW_STAGE_SET,
 } from "../../src/modules/events/presentation/constants/interactionStages";
 
 export interface EventRow {
   id: string;
   application_id: string;
-  contact_id: string | null;
   type: string;
   title: string;
   description: string;
-  event_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,36 +23,52 @@ export interface EventRow {
 interface EventApplicationInput {
   id: string;
   company_id: string;
-  status: string;
 }
 
-interface EventContactInput {
-  id: string;
-  company_id: string;
-}
+const STATUS_TO_COMPLETED_STAGE_COUNT: Record<string, number> = {
+  saved: 1,
+  applied: 4,
+  "phone-screening": 5,
+  technical: 6,
+  interview: 8,
+  offer: 11,
+  rejected: 6,
+};
 
-function getCompletedStages(status: string): InteractionStage[] {
-  const resolvedStatus =
-    status in EVENT_FLOW_BY_APPLICATION_STATUS
-      ? (status as ApplicationFlowStatus)
-      : "applied";
+function splitStagesByStatus(status: string): {
+  completedStages: InteractionStage[];
+  futureStages: InteractionStage[];
+} {
+  const flowStages = [...EVENT_FLOW_STAGE_SET];
+  const completedCount =
+    STATUS_TO_COMPLETED_STAGE_COUNT[status] ??
+    STATUS_TO_COMPLETED_STAGE_COUNT.applied;
+  const normalizedCompletedCount = Math.min(
+    Math.max(completedCount, 1),
+    flowStages.length,
+  );
 
-  return EVENT_FLOW_BY_APPLICATION_STATUS[resolvedStatus];
-}
+  const completedStages = flowStages.slice(0, normalizedCompletedCount);
+  const futureStages = flowStages.slice(normalizedCompletedCount);
 
-function getFutureStages(status: string): InteractionStage[] {
-  if (
-    !Object.prototype.hasOwnProperty.call(
-      FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS,
-      status,
-    )
-  ) {
-    return [];
+  if (status === "rejected") {
+    const rejectedWithDecision = completedStages.filter(
+      (stage) => stage !== "Decision/Accepted",
+    );
+    if (!rejectedWithDecision.includes("Decision/Rejected")) {
+      rejectedWithDecision.push("Decision/Rejected");
+    }
+
+    return {
+      completedStages: rejectedWithDecision,
+      futureStages: [],
+    };
   }
 
-  return FUTURE_EVENT_FLOW_BY_PROGRESS_STATUS[
-    status as ApplicationProgressStatus
-  ];
+  return {
+    completedStages,
+    futureStages,
+  };
 }
 
 function getRejectedEventTitle(): string {
@@ -68,7 +79,6 @@ function getRejectedEventTitle(): string {
 
 export function createEventRows(
   applications: EventApplicationInput[],
-  contacts: EventContactInput[],
   _eventsPerApplication = 2,
   seed = 1500,
 ): EventRow[] {
@@ -76,8 +86,19 @@ export function createEventRows(
   faker.setDefaultRefDate("2026-01-01T00:00:00.000Z");
 
   return applications.flatMap((application, applicationIndex) => {
-    const completedStages = getCompletedStages(application.status);
-    const futureStages = getFutureStages(application.status);
+    const lifecycleStatuses: string[] = [
+      "saved",
+      "applied",
+      "phone-screening",
+      "technical",
+      "interview",
+      "offer",
+      "rejected",
+    ];
+    const seededStatus =
+      lifecycleStatuses[applicationIndex % lifecycleStatuses.length] ??
+      "applied";
+    const { completedStages, futureStages } = splitStagesByStatus(seededStatus);
     const flowStages = [
       ...completedStages,
       ...futureStages.filter((stage) => !completedStages.includes(stage)),
@@ -87,35 +108,19 @@ export function createEventRows(
       faker.seed(seed + applicationIndex * 100 + index);
       const anchorDate = faker.date.recent({ days: 60 });
       const createdAt = new Date(anchorDate);
-      const eventAt = new Date(anchorDate);
-      const companyContacts = contacts.filter(
-        (contact) => contact.company_id === application.company_id,
-      );
       const stageCopy: EventStageCopy = EVENT_COPY_BY_STAGE[type];
-      const isCompletedStage = completedStages.includes(type);
-
-      eventAt.setDate(
-        eventAt.getDate() + index * faker.number.int({ min: 2, max: 6 }),
-      );
 
       return {
         id: faker.string.uuid(),
         application_id: application.id,
-        contact_id:
-          isCompletedStage &&
-          companyContacts.length > 0 &&
-          type !== "Application/Saved"
-            ? faker.helpers.arrayElement(companyContacts).id
-            : null,
         type,
         title:
-          isCompletedStage &&
+          completedStages.includes(type) &&
           type === "Decision/Rejected" &&
           completedStages[completedStages.length - 1] === type
             ? getRejectedEventTitle()
             : stageCopy.title,
         description: stageCopy.description,
-        event_at: isCompletedStage ? eventAt.toISOString() : null,
         created_at: createdAt.toISOString(),
         updated_at: createdAt.toISOString(),
       };

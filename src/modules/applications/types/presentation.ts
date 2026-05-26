@@ -1,10 +1,7 @@
 import type { ApplicationBasePayload } from "@modules/applications/types/payloads";
 import type { InteractionStage } from "@modules/events/presentation/constants/interactionStages";
 
-import {
-  ApplicationEventFlowStatus,
-  ApplicationStatus,
-} from "@modules/applications/types/enums";
+import { ApplicationStatus } from "@modules/applications/types/enums";
 
 /**
  * Drawer state used by the application presentation layer.
@@ -31,7 +28,6 @@ export type ApplicationFormValues = ApplicationBasePayload;
  */
 export interface ApplicationDraftFlowStep {
   type: InteractionStage;
-  eventAt: Date | null;
 }
 
 /**
@@ -53,7 +49,6 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
     companyId: null,
     title: "",
     status: ApplicationStatus.Saved,
-    eventFlowStatus: ApplicationEventFlowStatus.Applied,
     sourceUrl: "",
     appliedAt: "",
     locationText: "",

@@ -7,7 +7,7 @@
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
   import ApplicationDetailsManageContactDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsManageContactDialog.vue";
   import ApplicationDetailsUnlinkContactDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsUnlinkContactDialog.vue";
-  import { useContactService } from "@modules/contacts";
+  import { useContact } from "@modules/contacts";
   import { computed, ref, watch } from "vue";
 
   import LocationMapFull from "@/components/ui/LocationMapFull.vue";
@@ -91,7 +91,8 @@
     "request-unlink-contact": [contactId: string];
   }>();
 
-  const contactService = useContactService() as ContactLookupService;
+  const { service } = useContact();
+  const contactService = service as ContactLookupService;
 
   const linkedContacts = ref<LinkedContactSection[]>([]);
   const loading = ref(false);

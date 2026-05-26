@@ -6,9 +6,9 @@
   import type { Contact } from "@modules/contacts/domain/entities/Contact";
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
-  import { useContactService } from "@modules/contacts";
+  import { useContact } from "@modules/contacts";
   import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
-  import { useContactDatatable } from "@modules/contacts/presentation/composables/useContactDatatable";
+  import { useContactDatatable } from "@modules/contacts/composables/useContactDatatable";
   import { contactsSearchPlaceholder } from "@modules/contacts/presentation/constants/contactDatatable";
   import { computed, ref } from "vue";
 
@@ -26,7 +26,7 @@
     "update:visible": [value: boolean];
   }>();
 
-  const service = useContactService();
+  const { service } = useContact();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -257,3 +257,4 @@
     </div>
   </Dialog>
 </template>
+

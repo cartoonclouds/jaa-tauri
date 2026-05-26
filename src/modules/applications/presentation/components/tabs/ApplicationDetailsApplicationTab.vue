@@ -11,11 +11,10 @@
 
   import ApplicationDetailsView from "@modules/applications/presentation/components/ApplicationDetailsView.vue";
   import ApplicationForm from "@modules/applications/presentation/components/ApplicationForm.vue";
-  import { useEvent } from "@modules/events/presentation/composables/useEvent";
+  import { useEvent } from "@modules/events/composables/useEvent";
   import {
-    type ApplicationFlowStatus,
     EVENT_COPY_BY_STAGE,
-    EVENT_FLOW_BY_APPLICATION_STATUS,
+    EVENT_FLOW_STAGE_SET,
     INTERACTION_STAGES,
     type InteractionStage,
     isInteractionStage,
@@ -64,11 +63,9 @@
   const stageForm = reactive<{
     id: string;
     type: InteractionStage;
-    eventAt: Date | null;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
-    eventAt: null,
   });
 
   const createFlowSteps = ref<(ApplicationDraftFlowStep & { id: string })[]>(
@@ -90,55 +87,20 @@
           isInteractionStage(event.type),
       )
       .sort((left, right) => {
-        const leftTime = left.eventAt?.getTime() ?? left.createdAt.getTime();
-        const rightTime = right.eventAt?.getTime() ?? right.createdAt.getTime();
+        const leftTime = left.createdAt.getTime();
+        const rightTime = right.createdAt.getTime();
         return leftTime - rightTime;
       });
   });
 
   /**
-   * Maps event flow status values to stage defaults.
-   */
-  function mapEventFlowValueToFlowStatus(
-    value: string | null | undefined,
-  ): ApplicationFlowStatus {
-    if (value === "saved") {
-      return "saved";
-    }
-
-    if (value === "applied") {
-      return "applied";
-    }
-
-    if (value === "interview") {
-      return "interview";
-    }
-
-    if (value === "offer") {
-      return "offer";
-    }
-
-    if (value === "rejected") {
-      return "rejected";
-    }
-
-    return "saved";
-  }
-
-  /**
    * Initializes draft flow steps for create mode.
    */
   function initializeCreateFlowSteps(): void {
-    const flowStatus = mapEventFlowValueToFlowStatus(
-      props.initialValues.eventFlowStatus.value,
-    );
-    createFlowSteps.value = EVENT_FLOW_BY_APPLICATION_STATUS[flowStatus].map(
-      (stage) => ({
-        id: crypto.randomUUID(),
-        type: stage,
-        eventAt: null,
-      }),
-    );
+    createFlowSteps.value = [...EVENT_FLOW_STAGE_SET].map((stage) => ({
+      id: crypto.randomUUID(),
+      type: stage,
+    }));
   }
 
   watch(
@@ -152,17 +114,6 @@
   );
 
   /**
-   * Formats event datetime for stage rows.
-   */
-  function formatEventAt(value: Date | null): string {
-    if (!value) {
-      return "Not set";
-    }
-
-    return value.toLocaleString();
-  }
-
-  /**
    * Opens stage creation dialog.
    */
   function openCreateStageDialog(): void {
@@ -170,7 +121,6 @@
     stageDialogDraftId.value = null;
     stageForm.id = "";
     stageForm.type = INTERACTION_STAGES[0];
-    stageForm.eventAt = null;
     isStageDialogVisible.value = true;
   }
 
@@ -182,7 +132,6 @@
     stageDialogDraftId.value = null;
     stageForm.id = event.id;
     stageForm.type = event.type;
-    stageForm.eventAt = event.eventAt;
     isStageDialogVisible.value = true;
   }
 
@@ -196,7 +145,6 @@
     stageDialogDraftId.value = step.id;
     stageForm.id = "";
     stageForm.type = step.type;
-    stageForm.eventAt = step.eventAt;
     isStageDialogVisible.value = true;
   }
 
@@ -210,7 +158,6 @@
         createFlowSteps.value.push({
           id: crypto.randomUUID(),
           type: stageForm.type,
-          eventAt: stageForm.eventAt,
         });
       } else if (stageDialogDraftId.value) {
         const target = createFlowSteps.value.find(
@@ -218,7 +165,6 @@
         );
         if (target) {
           target.type = stageForm.type;
-          target.eventAt = stageForm.eventAt;
         }
       }
 
@@ -233,17 +179,14 @@
     if (stageDialogMode.value === "create") {
       await create({
         applicationId,
-        contactId: null,
         type: stageForm.type,
         title: EVENT_COPY_BY_STAGE[stageForm.type].title,
         description: null,
-        eventAt: stageForm.eventAt,
       });
     } else if (stageForm.id) {
       await update({
         id: stageForm.id,
         type: stageForm.type,
-        eventAt: stageForm.eventAt,
       });
     }
 
@@ -275,7 +218,6 @@
         ...payload,
         flowSteps: createFlowSteps.value.map((step) => ({
           type: step.type,
-          eventAt: step.eventAt,
         })),
       });
       return;
@@ -345,7 +287,7 @@
               {{ EVENT_COPY_BY_STAGE[event.type]?.title ?? event.type }}
             </p>
             <p class="text-xs text-surface-500">
-              {{ formatEventAt(event.eventAt) }}
+              {{ event.createdAt.toLocaleString() }}
             </p>
           </div>
 
@@ -384,7 +326,7 @@
         <div>
           <h3 class="text-sm font-semibold text-surface-900">Flow Steps</h3>
           <p class="text-xs text-surface-500">
-            Default flow is prefilled and can be customized before creating.
+            The stage set is prefilled and can be customized before creating.
           </p>
         </div>
 
@@ -407,9 +349,6 @@
           <div class="min-w-0">
             <p class="truncate text-sm font-medium text-surface-900">
               {{ EVENT_COPY_BY_STAGE[step.type].title }}
-            </p>
-            <p class="text-xs text-surface-500">
-              {{ formatEventAt(step.eventAt) }}
             </p>
           </div>
 
@@ -468,17 +407,6 @@
           fluid
         />
       </div>
-
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700">Event At</label>
-        <DatePicker
-          v-model="stageForm.eventAt"
-          show-time
-          hour-format="24"
-          date-format="yy-mm-dd"
-          fluid
-        />
-      </div>
     </div>
 
     <template #footer>
@@ -501,3 +429,4 @@
     </template>
   </Dialog>
 </template>
+

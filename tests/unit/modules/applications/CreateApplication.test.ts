@@ -1,8 +1,6 @@
 import { ApplicationRepository } from "@modules/applications";
-import {
-  ApplicationEventFlowStatus,
-  ApplicationStatus,
-} from "@modules/applications/types/enums";
+import { ApplicationStatus } from "@modules/applications/types/enums";
+import { EVENT_FLOW_STAGE_SET } from "@modules/events/presentation/constants/interactionStages";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
@@ -29,7 +27,7 @@ describe("ApplicationRepository.create", () => {
     );
   });
 
-  it("writes a row with default status and applied flow", async () => {
+  it("writes a row and links the default stage set", async () => {
     const db = mockDb();
     const repository = new ApplicationRepository(db as never);
 
@@ -38,9 +36,7 @@ describe("ApplicationRepository.create", () => {
     const values = vi.mocked(db.execute).mock.calls[0]?.[1];
 
     expect(Array.isArray(values)).toBe(true);
-    expect((values as unknown[])[4]).toBe(
-      ApplicationEventFlowStatus.Applied.value,
-    );
+    expect((values as unknown[])[2]).toBe("Frontend Engineer");
 
     const eventInsertCalls = vi
       .mocked(db.execute)
@@ -51,19 +47,14 @@ describe("ApplicationRepository.create", () => {
         String(sql).includes("INSERT INTO application_events"),
       );
 
-    expect(eventInsertCalls.length).toBeGreaterThan(0);
-    expect(eventLinkCalls.length).toBe(eventInsertCalls.length);
+    expect(eventInsertCalls.length).toBe(EVENT_FLOW_STAGE_SET.size);
+    expect(eventLinkCalls.length).toBe(EVENT_FLOW_STAGE_SET.size);
   });
 });
 
 describe("ApplicationRepository.update", () => {
-  it("does not recreate flow events when event flow status is unchanged", async () => {
+  it("does not recreate flow events during update", async () => {
     const db = mockDb();
-    vi.mocked(db.select).mockImplementationOnce(() =>
-      Promise.resolve([
-        { event_flow_status: ApplicationEventFlowStatus.Applied.value },
-      ] as unknown[]),
-    );
     const repository = new ApplicationRepository(db as never);
 
     await repository.update({
@@ -71,7 +62,6 @@ describe("ApplicationRepository.update", () => {
       companyId: null,
       title: "Frontend Engineer",
       status: ApplicationStatus.Applied,
-      eventFlowStatus: ApplicationEventFlowStatus.Applied,
       sourceUrl: null,
       appliedAt: null,
       locationText: null,

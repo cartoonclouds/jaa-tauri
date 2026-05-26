@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import StatisticCardsSection from "@modules/statistics/presentation/components/cards/StatisticCardsSection.vue";
   import StatisticsMomentumSummary from "@modules/statistics/presentation/components/StatisticsMomentumSummary.vue";
-  import { useStatistic } from "@modules/statistics/presentation/composables/useStatistic";
+  import { useStatistic } from "@modules/statistics/composables/useStatistic";
 
   import { Icon } from "#components";
 
@@ -34,6 +34,7 @@
     <StatisticsMomentumSummary :overview="overview" />
   </section>
 </template>
+
 
 
 

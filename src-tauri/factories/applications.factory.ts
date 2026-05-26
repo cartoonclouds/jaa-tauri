@@ -10,9 +10,7 @@ export interface ApplicationRow {
   id: string;
   company_id: string;
   title: string;
-  status: string;
   source_url: string;
-  applied_at: string | null;
   location_text: string;
   location_lat: number;
   location_lng: number;
@@ -31,70 +29,42 @@ export interface ApplicationRow {
   updated_at: string;
 }
 
-type ApplicationSeedStatus =
-  | "saved"
-  | "applied"
-  | "phone-screening"
-  | "technical"
-  | "interview"
-  | "offer"
-  | "rejected";
-
 interface ApplicationLifecycleProfile {
-  status: ApplicationSeedStatus;
   isArchived: number;
   priorityRange: {
     min: number;
     max: number;
   };
-  appliedAtOffsetDays: {
-    min: number;
-    max: number;
-  } | null;
 }
 
 const APPLICATION_LIFECYCLE_PROFILES: ApplicationLifecycleProfile[] = [
   {
-    status: "saved",
     isArchived: 0,
     priorityRange: { min: 1, max: 2 },
-    appliedAtOffsetDays: null,
   },
   {
-    status: "applied",
     isArchived: 0,
     priorityRange: { min: 2, max: 3 },
-    appliedAtOffsetDays: { min: 1, max: 5 },
   },
   {
-    status: "phone-screening",
     isArchived: 0,
     priorityRange: { min: 3, max: 4 },
-    appliedAtOffsetDays: { min: 2, max: 8 },
   },
   {
-    status: "technical",
     isArchived: 0,
     priorityRange: { min: 3, max: 5 },
-    appliedAtOffsetDays: { min: 3, max: 10 },
   },
   {
-    status: "interview",
     isArchived: 0,
     priorityRange: { min: 3, max: 4 },
-    appliedAtOffsetDays: { min: 3, max: 12 },
   },
   {
-    status: "offer",
     isArchived: 0,
     priorityRange: { min: 4, max: 5 },
-    appliedAtOffsetDays: { min: 5, max: 18 },
   },
   {
-    status: "rejected",
     isArchived: 1,
     priorityRange: { min: 1, max: 2 },
-    appliedAtOffsetDays: { min: 4, max: 20 },
   },
 ];
 
@@ -118,19 +88,6 @@ export function createApplicationRows(
           (companyIndex * applicationsPerCompany + index) %
             APPLICATION_LIFECYCLE_PROFILES.length
         ] ?? APPLICATION_LIFECYCLE_PROFILES[0];
-      const appliedAt = lifecycle.appliedAtOffsetDays
-        ? new Date(createdAt)
-        : null;
-
-      if (appliedAt && lifecycle.appliedAtOffsetDays) {
-        appliedAt.setDate(
-          appliedAt.getDate() +
-            faker.number.int({
-              min: lifecycle.appliedAtOffsetDays.min,
-              max: lifecycle.appliedAtOffsetDays.max,
-            }),
-        );
-      }
 
       const location = createLondonLocationSeed();
 
@@ -138,9 +95,7 @@ export function createApplicationRows(
         id: faker.string.uuid(),
         company_id: companyId,
         title: faker.person.jobTitle(),
-        status: lifecycle.status,
         source_url: faker.internet.url(),
-        applied_at: appliedAt?.toISOString() ?? null,
         location_text: location.locationText,
         location_lat: location.locationLat,
         location_lng: location.locationLng,

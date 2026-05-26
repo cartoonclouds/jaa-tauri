@@ -4,7 +4,7 @@
   import type { ContactUpdatePayload } from "@modules/contacts/repositories/ContactRepository";
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
-  import { useContactService } from "@modules/contacts";
+  import { useContact } from "@modules/contacts";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { computed, ref, watch } from "vue";
@@ -66,7 +66,7 @@
     return typeof value === "string" ? value.trim() : "";
   }
 
-  const contactService = useContactService();
+  const { service: contactService } = useContact();
   const associatedCompanies = ref<ContactAssociatedCompany[]>([]);
   const isLoadingAssociatedCompanies = ref(false);
   const associatedCompaniesError = ref<string | null>(null);

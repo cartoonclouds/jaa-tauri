@@ -4,8 +4,8 @@ import type {
   UserProfile,
 } from "@modules/profile";
 
-import { useDocumentService } from "@modules/documents";
-import { useProfileService } from "@modules/profile";
+import { useDocument } from "@modules/documents";
+import { useProfile } from "@modules/profile";
 import { CreateProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import { setOnboardingCompleted } from "@modules/settings/persistence";
 
@@ -64,7 +64,7 @@ export class OnboardingRepository {
       );
     }
 
-    const profileService = useProfileService();
+    const { service: profileService } = useProfile();
     const existingProfiles = await profileService.list();
 
     if (existingProfiles[0]) {
@@ -78,7 +78,7 @@ export class OnboardingRepository {
     }
 
     if (input.resumePath) {
-      const documentService = useDocumentService();
+      const { service: documentService } = useDocument();
       await documentService.create({
         title: getResumeDocumentTitle(input.resumePath),
         kind: "resume",
@@ -103,11 +103,3 @@ export async function completeOnboarding(
 ): Promise<void> {
   await onboardingRepository.complete(input);
 }
-
-
-
-
-
-
-
-

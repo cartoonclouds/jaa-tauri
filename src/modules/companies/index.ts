@@ -1,7 +1,5 @@
 export type * from "./domain/entities/Company";
-export * from "./presentation/composables/useCompany";
+export * from "./composables/useCompany";
+export * from "./composables/useCompanyDatatable";
 export * from "./repositories/CompanyRepository";
-export * from "./services/useCompanyService";
-
-
 

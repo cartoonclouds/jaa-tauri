@@ -8,16 +8,12 @@ export interface Event {
   id: string;
   /** Related application identifier. */
   applicationId: string;
-  /** Related contact identifier, when available. */
-  contactId: string | null;
   /** Event type identifier. */
   type: InteractionStage;
   /** Event title. */
   title: string;
   /** Free-form event description. */
   description: string | null;
-  /** Scheduled or recorded event time, when available. */
-  eventAt: Date | null;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -30,13 +26,8 @@ export interface Event {
 export interface CreateEventInput {
   /** Related application identifier. */
   applicationId: string;
-  /** Related contact identifier, when available. */
-  contactId?: string | null;
   /** Event type identifier. */
   type: InteractionStage;
   /** Event title. */
   title: string;
 }
-
-
-

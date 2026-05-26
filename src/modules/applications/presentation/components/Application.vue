@@ -18,17 +18,18 @@
   } from "@modules/contacts/repositories/ContactRepository";
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
-  import { useApplicationService } from "@modules/applications";
+  import { useApplication } from "@modules/applications";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
-  import { useApplicationDatatable } from "@modules/applications/presentation/composables/useApplicationDatatable";
+  import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
-  import { useCompany, useCompanyService } from "@modules/companies";
+  import { useCompany } from "@modules/companies";
   import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
-  import { useContactService } from "@modules/contacts";
+  import { useContact } from "@modules/contacts";
   import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
-  import { useEventService } from "@modules/events";
-  import { useTagService } from "@modules/tags";
+  import { useEvent } from "@modules/events";
+  import { EVENT_COPY_BY_STAGE } from "@modules/events/presentation/constants/interactionStages";
+  import { useTag } from "@modules/tags";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
   import { ref } from "vue";
@@ -45,11 +46,15 @@
     notes: string | null;
   }
 
-  const service = useApplicationService();
-  const companyService = useCompanyService();
-  const contactService = useContactService();
-  const eventService = useEventService();
-  const tagService = useTagService();
+  const { service } = useApplication();
+  const {
+    service: companyService,
+    items: companyItems,
+    refresh: refreshCompanies,
+  } = useCompany();
+  const { service: contactService } = useContact();
+  const { service: eventService } = useEvent();
+  const { service: tagService } = useTag();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -69,8 +74,6 @@
     sortOrder,
     totalRecords,
   } = useApplicationDatatable();
-  const { items: companyItems, refresh: refreshCompanies } = useCompany();
-
   const drawerMode = ref<ApplicationDrawerMode>("view");
   const isDrawerOpen = ref(false);
   const isSubmitting = ref(false);
@@ -106,7 +109,6 @@
       companyId: application.companyId,
       title: application.title,
       status: application.status,
-      eventFlowStatus: application.eventFlowStatus,
       sourceUrl: application.sourceUrl ?? "",
       appliedAt: formatDateTimeLocalValue(application.appliedAt),
       locationText: application.locationText ?? "",
@@ -203,7 +205,6 @@
            * Handles cancel edit mode.
            */
           status: payload.status,
-          eventFlowStatus: payload.eventFlowStatus,
           sourceUrl: payload.sourceUrl,
           appliedAt: payload.appliedAt,
           locationText: payload.locationText,
@@ -229,7 +230,6 @@
           companyId: payload.companyId,
           title: payload.title,
           status: payload.status,
-          eventFlowStatus: payload.eventFlowStatus,
           sourceUrl: payload.sourceUrl,
           appliedAt: payload.appliedAt,
           locationText: payload.locationText,
@@ -248,14 +248,35 @@
           isArchived: payload.isArchived,
         });
 
+        const createdApplicationEvents = (await eventService.list()).filter(
+          (event) => event.applicationId === createdApplicationId,
+        );
+        const selectedTypes = new Set(
+          (payload.flowSteps ?? []).map((step) => step.type),
+        );
+        const createdEventByType = new Map(
+          createdApplicationEvents.map((event) => [event.type, event]),
+        );
+
+        for (const defaultEvent of createdApplicationEvents) {
+          if (selectedTypes.has(defaultEvent.type)) {
+            continue;
+          }
+
+          await eventService.delete(defaultEvent.id);
+        }
+
         for (const step of payload.flowSteps ?? []) {
+          const existingEvent = createdEventByType.get(step.type) ?? null;
+          if (existingEvent) {
+            continue;
+          }
+
           await eventService.create({
             applicationId: createdApplicationId,
-            contactId: null,
             type: step.type,
-            title: step.type,
+            title: EVENT_COPY_BY_STAGE[step.type].title,
             description: null,
-            eventAt: step.eventAt,
           });
         }
       }
@@ -547,3 +568,4 @@
     />
   </div>
 </template>
+

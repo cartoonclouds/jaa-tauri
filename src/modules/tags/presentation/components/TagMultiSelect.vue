@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { useTag } from "@modules/tags/presentation/composables/useTag";
+  import { useTag } from "@modules/tags/composables/useTag";
   import { normalizeTagName } from "@modules/tags/utils/pendingTagResolution";
   import { computed, onMounted, ref } from "vue";
 
@@ -223,3 +223,4 @@
     </template>
   </MultiSelect>
 </template>
+

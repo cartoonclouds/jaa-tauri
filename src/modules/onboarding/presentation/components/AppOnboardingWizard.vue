@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { useOnboardingFlow } from "@modules/onboarding/presentation/composables/useOnboardingFlow.client";
+  import { useOnboardingFlow } from "@modules/onboarding/composables/useOnboardingFlow.client";
   import { defaultSkillOptions } from "@modules/onboarding/presentation/constants/defaultSkillOptions";
   import { computed, ref } from "vue";
 
@@ -438,3 +438,4 @@
     </template>
   </Card>
 </template>
+

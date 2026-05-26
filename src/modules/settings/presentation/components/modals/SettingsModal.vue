@@ -3,7 +3,7 @@
   import type { PersistedConstantSourceType } from "@shared/constants/persistedConstants";
 
   import { logError } from "@infra/logging/tauriLog.client";
-  import { useSettingService } from "@modules/settings";
+  import { useSetting } from "@modules/settings";
   import { Form } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { CONSTANT_MODULE_SOURCES } from "@shared/constants/persistedConstants";
@@ -55,7 +55,7 @@
     "update:visible": [value: boolean];
   }>();
 
-  const settingService = useSettingService();
+  const { service: settingService } = useSetting();
 
   /**
    * Returns whether an exported constant value can be persisted.

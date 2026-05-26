@@ -139,13 +139,11 @@ export const CreateApplicationSchema = ApplicationSchema.pick({
   companyId: true,
   title: true,
   status: true,
-  eventFlowStatus: true,
   locationText: true,
   locationLat: true,
   locationLng: true,
 }).partial({
   status: true,
-  eventFlowStatus: true,
   companyId: true,
   locationText: true,
   locationLat: true,
@@ -163,10 +161,6 @@ export const ApplicationFormSchema = z
     status: z.custom<ApplicationStatusValue>(
       isApplicationStatus,
       "Invalid status",
-    ),
-    eventFlowStatus: z.custom<ApplicationEventFlowStatusValue>(
-      isApplicationEventFlowStatus,
-      "Invalid event flow status",
     ),
     sourceUrl: z.string().url("Invalid URL").nullable().or(z.literal("")),
     appliedAt: z.string().nullable().or(z.literal("")),

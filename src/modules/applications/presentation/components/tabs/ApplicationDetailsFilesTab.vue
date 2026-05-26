@@ -5,7 +5,7 @@
     getApplicationFileIcon,
     getFileNameFromPath,
   } from "@modules/applications/presentation/utils/applicationFileUtils";
-  import { useDocumentService } from "@modules/documents";
+  import { useDocument } from "@modules/documents";
   import { getDocumentMimeTypeFromFilePath } from "@modules/documents/utils/documentUtils";
   import { appLocalDataDir, join } from "@tauri-apps/api/path";
   import { openPath, revealItemInDir } from "@tauri-apps/plugin-opener";
@@ -65,7 +65,8 @@
 
   const props = defineProps<Props>();
 
-  const documentService = useDocumentService() as DocumentLookupService;
+  const { service } = useDocument();
+  const documentService = service as DocumentLookupService;
   const { sanitizeFileName, writeBrowserFile } = useFileSystem({
     ensureDirectoryExists: true,
   });

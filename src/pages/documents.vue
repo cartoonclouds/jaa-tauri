@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import type { Document } from "@modules/documents/domain/entities/Document";
 
-  import { useDocumentService } from "@modules/documents";
-  import { useDocumentDatatable } from "@modules/documents/presentation/composables/useDocumentDatatable";
+  import { useDocument } from "@modules/documents";
+  import { useDocumentDatatable } from "@modules/documents/composables/useDocumentDatatable";
   import { documentsSearchPlaceholder } from "@modules/documents/presentation/constants/documentDatatable";
   import { getDocumentMimeTypeFromFilePath } from "@modules/documents/utils/documentUtils";
   import { reactive, ref } from "vue";
@@ -12,7 +12,7 @@
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const service = useDocumentService();
+  const { service } = useDocument();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -156,12 +156,4 @@
     </DataTable>
   </div>
 </template>
-
-
-
-
-
-
-
-
 

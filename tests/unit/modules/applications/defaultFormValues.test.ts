@@ -1,11 +1,10 @@
 import { createEmptyApplicationFormValues } from "@modules/applications";
-import { ApplicationEventFlowStatus } from "@modules/applications/types/enums";
 import { describe, expect, it } from "vitest";
 
 describe("createEmptyApplicationFormValues", () => {
-  it("defaults event flow status to applied", () => {
+  it("defaults status to saved", () => {
     const values = createEmptyApplicationFormValues();
 
-    expect(values.eventFlowStatus).toBe(ApplicationEventFlowStatus.Applied);
+    expect(values.status.value).toBe("saved");
   });
 });

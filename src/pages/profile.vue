@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import type { Profile } from "@modules/profile/domain/entities/Profile";
 
-  import { useProfileDatatable } from "@modules/profile/presentation/composables/useProfileDatatable";
+  import { useProfile } from "@modules/profile/composables/useProfile";
+  import { useProfileDatatable } from "@modules/profile/composables/useProfileDatatable";
   import { profileSearchPlaceholder } from "@modules/profile/presentation/constants/profileDatatable";
-  import { useProfileService } from "@modules/profile/services/useProfileService";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -11,7 +11,7 @@
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  const service = useProfileService();
+  const { create, update, remove } = useProfile();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -53,14 +53,14 @@
    */
   async function submit(): Promise<void> {
     if (editingId.value) {
-      await service.update({
+      await update({
         id: editingId.value,
         fullName: form.fullName,
         email: form.email || null,
         headline: form.headline || null,
       });
     } else {
-      await service.create({
+      await create({
         fullName: form.fullName,
         email: form.email || null,
         phone: null,
@@ -79,7 +79,7 @@
    * Handles remove profile.
    */
   async function removeProfile(id: string): Promise<void> {
-    await service.delete(id);
+    await remove(id);
     await refresh();
   }
 </script>
@@ -157,12 +157,4 @@
     </DataTable>
   </div>
 </template>
-
-
-
-
-
-
-
-
 

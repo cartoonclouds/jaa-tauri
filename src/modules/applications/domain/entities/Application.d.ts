@@ -69,8 +69,6 @@ export interface CreateApplicationInput {
   title: string;
   /** Application status. */
   status?: ApplicationStatus;
-  /** Event-flow status. */
-  eventFlowStatus?: ApplicationEventFlowStatus;
   /** Free-form location text. */
   locationText?: string | null;
   /** Latitude for geocoded location data. */

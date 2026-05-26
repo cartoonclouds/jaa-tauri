@@ -17,12 +17,8 @@ import {
 } from "@modules/applications/constants/applicationDatatableFields";
 import { ApplicationRepositoryCreateSchema } from "@modules/applications/domain/zod/application.schema";
 import {
-  ApplicationEventFlowStatus,
-  ApplicationStatus,
-} from "@modules/applications/types/enums";
-import {
   EVENT_COPY_BY_STAGE,
-  EVENT_FLOW_BY_APPLICATION_STATUS,
+  EVENT_FLOW_STAGE_SET,
 } from "@modules/events/presentation/constants/interactionStages";
 import {
   buildSearchWhereClause,
@@ -55,19 +51,41 @@ export interface IApplicationRepository extends IRepository<
 export class ApplicationRepository implements IApplicationRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
+  private readonly effectiveStageTypeExpression = `
+    latest_event.type
+  `;
+
+  private readonly effectiveApplicationStatusCaseExpression = `
+    CASE
+      WHEN ${this.effectiveStageTypeExpression} = 'Decision/Rejected' THEN 'rejected'
+      WHEN ${this.effectiveStageTypeExpression} = 'Decision/Accepted' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Offer/%' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Negotiation/%' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Post-Offer/%' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} = 'Interview/Technical Interview' THEN 'technical'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Interview/%' THEN 'interview'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Assessment/%' THEN 'interview'
+      WHEN ${this.effectiveStageTypeExpression} = 'Screening/Phone Screen' THEN 'phone-screening'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Screening/%' THEN 'applied'
+      WHEN ${this.effectiveStageTypeExpression} = 'Application/Saved' THEN 'saved'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Application/%' THEN 'applied'
+      ELSE 'saved'
+    END
+  `;
+
   private readonly effectiveEventFlowStatusCaseExpression = `
     CASE
-      WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
-      WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
-      WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
-      WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
-      WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
-      WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
-      WHEN latest_event.type = 'Application/Saved' THEN 'saved'
-      WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
-      ELSE applications.event_flow_status
+      WHEN ${this.effectiveStageTypeExpression} = 'Decision/Rejected' THEN 'rejected'
+      WHEN ${this.effectiveStageTypeExpression} = 'Decision/Accepted' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Offer/%' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Negotiation/%' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Post-Offer/%' THEN 'offer'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Interview/%' THEN 'interview'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Assessment/%' THEN 'interview'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Screening/%' THEN 'applied'
+      WHEN ${this.effectiveStageTypeExpression} = 'Application/Saved' THEN 'saved'
+      WHEN ${this.effectiveStageTypeExpression} LIKE 'Application/%' THEN 'applied'
+      ELSE 'applied'
     END
   `;
 
@@ -79,7 +97,7 @@ export class ApplicationRepository implements IApplicationRepository {
         ROW_NUMBER() OVER (
           PARTITION BY ae.application_id
           ORDER BY
-            COALESCE(e.event_at, e.created_at) DESC,
+            ae.created_at DESC,
             e.created_at DESC,
             e.id DESC
         ) AS rn
@@ -94,52 +112,40 @@ export class ApplicationRepository implements IApplicationRepository {
     ${this.effectiveEventFlowStatusCaseExpression} AS event_flow_status
   `;
 
+  private readonly effectiveApplicationStatusSelectClause = `
+    ${this.effectiveApplicationStatusCaseExpression} AS status
+  `;
+
+  private readonly eventStageJoinClauses = this.latestEventJoinClause;
+
   private readonly effectiveEventFlowStatusSearchExpression =
     this.effectiveEventFlowStatusCaseExpression;
 
+  private readonly effectiveApplicationStatusSearchExpression =
+    this.effectiveApplicationStatusCaseExpression;
+
   private resolveEffectiveSearchWhereClause(searchWhereClause: string): string {
-    return searchWhereClause.replace(
+    const eventFlowResolvedClause = searchWhereClause.replace(
       /\bevent_flow_status\b/g,
       this.effectiveEventFlowStatusSearchExpression,
     );
+
+    return eventFlowResolvedClause.replace(
+      /\bstatus\b/g,
+      this.effectiveApplicationStatusSearchExpression,
+    );
   }
 
-  private async ensureFlowEventsLinked(
+  private async ensureDefaultFlowEventsLinked(
     applicationId: string,
-    eventFlowStatusValue: string,
   ): Promise<void> {
-    if (
-      !eventFlowStatusValue ||
-      !(eventFlowStatusValue in EVENT_FLOW_BY_APPLICATION_STATUS)
-    ) {
-      return;
-    }
+    const defaultStages = [...EVENT_FLOW_STAGE_SET].reverse();
 
-    const normalizedStatus =
-      eventFlowStatusValue as keyof typeof EVENT_FLOW_BY_APPLICATION_STATUS;
-    const requiredStages = EVENT_FLOW_BY_APPLICATION_STATUS[normalizedStatus];
-    if (requiredStages.length === 0) {
-      return;
-    }
-
-    const existingRows = await this.db.select<{ type: string }>(
-      `SELECT e.type
-       FROM events e
-       INNER JOIN application_events ae ON ae.event_id = e.id
-       WHERE ae.application_id = $1`,
-      [applicationId],
-    );
-
-    const existingStageSet = new Set(existingRows.map((row) => row.type));
-
-    for (const stage of requiredStages) {
-      if (existingStageSet.has(stage)) {
-        continue;
-      }
-
+    for (const stage of defaultStages) {
       const eventId = crypto.randomUUID();
+
       await this.db.execute(
-        "INSERT INTO events (id, contact_id, type, title, description, event_at, created_at, updated_at) VALUES ($1, NULL, $2, $3, $4, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+        "INSERT INTO events (id, type, title, description, created_at, updated_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
         [
           eventId,
           stage,
@@ -166,9 +172,10 @@ export class ApplicationRepository implements IApplicationRepository {
     const rows = await this.db.select<Record<string, unknown>>(
       `SELECT
          applications.*,
+         ${this.effectiveApplicationStatusSelectClause},
          ${this.effectiveEventFlowStatusSelectClause}
        FROM applications
-       ${this.latestEventJoinClause}
+       ${this.eventStageJoinClauses}
        WHERE applications.deleted_at IS NULL
        ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}`,
     );
@@ -201,13 +208,15 @@ export class ApplicationRepository implements IApplicationRepository {
     const effectiveOrderByClause =
       query.sortField === "eventFlowStatus"
         ? `${this.effectiveEventFlowStatusSearchExpression} ${query.sortOrder === "asc" ? "ASC" : "DESC"}, applications.created_at DESC`
-        : orderByClause;
+        : query.sortField === "status"
+          ? `${this.effectiveApplicationStatusSearchExpression} ${query.sortOrder === "asc" ? "ASC" : "DESC"}, applications.created_at DESC`
+          : orderByClause;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(
           `SELECT COUNT(*) AS total
            FROM applications
-           ${this.latestEventJoinClause}
+           ${this.eventStageJoinClauses}
            WHERE applications.deleted_at IS NULL
              AND (${effectiveSearchWhereClause})`,
           [`%${search}%`],
@@ -222,9 +231,10 @@ export class ApplicationRepository implements IApplicationRepository {
       ? await this.db.select<Record<string, unknown>>(
           `SELECT
              applications.*,
+             ${this.effectiveApplicationStatusSelectClause},
              ${this.effectiveEventFlowStatusSelectClause}
            FROM applications
-           ${this.latestEventJoinClause}
+           ${this.eventStageJoinClauses}
            WHERE applications.deleted_at IS NULL
              AND (${effectiveSearchWhereClause})
            ORDER BY ${effectiveOrderByClause}
@@ -235,9 +245,10 @@ export class ApplicationRepository implements IApplicationRepository {
       : await this.db.select<Record<string, unknown>>(
           `SELECT
              applications.*,
+             ${this.effectiveApplicationStatusSelectClause},
              ${this.effectiveEventFlowStatusSelectClause}
            FROM applications
-           ${this.latestEventJoinClause}
+           ${this.eventStageJoinClauses}
            WHERE applications.deleted_at IS NULL
            ORDER BY ${effectiveOrderByClause}
            LIMIT $1
@@ -273,8 +284,6 @@ export class ApplicationRepository implements IApplicationRepository {
         id,
         company_id,
         title,
-        status,
-        event_flow_status,
         source_url,
         applied_at,
         location_text,
@@ -312,8 +321,6 @@ export class ApplicationRepository implements IApplicationRepository {
         $16,
         $17,
         $18,
-        $19,
-        $20,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
       )
@@ -322,11 +329,6 @@ export class ApplicationRepository implements IApplicationRepository {
         id,
         parseResult.data.companyId ?? null,
         title,
-        String(parseResult.data.status ?? ApplicationStatus.Saved),
-        String(
-          parseResult.data.eventFlowStatus ??
-            ApplicationEventFlowStatus.Applied,
-        ),
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         parseResult.data.locationText ?? null,
@@ -346,55 +348,39 @@ export class ApplicationRepository implements IApplicationRepository {
     );
 
     await syncTagIdsForEntity(this.db, "application", id, payload.tagIds);
-    await this.ensureFlowEventsLinked(
-      id,
-      String(
-        parseResult.data.eventFlowStatus ?? ApplicationEventFlowStatus.Applied,
-      ),
-    );
+    await this.ensureDefaultFlowEventsLinked(id);
 
     return id;
   }
 
   async update(payload: ApplicationUpdatePayload): Promise<void> {
-    const currentStatusRows = await this.db.select<{
-      event_flow_status: string;
-    }>("SELECT event_flow_status FROM applications WHERE id = $1 LIMIT 1", [
-      payload.id,
-    ]);
-    const currentEventFlowStatus = currentStatusRows[0]?.event_flow_status;
-
     await this.db.execute(
       `
       UPDATE applications
       SET
         company_id = $1,
         title = $2,
-        status = $3,
-        event_flow_status = $4,
-        source_url = $5,
-        applied_at = $6,
-        location_text = $7,
-        location_lat = $8,
-        location_lng = $9,
-        attendance_type = $10,
-        employment_type = $11,
-        salary_min = $12,
-        salary_max = $13,
-        currency = $14,
-        description = $15,
-        interview_process = $16,
-        benefits = $17,
-        priority = $18,
-        is_archived = $19,
+        source_url = $3,
+        applied_at = $4,
+        location_text = $5,
+        location_lat = $6,
+        location_lng = $7,
+        attendance_type = $8,
+        employment_type = $9,
+        salary_min = $10,
+        salary_max = $11,
+        currency = $12,
+        description = $13,
+        interview_process = $14,
+        benefits = $15,
+        priority = $16,
+        is_archived = $17,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $20
+      WHERE id = $18
       `,
       [
         payload.companyId ?? null,
         payload.title,
-        String(payload.status),
-        String(payload.eventFlowStatus),
         payload.sourceUrl ?? null,
         payload.appliedAt ?? null,
         payload.locationText ?? null,
@@ -420,13 +406,6 @@ export class ApplicationRepository implements IApplicationRepository {
       payload.id,
       payload.tagIds,
     );
-
-    if (currentEventFlowStatus !== String(payload.eventFlowStatus)) {
-      await this.ensureFlowEventsLinked(
-        payload.id,
-        String(payload.eventFlowStatus),
-      );
-    }
   }
 
   async delete(id: string): Promise<void> {

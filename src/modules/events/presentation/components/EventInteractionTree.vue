@@ -3,17 +3,13 @@
   import type { EventUpdatePayload } from "@modules/events/repositories/EventRepository";
   import type { TreeNode } from "primevue/treenode";
 
-  import { useEvent } from "@modules/events/presentation/composables/useEvent";
+  import { useEvent } from "@modules/events/composables/useEvent";
   import {
     INTERACTION_STAGES,
     type InteractionStage,
     isInteractionStage,
   } from "@modules/events/presentation/constants/interactionStages";
   import { toErrorMessage } from "@shared/utils/error";
-  import {
-    formatDateTimeLocalValue,
-    parseDateTimeLocalValue,
-  } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -34,7 +30,6 @@
     type: InteractionStage;
     title: string;
     description: string;
-    eventAt: string;
   }
 
   /**
@@ -45,7 +40,6 @@
     type: InteractionStage | "";
     title: string;
     description: string;
-    eventAt: string;
   }
 
   const { items, isLoading, error, clearError, create, update, remove } =
@@ -56,7 +50,6 @@
     type: INTERACTION_STAGES[0],
     title: "",
     description: "",
-    eventAt: "",
   });
 
   const isEditDialogVisible = ref(false);
@@ -67,7 +60,6 @@
     type: "",
     title: "",
     description: "",
-    eventAt: "",
   });
 
   useBodyScrollLock(isEditDialogVisible);
@@ -77,20 +69,6 @@
   const stageSuggestions = computed<readonly InteractionStage[]>(
     () => INTERACTION_STAGES,
   );
-
-  const createEventAtValue = computed<Date | null>({
-    get: () => parseDateTimeLocalValue(createForm.eventAt),
-    set: (value) => {
-      createForm.eventAt = formatDateTimeLocalValue(value);
-    },
-  });
-
-  const editEventAtValue = computed<Date | null>({
-    get: () => parseDateTimeLocalValue(editForm.eventAt),
-    set: (value) => {
-      editForm.eventAt = formatDateTimeLocalValue(value);
-    },
-  });
 
   const surfaceCardStyle = {
     background: "var(--p-content-background)",
@@ -157,8 +135,8 @@
      * Builds tree nodes.
      */
     const sorted = [...events].sort((a, b) => {
-      const left = a.eventAt?.getTime() ?? a.createdAt.getTime();
-      const right = b.eventAt?.getTime() ?? b.createdAt.getTime();
+      const left = a.createdAt.getTime();
+      const right = b.createdAt.getTime();
       return left - right;
     });
 
@@ -205,9 +183,7 @@
         stageNode.children = currentChildren;
       }
 
-      const eventDateLabel = event.eventAt
-        ? event.eventAt.toLocaleDateString()
-        : event.createdAt.toLocaleDateString();
+      const eventDateLabel = event.createdAt.toLocaleDateString();
       currentChildren.push({
         key: `event:${event.id}`,
         label: `${event.title} (${eventDateLabel})`,
@@ -273,9 +249,7 @@
       return "";
     }
 
-    const eventAtLabel = event.eventAt
-      ? event.eventAt.toLocaleString()
-      : event.createdAt.toLocaleString();
+    const eventAtLabel = event.createdAt.toLocaleString();
     return `${eventAtLabel} | ${event.type}`;
   }
 
@@ -294,7 +268,6 @@
       : INTERACTION_STAGES[0];
     editForm.title = data.event.title;
     editForm.description = data.event.description ?? "";
-    editForm.eventAt = formatDateTimeLocalValue(data.event.eventAt);
     isEditDialogVisible.value = true;
   }
 
@@ -314,16 +287,13 @@
     try {
       await create({
         applicationId: createForm.applicationId.trim(),
-        contactId: null,
         type: createForm.type,
         title: createForm.title.trim(),
         description: createForm.description.trim() || null,
-        eventAt: parseDateTimeLocalValue(createForm.eventAt),
       });
 
       createForm.title = "";
       createForm.description = "";
-      createForm.eventAt = "";
     } finally {
       isSavingCreate.value = false;
     }
@@ -348,7 +318,6 @@
         type: editForm.type,
         title: editForm.title.trim(),
         description: editForm.description.trim() || null,
-        eventAt: parseDateTimeLocalValue(editForm.eventAt),
       };
 
       await update(payload);
@@ -467,24 +436,6 @@
             auto-resize
             rows="2"
             placeholder="Notes from recruiter or follow-up action"
-          />
-        </div>
-
-        <div class="space-y-1">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="event-at"
-          >
-            Event time
-          </label>
-          <DatePicker
-            id="event-at"
-            v-model="createEventAtValue"
-            show-time
-            hour-format="24"
-            date-format="yy-mm-dd"
-            fluid
           />
         </div>
 
@@ -613,24 +564,6 @@
             rows="3"
           />
         </div>
-
-        <div class="space-y-1 md:col-span-2">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="edit-event-at"
-          >
-            Event time
-          </label>
-          <DatePicker
-            id="edit-event-at"
-            v-model="editEventAtValue"
-            show-time
-            hour-format="24"
-            date-format="yy-mm-dd"
-            fluid
-          />
-        </div>
       </div>
 
       <template #footer>
@@ -663,3 +596,4 @@
     </Dialog>
   </div>
 </template>
+

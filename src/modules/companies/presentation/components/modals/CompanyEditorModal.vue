@@ -7,8 +7,8 @@
     CompanyUpdatePayload,
   } from "@modules/companies/repositories/CompanyRepository";
 
-  import { useCompanyService } from "@modules/companies";
-  import { useTagService } from "@modules/tags";
+  import { useCompany } from "@modules/companies";
+  import { useTag } from "@modules/tags";
   import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
@@ -53,8 +53,8 @@
     showJobsAppliedForSection?: boolean;
   }
 
-  const tagService = useTagService();
-  const companyService = useCompanyService();
+  const { service: tagService } = useTag();
+  const { service: companyService } = useCompany();
   const isResolvingTags = ref(false);
   const selectedTagIds = ref<string[]>([]);
   const pendingTagNames = ref<string[]>([]);

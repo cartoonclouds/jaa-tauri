@@ -12,7 +12,7 @@
     type ApplicationSearchField,
     type ApplicationSearchFieldOption,
     type ApplicationSortableField,
-  } from "@modules/applications/presentation/composables/useApplicationDatatable";
+  } from "@modules/applications/composables/useApplicationDatatable";
 
   import ServerDatatable from "@/components/ui/ServerDatatable.vue";
 
@@ -185,3 +185,4 @@
     />
   </ServerDatatable>
 </template>
+
