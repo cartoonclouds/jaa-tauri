@@ -1,7 +1,11 @@
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
-import { normalizeLiteralValue } from "@shared/utils/normalizationUtils";
-import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
+import {
+  mapAuditTimestamps,
+  normalizeLiteralValue,
+  toNullableString,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 
 const CONTACT_TYPE_VALUES = ["company", "recruiter"] as const;
 
@@ -15,17 +19,17 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
   });
 
   return {
-    id: String(row.id),
-    companyId: (row.company_id as string | null) ?? null,
-    fullName: String(row.full_name),
-    email: (row.email as string | null) ?? null,
-    phone: (row.phone as string | null) ?? null,
-    linkedinUrl: (row.linkedin_url as string | null) ?? null,
-    locationText: (row.location_text as string | null) ?? null,
+    id: toRequiredString(row.id),
+    companyId: toNullableString(row.company_id),
+    fullName: toRequiredString(row.full_name),
+    email: toNullableString(row.email),
+    phone: toNullableString(row.phone),
+    linkedinUrl: toNullableString(row.linkedin_url),
+    locationText: toNullableString(row.location_text),
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
     type: normalizeLiteralValue(row.type, CONTACT_TYPE_VALUES, "company"),
-    notes: (row.notes as string | null) ?? null,
+    notes: toNullableString(row.notes),
     tagIds: [],
     ...timestamps,
   };

@@ -14,6 +14,7 @@ import {
   type PersistedConstantSourceType,
 } from "@shared/constants/persistedConstants";
 import { normalizeConstantValue } from "@shared/utils/constantValue";
+import { fromDbBoolean } from "@shared/utils/database-mapping/persistenceValueUtils";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -21,7 +22,6 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
-import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
 
 /**
  * Upsert payload for the application-wide settings record.

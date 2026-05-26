@@ -4,12 +4,13 @@ import {
   StatisticSchema,
   type StatisticScopeValue,
 } from "@modules/statistics/domain/zod/statistic.schema";
-import { normalizeLiteralValue } from "@shared/utils/normalizationUtils";
-import { toFiniteNumber } from "@shared/utils/numberValueUtils";
 import {
   mapAuditTimestamps,
   mapOptionalRowDate,
-} from "@shared/utils/rowDateUtils";
+  normalizeLiteralValue,
+  toFiniteNumber,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 
 const STATISTIC_SCOPE_VALUES = ["global", "company", "application"] as const;
 
@@ -30,8 +31,8 @@ export function mapStatisticRowToEntity(
   });
 
   return StatisticSchema.parse({
-    id: String(row.id),
-    name: String(row.name),
+    id: toRequiredString(row.id),
+    name: toRequiredString(row.name),
     value: toFiniteNumber(row.value, Number.NaN),
     scope: toScope(row.scope),
     recordedAt: mapOptionalRowDate(row.recorded_at),

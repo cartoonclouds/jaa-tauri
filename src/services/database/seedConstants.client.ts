@@ -8,7 +8,7 @@ import { normalizeConstantValue } from "@shared/utils/constantValue";
 import {
   fromDbBoolean,
   toDbBooleanInt,
-} from "@shared/utils/persistenceValueUtils";
+} from "@shared/utils/database-mapping/persistenceValueUtils";
 
 /**
  * Defines count row.

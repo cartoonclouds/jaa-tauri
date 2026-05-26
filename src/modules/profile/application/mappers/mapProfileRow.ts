@@ -1,9 +1,13 @@
 import type { Profile } from "@modules/profile/domain/entities/Profile";
 
-import { normalizeLiteralValue } from "@shared/utils/normalizationUtils";
-import { toNullableNumber } from "@shared/utils/numberValueUtils";
+import {
+  mapAuditTimestamps,
+  normalizeLiteralValue,
+  toNullableNumber,
+  toNullableString,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 import { parseStringArray } from "@shared/utils/parse";
-import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
 
 const REMOTE_PREFERENCE_VALUES = [
   "remote",
@@ -25,16 +29,16 @@ export function mapProfileRowToEntity(
   });
 
   const mapped = {
-    id: String(row.id),
-    fullName: String(row.full_name),
-    email: (row.email as string | null) ?? null,
-    phone: (row.phone as string | null) ?? null,
-    linkedinUrl: (row.linkedin_url as string | null) ?? null,
-    githubUrl: (row.github_url as string | null) ?? null,
-    portfolioUrl: (row.portfolio_url as string | null) ?? null,
-    headline: (row.headline as string | null) ?? null,
-    summary: (row.summary as string | null) ?? null,
-    locationText: (row.location_text as string | null) ?? null,
+    id: toRequiredString(row.id),
+    fullName: toRequiredString(row.full_name),
+    email: toNullableString(row.email),
+    phone: toNullableString(row.phone),
+    linkedinUrl: toNullableString(row.linkedin_url),
+    githubUrl: toNullableString(row.github_url),
+    portfolioUrl: toNullableString(row.portfolio_url),
+    headline: toNullableString(row.headline),
+    summary: toNullableString(row.summary),
+    locationText: toNullableString(row.location_text),
     desiredSalary: toNullableNumber(row.desired_salary),
     salaryCurrency:
       typeof row.salary_currency === "string" ? row.salary_currency : "USD",
@@ -45,9 +49,9 @@ export function mapProfileRowToEntity(
       "flexible",
     ),
     skills: parseStringArray(row.skills),
-    workEligibility: (row.work_eligibility as string | null) ?? "",
+    workEligibility: toNullableString(row.work_eligibility) ?? "",
     noticePeriodDays: toNullableNumber(row.notice_period_days),
-    interviewAvailability: (row.interview_availability as string | null) ?? "",
+    interviewAvailability: toNullableString(row.interview_availability) ?? "",
     ...timestamps,
   };
 

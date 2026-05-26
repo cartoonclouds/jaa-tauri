@@ -1,11 +1,13 @@
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
-import { normalizeAliasedLiteralValue } from "@shared/utils/normalizationUtils";
-import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
 import {
+  fromDbBoolean,
   mapAuditTimestamps,
   mapOptionalRowDate,
-} from "@shared/utils/rowDateUtils";
+  normalizeAliasedLiteralValue,
+  toNullableString,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 
 const NOTIFICATION_SEVERITY_VALUES = [
   "info",
@@ -26,17 +28,17 @@ export function mapNotificationRowToEntity(
   });
 
   return {
-    id: String(row.id),
-    applicationId: (row.application_id as string | null) ?? null,
-    eventId: (row.event_id as string | null) ?? null,
+    id: toRequiredString(row.id),
+    applicationId: toNullableString(row.application_id),
+    eventId: toNullableString(row.event_id),
     severity: normalizeAliasedLiteralValue(
       row.severity,
       NOTIFICATION_SEVERITY_VALUES,
       { warn: "warning" },
       "info",
     ),
-    title: String(row.title),
-    body: String(row.body),
+    title: toRequiredString(row.title),
+    body: toRequiredString(row.body),
     isRead: fromDbBoolean(row.is_read, false),
     scheduledFor: mapOptionalRowDate(row.scheduled_for),
     sentAt: mapOptionalRowDate(row.sent_at),

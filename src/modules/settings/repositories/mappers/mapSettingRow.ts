@@ -1,8 +1,11 @@
 import type { Setting } from "@modules/settings/domain/entities/Setting";
 
-import { normalizeLiteralValue } from "@shared/utils/normalizationUtils";
-import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
-import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
+import {
+  fromDbBoolean,
+  mapAuditTimestamps,
+  normalizeLiteralValue,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 
 const SETTING_THEME_VALUES = ["system", "light", "dark"] as const;
 
@@ -16,9 +19,9 @@ export function mapSettingRowToEntity(row: Record<string, unknown>): Setting {
   });
 
   return {
-    id: String(row.id),
+    id: toRequiredString(row.id),
     theme: normalizeLiteralValue(row.theme, SETTING_THEME_VALUES, "system"),
-    locale: String(row.locale),
+    locale: toRequiredString(row.locale),
     notificationsEnabled: fromDbBoolean(row.notifications_enabled, true),
     developerMode: fromDbBoolean(row.developer_mode, false),
     ...timestamps,

@@ -1,6 +1,10 @@
 import type { Company } from "@modules/companies/domain/entities/Company";
 
-import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
+import {
+  mapAuditTimestamps,
+  toNullableString,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 
 /**
  * Map a raw database row into a typed company entity.
@@ -12,16 +16,16 @@ export function mapCompanyRowToEntity(row: Record<string, unknown>): Company {
   });
 
   return {
-    id: String(row.id),
-    name: String(row.name),
-    websiteUrl: (row.website_url as string | null) ?? null,
-    linkedinUrl: (row.linkedin_url as string | null) ?? null,
-    industry: (row.industry as string | null) ?? null,
-    size: (row.size as string | null) ?? null,
-    locationText: (row.location_text as string | null) ?? null,
+    id: toRequiredString(row.id),
+    name: toRequiredString(row.name),
+    websiteUrl: toNullableString(row.website_url),
+    linkedinUrl: toNullableString(row.linkedin_url),
+    industry: toNullableString(row.industry),
+    size: toNullableString(row.size),
+    locationText: toNullableString(row.location_text),
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
-    notes: (row.notes as string | null) ?? null,
+    notes: toNullableString(row.notes),
     tagIds: [],
     ...timestamps,
   };

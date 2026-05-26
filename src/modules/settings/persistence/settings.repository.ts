@@ -15,15 +15,15 @@ import type {
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { logError } from "@infra/logging/appLogger";
-import { toErrorMessage } from "@shared/utils/error";
-import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
-import { normalizeAliasedLiteralValue } from "@shared/utils/normalizationUtils";
-import { parseStringArray } from "@shared/utils/parse";
+import { normalizeAliasedLiteralValue } from "@shared/utils/database-mapping/normalizationUtils";
 import {
   fromDbBoolean,
   parseBooleanRecordValue,
   toDbBooleanInt,
-} from "@shared/utils/persistenceValueUtils";
+} from "@shared/utils/database-mapping/persistenceValueUtils";
+import { toErrorMessage } from "@shared/utils/error";
+import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
+import { parseStringArray } from "@shared/utils/parse";
 import { z } from "zod";
 
 const SettingsInputSchema = z.object({

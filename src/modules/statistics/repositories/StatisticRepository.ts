@@ -4,7 +4,7 @@ import type { Statistic } from "@modules/statistics/domain/entities/Statistic";
 import { mapStatisticRowToEntity } from "@modules/statistics/application/mappers/mapStatisticRow";
 import { StatisticSchema } from "@modules/statistics/domain/zod/statistic.schema";
 import { STATISTIC_METRIC_DEFINITIONS } from "@modules/statistics/statisticMetricDefinitions";
-import { toFiniteNumber } from "@shared/utils/numberValueUtils";
+import { toFiniteNumber } from "@shared/utils/database-mapping/mapperValueUtils";
 
 /**
  * Aggregated read model returned by statistics queries.

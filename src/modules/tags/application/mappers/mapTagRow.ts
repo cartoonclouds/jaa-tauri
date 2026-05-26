@@ -1,6 +1,10 @@
 import type { Tag } from "@modules/tags/domain/entities/Tag";
 
-import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
+import {
+  mapAuditTimestamps,
+  toNullableString,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
 
 /**
  * Map a raw database row into a typed tag entity.
@@ -12,9 +16,9 @@ export function mapTagRowToEntity(row: Record<string, unknown>): Tag {
   });
 
   return {
-    id: String(row.id),
-    name: String(row.name),
-    color: (row.color as string | null) ?? null,
+    id: toRequiredString(row.id),
+    name: toRequiredString(row.name),
+    color: toNullableString(row.color),
     ...timestamps,
   };
 }

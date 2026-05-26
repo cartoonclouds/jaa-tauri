@@ -6,13 +6,15 @@ import {
   ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/types/enums";
-import { mapEnumFromDbValue } from "@shared/utils/enum";
-import { toFiniteNumber } from "@shared/utils/numberValueUtils";
-import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
 import {
+  fromDbBoolean,
   mapAuditTimestamps,
   mapOptionalRowDate,
-} from "@shared/utils/rowDateUtils";
+  toFiniteNumber,
+  toNullableString,
+  toRequiredString,
+} from "@shared/utils/database-mapping/mapperValueUtils";
+import { mapEnumFromDbValue } from "@shared/utils/enum";
 
 /**
  * Map a raw database row into a typed application entity.
@@ -26,18 +28,18 @@ export function mapApplicationRowToEntity(
   });
 
   return {
-    id: String(row.id),
-    companyId: (row.company_id as string | null) ?? null,
-    title: String(row.title),
+    id: toRequiredString(row.id),
+    companyId: toNullableString(row.company_id),
+    title: toRequiredString(row.title),
     status:
       mapEnumFromDbValue(row.status, ApplicationStatus) ??
       ApplicationStatus.Saved,
     eventFlowStatus:
       mapEnumFromDbValue(row.event_flow_status, ApplicationEventFlowStatus) ??
       ApplicationEventFlowStatus.Saved,
-    sourceUrl: (row.source_url as string | null) ?? null,
+    sourceUrl: toNullableString(row.source_url),
     appliedAt: mapOptionalRowDate(row.applied_at),
-    locationText: (row.location_text as string | null) ?? null,
+    locationText: toNullableString(row.location_text),
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
     attendanceType: mapEnumFromDbValue(
@@ -50,10 +52,10 @@ export function mapApplicationRowToEntity(
     ),
     salaryMin: (row.salary_min as number | null) ?? null,
     salaryMax: (row.salary_max as number | null) ?? null,
-    currency: (row.currency as string | null) ?? null,
-    description: (row.description as string | null) ?? null,
-    interviewProcess: (row.interview_process as string | null) ?? null,
-    benefits: (row.benefits as string | null) ?? null,
+    currency: toNullableString(row.currency),
+    description: toNullableString(row.description),
+    interviewProcess: toNullableString(row.interview_process),
+    benefits: toNullableString(row.benefits),
     tagIds: [],
     priority: toFiniteNumber(row.priority, 3),
     isArchived: fromDbBoolean(row.is_archived, false),
