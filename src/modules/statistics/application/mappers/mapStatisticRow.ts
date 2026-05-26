@@ -4,11 +4,12 @@ import {
   StatisticSchema,
   type StatisticScopeValue,
 } from "@modules/statistics/domain/zod/statistic.schema";
-import { toDate, toNullableDate } from "@shared/utils/toDate";
+import {
+  mapAuditTimestamps,
+  mapOptionalRowDate,
+} from "@shared/utils/rowDateUtils";
 
-/**
- * Handles to scope.
- */
+/** Maps raw DB scope values to the supported statistics scope enum. */
 function toScope(value: unknown): StatisticScopeValue {
   return value === "company" || value === "application" ? value : "global";
 }
@@ -19,21 +20,17 @@ function toScope(value: unknown): StatisticScopeValue {
 export function mapStatisticRowToEntity(
   row: Record<string, unknown>,
 ): Statistic {
+  const timestamps = mapAuditTimestamps({
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  });
+
   return StatisticSchema.parse({
     id: String(row.id),
     name: String(row.name),
     value: Number(row.value),
     scope: toScope(row.scope),
-    recordedAt: toNullableDate(row.recorded_at),
-    createdAt: toDate(row.created_at),
-    updatedAt: toDate(row.updated_at),
+    recordedAt: mapOptionalRowDate(row.recorded_at),
+    ...timestamps,
   });
 }
-
-
-
-
-
-
-
-

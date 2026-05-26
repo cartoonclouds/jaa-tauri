@@ -21,6 +21,7 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
+import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
 
 /**
  * Upsert payload for the application-wide settings record.
@@ -134,12 +135,11 @@ export class SettingRepository implements ISettingRepository {
     label: string | null;
     is_visible: number | boolean;
   }): ConstantEntryRow {
-    const visibility = row.is_visible;
     return {
       type: row.type,
       value: normalizeConstantValue(row.value),
       label: row.label,
-      isVisible: visibility === true || Number(visibility) === 1,
+      isVisible: fromDbBoolean(row.is_visible, false),
     };
   }
 

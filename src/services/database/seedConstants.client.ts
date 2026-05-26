@@ -5,6 +5,10 @@ import {
   createPersistedConstantRowsFromSources,
 } from "@shared/constants/persistedConstants";
 import { normalizeConstantValue } from "@shared/utils/constantValue";
+import {
+  fromDbBoolean,
+  toDbBooleanInt,
+} from "@shared/utils/persistenceValueUtils";
 
 /**
  * Defines count row.
@@ -61,7 +65,7 @@ async function normalizePersistedConstantValues(
           row.type,
           normalizedValue,
           row.label,
-          row.is_visible === true || Number(row.is_visible) === 1 ? 1 : 0,
+          toDbBooleanInt(fromDbBoolean(row.is_visible, false)),
         ],
       );
 

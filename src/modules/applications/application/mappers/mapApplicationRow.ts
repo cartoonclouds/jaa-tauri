@@ -7,7 +7,11 @@ import {
   ApplicationStatus,
 } from "@modules/applications/types/enums";
 import { mapEnumFromDbValue } from "@shared/utils/enum";
-import { toDate, toNullableDate } from "@shared/utils/toDate";
+import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
+import {
+  mapAuditTimestamps,
+  mapOptionalRowDate,
+} from "@shared/utils/rowDateUtils";
 
 /**
  * Map a raw database row into a typed application entity.
@@ -15,6 +19,11 @@ import { toDate, toNullableDate } from "@shared/utils/toDate";
 export function mapApplicationRowToEntity(
   row: Record<string, unknown>,
 ): Application {
+  const timestamps = mapAuditTimestamps({
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  });
+
   return {
     id: String(row.id),
     companyId: (row.company_id as string | null) ?? null,
@@ -26,7 +35,7 @@ export function mapApplicationRowToEntity(
       mapEnumFromDbValue(row.event_flow_status, ApplicationEventFlowStatus) ??
       ApplicationEventFlowStatus.Saved,
     sourceUrl: (row.source_url as string | null) ?? null,
-    appliedAt: toNullableDate(row.applied_at),
+    appliedAt: mapOptionalRowDate(row.applied_at),
     locationText: (row.location_text as string | null) ?? null,
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
@@ -46,9 +55,8 @@ export function mapApplicationRowToEntity(
     benefits: (row.benefits as string | null) ?? null,
     tagIds: [],
     priority: Number(row.priority ?? 3),
-    isArchived: Number(row.is_archived ?? 0) === 1,
-    isDeleted: row.deleted_at != null,
-    createdAt: toDate(row.created_at),
-    updatedAt: toDate(row.updated_at),
+    isArchived: fromDbBoolean(row.is_archived, false),
+    isDeleted: row.deleted_at !== null,
+    ...timestamps,
   };
 }

@@ -18,6 +18,11 @@ import { logError } from "@infra/logging/appLogger";
 import { toErrorMessage } from "@shared/utils/error";
 import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 import { parseStringArray } from "@shared/utils/parse";
+import {
+  fromDbBoolean,
+  parseBooleanRecordValue,
+  toDbBooleanInt,
+} from "@shared/utils/persistenceValueUtils";
 import { z } from "zod";
 
 const SettingsInputSchema = z.object({
@@ -59,42 +64,6 @@ function cloneSettings(settings: AppSettings): AppSettings {
 }
 
 /**
- * Maps a boolean setting value to SQLite integer representation.
- */
-function toInt(value: boolean): number {
-  return value ? 1 : 0;
-}
-
-/**
- * Parses a JSON object string into a boolean record with fallback support.
- */
-function parseBooleanRecord(
-  value: unknown,
-  fallback: Record<string, boolean>,
-): Record<string, boolean> {
-  if (typeof value !== "string") {
-    return { ...fallback };
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(value);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return { ...fallback };
-    }
-
-    return Object.entries(parsed).reduce<Record<string, boolean>>(
-      (accumulator, [key, recordValue]) => {
-        accumulator[key] = Boolean(recordValue);
-        return accumulator;
-      },
-      {},
-    );
-  } catch {
-    return { ...fallback };
-  }
-}
-
-/**
  * Normalizes persisted theme values to the supported app enum.
  */
 function normalizeTheme(value: unknown): AppSettings["theme"] {
@@ -115,27 +84,26 @@ function normalizeTheme(value: unknown): AppSettings["theme"] {
 function mapRowToSettings(row: SettingsRow): AppSettings {
   return {
     theme: normalizeTheme(row.theme),
-    notificationsEnabled:
-      Number(
-        row.notifications_enabled ??
-          Number(DEFAULT_SETTINGS.notificationsEnabled),
-      ) === 1,
-    developerMode:
-      Number(row.developer_mode ?? Number(DEFAULT_SETTINGS.developerMode)) ===
-      1,
+    notificationsEnabled: fromDbBoolean(
+      row.notifications_enabled,
+      DEFAULT_SETTINGS.notificationsEnabled,
+    ),
+    developerMode: fromDbBoolean(
+      row.developer_mode,
+      DEFAULT_SETTINGS.developerMode,
+    ),
     recentSearches: parseStringArray(
       row.recent_searches,
       DEFAULT_SETTINGS.recentSearches,
     ),
-    tableColumnVisibility: parseBooleanRecord(
+    tableColumnVisibility: parseBooleanRecordValue(
       row.table_column_visibility,
       DEFAULT_SETTINGS.tableColumnVisibility,
     ),
-    onboardingCompleted:
-      Number(
-        row.onboarding_completed ??
-          Number(DEFAULT_SETTINGS.onboardingCompleted),
-      ) === 1,
+    onboardingCompleted: fromDbBoolean(
+      row.onboarding_completed,
+      DEFAULT_SETTINGS.onboardingCompleted,
+    ),
   };
 }
 
@@ -188,11 +156,11 @@ async function upsertSettingsRow(
       STORE_KEY,
       settings.theme,
       "en-GB",
-      toInt(settings.notificationsEnabled),
-      toInt(settings.developerMode),
+      toDbBooleanInt(settings.notificationsEnabled),
+      toDbBooleanInt(settings.developerMode),
       JSON.stringify(settings.recentSearches),
       JSON.stringify(settings.tableColumnVisibility),
-      toInt(settings.onboardingCompleted),
+      toDbBooleanInt(settings.onboardingCompleted),
     ],
   );
 }

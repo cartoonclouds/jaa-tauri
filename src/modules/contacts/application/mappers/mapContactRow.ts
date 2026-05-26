@@ -1,11 +1,16 @@
 import type { Contact } from "@modules/contacts/domain/entities/Contact";
 
-import { toDate } from "@shared/utils/toDate";
+import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
 
 /**
  * Map a raw database row into a typed contact entity.
  */
 export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
+  const timestamps = mapAuditTimestamps({
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  });
+
   return {
     id: String(row.id),
     companyId: (row.company_id as string | null) ?? null,
@@ -19,7 +24,6 @@ export function mapContactRowToEntity(row: Record<string, unknown>): Contact {
     type: row.type === "recruiter" ? "recruiter" : "company",
     notes: (row.notes as string | null) ?? null,
     tagIds: [],
-    createdAt: toDate(row.created_at),
-    updatedAt: toDate(row.updated_at),
+    ...timestamps,
   };
 }

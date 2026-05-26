@@ -1,6 +1,10 @@
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
 
-import { toDate, toNullableDate } from "@shared/utils/toDate";
+import { fromDbBoolean } from "@shared/utils/persistenceValueUtils";
+import {
+  mapAuditTimestamps,
+  mapOptionalRowDate,
+} from "@shared/utils/rowDateUtils";
 
 /**
  * Map a raw database row into a typed notification entity.
@@ -9,6 +13,10 @@ export function mapNotificationRowToEntity(
   row: Record<string, unknown>,
 ): Notification {
   const severity = row.severity;
+  const timestamps = mapAuditTimestamps({
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  });
 
   return {
     id: String(row.id),
@@ -25,13 +33,9 @@ export function mapNotificationRowToEntity(
           : "info",
     title: String(row.title),
     body: String(row.body),
-    isRead: Number(row.is_read ?? 0) === 1,
-    scheduledFor: toNullableDate(row.scheduled_for),
-    sentAt: toNullableDate(row.sent_at),
-    createdAt: toDate(row.created_at),
-    updatedAt: toDate(row.updated_at),
+    isRead: fromDbBoolean(row.is_read, false),
+    scheduledFor: mapOptionalRowDate(row.scheduled_for),
+    sentAt: mapOptionalRowDate(row.sent_at),
+    ...timestamps,
   };
 }
-
-
-

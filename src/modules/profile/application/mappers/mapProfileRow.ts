@@ -1,7 +1,7 @@
 import type { Profile } from "@modules/profile/domain/entities/Profile";
 
 import { parseStringArray } from "@shared/utils/parse";
-import { toDate } from "@shared/utils/toDate";
+import { mapAuditTimestamps } from "@shared/utils/rowDateUtils";
 
 /**
  * Map a raw database row into a typed profile entity.
@@ -10,6 +10,11 @@ export function mapProfileRowToEntity(
   row: Record<string, unknown>,
   errorPrefix = "Profile row validation failed",
 ): Profile {
+  const timestamps = mapAuditTimestamps({
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  });
+
   const mapped = {
     id: String(row.id),
     fullName: String(row.full_name),
@@ -40,13 +45,9 @@ export function mapProfileRowToEntity(
         ? row.notice_period_days
         : null,
     interviewAvailability: (row.interview_availability as string | null) ?? "",
-    createdAt: toDate(row.created_at),
-    updatedAt: toDate(row.updated_at),
+    ...timestamps,
   };
 
   void errorPrefix;
   return mapped as Profile;
 }
-
-
-
