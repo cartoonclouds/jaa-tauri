@@ -11,14 +11,14 @@ import {
 
 export interface NotificationRow {
   id: string;
-  application_id: string;
+  application_id: string | null;
   event_id: string | null;
   severity: "info" | "warning" | "success" | "error";
   title: string;
   body: string;
   is_read: number;
-  scheduled_for: string;
-  sent_at: string;
+  scheduled_for: string | null;
+  sent_at: string | null;
   created_at: string;
   updated_at: string;
 }

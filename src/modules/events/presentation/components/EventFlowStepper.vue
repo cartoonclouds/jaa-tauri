@@ -152,7 +152,7 @@
       >
         <template #default="{ activateCallback, value, a11yAttrs }">
           <div
-            class="flex flex-row flex-auto self-start items-start gap-2"
+            class="flex flex-row flex-auto self-start items-start"
             v-bind="a11yAttrs.root"
           >
             <button
@@ -183,6 +183,10 @@
                 {{ EVENT_COPY_BY_STAGE[stage]?.title ?? stage }}
               </span>
             </button>
+            <Divider
+              v-if="index < displayedStages.length - 1"
+              class="hidden flex-1 self-start pt-5 sm:block"
+            />
           </div>
         </template>
       </Step>

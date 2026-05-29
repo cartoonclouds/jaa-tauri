@@ -8,20 +8,21 @@ import { createLondonLocationSeed } from "./location.factory";
 
 export interface ApplicationRow {
   id: string;
-  company_id: string;
+  company_id: string | null;
   title: string;
-  source_url: string;
-  location_text: string;
-  location_lat: number;
-  location_lng: number;
-  attendance_type: string;
-  employment_type: string;
-  salary_min: number;
-  salary_max: number;
-  currency: string;
-  description: string;
-  interview_process: string;
-  benefits: string;
+  source_url: string | null;
+  applied_at: string;
+  location_text: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
+  attendance_type: string | null;
+  employment_type: string | null;
+  salary_min: number | null;
+  salary_max: number | null;
+  currency: string | null;
+  description: string | null;
+  interview_process: string | null;
+  benefits: string | null;
   priority: number;
   is_archived: number;
   deleted_at: string | null;
@@ -96,6 +97,7 @@ export function createApplicationRows(
         company_id: companyId,
         title: faker.person.jobTitle(),
         source_url: faker.internet.url(),
+        applied_at: createdAt.toISOString(),
         location_text: location.locationText,
         location_lat: location.locationLat,
         location_lng: location.locationLng,

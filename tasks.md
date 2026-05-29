@@ -35,10 +35,4 @@ Incorporate all constants module code into settings.
 
 When editing a flow state event, remove all options already associated with that application from the selectbox (except for that selected event)
 
-
-
-Update all factories by comparing them to their related migration.
-
 Add the Temporal polyfill and update all usages of Date to use either the native browser's Temporal implementation or the polyfill.
-
-Move all dialogs into their own component.

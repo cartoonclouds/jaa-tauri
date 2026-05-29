@@ -14,7 +14,7 @@ export interface EventRow {
   id: string;
   type: string;
   title: string;
-  description: string;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }

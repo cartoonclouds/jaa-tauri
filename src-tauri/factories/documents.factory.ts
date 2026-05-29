@@ -5,9 +5,9 @@ export interface DocumentRow {
   title: string;
   kind: string;
   file_path: string;
-  mime_type: string;
-  size_bytes: number;
-  checksum: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  checksum: string | null;
   created_at: string;
   updated_at: string;
 }
