@@ -1,4 +1,3 @@
-import type { Device } from "@nuxtjs/device";
 
 /**
  * Normalized device flags exposed to the app.

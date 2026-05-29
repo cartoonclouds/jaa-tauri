@@ -5,7 +5,6 @@
     DatatableSortOrderInput,
   } from "@shared/types";
 
-  import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import {
     APPLICATION_SEARCH_FIELDS,
     APPLICATION_SORTABLE_FIELDS,
@@ -13,6 +12,7 @@
     type ApplicationSearchFieldOption,
     type ApplicationSortableField,
   } from "@modules/applications/composables/useApplicationDatatable";
+  import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
 
   import ServerDatatable from "@/components/ui/ServerDatatable.vue";
 

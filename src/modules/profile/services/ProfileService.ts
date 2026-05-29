@@ -1,11 +1,11 @@
 import type { DatatablePageQuery } from "@shared/types";
 
+import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import {
   type IProfileRepository,
   type ProfileCreatePayload,
   type ProfileUpdatePayload,
 } from "@modules/profile/repositories/ProfileRepository";
-import { ProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 
 const ProfileNameSchema = ProfileSchema.pick({ fullName: true });
 

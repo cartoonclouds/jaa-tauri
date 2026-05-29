@@ -21,8 +21,8 @@
   import { useApplication } from "@modules/applications";
   import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
-  import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
-   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
+  import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
+   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies";
   import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
   import { useContact } from "@modules/contacts";

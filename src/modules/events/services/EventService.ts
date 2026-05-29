@@ -1,9 +1,9 @@
+import { EventSchema } from "@modules/events/domain/zod/event.schema";
 import {
   type EventCreatePayload,
   type EventUpdatePayload,
   type IEventRepository,
 } from "@modules/events/repositories/EventRepository";
-import { EventSchema } from "@modules/events/domain/zod/event.schema";
 
 /**
  * Implements event service.
