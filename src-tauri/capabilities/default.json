@@ -4,7 +4,7 @@
   "description": "enables the default permissions for all platforms",
   "windows": [
     "main",
-    "onboarding-modal"
+    "onboarding-dialog"
   ],
   "domains": [
     "http://127.0.0.1",

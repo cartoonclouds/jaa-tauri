@@ -13,7 +13,7 @@
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   /**
-   * Props accepted by the settings modal.
+   * Props accepted by the settings dialog.
    */
   interface Props {
     visible: boolean;
@@ -41,7 +41,7 @@
   }
 
   /**
-   * Constant group metadata shown as tabs in the modal.
+   * Constant group metadata shown as tabs in the dialog.
    */
   interface ConstantGroup {
     key: string;
@@ -75,14 +75,14 @@
     );
   }
 
-  const modalVisible = computed({
+  const dialogVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
       emit("update:visible", value);
     },
   });
 
-  useBodyScrollLock(modalVisible);
+  useBodyScrollLock(dialogVisible);
 
   const constantGroups = computed<ConstantGroup[]>(() => {
     const seen = new Set<string>();
@@ -194,7 +194,7 @@
   }
 
   /**
-   * Load persisted settings and constants into modal state.
+   * Load persisted settings and constants into dialog state.
    */
   async function loadState(): Promise<void> {
     isBusy.value = true;
@@ -238,7 +238,7 @@
 
       activeConstantTab.value = constantGroups.value[0]?.type ?? "";
     } catch (error) {
-      logError("Failed to load settings modal data:", error);
+      logError("Failed to load settings dialog data:", error);
     } finally {
       isBusy.value = false;
     }
@@ -352,7 +352,7 @@
 
 <template>
   <Dialog
-    v-model:visible="modalVisible"
+    v-model:visible="dialogVisible"
     modal
     dismissable-mask
     maximizable

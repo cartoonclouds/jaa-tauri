@@ -41,19 +41,19 @@
     totalRecords,
   } = useContactDatatable();
   const selectedContact = ref<EditableContact | null>(null);
-  const isEditorModalVisible = ref(false);
+  const isEditorDialogVisible = ref(false);
   const isSavingContact = ref(false);
   const mapDialogVisible = ref(false);
   const selectedMapContact = ref<Contact | null>(null);
 
-  const modalVisible = computed({
+  const dialogVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
       emit("update:visible", value);
     },
   });
 
-  useBodyScrollLock(modalVisible);
+  useBodyScrollLock(dialogVisible);
   useBodyScrollLock(mapDialogVisible);
 
   /**
@@ -75,19 +75,19 @@
   }
 
   /**
-   * Handles opening the create contact modal.
+   * Handles opening the create contact dialog.
    */
-  function openCreateContactModal(): void {
+  function openCreateContactDialog(): void {
     selectedContact.value = null;
-    isEditorModalVisible.value = true;
+    isEditorDialogVisible.value = true;
   }
 
   /**
-   * Handles opening the edit contact modal.
+   * Handles opening the edit contact dialog.
    */
-  function openEditContactModal(contact: Contact): void {
+  function openEditContactDialog(contact: Contact): void {
     selectedContact.value = toEditableContact(contact);
-    isEditorModalVisible.value = true;
+    isEditorDialogVisible.value = true;
   }
 
   /**
@@ -106,7 +106,7 @@
       }
 
       await refresh();
-      isEditorModalVisible.value = false;
+      isEditorDialogVisible.value = false;
       selectedContact.value = null;
     } finally {
       isSavingContact.value = false;
@@ -140,7 +140,7 @@
 
 <template>
   <Dialog
-    v-model:visible="modalVisible"
+    v-model:visible="dialogVisible"
     modal
     header="Contacts"
     class="w-[95vw]! max-w-6xl"
@@ -148,7 +148,7 @@
     <div class="space-y-6 p-2 md:p-3">
       <div class="flex items-center justify-between gap-3">
         <h2 class="text-2xl font-semibold">Contacts</h2>
-        <Button type="button" @click="openCreateContactModal">
+        <Button type="button" @click="openCreateContactDialog">
           <Icon name="heroicons:plus" class="h-4 w-4" />
           <span>New Contact</span>
         </Button>
@@ -213,7 +213,7 @@
               <Button
                 size="small"
                 label="Edit"
-                @click="openEditContactModal(slotProps.data as Contact)"
+                @click="openEditContactDialog(slotProps.data as Contact)"
               />
               <Button
                 size="small"
@@ -233,7 +233,7 @@
       />
 
       <ContactEditorDialog
-        v-model:visible="isEditorModalVisible"
+        v-model:visible="isEditorDialogVisible"
         :contact="selectedContact"
         :busy="isSavingContact"
         @submit="onContactEditorSubmit"

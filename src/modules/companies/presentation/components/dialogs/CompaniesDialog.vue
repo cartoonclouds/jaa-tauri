@@ -38,32 +38,32 @@
     totalRecords,
   } = useCompanyDatatable();
   const selectedCompany = ref<Company | null>(null);
-  const isEditorModalVisible = ref(false);
+  const isEditorDialogVisible = ref(false);
   const isSavingCompany = ref(false);
 
-  const modalVisible = computed({
+  const dialogVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
       emit("update:visible", value);
     },
   });
 
-  useBodyScrollLock(modalVisible);
+  useBodyScrollLock(dialogVisible);
 
   /**
-   * Handles open create company modal.
+   * Handles open create company dialog.
    */
-  function openCreateCompanyModal(): void {
+  function openCreateCompanyDialog(): void {
     selectedCompany.value = null;
-    isEditorModalVisible.value = true;
+    isEditorDialogVisible.value = true;
   }
 
   /**
-   * Handles open edit company modal.
+   * Handles open edit company dialog.
    */
-  function openEditCompanyModal(company: Company): void {
+  function openEditCompanyDialog(company: Company): void {
     selectedCompany.value = company;
-    isEditorModalVisible.value = true;
+    isEditorDialogVisible.value = true;
   }
 
   /**
@@ -82,7 +82,7 @@
       }
 
       await refresh();
-      isEditorModalVisible.value = false;
+      isEditorDialogVisible.value = false;
     } finally {
       isSavingCompany.value = false;
     }
@@ -99,7 +99,7 @@
 
 <template>
   <Dialog
-    v-model:visible="modalVisible"
+    v-model:visible="dialogVisible"
     modal
     header="Companies"
     class="w-[95vw]! max-w-6xl"
@@ -107,7 +107,7 @@
     <div class="space-y-6 p-2 md:p-3">
       <div class="flex items-center justify-between gap-3">
         <h2 class="text-2xl font-semibold">Companies</h2>
-        <Button type="button" @click="openCreateCompanyModal">
+        <Button type="button" @click="openCreateCompanyDialog">
           <Icon name="heroicons:plus" class="h-4 w-4" />
           <span>New Company</span>
         </Button>
@@ -153,7 +153,7 @@
               <Button
                 size="small"
                 label="Edit"
-                @click="openEditCompanyModal(slotProps.data as Company)"
+                @click="openEditCompanyDialog(slotProps.data as Company)"
               />
               <Button
                 size="small"
@@ -167,7 +167,7 @@
       </DataTable>
 
       <CompanyEditorDialog
-        v-model:visible="isEditorModalVisible"
+        v-model:visible="isEditorDialogVisible"
         :company="selectedCompany"
         :busy="isSavingCompany"
         @submit="onCompanyEditorSubmit"

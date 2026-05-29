@@ -16,7 +16,7 @@ export function useOnboardingNavigation() {
     try {
       if (import.meta.client && isTauri()) {
         await openChildWebviewWindow({
-          label: "onboarding-modal",
+          label: "onboarding-dialog",
           url: "/onboarding",
           title: "Complete Onboarding",
         });

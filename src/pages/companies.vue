@@ -2,15 +2,15 @@
   import { onMounted } from "vue";
 
   import { definePageMeta, useRouter } from "#imports";
-  import { useCompaniesModal } from "@/composables/useCompaniesModal";
+  import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
 
   definePageMeta({ ssr: false });
 
   const router = useRouter();
-  const { openCompaniesModal } = useCompaniesModal();
+  const { openCompaniesDialog } = useCompaniesDialog();
 
   onMounted(() => {
-    openCompaniesModal();
+    openCompaniesDialog();
     void router.replace("/");
   });
 </script>

@@ -3,9 +3,9 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Menu, MenuItem, Submenu } from "@tauri-apps/api/menu";
 import { defineNuxtPlugin } from "nuxt/app";
 
-import { useCompaniesModal } from "@/composables/useCompaniesModal";
-import { useContactsModal } from "@/composables/useContactsModal";
-import { useSettingsModal } from "@/composables/useSettingsModal";
+import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
+import { useContactsDialog } from "@/composables/useContactsDialog";
+import { useSettingsDialog } from "@/composables/useSettingsDialog";
 
 /**
  * Installs a native app menubar with Settings navigation and app exit actions.
@@ -16,16 +16,16 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
 
-    const { openCompaniesModal } = useCompaniesModal();
-    const { openContactsModal } = useContactsModal();
-    const { openSettingsModal } = useSettingsModal();
+    const { openCompaniesDialog } = useCompaniesDialog();
+    const { openContactsDialog } = useContactsDialog();
+    const { openSettingsDialog } = useSettingsDialog();
 
     try {
       const companiesItem = await MenuItem.new({
         id: "open-companies",
         text: "Companies",
         action: () => {
-          openCompaniesModal();
+          openCompaniesDialog();
         },
       });
 
@@ -33,7 +33,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         id: "open-contacts",
         text: "Contacts",
         action: () => {
-          openContactsModal();
+          openContactsDialog();
         },
       });
 
@@ -42,7 +42,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         text: "Settings",
         accelerator: "CmdOrCtrl+,",
         action: () => {
-          openSettingsModal();
+          openSettingsDialog();
         },
       });
 

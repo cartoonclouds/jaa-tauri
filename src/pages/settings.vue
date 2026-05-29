@@ -2,15 +2,15 @@
   import { onMounted } from "vue";
 
   import { definePageMeta, useRouter } from "#imports";
-  import { useSettingsModal } from "@/composables/useSettingsModal";
+  import { useSettingsDialog } from "@/composables/useSettingsDialog";
 
   definePageMeta({ ssr: false });
 
   const router = useRouter();
-  const { openSettingsModal } = useSettingsModal();
+  const { openSettingsDialog } = useSettingsDialog();
 
   onMounted(() => {
-    openSettingsModal();
+    openSettingsDialog();
     void router.replace("/");
   });
 </script>

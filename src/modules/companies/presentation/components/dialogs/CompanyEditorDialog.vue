@@ -65,18 +65,18 @@
   const isLoadingAssociatedApplications = ref(false);
   const associatedApplicationsError = ref<string | null>(null);
 
-  const modalVisible = computed({
+  const dialogVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
       emit("update:visible", value);
     },
   });
 
-  useBodyScrollLock(modalVisible);
+  useBodyScrollLock(dialogVisible);
 
   const isEditMode = computed(() => Boolean(props.company));
 
-  const modalTitle = computed(() =>
+  const dialogTitle = computed(() =>
     isEditMode.value ? "Edit Company" : "Create Company",
   );
 
@@ -195,9 +195,9 @@
 
 <template>
   <Dialog
-    v-model:visible="modalVisible"
+    v-model:visible="dialogVisible"
     modal
-    :header="modalTitle"
+    :header="dialogTitle"
     class="w-full! max-w-2xl"
   >
     <Form
@@ -430,7 +430,7 @@
           severity="secondary"
           text
           label="Cancel"
-          @click="modalVisible = false"
+          @click="dialogVisible = false"
         />
         <Button
           type="submit"

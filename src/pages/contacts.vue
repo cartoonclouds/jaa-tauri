@@ -2,15 +2,15 @@
   import { onMounted } from "vue";
 
   import { definePageMeta, useRouter } from "#imports";
-  import { useContactsModal } from "@/composables/useContactsModal";
+  import { useContactsDialog } from "@/composables/useContactsDialog";
 
   definePageMeta({ ssr: false });
 
   const router = useRouter();
-  const { openContactsModal } = useContactsModal();
+  const { openContactsDialog } = useContactsDialog();
 
   onMounted(() => {
-    openContactsModal();
+    openContactsDialog();
     void router.replace("/");
   });
 </script>

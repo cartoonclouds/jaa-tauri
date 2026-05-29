@@ -403,9 +403,9 @@
   }
 
   /**
-   * Handles open company editor from contact modal table.
+   * Handles open company editor from contact dialog table.
    */
-  function openCompanyEditorFromContactModal(companyId: string): void {
+  function openCompanyEditorFromContactDialog(companyId: string): void {
     isContactEditorVisible.value = false;
     openCompanyEditor(companyId);
   }
@@ -570,7 +570,7 @@
       :initial-company-id="selectedApplication?.companyId ?? null"
       :busy="isSavingContact"
       @submit="onContactEditorSubmit"
-      @request-open-company="openCompanyEditorFromContactModal"
+      @request-open-company="openCompanyEditorFromContactDialog"
     />
   </div>
 </template>

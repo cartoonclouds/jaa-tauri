@@ -7,7 +7,7 @@
   ],
   "windows": [
     "main",
-    "onboarding-modal"
+    "onboarding-dialog"
   ],
   "permissions": [
     "window-state:default",

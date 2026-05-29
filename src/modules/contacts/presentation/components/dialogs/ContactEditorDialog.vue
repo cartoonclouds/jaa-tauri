@@ -25,7 +25,7 @@
   }>();
 
   /**
-   * Payload emitted by the contact editor modal.
+   * Payload emitted by the contact editor dialog.
    */
   export type ContactEditorSubmitPayload =
     | ContactCreatePayload
@@ -72,18 +72,18 @@
   const associatedCompaniesError = ref<string | null>(null);
   const isEditMode = computed(() => Boolean(props.contact));
 
-  const modalTitle = computed(() =>
+  const dialogTitle = computed(() =>
     isEditMode.value ? "Edit Contact" : "Create Contact",
   );
 
-  const modalVisible = computed({
+  const dialogVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
       emit("update:visible", value);
     },
   });
 
-  useBodyScrollLock(modalVisible);
+  useBodyScrollLock(dialogVisible);
 
   const initialValues = computed(() => ({
     fullName: props.contact?.fullName ?? "",
@@ -172,9 +172,9 @@
 
 <template>
   <Dialog
-    v-model:visible="modalVisible"
+    v-model:visible="dialogVisible"
     modal
-    :header="modalTitle"
+    :header="dialogTitle"
     class="w-full! max-w-2xl"
   >
     <Form
@@ -405,7 +405,7 @@
           severity="secondary"
           text
           label="Cancel"
-          @click="modalVisible = false"
+          @click="dialogVisible = false"
         />
         <Button type="submit" label="Save Changes" :loading="busy" />
       </div>

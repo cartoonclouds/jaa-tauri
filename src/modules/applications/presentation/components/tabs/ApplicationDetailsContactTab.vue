@@ -168,7 +168,7 @@
   );
 
   /**
-   * Handles open add contact modal.
+   * Handles open add contact dialog.
    */
   async function openManageContactDialog(): Promise<void> {
     if (!props.application?.id) {
@@ -202,7 +202,7 @@
   }
 
   /**
-   * Handles submit add contact modal.
+   * Handles submit add contact dialog.
    */
   function submitManageContact(): void {
     if (contactActionMode.value === "link") {
@@ -235,7 +235,7 @@
   }
 
   /**
-   * Opens the unlink confirmation modal for a contact.
+   * Opens the unlink confirmation dialog for a contact.
    */
   function requestUnlinkContact(contact: LinkedContact): void {
     pendingUnlinkContactId.value = contact.id;

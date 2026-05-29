@@ -12,15 +12,15 @@
   import { onMounted } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
-  import { useCompaniesModal } from "@/composables/useCompaniesModal";
-  import { useContactsModal } from "@/composables/useContactsModal";
+  import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
+  import { useContactsDialog } from "@/composables/useContactsDialog";
   import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
-  import { useSettingsModal } from "@/composables/useSettingsModal";
+  import { useSettingsDialog } from "@/composables/useSettingsDialog";
 
   const { openOnboarding } = useOnboardingNavigation();
-  const { isCompaniesModalVisible } = useCompaniesModal();
-  const { isContactsModalVisible } = useContactsModal();
-  const { isSettingsModalVisible } = useSettingsModal();
+  const { isCompaniesDialogVisible } = useCompaniesDialog();
+  const { isContactsDialogVisible } = useContactsDialog();
+  const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
 
   onMounted(async () => {
@@ -63,9 +63,9 @@
   <div class="app-dark min-h-screen">
     <NuxtLayout>
       <NuxtPage />
-      <CompaniesDialog v-model:visible="isCompaniesModalVisible" />
-      <ContactsDialog v-model:visible="isContactsModalVisible" />
-      <SettingsDialog v-model:visible="isSettingsModalVisible" />
+      <CompaniesDialog v-model:visible="isCompaniesDialogVisible" />
+      <ContactsDialog v-model:visible="isContactsDialogVisible" />
+      <SettingsDialog v-model:visible="isSettingsDialogVisible" />
       <Toast />
     </NuxtLayout>
   </div>
