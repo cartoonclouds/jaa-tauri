@@ -286,13 +286,42 @@ export class CompanyRepository implements ICompanyRepository {
   ): Promise<CompanyAssociatedApplication[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       `SELECT
-         id,
-         title,
-         status,
-         applied_at
+         applications.id,
+         applications.title,
+         CASE
+           WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
+           WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
+           WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
+           WHEN latest_event.type = 'Interview/Technical Interview' THEN 'technical'
+           WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
+           WHEN latest_event.type = 'Screening/Phone Screen' THEN 'phone-screening'
+           WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
+           WHEN latest_event.type = 'Application/Saved' THEN 'saved'
+           WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
+           ELSE 'saved'
+         END AS status,
+         applications.applied_at
        FROM applications
-       WHERE company_id = $1
-       ORDER BY applied_at DESC, updated_at DESC`,
+       LEFT JOIN (
+         SELECT
+           ae.application_id,
+           e.type,
+           ROW_NUMBER() OVER (
+             PARTITION BY ae.application_id
+             ORDER BY ae.sort_order DESC
+           ) AS rn
+         FROM application_events ae
+         INNER JOIN events e ON e.id = ae.event_id
+         WHERE ae.event_at IS NOT NULL
+       ) latest_event
+         ON latest_event.application_id = applications.id
+        AND latest_event.rn = 1
+       WHERE applications.company_id = $1
+         AND applications.deleted_at IS NULL
+       ORDER BY applications.applied_at DESC, applications.updated_at DESC`,
       [companyId],
     );
 

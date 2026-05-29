@@ -97,8 +97,8 @@
   );
 
   watch(
-    () => [props.visible, props.company?.id],
-    async ([visible, companyId]) => {
+    () => [props.visible, props.company?.id, props.showJobsAppliedForSection],
+    async ([visible, companyId, showJobsAppliedForSection]) => {
       if (!visible || typeof companyId !== "string") {
         associatedContacts.value = [];
         associatedApplications.value = [];
@@ -110,22 +110,47 @@
       }
 
       isLoadingAssociatedContacts.value = true;
-      isLoadingAssociatedApplications.value = true;
+      isLoadingAssociatedApplications.value = showJobsAppliedForSection;
       associatedContactsError.value = null;
       associatedApplicationsError.value = null;
 
       try {
-        associatedContacts.value =
-          await companyService.listAssociatedContacts(companyId);
-        associatedApplications.value =
-          await companyService.listAssociatedApplications(companyId);
-      } catch (error: unknown) {
-        associatedContacts.value = [];
-        associatedApplications.value = [];
-        const message =
-          error instanceof Error ? error.message : "Unknown error";
-        associatedContactsError.value = `Unable to load associated contacts: ${message}`;
-        associatedApplicationsError.value = `Unable to load jobs applied for: ${message}`;
+        const contactsPromise =
+          companyService.listAssociatedContacts(companyId);
+        const applicationsPromise = showJobsAppliedForSection
+          ? companyService.listAssociatedApplications(companyId)
+          : Promise.resolve<CompanyAssociatedApplication[]>([]);
+
+        const [contactsResult, applicationsResult] = await Promise.allSettled([
+          contactsPromise,
+          applicationsPromise,
+        ]);
+
+        if (contactsResult.status === "fulfilled") {
+          associatedContacts.value = contactsResult.value;
+        } else {
+          associatedContacts.value = [];
+          const message =
+            contactsResult.reason instanceof Error
+              ? contactsResult.reason.message
+              : "Unknown error";
+          associatedContactsError.value = `Unable to load associated contacts: ${message}`;
+        }
+
+        if (showJobsAppliedForSection) {
+          if (applicationsResult.status === "fulfilled") {
+            associatedApplications.value = applicationsResult.value;
+          } else {
+            associatedApplications.value = [];
+            const message =
+              applicationsResult.reason instanceof Error
+                ? applicationsResult.reason.message
+                : "Unknown error";
+            associatedApplicationsError.value = `Unable to load jobs applied for: ${message}`;
+          }
+        } else {
+          associatedApplications.value = [];
+        }
       } finally {
         isLoadingAssociatedContacts.value = false;
         isLoadingAssociatedApplications.value = false;
