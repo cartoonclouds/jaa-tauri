@@ -22,7 +22,7 @@
   import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
-   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
+  import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies";
   import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
   import { useContact } from "@modules/contacts";
@@ -266,9 +266,14 @@
           await eventService.delete(defaultEvent.id);
         }
 
-        for (const step of payload.flowSteps ?? []) {
+        for (const [index, step] of (payload.flowSteps ?? []).entries()) {
+          const stepSortOrder = step.sortOrder ?? index + 1;
           const existingEvent = createdEventByType.get(step.type) ?? null;
           if (existingEvent) {
+            await eventService.update({
+              id: existingEvent.id,
+              sortOrder: stepSortOrder,
+            });
             continue;
           }
 
@@ -277,6 +282,7 @@
             type: step.type,
             title: EVENT_COPY_BY_STAGE[step.type].title,
             description: null,
+            sortOrder: stepSortOrder,
           });
         }
       }

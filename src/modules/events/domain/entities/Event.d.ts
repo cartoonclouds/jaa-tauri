@@ -8,6 +8,8 @@ export interface Event {
   id: string;
   /** Related application identifier. */
   applicationId: string;
+  /** Display order of this flow step within an application timeline. */
+  sortOrder: number;
   /** Event type identifier. */
   type: InteractionStage;
   /** Event title. */

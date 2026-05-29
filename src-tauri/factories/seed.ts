@@ -489,6 +489,7 @@ function main(): void {
           application_id: application.id,
           event_id: eventRow.id,
           event_at: completedAt,
+          sort_order: stageIndex + 1,
           created_at: new Date(Date.UTC(2026, 0, 1, 0, 0, 0)).toISOString(),
         };
       }),

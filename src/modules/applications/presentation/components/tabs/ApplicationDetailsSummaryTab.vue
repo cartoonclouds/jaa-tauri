@@ -43,7 +43,7 @@
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
-    eventAt: new Date(),
+    eventAt: null,
   });
 
   useBodyScrollLock(isEditDialogVisible);
@@ -61,10 +61,6 @@
     });
   }
 
-  const interactionStageOrder = new Map<InteractionStage, number>(
-    INTERACTION_STAGES.map((stage, index) => [stage, index]),
-  );
-
   const applicationStageEvents = computed<Event[]>(() => {
     const application = props.application;
     if (!application) {
@@ -78,11 +74,11 @@
           isInteractionStage(event.type),
       )
       .sort((left, right) => {
-        const leftOrder =
-          interactionStageOrder.get(left.type) ?? Number.MAX_SAFE_INTEGER;
-        const rightOrder =
-          interactionStageOrder.get(right.type) ?? Number.MAX_SAFE_INTEGER;
-        return leftOrder - rightOrder;
+        if (left.sortOrder !== right.sortOrder) {
+          return left.sortOrder - right.sortOrder;
+        }
+
+        return left.id.localeCompare(right.id);
       });
   });
 
@@ -109,16 +105,34 @@
       }
     }
 
-    return summaryFlowStages.value.filter((stage) =>
-      completedStages.has(stage),
-    );
+    const completedPrefix: InteractionStage[] = [];
+    for (const stage of summaryFlowStages.value) {
+      if (!completedStages.has(stage)) {
+        break;
+      }
+
+      completedPrefix.push(stage);
+    }
+
+    return completedPrefix;
   });
 
   const futureFlowStages = computed<InteractionStage[]>(() => {
-    const completedStages = new Set(completedFlowStages.value);
+    const completedPrefixStages = new Set(completedFlowStages.value);
     return summaryFlowStages.value.filter(
-      (stage) => !completedStages.has(stage),
+      (stage) => !completedPrefixStages.has(stage),
     );
+  });
+
+  const editableFlowStages = computed<InteractionStage[]>(() => {
+    const editableStages = [...completedFlowStages.value];
+    const firstFutureStage = futureFlowStages.value[0];
+
+    if (firstFutureStage) {
+      editableStages.push(firstFutureStage);
+    }
+
+    return editableStages;
   });
 
   const displayedFlowStages = computed(() => {
@@ -191,6 +205,10 @@
    * Handles open stage edit by step double-click.
    */
   function onStageDoubleClick(stage: InteractionStage): void {
+    if (!editableFlowStages.value.includes(stage)) {
+      return;
+    }
+
     const applicationId = props.application?.id;
     const event = applicationId
       ? eventItems.value.find(
@@ -202,11 +220,11 @@
     if (event) {
       editForm.id = event.id;
       editForm.type = event.type;
-      editForm.eventAt = event.eventAt ? new Date(event.eventAt) : new Date();
+      editForm.eventAt = event.eventAt ? new Date(event.eventAt) : null;
     } else {
       editForm.id = "";
       editForm.type = stage;
-      editForm.eventAt = new Date();
+      editForm.eventAt = null;
     }
 
     isEditDialogVisible.value = true;
@@ -271,7 +289,10 @@
 
 <template>
   <div v-if="application" class="space-y-4">
-    <ApplicationDetailsCard title="Application Flow">
+    <ApplicationDetailsCard
+      title="Application Flow"
+      info="To add or remove events from the timeline, edit the application."
+    >
       <div class="rounded-lg border border-surface-200 bg-surface-0 px-3 py-2">
         <p
           class="mb-2 text-xs font-semibold uppercase tracking-wide text-surface-500"
@@ -291,12 +312,14 @@
             :stages="completedFlowStages"
             :future-stages="futureFlowStages"
             :active-step-index="summaryTimelineActiveStepIndex"
+            :editable-stages="editableFlowStages"
             :stage-hover-labels="stageHoverLabels"
             @stage-dblclick="onStageDoubleClick"
           />
 
           <p class="text-xs text-surface-500">
-            Tip: Double-click any step to set the date/time.
+            Tip: Double-click completed steps or the next upcoming step to set
+            the date/time.
           </p>
         </div>
       </div>

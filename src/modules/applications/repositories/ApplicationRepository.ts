@@ -98,10 +98,7 @@ export class ApplicationRepository implements IApplicationRepository {
         ae.event_at,
         ROW_NUMBER() OVER (
           PARTITION BY ae.application_id
-          ORDER BY
-            ae.event_at DESC,
-            ae.created_at DESC,
-            e.id DESC
+          ORDER BY ae.sort_order DESC
         ) AS rn
       FROM application_events ae
       INNER JOIN events e ON e.id = ae.event_id
@@ -145,15 +142,15 @@ export class ApplicationRepository implements IApplicationRepository {
     const canonicalEventsByStage = await this.ensureCanonicalFlowEvents();
     const defaultStages = [...EVENT_FLOW_STAGE_SET];
 
-    for (const stage of defaultStages) {
+    for (const [index, stage] of defaultStages.entries()) {
       const eventId = canonicalEventsByStage.get(stage);
       if (!eventId) {
         continue;
       }
 
       await this.db.execute(
-        "INSERT OR IGNORE INTO application_events (application_id, event_id, event_at, created_at) VALUES ($1, $2, NULL, CURRENT_TIMESTAMP)",
-        [applicationId, eventId],
+        "INSERT OR IGNORE INTO application_events (application_id, event_id, event_at, sort_order, created_at) VALUES ($1, $2, NULL, $3, CURRENT_TIMESTAMP)",
+        [applicationId, eventId, index + 1],
       );
     }
   }

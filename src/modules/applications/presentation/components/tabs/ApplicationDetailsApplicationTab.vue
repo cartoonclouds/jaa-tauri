@@ -54,6 +54,8 @@
     create,
     update,
     remove,
+    refresh: refreshEvents,
+    service: eventService,
     isLoading: isMutatingEvent,
   } = useEvent();
 
@@ -63,22 +65,20 @@
   const stageForm = reactive<{
     id: string;
     type: InteractionStage;
-    eventAt: Date | null;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
-    eventAt: new Date(),
   });
 
   const createFlowSteps = ref<(ApplicationDraftFlowStep & { id: string })[]>(
     [],
   );
+  const draggedCreateStepId = ref<string | null>(null);
+  const draggedEditStepId = ref<string | null>(null);
+  const createDropTargetStepId = ref<string | null>(null);
+  const editDropTargetEventId = ref<string | null>(null);
 
   useBodyScrollLock(isStageDialogVisible);
-
-  const interactionStageOrder = new Map<InteractionStage, number>(
-    INTERACTION_STAGES.map((stage, index) => [stage, index]),
-  );
 
   const editableStageEvents = computed<Event[]>(() => {
     const applicationId = props.application?.id;
@@ -93,21 +93,73 @@
           isInteractionStage(event.type),
       )
       .sort((left, right) => {
-        const leftOrder =
-          interactionStageOrder.get(left.type) ?? Number.MAX_SAFE_INTEGER;
-        const rightOrder =
-          interactionStageOrder.get(right.type) ?? Number.MAX_SAFE_INTEGER;
-        return leftOrder - rightOrder;
+        if (left.sortOrder !== right.sortOrder) {
+          return left.sortOrder - right.sortOrder;
+        }
+
+        return left.id.localeCompare(right.id);
       });
   });
+
+  /**
+   * Ensures draft flow steps use contiguous sort order values.
+   */
+  function normalizeCreateFlowStepSortOrder(): void {
+    createFlowSteps.value = createFlowSteps.value.map((step, index) => ({
+      ...step,
+      sortOrder: index + 1,
+    }));
+  }
+
+  /**
+   * Reorders a list by moving one id before another id.
+   */
+  function reorderById<T extends { id: string }>(
+    items: readonly T[],
+    draggedId: string,
+    targetId: string,
+  ): T[] {
+    const sourceIndex = items.findIndex((item) => item.id === draggedId);
+    const targetIndex = items.findIndex((item) => item.id === targetId);
+
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+      return [...items];
+    }
+
+    const next = [...items];
+    const [moved] = next.splice(sourceIndex, 1);
+    if (!moved) {
+      return [...items];
+    }
+
+    next.splice(targetIndex, 0, moved);
+    return next;
+  }
+
+  /**
+   * Persists event sort_order values using the current rendered order.
+   */
+  async function persistEditableStageSortOrder(
+    orderedEvents: readonly Event[],
+  ): Promise<void> {
+    for (const [index, stageEvent] of orderedEvents.entries()) {
+      await eventService.update({
+        id: stageEvent.id,
+        sortOrder: index + 1,
+      });
+    }
+
+    await refreshEvents();
+  }
 
   /**
    * Initializes draft flow steps for create mode.
    */
   function initializeCreateFlowSteps(): void {
-    createFlowSteps.value = [...EVENT_FLOW_STAGE_SET].map((stage) => ({
+    createFlowSteps.value = [...EVENT_FLOW_STAGE_SET].map((stage, index) => ({
       id: crypto.randomUUID(),
       type: stage,
+      sortOrder: index + 1,
     }));
   }
 
@@ -129,7 +181,6 @@
     stageDialogDraftId.value = null;
     stageForm.id = "";
     stageForm.type = INTERACTION_STAGES[0];
-    stageForm.eventAt = new Date();
     isStageDialogVisible.value = true;
   }
 
@@ -141,7 +192,6 @@
     stageDialogDraftId.value = null;
     stageForm.id = event.id;
     stageForm.type = event.type;
-    stageForm.eventAt = event.eventAt ? new Date(event.eventAt) : new Date();
     isStageDialogVisible.value = true;
   }
 
@@ -155,7 +205,6 @@
     stageDialogDraftId.value = step.id;
     stageForm.id = "";
     stageForm.type = step.type;
-    stageForm.eventAt = null;
     isStageDialogVisible.value = true;
   }
 
@@ -164,15 +213,13 @@
    */
   async function saveStageDialog(): Promise<void> {
     const applicationId = props.application?.id;
-    const eventAtIso = stageForm.eventAt
-      ? stageForm.eventAt.toISOString()
-      : null;
 
     if (props.mode === "create") {
       if (stageDialogMode.value === "create") {
         createFlowSteps.value.push({
           id: crypto.randomUUID(),
           type: stageForm.type,
+          sortOrder: createFlowSteps.value.length + 1,
         });
       } else if (stageDialogDraftId.value) {
         const target = createFlowSteps.value.find(
@@ -182,6 +229,8 @@
           target.type = stageForm.type;
         }
       }
+
+      normalizeCreateFlowStepSortOrder();
 
       isStageDialogVisible.value = false;
       return;
@@ -197,13 +246,11 @@
         type: stageForm.type,
         title: EVENT_COPY_BY_STAGE[stageForm.type].title,
         description: null,
-        eventAt: eventAtIso,
       });
     } else if (stageForm.id) {
       await update({
         id: stageForm.id,
         type: stageForm.type,
-        eventAt: eventAtIso,
       });
     }
 
@@ -224,6 +271,114 @@
     createFlowSteps.value = createFlowSteps.value.filter(
       (step) => step.id !== stepId,
     );
+    normalizeCreateFlowStepSortOrder();
+  }
+
+  /**
+   * Handles edit-mode stage row drag start.
+   */
+  function onEditStageDragStart(eventId: string, event: DragEvent): void {
+    draggedEditStepId.value = eventId;
+    editDropTargetEventId.value = null;
+
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", eventId);
+    }
+  }
+
+  /**
+   * Handles edit-mode stage row drag over to allow dropping.
+   */
+  function onEditStageDragOver(targetEventId: string, event: DragEvent): void {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
+
+    const draggedId =
+      draggedEditStepId.value ?? event.dataTransfer?.getData("text/plain");
+    editDropTargetEventId.value =
+      draggedId && draggedId !== targetEventId ? targetEventId : null;
+  }
+
+  /**
+   * Handles edit-mode stage row drop and persists new sort order.
+   */
+  async function onEditStageDrop(
+    targetEventId: string,
+    event: DragEvent,
+  ): Promise<void> {
+    event.preventDefault();
+
+    const draggedId =
+      draggedEditStepId.value ?? event.dataTransfer?.getData("text/plain");
+    draggedEditStepId.value = null;
+    editDropTargetEventId.value = null;
+
+    if (!draggedId || draggedId === targetEventId || isMutatingEvent.value) {
+      return;
+    }
+
+    const reordered = reorderById(
+      editableStageEvents.value,
+      draggedId,
+      targetEventId,
+    );
+    await persistEditableStageSortOrder(reordered);
+  }
+
+  /**
+   * Handles create-mode stage row drag start.
+   */
+  function onCreateStageDragStart(stepId: string, event: DragEvent): void {
+    draggedCreateStepId.value = stepId;
+    createDropTargetStepId.value = null;
+
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", stepId);
+    }
+  }
+
+  /**
+   * Handles create-mode stage row drag over to allow dropping.
+   */
+  function onCreateStageDragOver(targetStepId: string, event: DragEvent): void {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
+
+    const draggedId =
+      draggedCreateStepId.value ?? event.dataTransfer?.getData("text/plain");
+    createDropTargetStepId.value =
+      draggedId && draggedId !== targetStepId ? targetStepId : null;
+  }
+
+  /**
+   * Handles create-mode stage row drop.
+   */
+  function onCreateStageDrop(targetStepId: string, event: DragEvent): void {
+    event.preventDefault();
+
+    const draggedId =
+      draggedCreateStepId.value ?? event.dataTransfer?.getData("text/plain");
+    draggedCreateStepId.value = null;
+    createDropTargetStepId.value = null;
+
+    if (!draggedId || draggedId === targetStepId) {
+      return;
+    }
+
+    createFlowSteps.value = reorderById(
+      createFlowSteps.value,
+      draggedId,
+      targetStepId,
+    );
+    normalizeCreateFlowStepSortOrder();
   }
 
   /**
@@ -235,6 +390,7 @@
         ...payload,
         flowSteps: createFlowSteps.value.map((step) => ({
           type: step.type,
+          sortOrder: step.sortOrder,
         })),
       });
       return;
@@ -295,17 +451,47 @@
 
       <div v-else class="space-y-2">
         <div
-          v-for="event in editableStageEvents"
-          :key="event.id"
-          class="flex items-center justify-between gap-3 rounded-lg border border-surface-200 px-3 py-2"
+          v-for="stageEvent in editableStageEvents"
+          :key="stageEvent.id"
+          class="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors"
+          :class="
+            editDropTargetEventId === stageEvent.id
+              ? 'border-primary-400 bg-primary-50/20'
+              : 'border-surface-200'
+          "
+          @dragover="onEditStageDragOver(stageEvent.id, $event)"
+          @dragleave="editDropTargetEventId = null"
+          @drop.prevent="onEditStageDrop(stageEvent.id, $event)"
         >
-          <div class="min-w-0">
-            <p class="truncate text-sm font-medium text-surface-900">
-              {{ EVENT_COPY_BY_STAGE[event.type]?.title ?? event.type }}
-            </p>
-            <p class="text-xs text-surface-500">
-              {{ event.eventAt ? event.eventAt.toLocaleString() : "Pending" }}
-            </p>
+          <div class="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing"
+              draggable="true"
+              :aria-label="`Drag ${EVENT_COPY_BY_STAGE[stageEvent.type]?.title ?? stageEvent.type}`"
+              @dragstart="onEditStageDragStart(stageEvent.id, $event)"
+              @dragend="
+                draggedEditStepId = null;
+                editDropTargetEventId = null;
+              "
+            >
+              <Icon name="heroicons:bars-3" class="h-4 w-4" />
+            </button>
+
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-surface-900">
+                {{
+                  EVENT_COPY_BY_STAGE[stageEvent.type]?.title ?? stageEvent.type
+                }}
+              </p>
+              <p class="text-xs text-surface-500">
+                {{
+                  stageEvent.eventAt
+                    ? stageEvent.eventAt.toLocaleString()
+                    : "Pending"
+                }}
+              </p>
+            </div>
           </div>
 
           <div class="flex items-center gap-1">
@@ -315,7 +501,7 @@
               text
               size="small"
               :disabled="isMutatingEvent"
-              @click="openEditStageDialog(event)"
+              @click="openEditStageDialog(stageEvent)"
             >
               <Icon name="heroicons:pencil-square" class="h-4 w-4" />
             </Button>
@@ -326,7 +512,7 @@
               text
               size="small"
               :disabled="isMutatingEvent"
-              @click="deleteStage(event.id)"
+              @click="deleteStage(stageEvent.id)"
             >
               <Icon name="heroicons:trash" class="h-4 w-4" />
             </Button>
@@ -361,12 +547,36 @@
         <div
           v-for="step in createFlowSteps"
           :key="step.id"
-          class="flex items-center justify-between gap-3 rounded-lg border border-surface-200 px-3 py-2"
+          class="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors"
+          :class="
+            createDropTargetStepId === step.id
+              ? 'border-primary-400 bg-primary-50/20'
+              : 'border-surface-200'
+          "
+          @dragover="onCreateStageDragOver(step.id, $event)"
+          @dragleave="createDropTargetStepId = null"
+          @drop.prevent="onCreateStageDrop(step.id, $event)"
         >
-          <div class="min-w-0">
-            <p class="truncate text-sm font-medium text-surface-900">
-              {{ EVENT_COPY_BY_STAGE[step.type].title }}
-            </p>
+          <div class="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing"
+              draggable="true"
+              :aria-label="`Drag ${EVENT_COPY_BY_STAGE[step.type].title}`"
+              @dragstart="onCreateStageDragStart(step.id, $event)"
+              @dragend="
+                draggedCreateStepId = null;
+                createDropTargetStepId = null;
+              "
+            >
+              <Icon name="heroicons:bars-3" class="h-4 w-4" />
+            </button>
+
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-surface-900">
+                {{ EVENT_COPY_BY_STAGE[step.type].title }}
+              </p>
+            </div>
           </div>
 
           <div class="flex items-center gap-1">
@@ -421,20 +631,6 @@
         <Select
           v-model="stageForm.type"
           :options="[...INTERACTION_STAGES]"
-          fluid
-        />
-      </div>
-
-      <div v-if="mode === 'edit'" class="space-y-1">
-        <label class="text-sm font-medium text-surface-700"
-          >Event Date/Time</label
-        >
-        <DatePicker
-          v-model="stageForm.eventAt"
-          show-time
-          hour-format="24"
-          show-icon
-          show-clear
           fluid
         />
       </div>

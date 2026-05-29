@@ -21,8 +21,9 @@ export class EventService {
       type: true,
       title: true,
       eventAt: true,
+      sortOrder: true,
     })
-      .partial({ eventAt: true })
+      .partial({ eventAt: true, sortOrder: true })
       .safeParse(payload);
     if (!result.success) {
       throw new Error(`Validation failed: ${result.error.message}`);
@@ -34,17 +35,20 @@ export class EventService {
     if (
       payload.type !== undefined ||
       payload.title !== undefined ||
-      payload.eventAt !== undefined
+      payload.eventAt !== undefined ||
+      payload.sortOrder !== undefined
     ) {
       const validatePayload = {
         type: payload.type,
         title: payload.title,
         eventAt: payload.eventAt,
+        sortOrder: payload.sortOrder,
       };
       const result = EventSchema.pick({
         type: true,
         title: true,
         eventAt: true,
+        sortOrder: true,
       })
         .partial()
         .safeParse(validatePayload);

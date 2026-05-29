@@ -28,6 +28,7 @@ export type ApplicationFormValues = ApplicationBasePayload;
  */
 export interface ApplicationDraftFlowStep {
   type: InteractionStage;
+  sortOrder: number;
 }
 
 /**

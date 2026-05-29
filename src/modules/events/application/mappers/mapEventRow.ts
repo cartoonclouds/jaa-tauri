@@ -4,6 +4,7 @@ import { toInteractionStage } from "@modules/events/constants";
 import {
   mapAuditTimestamps,
   mapOptionalRowDate,
+  toFiniteNumber,
   toNullableString,
   toRequiredString,
 } from "@shared/utils/database-mapping/mapperValueUtils";
@@ -20,6 +21,7 @@ export function mapEventRowToEntity(row: Record<string, unknown>): Event {
   return {
     id: toRequiredString(row.id),
     applicationId: toRequiredString(row.application_id),
+    sortOrder: toFiniteNumber(row.sort_order),
     type: toInteractionStage(row.type),
     title: toRequiredString(row.title),
     description: toNullableString(row.description),

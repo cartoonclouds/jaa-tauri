@@ -12,12 +12,14 @@
     futureStages?: InteractionStage[];
     activeStepIndex?: number;
     stageHoverLabels?: Partial<Record<InteractionStage, string>>;
+    editableStages?: InteractionStage[] | null;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     futureStages: () => [],
     activeStepIndex: 1,
     stageHoverLabels: () => ({}),
+    editableStages: null,
   });
   const emit = defineEmits<{
     "stage-dblclick": [stage: InteractionStage];
@@ -100,25 +102,6 @@
   }
 
   /**
-   * Handles get connector style.
-   */
-  function getConnectorStyle(stepValue: number): CSSProperties {
-    /**
-     * Gets connector style.
-     */
-    const isFuture = stepValue >= props.stages.length;
-
-    return {
-      borderTopColor: isFuture
-        ? "var(--p-stepper-separator-background)"
-        : "var(--p-stepper-step-title-active-color)",
-      borderTopStyle: isFuture ? "dashed" : "solid",
-      borderTopWidth: "2px",
-      opacity: isFuture ? 0.55 : 1,
-    };
-  }
-
-  /**
    * Handles get hover text.
    */
   function getHoverText(stage: InteractionStage): string {
@@ -134,7 +117,22 @@
    * Handles on stage double click.
    */
   function onStageDoubleClick(stage: InteractionStage): void {
+    if (props.editableStages && !props.editableStages.includes(stage)) {
+      return;
+    }
+
     emit("stage-dblclick", stage);
+  }
+
+  /**
+   * Handles whether a stage supports double-click edit.
+   */
+  function isStageEditable(stage: InteractionStage): boolean {
+    if (!props.editableStages) {
+      return true;
+    }
+
+    return props.editableStages.includes(stage);
   }
 </script>
 
@@ -162,7 +160,12 @@
                 value: getHoverText(stage),
                 disabled: !getHoverText(stage),
               }"
-              class="inline-flex h-auto min-h-20 self-start hover:cursor-pointer flex-col items-center gap-2 border-0 bg-transparent align-top"
+              class="inline-flex h-auto min-h-20 self-start flex-col items-center gap-2 border-0 bg-transparent align-top"
+              :class="
+                isStageEditable(stage)
+                  ? 'hover:cursor-pointer'
+                  : 'cursor-default'
+              "
               v-bind="a11yAttrs.header"
               @dblclick="onStageDoubleClick(stage)"
               @click="activateCallback"
@@ -180,12 +183,6 @@
                 {{ EVENT_COPY_BY_STAGE[stage]?.title ?? stage }}
               </span>
             </button>
-            <div
-              v-if="index < displayedStages.length - 1"
-              class="hidden w-full self-start border-t sm:block"
-              style="margin-top: 1.25rem"
-              :style="getConnectorStyle(index + 1)"
-            />
           </div>
         </template>
       </Step>

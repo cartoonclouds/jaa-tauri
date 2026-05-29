@@ -23,6 +23,7 @@ export interface ApplicationEventRow {
   application_id: string;
   event_id: string;
   event_at: string | null;
+  sort_order: number;
   created_at: string;
 }
 
@@ -138,6 +139,7 @@ export function createApplicationEventRows(
         application_id: application.id,
         event_id: eventId,
         event_at: stageEventAt,
+        sort_order: stageIndex + 1,
         created_at: new Date(baseTime).toISOString(),
       };
     });

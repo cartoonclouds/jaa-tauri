@@ -41,7 +41,7 @@ describe("EventRepository.create", () => {
     });
 
     expect(db.execute).toHaveBeenCalledTimes(2);
-    expect(db.select).toHaveBeenCalledTimes(1);
+    expect(db.select).toHaveBeenCalledTimes(2);
   });
 
   it("uses a provided eventAt timestamp when creating the flow step", async () => {
@@ -63,6 +63,30 @@ describe("EventRepository.create", () => {
         "11111111-1111-4111-8111-111111111111",
         "Interview/Technical Interview",
         eventAt,
+        1,
+      ],
+    );
+  });
+
+  it("persists explicit sortOrder when creating the flow step", async () => {
+    const db = mockDb();
+    const repository = new EventRepository(db as never);
+
+    await repository.create({
+      applicationId: "11111111-1111-4111-8111-111111111111",
+      type: "Interview/Technical Interview",
+      title: "Tech interview",
+      description: null,
+      sortOrder: 7,
+    });
+
+    expect(db.execute).toHaveBeenLastCalledWith(
+      expect.stringContaining("sort_order"),
+      [
+        "11111111-1111-4111-8111-111111111111",
+        "Interview/Technical Interview",
+        null,
+        7,
       ],
     );
   });
@@ -86,6 +110,25 @@ describe("EventRepository.update", () => {
         "11111111-1111-4111-8111-111111111111",
         "Interview/Technical Interview",
         eventAt,
+      ],
+    );
+  });
+
+  it("updates sortOrder without mutating eventAt", async () => {
+    const db = mockDb();
+    const repository = new EventRepository(db as never);
+
+    await repository.update({
+      id: "11111111-1111-4111-8111-111111111111::Interview/Technical Interview",
+      sortOrder: 4,
+    });
+
+    expect(db.execute).toHaveBeenLastCalledWith(
+      expect.stringContaining("SET sort_order = $3"),
+      [
+        "11111111-1111-4111-8111-111111111111",
+        "Interview/Technical Interview",
+        4,
       ],
     );
   });

@@ -11,6 +11,7 @@ import { z } from "zod";
 export const EventSchema = z.object({
   id: z.string().min(1),
   applicationId: UuidSchema,
+  sortOrder: z.number().int().nonnegative(),
   type: z.enum(INTERACTION_STAGES),
   title: z.string().min(1),
   description: NullableStringSchema,
