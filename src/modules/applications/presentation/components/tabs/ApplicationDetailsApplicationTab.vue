@@ -63,9 +63,11 @@
   const stageForm = reactive<{
     id: string;
     type: InteractionStage;
+    eventAt: Date | null;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
+    eventAt: new Date(),
   });
 
   const createFlowSteps = ref<(ApplicationDraftFlowStep & { id: string })[]>(
@@ -73,6 +75,10 @@
   );
 
   useBodyScrollLock(isStageDialogVisible);
+
+  const interactionStageOrder = new Map<InteractionStage, number>(
+    INTERACTION_STAGES.map((stage, index) => [stage, index]),
+  );
 
   const editableStageEvents = computed<Event[]>(() => {
     const applicationId = props.application?.id;
@@ -87,9 +93,11 @@
           isInteractionStage(event.type),
       )
       .sort((left, right) => {
-        const leftTime = left.createdAt.getTime();
-        const rightTime = right.createdAt.getTime();
-        return leftTime - rightTime;
+        const leftOrder =
+          interactionStageOrder.get(left.type) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder =
+          interactionStageOrder.get(right.type) ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder - rightOrder;
       });
   });
 
@@ -121,6 +129,7 @@
     stageDialogDraftId.value = null;
     stageForm.id = "";
     stageForm.type = INTERACTION_STAGES[0];
+    stageForm.eventAt = new Date();
     isStageDialogVisible.value = true;
   }
 
@@ -132,6 +141,7 @@
     stageDialogDraftId.value = null;
     stageForm.id = event.id;
     stageForm.type = event.type;
+    stageForm.eventAt = event.eventAt ? new Date(event.eventAt) : new Date();
     isStageDialogVisible.value = true;
   }
 
@@ -145,6 +155,7 @@
     stageDialogDraftId.value = step.id;
     stageForm.id = "";
     stageForm.type = step.type;
+    stageForm.eventAt = null;
     isStageDialogVisible.value = true;
   }
 
@@ -153,6 +164,10 @@
    */
   async function saveStageDialog(): Promise<void> {
     const applicationId = props.application?.id;
+    const eventAtIso = stageForm.eventAt
+      ? stageForm.eventAt.toISOString()
+      : null;
+
     if (props.mode === "create") {
       if (stageDialogMode.value === "create") {
         createFlowSteps.value.push({
@@ -182,11 +197,13 @@
         type: stageForm.type,
         title: EVENT_COPY_BY_STAGE[stageForm.type].title,
         description: null,
+        eventAt: eventAtIso,
       });
     } else if (stageForm.id) {
       await update({
         id: stageForm.id,
         type: stageForm.type,
+        eventAt: eventAtIso,
       });
     }
 
@@ -287,7 +304,7 @@
               {{ EVENT_COPY_BY_STAGE[event.type]?.title ?? event.type }}
             </p>
             <p class="text-xs text-surface-500">
-              {{ event.createdAt.toLocaleString() }}
+              {{ event.eventAt ? event.eventAt.toLocaleString() : "Pending" }}
             </p>
           </div>
 
@@ -404,6 +421,20 @@
         <Select
           v-model="stageForm.type"
           :options="[...INTERACTION_STAGES]"
+          fluid
+        />
+      </div>
+
+      <div v-if="mode === 'edit'" class="space-y-1">
+        <label class="text-sm font-medium text-surface-700"
+          >Event Date/Time</label
+        >
+        <DatePicker
+          v-model="stageForm.eventAt"
+          show-time
+          hour-format="24"
+          show-icon
+          show-clear
           fluid
         />
       </div>

@@ -20,7 +20,10 @@ export class EventService {
       applicationId: true,
       type: true,
       title: true,
-    }).safeParse(payload);
+      eventAt: true,
+    })
+      .partial({ eventAt: true })
+      .safeParse(payload);
     if (!result.success) {
       throw new Error(`Validation failed: ${result.error.message}`);
     }
@@ -28,9 +31,21 @@ export class EventService {
   }
 
   update(payload: EventUpdatePayload) {
-    if (payload.type !== undefined || payload.title !== undefined) {
-      const validatePayload = { type: payload.type, title: payload.title };
-      const result = EventSchema.pick({ type: true, title: true })
+    if (
+      payload.type !== undefined ||
+      payload.title !== undefined ||
+      payload.eventAt !== undefined
+    ) {
+      const validatePayload = {
+        type: payload.type,
+        title: payload.title,
+        eventAt: payload.eventAt,
+      };
+      const result = EventSchema.pick({
+        type: true,
+        title: true,
+        eventAt: true,
+      })
         .partial()
         .safeParse(validatePayload);
       if (!result.success) {
@@ -44,11 +59,3 @@ export class EventService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

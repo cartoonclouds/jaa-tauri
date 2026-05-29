@@ -3,6 +3,7 @@ import type { Event } from "@modules/events/domain/entities/Event";
 import { toInteractionStage } from "@modules/events/constants";
 import {
   mapAuditTimestamps,
+  mapOptionalRowDate,
   toNullableString,
   toRequiredString,
 } from "@shared/utils/database-mapping/mapperValueUtils";
@@ -22,6 +23,7 @@ export function mapEventRowToEntity(row: Record<string, unknown>): Event {
     type: toInteractionStage(row.type),
     title: toRequiredString(row.title),
     description: toNullableString(row.description),
+    eventAt: mapOptionalRowDate(row.event_at),
     ...timestamps,
   };
 }

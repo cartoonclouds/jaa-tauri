@@ -39,9 +39,11 @@
   const editForm = reactive<{
     id: string;
     type: InteractionStage;
+    eventAt: Date | null;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
+    eventAt: new Date(),
   });
 
   useBodyScrollLock(isEditDialogVisible);
@@ -59,22 +61,34 @@
     });
   }
 
-  const summaryFlowStages = computed<InteractionStage[]>(() => {
+  const interactionStageOrder = new Map<InteractionStage, number>(
+    INTERACTION_STAGES.map((stage, index) => [stage, index]),
+  );
+
+  const applicationStageEvents = computed<Event[]>(() => {
     const application = props.application;
     if (!application) {
       return [];
     }
 
-    const sortedApplicationEvents = eventItems.value
-      .filter((event) => event.applicationId === application.id)
+    return eventItems.value
+      .filter(
+        (event) =>
+          event.applicationId === application.id &&
+          isInteractionStage(event.type),
+      )
       .sort((left, right) => {
-        const leftTime = left.createdAt.getTime();
-        const rightTime = right.createdAt.getTime();
-        return leftTime - rightTime;
+        const leftOrder =
+          interactionStageOrder.get(left.type) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder =
+          interactionStageOrder.get(right.type) ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder - rightOrder;
       });
+  });
 
+  const summaryFlowStages = computed<InteractionStage[]>(() => {
     const stagesFromEvents: InteractionStage[] = [];
-    for (const event of sortedApplicationEvents) {
+    for (const event of applicationStageEvents.value) {
       if (!isInteractionStage(event.type)) {
         continue;
       }
@@ -87,26 +101,32 @@
     return stagesFromEvents;
   });
 
-  const futureFlowStages = computed<InteractionStage[]>(() => []);
+  const completedFlowStages = computed<InteractionStage[]>(() => {
+    const completedStages = new Set<InteractionStage>();
+    for (const event of applicationStageEvents.value) {
+      if (event.eventAt && isInteractionStage(event.type)) {
+        completedStages.add(event.type);
+      }
+    }
 
-  const completedFlowStages = computed<InteractionStage[]>(
-    () => summaryFlowStages.value,
-  );
+    return summaryFlowStages.value.filter((stage) =>
+      completedStages.has(stage),
+    );
+  });
+
+  const futureFlowStages = computed<InteractionStage[]>(() => {
+    const completedStages = new Set(completedFlowStages.value);
+    return summaryFlowStages.value.filter(
+      (stage) => !completedStages.has(stage),
+    );
+  });
 
   const displayedFlowStages = computed(() => {
     const application = props.application;
     const stageEventByType = new Map<InteractionStage, Event>();
 
     if (application) {
-      const sortedApplicationEvents = eventItems.value
-        .filter((event) => event.applicationId === application.id)
-        .sort((left, right) => {
-          const leftTime = left.createdAt.getTime();
-          const rightTime = right.createdAt.getTime();
-          return leftTime - rightTime;
-        });
-
-      for (const event of sortedApplicationEvents) {
+      for (const event of applicationStageEvents.value) {
         if (!isInteractionStage(event.type)) {
           continue;
         }
@@ -119,12 +139,12 @@
 
     return summaryFlowStages.value.map((stage) => {
       const event = stageEventByType.get(stage) ?? null;
-      const createdAt = event?.createdAt ?? null;
+      const eventAt = event?.eventAt ?? null;
       return {
         eventId: event?.id ?? null,
         stage,
-        isFuture: false,
-        eventAtLabel: createdAt ? formatStageDate(createdAt) : null,
+        isFuture: !eventAt,
+        eventAtLabel: eventAt ? formatStageDate(eventAt) : null,
       };
     });
   });
@@ -182,9 +202,11 @@
     if (event) {
       editForm.id = event.id;
       editForm.type = event.type;
+      editForm.eventAt = event.eventAt ? new Date(event.eventAt) : new Date();
     } else {
       editForm.id = "";
       editForm.type = stage;
+      editForm.eventAt = new Date();
     }
 
     isEditDialogVisible.value = true;
@@ -194,10 +216,13 @@
    * Handles save stage edit.
    */
   async function saveStageEdit(): Promise<void> {
+    const eventAtIso = editForm.eventAt ? editForm.eventAt.toISOString() : null;
+
     if (editForm.id) {
       await update({
         id: editForm.id,
         type: editForm.type,
+        eventAt: eventAtIso,
       });
     } else if (props.application) {
       await create({
@@ -205,6 +230,7 @@
         type: editForm.type,
         title: EVENT_COPY_BY_STAGE[editForm.type].title,
         description: null,
+        eventAt: eventAtIso,
       });
     }
 
@@ -270,7 +296,7 @@
           />
 
           <p class="text-xs text-surface-500">
-            Tip: Double-click any step to edit an event.
+            Tip: Double-click any step to set the date/time.
           </p>
         </div>
       </div>
@@ -324,6 +350,20 @@
         <Select
           v-model="editForm.type"
           :options="[...INTERACTION_STAGES]"
+          fluid
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-sm font-medium text-surface-700"
+          >Event Date/Time</label
+        >
+        <DatePicker
+          v-model="editForm.eventAt"
+          show-time
+          hour-format="24"
+          show-icon
+          show-clear
           fluid
         />
       </div>

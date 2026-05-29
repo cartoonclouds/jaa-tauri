@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS application_events (
   application_id TEXT NOT NULL,
   event_id TEXT NOT NULL,
+  event_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (application_id, event_id),
@@ -17,3 +18,6 @@ ON application_events (application_id);
 
 CREATE INDEX IF NOT EXISTS idx_application_events_event_id
 ON application_events (event_id);
+
+CREATE INDEX IF NOT EXISTS idx_application_events_event_at
+ON application_events (event_at);

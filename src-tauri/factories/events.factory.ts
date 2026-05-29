@@ -12,7 +12,6 @@ import {
 
 export interface EventRow {
   id: string;
-  application_id: string;
   type: string;
   title: string;
   description: string;
@@ -20,7 +19,14 @@ export interface EventRow {
   updated_at: string;
 }
 
-interface EventApplicationInput {
+export interface ApplicationEventRow {
+  application_id: string;
+  event_id: string;
+  event_at: string | null;
+  created_at: string;
+}
+
+export interface EventApplicationInput {
   id: string;
   company_id: string;
 }
@@ -37,7 +43,6 @@ const STATUS_TO_COMPLETED_STAGE_COUNT: Record<string, number> = {
 
 function splitStagesByStatus(status: string): {
   completedStages: InteractionStage[];
-  futureStages: InteractionStage[];
 } {
   const flowStages = [...EVENT_FLOW_STAGE_SET];
   const completedCount =
@@ -49,7 +54,6 @@ function splitStagesByStatus(status: string): {
   );
 
   const completedStages = flowStages.slice(0, normalizedCompletedCount);
-  const futureStages = flowStages.slice(normalizedCompletedCount);
 
   if (status === "rejected") {
     const rejectedWithDecision = completedStages.filter(
@@ -61,23 +65,47 @@ function splitStagesByStatus(status: string): {
 
     return {
       completedStages: rejectedWithDecision,
-      futureStages: [],
     };
   }
 
   return {
     completedStages,
-    futureStages,
   };
 }
 
-export function createEventRows(
-  applications: EventApplicationInput[],
-  _eventsPerApplication = 2,
-  seed = 1500,
-): EventRow[] {
+export function createEventRows(seed = 1500): EventRow[] {
   faker.seed(seed);
   faker.setDefaultRefDate("2026-01-01T00:00:00.000Z");
+
+  return [...EVENT_FLOW_STAGE_SET].map((type, index) => {
+    faker.seed(seed + index);
+    const anchorDate = faker.date.recent({ days: 60 });
+    const createdAt = new Date(anchorDate);
+    const stageCopy: EventStageCopy = EVENT_COPY_BY_STAGE[type];
+
+    return {
+      id: faker.string.uuid(),
+      type,
+      title: stageCopy.title,
+      description: stageCopy.description,
+      created_at: createdAt.toISOString(),
+      updated_at: createdAt.toISOString(),
+    };
+  });
+}
+
+export function createApplicationEventRows(
+  applications: EventApplicationInput[],
+  events: EventRow[],
+  _eventsPerApplication = 2,
+  seed = 1501,
+): ApplicationEventRow[] {
+  faker.seed(seed);
+  faker.setDefaultRefDate("2026-01-01T00:00:00.000Z");
+
+  const eventIdByStage = new Map(
+    events.map((eventRow) => [eventRow.type, eventRow.id]),
+  );
 
   return applications.flatMap((application, applicationIndex) => {
     const lifecycleStatuses: string[] = [
@@ -92,25 +120,25 @@ export function createEventRows(
     const seededStatus =
       lifecycleStatuses[applicationIndex % lifecycleStatuses.length] ??
       "applied";
-    const { completedStages, futureStages } = splitStagesByStatus(seededStatus);
-    const pendingStages = futureStages.filter(
-      (stage) => !completedStages.includes(stage),
-    );
+    const { completedStages } = splitStagesByStatus(seededStatus);
+    const baseDate = faker.date.recent({ days: 60 });
+    const baseTime = baseDate.getTime();
 
-    return pendingStages.map((type, index) => {
-      faker.seed(seed + applicationIndex * 100 + index);
-      const anchorDate = faker.date.recent({ days: 60 });
-      const createdAt = new Date(anchorDate);
-      const stageCopy: EventStageCopy = EVENT_COPY_BY_STAGE[type];
+    return [...EVENT_FLOW_STAGE_SET].map((stage, stageIndex) => {
+      const stageEventAt = completedStages.includes(stage)
+        ? new Date(baseTime + stageIndex * 3600_000).toISOString()
+        : null;
+      const eventId = eventIdByStage.get(stage);
+
+      if (!eventId) {
+        throw new Error(`Missing canonical event row for stage: ${stage}`);
+      }
 
       return {
-        id: faker.string.uuid(),
         application_id: application.id,
-        type,
-        title: stageCopy.title,
-        description: stageCopy.description,
-        created_at: createdAt.toISOString(),
-        updated_at: createdAt.toISOString(),
+        event_id: eventId,
+        event_at: stageEventAt,
+        created_at: new Date(baseTime).toISOString(),
       };
     });
   });

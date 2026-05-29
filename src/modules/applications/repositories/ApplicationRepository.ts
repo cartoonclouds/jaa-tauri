@@ -19,6 +19,7 @@ import { ApplicationRepositoryCreateSchema } from "@modules/applications/domain/
 import {
   EVENT_COPY_BY_STAGE,
   EVENT_FLOW_STAGE_SET,
+  type InteractionStage,
 } from "@modules/events/constants";
 import {
   buildSearchWhereClause,
@@ -94,15 +95,17 @@ export class ApplicationRepository implements IApplicationRepository {
       SELECT
         ae.application_id,
         e.type,
+        ae.event_at,
         ROW_NUMBER() OVER (
           PARTITION BY ae.application_id
           ORDER BY
+            ae.event_at DESC,
             ae.created_at DESC,
-            e.created_at DESC,
             e.id DESC
         ) AS rn
       FROM application_events ae
       INNER JOIN events e ON e.id = ae.event_id
+      WHERE ae.event_at IS NOT NULL
     ) latest_event
       ON latest_event.application_id = applications.id
      AND latest_event.rn = 1
@@ -139,26 +142,50 @@ export class ApplicationRepository implements IApplicationRepository {
   private async ensureDefaultFlowEventsLinked(
     applicationId: string,
   ): Promise<void> {
-    const defaultStages = [...EVENT_FLOW_STAGE_SET].reverse();
+    const canonicalEventsByStage = await this.ensureCanonicalFlowEvents();
+    const defaultStages = [...EVENT_FLOW_STAGE_SET];
 
     for (const stage of defaultStages) {
-      const eventId = crypto.randomUUID();
+      const eventId = canonicalEventsByStage.get(stage);
+      if (!eventId) {
+        continue;
+      }
 
       await this.db.execute(
-        "INSERT INTO events (id, type, title, description, created_at, updated_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+        "INSERT OR IGNORE INTO application_events (application_id, event_id, event_at, created_at) VALUES ($1, $2, NULL, CURRENT_TIMESTAMP)",
+        [applicationId, eventId],
+      );
+    }
+  }
+
+  private async ensureCanonicalFlowEvents(): Promise<
+    Map<InteractionStage, string>
+  > {
+    const eventMap = new Map<InteractionStage, string>();
+
+    for (const stage of EVENT_FLOW_STAGE_SET) {
+      await this.db.execute(
+        "INSERT OR IGNORE INTO events (id, type, title, description, created_at, updated_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
         [
-          eventId,
+          crypto.randomUUID(),
           stage,
           EVENT_COPY_BY_STAGE[stage].title,
           EVENT_COPY_BY_STAGE[stage].description,
         ],
       );
 
-      await this.db.execute(
-        "INSERT INTO application_events (application_id, event_id) VALUES ($1, $2)",
-        [applicationId, eventId],
+      const rows = await this.db.select<{ id: string }>(
+        "SELECT id FROM events WHERE type = $1 ORDER BY id ASC LIMIT 1",
+        [stage],
       );
+
+      const eventId = rows[0]?.id;
+      if (eventId) {
+        eventMap.set(stage, eventId);
+      }
     }
+
+    return eventMap;
   }
 
   private async withTags(application: Application): Promise<Application> {

@@ -1,6 +1,7 @@
 import { INTERACTION_STAGES } from "@modules/events/constants";
 import {
   DateTimeSchema,
+  NullableDateTimeSchema,
   NullableStringSchema,
   UuidSchema,
 } from "@shared/domain/zod/fields";
@@ -8,11 +9,12 @@ import { z } from "zod";
 
 /** Runtime schema for persisted event entities. */
 export const EventSchema = z.object({
-  id: UuidSchema,
+  id: z.string().min(1),
   applicationId: UuidSchema,
   type: z.enum(INTERACTION_STAGES),
   title: z.string().min(1),
   description: NullableStringSchema,
+  eventAt: NullableDateTimeSchema,
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });

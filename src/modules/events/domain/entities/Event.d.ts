@@ -4,7 +4,7 @@ import type { InteractionStage } from "@modules/events/constants";
  * Event entity used to track application interactions.
  */
 export interface Event {
-  /** Unique event identifier. */
+  /** Unique application-event link identifier. */
   id: string;
   /** Related application identifier. */
   applicationId: string;
@@ -14,6 +14,8 @@ export interface Event {
   title: string;
   /** Free-form event description. */
   description: string | null;
+  /** Completion timestamp; null means this stage is still pending. */
+  eventAt: Date | null;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */

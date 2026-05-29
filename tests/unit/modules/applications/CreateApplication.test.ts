@@ -1,11 +1,18 @@
 import { ApplicationRepository } from "@modules/applications";
 import { ApplicationStatus } from "@modules/applications/types/enums";
-import { EVENT_FLOW_STAGE_SET } from "@modules/events/presentation/constants/interactionStages";
+import { EVENT_FLOW_STAGE_SET } from "@modules/events/constants";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
   const db = {
-    select: vi.fn((..._args: unknown[]) => Promise.resolve([] as unknown[])),
+    select: vi.fn((sql: unknown, args?: unknown[]) => {
+      const statement = String(sql);
+      if (statement.includes("SELECT id FROM events WHERE type = $1")) {
+        return Promise.resolve([{ id: args?.[0] as string }]);
+      }
+
+      return Promise.resolve([] as unknown[]);
+    }),
     execute: vi.fn((..._args: unknown[]) =>
       Promise.resolve({ rowsAffected: 1 }),
     ),
@@ -40,11 +47,13 @@ describe("ApplicationRepository.create", () => {
 
     const eventInsertCalls = vi
       .mocked(db.execute)
-      .mock.calls.filter(([sql]) => String(sql).includes("INSERT INTO events"));
+      .mock.calls.filter(([sql]) =>
+        String(sql).includes("INSERT OR IGNORE INTO events"),
+      );
     const eventLinkCalls = vi
       .mocked(db.execute)
       .mock.calls.filter(([sql]) =>
-        String(sql).includes("INSERT INTO application_events"),
+        String(sql).includes("INSERT OR IGNORE INTO application_events"),
       );
 
     expect(eventInsertCalls.length).toBe(EVENT_FLOW_STAGE_SET.size);

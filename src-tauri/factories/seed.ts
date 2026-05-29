@@ -473,34 +473,63 @@ function main(): void {
       seed + 112,
     );
 
-    const events = createEventRows(
-      applications.map((application) => ({
-        id: application.id,
-        company_id: application.company_id,
-      })),
-      seedConfig.eventsPerApplication,
-      seed + 120,
+    const events = createEventRows(seed + 120);
+
+    const applicationEvents = applications.flatMap((application) =>
+      events.map((eventRow, stageIndex) => {
+        const completedWindow = Math.max(seedConfig.eventsPerApplication, 0);
+        const completedAt =
+          stageIndex < completedWindow
+            ? new Date(
+                Date.UTC(2026, 0, 1, Math.min(stageIndex, 23), 0, 0),
+              ).toISOString()
+            : null;
+
+        return {
+          application_id: application.id,
+          event_id: eventRow.id,
+          event_at: completedAt,
+          created_at: new Date(Date.UTC(2026, 0, 1, 0, 0, 0)).toISOString(),
+        };
+      }),
     );
+
+    const completedApplicationEvents = applicationEvents.filter(
+      (row) => row.event_at !== null,
+    );
+
+    const notificationEventInputs = completedApplicationEvents
+      .map((applicationEventRow) => {
+        const event = events.find(
+          (eventRow) => eventRow.id === applicationEventRow.event_id,
+        );
+        if (!event) {
+          return null;
+        }
+
+        return {
+          id: event.id,
+          application_id: applicationEventRow.application_id,
+          type: event.type,
+          title: event.title,
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          id: string;
+          application_id: string;
+          type: string;
+          title: string;
+        } => row !== null,
+      );
 
     const notifications = createNotificationRows(
       applications.map((application) => ({ id: application.id })),
-      events.map((event) => ({
-        id: event.id,
-        application_id: event.application_id,
-        type: event.type,
-        title: event.title,
-      })),
+      notificationEventInputs,
       seedConfig.notificationsPerApplication,
       seed + 130,
-    );
-
-    const applicationEvents = events.map((event) => ({
-      application_id: event.application_id,
-      event_id: event.id,
-    }));
-
-    const eventRows = events.map(
-      ({ application_id: _application_id, ...eventRow }) => eventRow,
     );
 
     const applicationDocuments = createApplicationDocumentRows(
@@ -535,7 +564,7 @@ function main(): void {
       application_tags: insertMany(db, "application_tags", applicationTags),
       company_tags: insertMany(db, "company_tags", companyTags),
       contact_tags: insertMany(db, "contact_tags", contactTags),
-      events: insertMany(db, "events", eventRows),
+      events: insertMany(db, "events", events),
       application_events: insertMany(
         db,
         "application_events",

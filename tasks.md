@@ -32,3 +32,12 @@ Review all files and fix any existing issues.
 When clicking on date input, some of the popup shown is being hidden behind the main window. Make sure this is alway on top and fully visible.
 
 Incorporate all constants module code into settings.
+
+
+When editing a flow state event, remove all options already associated with that application from the selectbox (except for that selected event)
+
+Remove the custom connector, update this component to adhere to PrimeVue's documentation https://primevue.org/stepper/
+
+Add to the application drawer timeline a small icon in the top/right of the section when on hover shows text telling the user they can add/remove events when editing the application.
+
+Update all factories by comparing them to their related migration.
