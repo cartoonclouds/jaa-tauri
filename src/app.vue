@@ -1,13 +1,13 @@
 <script setup lang="ts">
   import { logError, logInfo } from "@infra/logging/tauriLog.client";
-  import CompaniesModal from "@modules/companies/presentation/components/modals/CompaniesModal.vue";
-  import ContactsModal from "@modules/contacts/presentation/components/modals/ContactsModal.vue";
+  import CompaniesDialog from "@modules/companies/presentation/components/dialogs/CompaniesDialog.vue";
+  import ContactsDialog from "@modules/contacts/presentation/components/dialogs/ContactsDialog.vue";
   import { useProfile } from "@modules/profile";
   import {
     getOnboardingCompleted,
     setOnboardingCompleted,
   } from "@modules/settings/persistence";
-  import SettingsModal from "@modules/settings/presentation/components/modals/SettingsModal.vue";
+  import SettingsDialog from "@modules/settings/presentation/components/dialogs/SettingsDialog.vue";
   import { invoke, isTauri } from "@tauri-apps/api/core";
   import { onMounted } from "vue";
 
@@ -63,9 +63,9 @@
   <div class="app-dark min-h-screen">
     <NuxtLayout>
       <NuxtPage />
-      <CompaniesModal v-model:visible="isCompaniesModalVisible" />
-      <ContactsModal v-model:visible="isContactsModalVisible" />
-      <SettingsModal v-model:visible="isSettingsModalVisible" />
+      <CompaniesDialog v-model:visible="isCompaniesModalVisible" />
+      <ContactsDialog v-model:visible="isContactsModalVisible" />
+      <SettingsDialog v-model:visible="isSettingsModalVisible" />
       <Toast />
     </NuxtLayout>
   </div>

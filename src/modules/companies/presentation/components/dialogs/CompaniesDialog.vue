@@ -8,7 +8,7 @@
   import { useCompany } from "@modules/companies";
   import { useCompanyDatatable } from "@modules/companies/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/constants";
-  import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
+  import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
   import { computed, ref } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -166,7 +166,7 @@
         </Column>
       </DataTable>
 
-      <CompanyEditorModal
+      <CompanyEditorDialog
         v-model:visible="isEditorModalVisible"
         :company="selectedCompany"
         :busy="isSavingCompany"

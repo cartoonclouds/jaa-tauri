@@ -9,6 +9,7 @@
     type InteractionStage,
     isInteractionStage,
   } from "@modules/events/constants";
+  import EventInteractionEditDialog from "@modules/events/presentation/components/dialogs/EventInteractionEditDialog.vue";
   import { toErrorMessage } from "@shared/utils/error";
   import { computed, reactive, ref, watch } from "vue";
 
@@ -508,91 +509,19 @@
       </Tree>
     </div>
 
-    <Dialog
+    <EventInteractionEditDialog
       v-model:visible="isEditDialogVisible"
-      modal
-      header="Edit interaction"
-      :style="{ width: '38rem' }"
-      :breakpoints="{ '1199px': '70vw', '575px': '95vw' }"
-    >
-      <Message v-if="eventErrorMessage" severity="error" class="mb-4">
-        {{ eventErrorMessage }}
-      </Message>
-
-      <div class="grid gap-3 md:grid-cols-2">
-        <div class="space-y-1 md:col-span-2">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="edit-event-type"
-          >
-            Interaction stage
-          </label>
-          <InputText
-            id="edit-event-type"
-            v-model="editForm.type"
-            fluid
-            list="interaction-stage-options"
-            placeholder="Interview/Technical"
-          />
-        </div>
-
-        <div class="space-y-1 md:col-span-2">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="edit-event-title"
-          >
-            Title
-          </label>
-          <InputText id="edit-event-title" v-model="editForm.title" fluid />
-        </div>
-
-        <div class="space-y-1 md:col-span-2">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="edit-event-description"
-          >
-            Description
-          </label>
-          <Textarea
-            id="edit-event-description"
-            v-model="editForm.description"
-            fluid
-            auto-resize
-            rows="3"
-          />
-        </div>
-      </div>
-
-      <template #footer>
-        <div class="flex w-full justify-between gap-2">
-          <Button
-            type="button"
-            severity="danger"
-            outlined
-            label="Delete"
-            :loading="isSavingEdit"
-            @click="deleteFromEditDialog"
-          />
-          <div class="flex gap-2">
-            <Button
-              type="button"
-              severity="secondary"
-              label="Cancel"
-              :disabled="isSavingEdit"
-              @click="isEditDialogVisible = false"
-            />
-            <Button
-              type="button"
-              label="Save"
-              :loading="isSavingEdit"
-              @click="submitEdit"
-            />
-          </div>
-        </div>
-      </template>
-    </Dialog>
+      :event-type="editForm.type"
+      :title="editForm.title"
+      :description="editForm.description"
+      :is-saving="isSavingEdit"
+      :error-message="eventErrorMessage"
+      :muted-text-style="mutedTextStyle"
+      @update:event-type="editForm.type = $event"
+      @update:title="editForm.title = $event"
+      @update:description="editForm.description = $event"
+      @save="submitEdit"
+      @delete="deleteFromEditDialog"
+    />
   </div>
 </template>

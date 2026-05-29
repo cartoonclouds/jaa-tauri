@@ -4,6 +4,7 @@
 
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
+  import ApplicationDetailsSummaryEditFlowStepDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsSummaryEditFlowStepDialog.vue";
   import { useEvent } from "@modules/events/composables/useEvent";
   import {
     EVENT_COPY_BY_STAGE,
@@ -361,66 +362,15 @@
     Summary details are available after selecting or saving an application.
   </Message>
 
-  <Dialog
+  <ApplicationDetailsSummaryEditFlowStepDialog
     v-model:visible="isEditDialogVisible"
-    modal
-    header="Edit Flow Step"
-    class="w-full! max-w-lg"
-  >
-    <div class="space-y-3">
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700">Stage</label>
-        <Select
-          v-model="editForm.type"
-          :options="[...INTERACTION_STAGES]"
-          fluid
-        />
-      </div>
-
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700"
-          >Event Date/Time</label
-        >
-        <DatePicker
-          v-model="editForm.eventAt"
-          show-time
-          hour-format="24"
-          show-icon
-          show-clear
-          fluid
-        />
-      </div>
-    </div>
-
-    <template #footer>
-      <div class="flex justify-end gap-2 w-full">
-        <Button
-          v-if="selectedStageEventId"
-          type="button"
-          label="Delete"
-          severity="danger"
-          text
-          :disabled="isMutatingEvent"
-          class="mr-auto"
-          @click="requestDeleteStageEdit"
-        />
-        <Button
-          type="button"
-          label="Cancel"
-          severity="secondary"
-          text
-          :disabled="isMutatingEvent"
-          @click="isEditDialogVisible = false"
-        />
-        <Button
-          type="button"
-          label="Save"
-          :loading="isMutatingEvent"
-          @click="saveStageEdit"
-        />
-      </div>
-    </template>
-  </Dialog>
+    v-model:stage-type="editForm.type"
+    v-model:event-at="editForm.eventAt"
+    :selected-stage-event-id="selectedStageEventId"
+    :is-mutating-event="isMutatingEvent"
+    @save="saveStageEdit"
+    @request-delete="requestDeleteStageEdit"
+  />
 
   <ConfirmActionDialog
     v-model:visible="isDeleteConfirmVisible"

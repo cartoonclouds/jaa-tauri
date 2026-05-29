@@ -9,10 +9,10 @@
   import { useContact } from "@modules/contacts";
   import { useContactDatatable } from "@modules/contacts/composables/useContactDatatable";
   import { contactsSearchPlaceholder } from "@modules/contacts/constants";
-  import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
+  import ContactEditorDialog from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
+  import ContactLocationMapDialog from "@modules/contacts/presentation/components/dialogs/ContactLocationMapDialog.vue";
   import { computed, ref } from "vue";
 
-  import LocationMapFull from "@/components/ui/LocationMapFull.vue";
   import LocationMapPreview from "@/components/ui/LocationMapPreview.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
@@ -226,29 +226,13 @@
         </Column>
       </DataTable>
 
-      <Dialog
+      <ContactLocationMapDialog
         v-model:visible="mapDialogVisible"
-        modal
-        :style="{ width: 'min(64rem, 92vw)' }"
-        :header="
-          selectedMapContact ? `Map - ${selectedMapContact.fullName}` : 'Map'
-        "
+        :contact="selectedMapContact"
         @hide="closeMapDialog"
-      >
-        <LocationMapFull
-          :latitude="selectedMapContact?.locationLat ?? null"
-          :longitude="selectedMapContact?.locationLng ?? null"
-          :location-text="selectedMapContact?.locationText ?? null"
-          :title="
-            selectedMapContact
-              ? `Map for ${selectedMapContact.fullName}`
-              : 'Contact location map'
-          "
-          height-class="h-[26rem]"
-        />
-      </Dialog>
+      />
 
-      <ContactEditorModal
+      <ContactEditorDialog
         v-model:visible="isEditorModalVisible"
         :contact="selectedContact"
         :busy="isSavingContact"

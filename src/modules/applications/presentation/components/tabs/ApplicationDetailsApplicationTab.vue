@@ -11,6 +11,7 @@
 
   import ApplicationDetailsView from "@modules/applications/presentation/components/ApplicationDetailsView.vue";
   import ApplicationForm from "@modules/applications/presentation/components/ApplicationForm.vue";
+  import ApplicationDetailsStageDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsStageDialog.vue";
   import { useEvent } from "@modules/events/composables/useEvent";
   import {
     EVENT_COPY_BY_STAGE,
@@ -619,40 +620,11 @@
     No application details are currently available.
   </Message>
 
-  <Dialog
+  <ApplicationDetailsStageDialog
     v-model:visible="isStageDialogVisible"
-    modal
-    :header="stageDialogMode === 'create' ? 'Add Flow Step' : 'Edit Flow Step'"
-    class="w-full! max-w-lg"
-  >
-    <div class="space-y-3">
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700">Stage</label>
-        <Select
-          v-model="stageForm.type"
-          :options="[...INTERACTION_STAGES]"
-          fluid
-        />
-      </div>
-    </div>
-
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <Button
-          type="button"
-          label="Cancel"
-          severity="secondary"
-          text
-          :disabled="isMutatingEvent"
-          @click="isStageDialogVisible = false"
-        />
-        <Button
-          type="button"
-          :label="stageDialogMode === 'create' ? 'Add Step' : 'Save'"
-          :loading="isMutatingEvent"
-          @click="saveStageDialog"
-        />
-      </div>
-    </template>
-  </Dialog>
+    v-model:stage-type="stageForm.type"
+    :mode="stageDialogMode"
+    :is-mutating-event="isMutatingEvent"
+    @save="saveStageDialog"
+  />
 </template>

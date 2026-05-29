@@ -11,7 +11,7 @@
     CompanyUpdatePayload,
   } from "@modules/companies";
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
-  import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
+  import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import type {
     ContactCreatePayload,
     ContactUpdatePayload,
@@ -24,9 +24,9 @@
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
   import { useCompany } from "@modules/companies";
-  import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
+  import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
   import { useContact } from "@modules/contacts";
-  import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
+  import ContactEditorDialog from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import { useEvent } from "@modules/events";
   import { EVENT_COPY_BY_STAGE } from "@modules/events/constants";
   import { useTag } from "@modules/tags";
@@ -554,7 +554,7 @@
       @request-unlink-contact="onRequestUnlinkContact"
     />
 
-    <CompanyEditorModal
+    <CompanyEditorDialog
       v-model:visible="isCompanyEditorVisible"
       :company="selectedCompany"
       :busy="isSavingCompany"
@@ -563,7 +563,7 @@
       @request-open-contact="openContactEditorById"
     />
 
-    <ContactEditorModal
+    <ContactEditorDialog
       v-model:visible="isContactEditorVisible"
       :contact="selectedContact"
       :application-id="selectedApplication?.id ?? null"
