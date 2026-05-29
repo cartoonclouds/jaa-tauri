@@ -1,7 +1,6 @@
-import * as applicationFormOptions from "../../modules/applications/presentation/constants/applicationFormOptions";
-import * as interactionStageConstants from "../../modules/events/domain/constants/interactionStage";
-import * as interactionStagePresentationConstants from "../../modules/events/presentation/constants/interactionStages";
-import * as onboardingDefaultSkillOptions from "../../modules/onboarding/presentation/constants/defaultSkillOptions";
+import * as applicationFormOptions from "../../modules/applications/constants";
+import * as interactionStageConstants from "../../modules/events/constants";
+import * as onboardingDefaultSkillOptions from "../../modules/onboarding/constants";
 
 /**
  * Normalized row payload persisted into the constants table.
@@ -38,10 +37,6 @@ export const CONSTANT_MODULE_SOURCES = [
   {
     namespace: "events.domain.constants.interactionStage",
     module: interactionStageConstants,
-  },
-  {
-    namespace: "events.presentation.constants.interactionStages",
-    module: interactionStagePresentationConstants,
   },
   {
     namespace: "onboarding.presentation.constants.defaultSkillOptions",

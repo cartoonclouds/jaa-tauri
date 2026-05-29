@@ -4,7 +4,7 @@ import { useCompany } from "@modules/companies";
 import {
   COMPANY_SEARCH_FIELDS,
   type CompanySearchField,
-} from "@modules/companies/constants/companyDatatableFields";
+} from "@modules/companies/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

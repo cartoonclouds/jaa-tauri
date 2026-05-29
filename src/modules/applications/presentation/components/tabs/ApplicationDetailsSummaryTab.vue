@@ -4,14 +4,14 @@
 
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
-  import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
   import { useEvent } from "@modules/events/composables/useEvent";
   import {
     EVENT_COPY_BY_STAGE,
     INTERACTION_STAGES,
     type InteractionStage,
     isInteractionStage,
-  } from "@modules/events/presentation/constants/interactionStages";
+  } from "@modules/events/constants";
+  import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
   import { computed, reactive, ref } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
@@ -369,4 +369,3 @@
     @confirm="deleteStageEdit"
   />
 </template>
-

@@ -3,7 +3,7 @@
 
   import { useDocument } from "@modules/documents";
   import { useDocumentDatatable } from "@modules/documents/composables/useDocumentDatatable";
-  import { documentsSearchPlaceholder } from "@modules/documents/presentation/constants/documentDatatable";
+  import { documentsSearchPlaceholder } from "@modules/documents/constants";
   import { getDocumentMimeTypeFromFilePath } from "@modules/documents/utils/documentUtils";
   import { reactive, ref } from "vue";
 
@@ -156,4 +156,3 @@
     </DataTable>
   </div>
 </template>
-

@@ -19,16 +19,16 @@
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
   import { useApplication } from "@modules/applications";
-  import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
-  import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
   import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
+  import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
+   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
   import { useCompany } from "@modules/companies";
   import CompanyEditorModal from "@modules/companies/presentation/components/modals/CompanyEditorModal.vue";
   import { useContact } from "@modules/contacts";
   import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
   import { useEvent } from "@modules/events";
-  import { EVENT_COPY_BY_STAGE } from "@modules/events/presentation/constants/interactionStages";
+  import { EVENT_COPY_BY_STAGE } from "@modules/events/constants";
   import { useTag } from "@modules/tags";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
@@ -568,4 +568,3 @@
     />
   </div>
 </template>
-

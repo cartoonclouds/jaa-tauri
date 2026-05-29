@@ -1,6 +1,4 @@
-/**
- * Curated default skill options shown in the onboarding flow.
- */
+/** Curated default skill options shown in the onboarding flow. */
 export const defaultSkillOptions = [
   "Communication",
   "Customer Service",

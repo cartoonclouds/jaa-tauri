@@ -1,4 +1,4 @@
-import { INTERACTION_STAGES } from "@modules/events/domain/constants/interactionStage";
+import { INTERACTION_STAGES } from "@modules/events/constants";
 import {
   DateTimeSchema,
   NullableStringSchema,

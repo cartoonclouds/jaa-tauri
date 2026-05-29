@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
-import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants/companyDatatableFields";
+import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants";
 import { CompanyRepositoryCreateSchema } from "@modules/companies/domain/zod/company.schema";
 import {
   buildSearchWhereClause,

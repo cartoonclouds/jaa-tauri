@@ -4,7 +4,7 @@ import { useContact } from "@modules/contacts";
 import {
   CONTACT_SEARCH_FIELDS,
   type ContactSearchField,
-} from "@modules/contacts/constants/contactDatatableFields";
+} from "@modules/contacts/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

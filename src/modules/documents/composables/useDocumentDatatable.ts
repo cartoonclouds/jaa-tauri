@@ -4,7 +4,7 @@ import { useDocument } from "@modules/documents";
 import {
   DOCUMENT_SEARCH_FIELDS,
   type DocumentSearchField,
-} from "@modules/documents/constants/documentDatatableFields";
+} from "@modules/documents/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

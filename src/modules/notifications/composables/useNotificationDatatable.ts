@@ -4,7 +4,7 @@ import { useNotification } from "@modules/notifications";
 import {
   NOTIFICATION_SEARCH_FIELDS,
   type NotificationSearchField,
-} from "@modules/notifications/constants/notificationDatatableFields";
+} from "@modules/notifications/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

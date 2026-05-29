@@ -4,7 +4,7 @@ import { useTag } from "@modules/tags";
 import {
   TAG_SEARCH_FIELDS,
   type TagSearchField,
-} from "@modules/tags/constants/tagDatatableFields";
+} from "@modules/tags/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

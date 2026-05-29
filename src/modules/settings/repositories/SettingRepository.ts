@@ -6,7 +6,7 @@ import type {
   IRepository,
 } from "@shared/types";
 
-import { SETTING_SEARCH_FIELDS } from "@modules/settings/constants/settingDatatableFields";
+import { SETTING_SEARCH_FIELDS } from "@modules/settings/constants";
 import { SettingRepositoryUpsertSchema } from "@modules/settings/domain/zod/settings.schema";
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
 import {

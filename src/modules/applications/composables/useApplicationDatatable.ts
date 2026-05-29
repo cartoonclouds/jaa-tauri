@@ -8,7 +8,7 @@ import {
   type ApplicationSearchField,
   type ApplicationSearchFieldOption,
   type ApplicationSortableField,
-} from "@modules/applications/constants/applicationDatatableFields";
+} from "@modules/applications/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

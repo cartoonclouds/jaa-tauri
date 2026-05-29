@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
-import { PROFILE_SEARCH_FIELDS } from "@modules/profile/constants/profileDatatableFields";
+import { PROFILE_SEARCH_FIELDS } from "@modules/profile/constants";
 import {
   ProfileRepositoryCreateSchema,
   ProfileRepositoryUpdateSchema,
@@ -221,11 +221,3 @@ export class ProfileRepository implements IProfileRepository {
     await this.db.execute("DELETE FROM profiles WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

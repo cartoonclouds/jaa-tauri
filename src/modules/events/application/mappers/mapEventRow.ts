@@ -1,6 +1,6 @@
 import type { Event } from "@modules/events/domain/entities/Event";
 
-import { toInteractionStage } from "@modules/events/domain/constants/interactionStage";
+import { toInteractionStage } from "@modules/events/constants";
 import {
   mapAuditTimestamps,
   toNullableString,

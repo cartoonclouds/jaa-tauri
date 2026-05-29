@@ -4,7 +4,7 @@ import { useProfile } from "@modules/profile";
 import {
   PROFILE_SEARCH_FIELDS,
   type ProfileSearchField,
-} from "@modules/profile/constants/profileDatatableFields";
+} from "@modules/profile/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

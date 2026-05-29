@@ -1,4 +1,4 @@
-import type { InteractionStage } from "@modules/events/domain/constants/interactionStage";
+import type { InteractionStage } from "@modules/events/constants";
 
 /**
  * Event entity used to track application interactions.

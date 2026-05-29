@@ -4,7 +4,7 @@ import { useSetting } from "@modules/settings";
 import {
   SETTING_SEARCH_FIELDS,
   type SettingSearchField,
-} from "@modules/settings/constants/settingDatatableFields";
+} from "@modules/settings/constants";
 
 import { useServerDatatable } from "@/composables/useServerDatatable";
 

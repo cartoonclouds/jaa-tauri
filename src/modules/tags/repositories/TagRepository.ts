@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
-import { TAG_SEARCH_FIELDS } from "@modules/tags/constants/tagDatatableFields";
+import { TAG_SEARCH_FIELDS } from "@modules/tags/constants";
 import { TagRepositoryCreateSchema } from "@modules/tags/domain/zod/tag.schema";
 import {
   buildSearchWhereClause,
@@ -124,11 +124,3 @@ export class TagRepository implements ITagRepository {
     await this.db.execute("DELETE FROM tags WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

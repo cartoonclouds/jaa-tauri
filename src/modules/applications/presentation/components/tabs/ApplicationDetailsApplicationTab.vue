@@ -18,7 +18,7 @@
     INTERACTION_STAGES,
     type InteractionStage,
     isInteractionStage,
-  } from "@modules/events/presentation/constants/interactionStages";
+  } from "@modules/events/constants";
   import { computed, reactive, ref, watch } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -429,4 +429,3 @@
     </template>
   </Dialog>
 </template>
-

@@ -3,7 +3,7 @@
 
   import { useNotification } from "@modules/notifications/composables/useNotification";
   import { useNotificationDatatable } from "@modules/notifications/composables/useNotificationDatatable";
-  import { notificationsSearchPlaceholder } from "@modules/notifications/presentation/constants/notificationDatatable";
+  import { notificationsSearchPlaceholder } from "@modules/notifications/constants";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -157,4 +157,3 @@
     </DataTable>
   </div>
 </template>
-

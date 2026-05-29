@@ -7,9 +7,9 @@
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
   import { useContact } from "@modules/contacts";
-  import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
   import { useContactDatatable } from "@modules/contacts/composables/useContactDatatable";
-  import { contactsSearchPlaceholder } from "@modules/contacts/presentation/constants/contactDatatable";
+  import { contactsSearchPlaceholder } from "@modules/contacts/constants";
+  import ContactEditorModal from "@modules/contacts/presentation/components/modals/ContactEditorModal.vue";
   import { computed, ref } from "vue";
 
   import LocationMapFull from "@/components/ui/LocationMapFull.vue";
@@ -257,4 +257,3 @@
     </div>
   </Dialog>
 </template>
-

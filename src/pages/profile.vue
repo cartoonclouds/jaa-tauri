@@ -3,7 +3,7 @@
 
   import { useProfile } from "@modules/profile/composables/useProfile";
   import { useProfileDatatable } from "@modules/profile/composables/useProfileDatatable";
-  import { profileSearchPlaceholder } from "@modules/profile/presentation/constants/profileDatatable";
+  import { profileSearchPlaceholder } from "@modules/profile/constants";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -157,4 +157,3 @@
     </DataTable>
   </div>
 </template>
-

@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapContactRowToEntity } from "@modules/contacts/application/mappers/mapContactRow";
-import { CONTACT_SEARCH_FIELDS } from "@modules/contacts/constants/contactDatatableFields";
+import { CONTACT_SEARCH_FIELDS } from "@modules/contacts/constants";
 import {
   ContactRepositoryCreateSchema,
   ContactTypeSchema,

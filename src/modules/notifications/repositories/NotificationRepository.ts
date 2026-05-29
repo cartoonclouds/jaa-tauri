@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
-import { NOTIFICATION_SEARCH_FIELDS } from "@modules/notifications/constants/notificationDatatableFields";
+import { NOTIFICATION_SEARCH_FIELDS } from "@modules/notifications/constants";
 import { NotificationRepositoryCreateSchema } from "@modules/notifications/domain/zod/notification.schema";
 import {
   buildSearchWhereClause,
@@ -171,11 +171,3 @@ export class NotificationRepository implements INotificationRepository {
     await this.db.execute("DELETE FROM notifications WHERE id = $1", [id]);
   }
 }
-
-
-
-
-
-
-
-

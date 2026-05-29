@@ -3,7 +3,7 @@
 
   import { useTag } from "@modules/tags/composables/useTag";
   import { useTagDatatable } from "@modules/tags/composables/useTagDatatable";
-  import { tagsSearchPlaceholder } from "@modules/tags/presentation/constants/tagDatatable";
+  import { tagsSearchPlaceholder } from "@modules/tags/constants";
   import { reactive, ref } from "vue";
 
   import { definePageMeta } from "#imports";
@@ -143,4 +143,3 @@
     </DataTable>
   </div>
 </template>
-

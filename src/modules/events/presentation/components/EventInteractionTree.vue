@@ -8,7 +8,7 @@
     INTERACTION_STAGES,
     type InteractionStage,
     isInteractionStage,
-  } from "@modules/events/presentation/constants/interactionStages";
+  } from "@modules/events/constants";
   import { toErrorMessage } from "@shared/utils/error";
   import { computed, reactive, ref, watch } from "vue";
 
@@ -596,4 +596,3 @@
     </Dialog>
   </div>
 </template>
-

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  import type { InteractionStage } from "@modules/events/presentation/constants/interactionStages";
+  import type { InteractionStage } from "@modules/events/constants";
 
-  import { EVENT_COPY_BY_STAGE } from "@modules/events/presentation/constants/interactionStages";
+  import { EVENT_COPY_BY_STAGE } from "@modules/events/constants";
   import { computed, type CSSProperties } from "vue";
 
   /**

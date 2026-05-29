@@ -7,7 +7,7 @@ import type {
 } from "@shared/types";
 
 import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
-import { DOCUMENT_SEARCH_FIELDS } from "@modules/documents/constants/documentDatatableFields";
+import { DOCUMENT_SEARCH_FIELDS } from "@modules/documents/constants";
 import { DocumentRepositoryCreateSchema } from "@modules/documents/domain/zod/document.schema";
 import {
   buildSearchWhereClause,

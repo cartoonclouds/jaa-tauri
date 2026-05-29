@@ -14,12 +14,12 @@ import { mapApplicationRowToEntity } from "@modules/applications/application/map
 import {
   APPLICATION_SEARCH_FIELDS,
   APPLICATION_SORTABLE_COLUMN_MAP,
-} from "@modules/applications/constants/applicationDatatableFields";
+} from "@modules/applications/constants";
 import { ApplicationRepositoryCreateSchema } from "@modules/applications/domain/zod/application.schema";
 import {
   EVENT_COPY_BY_STAGE,
   EVENT_FLOW_STAGE_SET,
-} from "@modules/events/presentation/constants/interactionStages";
+} from "@modules/events/constants";
 import {
   buildSearchWhereClause,
   DEFAULT_CREATED_AT_ORDER_BY,

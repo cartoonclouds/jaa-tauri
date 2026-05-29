@@ -1,5 +1,5 @@
 import type { ApplicationBasePayload } from "@modules/applications/types/payloads";
-import type { InteractionStage } from "@modules/events/presentation/constants/interactionStages";
+import type { InteractionStage } from "@modules/events/constants";
 
 import { ApplicationStatus } from "@modules/applications/types/enums";
 
