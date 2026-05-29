@@ -11,6 +11,7 @@
   import type { EditableContact } from "@modules/contacts/types/presentation";
 
   import { scrollDrawerContentToTop } from "@modules/applications/presentation/utils/drawerScrollUtils";
+  import { formatDisplayDateTime } from "@shared/utils/toDate";
   import {
     computed,
     defineAsyncComponent,
@@ -138,7 +139,7 @@
       return "-";
     }
 
-    return props.application.appliedAt.toLocaleString();
+    return formatDisplayDateTime(props.application.appliedAt);
   });
 
   const drawerInlineStyle = computed(() => ({

@@ -13,6 +13,7 @@
     isInteractionStage,
   } from "@modules/events/constants";
   import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
+  import { formatDisplayDateTime } from "@shared/utils/toDate";
   import { computed, reactive, ref } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
@@ -25,6 +26,16 @@
     application: Application | null;
     companyName: string;
     appliedAtLabel: string;
+  }
+
+  /**
+   * Defines a rendered flow stage item for the summary stepper.
+   */
+  interface DisplayedFlowStageItem {
+    eventId: string | null;
+    stage: InteractionStage;
+    isFuture: boolean;
+    eventAtLabel: string | null;
   }
 
   const props = defineProps<Props>();
@@ -48,19 +59,6 @@
   });
 
   useBodyScrollLock(isEditDialogVisible);
-
-  /**
-   * Formats stage timestamp in a short, readable form.
-   */
-  function formatStageDate(value: Date): string {
-    return value.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
 
   const applicationStageEvents = computed<Event[]>(() => {
     const application = props.application;
@@ -136,7 +134,7 @@
     return editableStages;
   });
 
-  const displayedFlowStages = computed(() => {
+  const displayedFlowStages = computed<DisplayedFlowStageItem[]>(() => {
     const application = props.application;
     const stageEventByType = new Map<InteractionStage, Event>();
 
@@ -154,12 +152,12 @@
 
     return summaryFlowStages.value.map((stage) => {
       const event = stageEventByType.get(stage) ?? null;
-      const eventAt = event?.eventAt ?? null;
+      const eventAt: Date | null = event?.eventAt ?? null;
       return {
         eventId: event?.id ?? null,
         stage,
         isFuture: !eventAt,
-        eventAtLabel: eventAt ? formatStageDate(eventAt) : null,
+        eventAtLabel: eventAt ? formatDisplayDateTime(eventAt) : null,
       };
     });
   });

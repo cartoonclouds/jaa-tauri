@@ -11,6 +11,10 @@
   } from "@modules/events/constants";
   import EventInteractionEditDialog from "@modules/events/presentation/components/dialogs/EventInteractionEditDialog.vue";
   import { toErrorMessage } from "@shared/utils/error";
+  import {
+    formatDisplayDate,
+    formatDisplayDateTime,
+  } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -184,7 +188,7 @@
         stageNode.children = currentChildren;
       }
 
-      const eventDateLabel = event.createdAt.toLocaleDateString();
+      const eventDateLabel = formatDisplayDate(event.createdAt);
       currentChildren.push({
         key: `event:${event.id}`,
         label: `${event.title} (${eventDateLabel})`,
@@ -250,7 +254,7 @@
       return "";
     }
 
-    const eventAtLabel = event.createdAt.toLocaleString();
+    const eventAtLabel = formatDisplayDateTime(event.createdAt);
     return `${eventAtLabel} | ${event.type}`;
   }
 

@@ -30,6 +30,34 @@ export function toNullableDate(value: unknown): Date | null {
   return toDate(value);
 }
 
+const DISPLAY_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+
+const DISPLAY_DATE_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+/**
+ * Format a Date for date-only display in the UI.
+ */
+export function formatDisplayDate(value: Date): string {
+  return DISPLAY_DATE_FORMATTER.format(value);
+}
+
+/**
+ * Format a Date for date-time display in the UI.
+ */
+export function formatDisplayDateTime(value: Date): string {
+  return DISPLAY_DATE_TIME_FORMATTER.format(value);
+}
+
 /**
  * Format a Date for use with an HTML datetime-local input.
  */
@@ -90,6 +118,3 @@ export function parseDateTimeLocalValue(value: string): Date | null {
   const parsed = new Date(year, month - 1, day, hour, minute);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
-
-
-

@@ -20,6 +20,7 @@
     type InteractionStage,
     isInteractionStage,
   } from "@modules/events/constants";
+  import { formatDisplayDateTime } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -488,7 +489,7 @@
               <p class="text-xs text-surface-500">
                 {{
                   stageEvent.eventAt
-                    ? stageEvent.eventAt.toLocaleString()
+                    ? formatDisplayDateTime(stageEvent.eventAt)
                     : "Pending"
                 }}
               </p>
