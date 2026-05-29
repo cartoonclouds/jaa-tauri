@@ -1,14 +1,14 @@
 import type {
   EventStageCopy,
   InteractionStage,
-} from "../../src/modules/events/presentation/constants/interactionStages";
+} from "../../src/modules/events/constants";
 
 import { faker } from "@faker-js/faker";
 
 import {
   EVENT_COPY_BY_STAGE,
   EVENT_FLOW_STAGE_SET,
-} from "../../src/modules/events/presentation/constants/interactionStages";
+} from "../../src/modules/events/constants";
 
 export interface EventRow {
   id: string;
@@ -71,12 +71,6 @@ function splitStagesByStatus(status: string): {
   };
 }
 
-function getRejectedEventTitle(): string {
-  const rejectedTitles = ["Application rejected", "Process ended after review"];
-
-  return faker.helpers.arrayElement(rejectedTitles);
-}
-
 export function createEventRows(
   applications: EventApplicationInput[],
   _eventsPerApplication = 2,
@@ -99,12 +93,11 @@ export function createEventRows(
       lifecycleStatuses[applicationIndex % lifecycleStatuses.length] ??
       "applied";
     const { completedStages, futureStages } = splitStagesByStatus(seededStatus);
-    const flowStages = [
-      ...completedStages,
-      ...futureStages.filter((stage) => !completedStages.includes(stage)),
-    ];
+    const pendingStages = futureStages.filter(
+      (stage) => !completedStages.includes(stage),
+    );
 
-    return flowStages.map((type, index) => {
+    return pendingStages.map((type, index) => {
       faker.seed(seed + applicationIndex * 100 + index);
       const anchorDate = faker.date.recent({ days: 60 });
       const createdAt = new Date(anchorDate);
@@ -114,12 +107,7 @@ export function createEventRows(
         id: faker.string.uuid(),
         application_id: application.id,
         type,
-        title:
-          completedStages.includes(type) &&
-          type === "Decision/Rejected" &&
-          completedStages[completedStages.length - 1] === type
-            ? getRejectedEventTitle()
-            : stageCopy.title,
+        title: stageCopy.title,
         description: stageCopy.description,
         created_at: createdAt.toISOString(),
         updated_at: createdAt.toISOString(),

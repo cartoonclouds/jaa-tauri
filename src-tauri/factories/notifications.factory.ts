@@ -1,4 +1,4 @@
-import type { EventNotificationSeverity } from "../../src/modules/events/presentation/constants/interactionStages";
+import type { EventNotificationSeverity } from "../../src/modules/events/constants";
 
 import { faker } from "@faker-js/faker";
 
@@ -7,7 +7,7 @@ import {
   EVENT_NOTIFICATION_SEVERITY_BY_PREFIX,
   EVENT_NOTIFICATION_SEVERITY_BY_STAGE,
   isInteractionStage,
-} from "../../src/modules/events/presentation/constants/interactionStages";
+} from "../../src/modules/events/constants";
 
 export interface NotificationRow {
   id: string;
