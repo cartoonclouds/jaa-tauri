@@ -1,7 +1,4 @@
-import type {
-  ExecutableConstructor,
-  IExecutable,
-} from "../domain/types/executable";
+import type { ExecutableConstructor, IMetric } from "../domain/types/metric";
 import type { Statistic } from "@/modules/statistics/domain/types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
@@ -58,7 +55,7 @@ export interface IStatisticRepository {
   /** Read all persisted statistic records. */
   list(): Promise<Statistic[]>;
   /** Fetch aggregated statistics for the job applications dashboard. */
-  getOverview(): Promise<IExecutable[]>;
+  getOverview(): Promise<IMetric[]>;
 }
 
 /**
@@ -76,15 +73,15 @@ export class StatisticRepository implements IStatisticRepository {
     return StatisticSchema.array().parse(mapped);
   }
 
-  async getOverview(): Promise<IExecutable[]> {
-    const overview: IExecutable[] = [];
+  async getOverview(): Promise<IMetric[]> {
+    const overview: IMetric[] = [];
 
     const metricDefinitions: readonly ExecutableConstructor[] =
       CARD_METRIC_DEFINITIONS.concat(INTERNAL_METRIC_DEFINITIONS);
 
     for (const ExecutableClass of metricDefinitions) {
       try {
-        const executable: IExecutable = new ExecutableClass(this.db);
+        const executable: IMetric = new ExecutableClass(this.db);
         await executable.execute();
         overview.push(executable);
       } catch (error: unknown) {

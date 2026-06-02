@@ -7,7 +7,8 @@
       "@/*": ["src/*"],
       "@modules/*": ["src/modules/*"],
       "@shared/*": ["src/shared/*"],
-      "@infra/*": ["src/infrastructure/*"]
+      "@infra/*": ["src/infrastructure/*"],
+      "@testUtils/*": ["tests/unit/shared/utils/*"]
     },
     "types": ["vitest/globals", "node"],
     "noEmit": true

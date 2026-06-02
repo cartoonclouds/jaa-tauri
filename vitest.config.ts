@@ -32,6 +32,7 @@ export default defineVitestConfig({
       "@modules": resolve(__dirname, "./src/modules"),
       "@shared": resolve(__dirname, "./src/shared"),
       "@infra": resolve(__dirname, "./src/infrastructure"),
+      "@testUtils": resolve(__dirname, "./tests/unit/shared/utils"),
     },
   },
 });

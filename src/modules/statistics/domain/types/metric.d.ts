@@ -4,10 +4,10 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 /**
  * Represents an executable statistics class that will calculate a specific statistic metric when executed.
  */
-export interface IExecutable {
+export interface IMetric {
   /**
    * Execute the logic to calculate the statistic metric. The result will be used for rendering and may also be persisted depending on the repository implementation.
-   * @returns The calculated metric value of type T.
+   * @returns The calculated metric value.
    */
   execute(): Promise<number>;
   /**
@@ -18,9 +18,9 @@ export interface IExecutable {
 }
 
 /**
- * Constructor signature for classes implementing IExecutable, used for type safety in repositories and metric definitions.
+ * Constructor signature for classes implementing IMetric, used for type safety in repositories and metric definitions.
  */
 export interface ExecutableConstructor {
-  new (db: DatabaseDriver): IExecutable;
+  new (db: DatabaseDriver): IMetric;
   id: string;
 }

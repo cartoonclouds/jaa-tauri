@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -10,7 +10,7 @@ import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils
 import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications created in the 30-day window before the last 30 days. */
-export class ApplicationsCreatedPrevious30Days implements IExecutable {
+export class ApplicationsCreatedPrevious30Days implements IMetric {
   public static readonly id = "applicationsCreatedPrevious30Days";
 
   private static readonly QUERY = `SELECT

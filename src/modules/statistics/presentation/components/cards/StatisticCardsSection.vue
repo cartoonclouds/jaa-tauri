@@ -1,6 +1,6 @@
 <script setup lang="ts">
+  import type { IMetric } from "@/modules/statistics/domain/types/metric.js";
   import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/statistic.js";
-  import type { IExecutable } from "@modules/statistics/domain/types/executable";
 
   import { computed } from "vue";
 
@@ -10,14 +10,14 @@
    * Defines statistic cards section props.
    */
   interface StatisticCardsSectionProps {
-    overview: IExecutable[];
+    overview: IMetric[];
   }
 
   const props = defineProps<StatisticCardsSectionProps>();
 
   const metricViews = computed<StatisticCardMetricDefinition[]>(() => {
     return props.overview.map(
-      (executable: IExecutable): StatisticCardMetricDefinition => {
+      (executable: IMetric): StatisticCardMetricDefinition => {
         return executable.toView();
       },
     );

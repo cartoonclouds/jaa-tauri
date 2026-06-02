@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -13,7 +13,7 @@ import {
 } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications currently tracked (excluding deleted rows). */
-export class TotalAppliedApplications implements IExecutable {
+export class TotalAppliedApplications implements IMetric {
   public static readonly id = "totalAppliedApplications";
 
   private static readonly QUERY = `SELECT

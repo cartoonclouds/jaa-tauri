@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -19,7 +19,7 @@ import {
 } from "./statisticSql";
 
 /** Percentage of applied applications currently in offer stage. */
-export class OfferRate implements IExecutable {
+export class OfferRate implements IMetric {
   public static readonly id = "offerRate";
 
   private static readonly QUERY = `SELECT

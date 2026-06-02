@@ -1,25 +1,26 @@
 import { EventRepository } from "@modules/events";
-import { describe, expect, it, vi } from "vitest";
+import { createMockDbWithOptions } from "@testUtils/dbTestUtils";
+import { describe, expect, it } from "vitest";
 
 function mockDb() {
-  return {
-    select: vi.fn((sql: unknown) => {
+  const { db } = createMockDbWithOptions([], {
+    select: (sql: unknown) => {
       if (String(sql).includes("SELECT id FROM events WHERE type = $1")) {
         return Promise.resolve([{ id: "Interview/Technical Interview" }]);
       }
 
       return Promise.resolve([]);
-    }),
-    execute: vi.fn((..._args: unknown[]) =>
-      Promise.resolve({ rowsAffected: 1 }),
-    ),
-  };
+    },
+    execute: () => Promise.resolve({ rowsAffected: 1 }),
+  });
+
+  return db;
 }
 
 describe("EventRepository.create", () => {
   it("rejects missing required fields", async () => {
     const db = mockDb();
-    const repository = new EventRepository(db as never);
+    const repository = new EventRepository(db);
 
     await expect(
       repository.create({
@@ -33,7 +34,7 @@ describe("EventRepository.create", () => {
 
   it("marks a canonical event as completed for an application", async () => {
     const db = mockDb();
-    const repository = new EventRepository(db as never);
+    const repository = new EventRepository(db);
 
     await repository.create({
       applicationId: "11111111-1111-4111-8111-111111111111",
@@ -48,7 +49,7 @@ describe("EventRepository.create", () => {
 
   it("uses a provided eventAt timestamp when creating the flow step", async () => {
     const db = mockDb();
-    const repository = new EventRepository(db as never);
+    const repository = new EventRepository(db);
     const eventAt = "2026-05-29T09:30:00.000Z";
 
     await repository.create({
@@ -72,7 +73,7 @@ describe("EventRepository.create", () => {
 
   it("persists explicit sortOrder when creating the flow step", async () => {
     const db = mockDb();
-    const repository = new EventRepository(db as never);
+    const repository = new EventRepository(db);
 
     await repository.create({
       applicationId: "11111111-1111-4111-8111-111111111111",
@@ -97,7 +98,7 @@ describe("EventRepository.create", () => {
 describe("EventRepository.update", () => {
   it("uses a provided eventAt timestamp when updating an existing step", async () => {
     const db = mockDb();
-    const repository = new EventRepository(db as never);
+    const repository = new EventRepository(db);
     const eventAt = "2026-06-01T14:15:00.000Z";
 
     await repository.update({
@@ -118,7 +119,7 @@ describe("EventRepository.update", () => {
 
   it("updates sortOrder without mutating eventAt", async () => {
     const db = mockDb();
-    const repository = new EventRepository(db as never);
+    const repository = new EventRepository(db);
 
     await repository.update({
       id: "11111111-1111-4111-8111-111111111111::Interview/Technical Interview",

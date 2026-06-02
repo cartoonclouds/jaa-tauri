@@ -1,6 +1,6 @@
 <script setup lang="ts">
+  import type { IMetric } from "@/modules/statistics/domain/types/metric";
   import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/statistic";
-  import type { IExecutable } from "@modules/statistics/domain/types/executable";
 
   import { computed } from "vue";
 
@@ -10,7 +10,7 @@
    * Defines statistics momentum summary props.
    */
   interface StatisticsMomentumSummaryProps {
-    overview: IExecutable[];
+    overview: IMetric[];
   }
 
   const props = defineProps<StatisticsMomentumSummaryProps>();

@@ -1,16 +1,11 @@
 import { NotificationRepository } from "@modules/notifications";
-import { describe, expect, it, vi } from "vitest";
-
-function mockDb() {
-  return {
-    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
-  };
-}
+import { createMockDb } from "@testUtils/dbTestUtils";
+import { describe, expect, it } from "vitest";
 
 describe("NotificationRepository.create", () => {
   it("rejects missing title/body", async () => {
-    const db = mockDb();
-    const repository = new NotificationRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new NotificationRepository(db);
 
     await expect(
       repository.create({
@@ -27,8 +22,8 @@ describe("NotificationRepository.create", () => {
   });
 
   it("inserts a notification row", async () => {
-    const db = mockDb();
-    const repository = new NotificationRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new NotificationRepository(db);
 
     await repository.create({
       applicationId: null,

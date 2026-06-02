@@ -53,6 +53,7 @@ export default defineNuxtConfig({
     "@modules": resolve(rootDir, "./src/modules"),
     "@shared": resolve(rootDir, "./src/shared"),
     "@infra": resolve(rootDir, "./src/infrastructure"),
+    "@testUtils": resolve(rootDir, "./tests/unit/shared/utils"),
   },
 
   imports: {

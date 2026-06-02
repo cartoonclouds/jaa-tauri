@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 import { OFFER_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently marked as offer. */
-export class TotalOffers implements IExecutable {
+export class TotalOffers implements IMetric {
   public static readonly id = "totalOffers";
 
   private static readonly QUERY = `SELECT

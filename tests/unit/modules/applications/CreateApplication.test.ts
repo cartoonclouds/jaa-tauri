@@ -1,25 +1,21 @@
 import { ApplicationRepository } from "@modules/applications";
 import { ApplicationStatus } from "@modules/applications/types/enums";
 import { EVENT_FLOW_STAGE_SET } from "@modules/events/constants";
+import { createMockDbWithOptions } from "@testUtils/dbTestUtils";
 import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
-  const db = {
-    select: vi.fn((sql: unknown, args?: unknown[]) => {
+  const { db } = createMockDbWithOptions([], {
+    select: (sql: unknown, args?: unknown[]) => {
       const statement = String(sql);
       if (statement.includes("SELECT id FROM events WHERE type = $1")) {
         return Promise.resolve([{ id: args?.[0] as string }]);
       }
 
       return Promise.resolve([] as unknown[]);
-    }),
-    execute: vi.fn((..._args: unknown[]) =>
-      Promise.resolve({ rowsAffected: 1 }),
-    ),
-    transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
-      callback(db),
-    ),
-  };
+    },
+    execute: () => Promise.resolve({ rowsAffected: 1 }),
+  });
 
   return db;
 }
@@ -27,7 +23,7 @@ function mockDb() {
 describe("ApplicationRepository.create", () => {
   it("rejects empty title", async () => {
     const db = mockDb();
-    const repository = new ApplicationRepository(db as never);
+    const repository = new ApplicationRepository(db);
 
     await expect(repository.create({ title: "   " })).rejects.toThrow(
       "Application title is required",
@@ -36,7 +32,7 @@ describe("ApplicationRepository.create", () => {
 
   it("writes a row and links the default stage set", async () => {
     const db = mockDb();
-    const repository = new ApplicationRepository(db as never);
+    const repository = new ApplicationRepository(db);
 
     await repository.create({ title: "Frontend Engineer" });
 
@@ -64,7 +60,7 @@ describe("ApplicationRepository.create", () => {
 describe("ApplicationRepository.update", () => {
   it("does not recreate flow events during update", async () => {
     const db = mockDb();
-    const repository = new ApplicationRepository(db as never);
+    const repository = new ApplicationRepository(db);
 
     await repository.update({
       id: "app-1",

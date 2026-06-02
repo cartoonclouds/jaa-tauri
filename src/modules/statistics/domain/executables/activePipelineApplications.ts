@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -14,7 +14,7 @@ import {
 } from "./statisticSql";
 
 /** Active pipeline applications excluding offer and rejected outcomes. */
-export class ActivePipelineApplications implements IExecutable {
+export class ActivePipelineApplications implements IMetric {
   public static readonly id = "activePipelineApplications";
 
   private static readonly QUERY = `SELECT

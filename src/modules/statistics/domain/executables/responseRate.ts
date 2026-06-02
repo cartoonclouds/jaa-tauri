@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -19,7 +19,7 @@ import {
 } from "./statisticSql";
 
 /** Percentage of applied applications that advanced to response stages. */
-export class ResponseRate implements IExecutable {
+export class ResponseRate implements IMetric {
   public static readonly id = "responseRate";
 
   private static readonly QUERY = `SELECT

@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 import { INTERVIEWING_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently in interview pipeline stages. */
-export class TotalInterviewingApplications implements IExecutable {
+export class TotalInterviewingApplications implements IMetric {
   public static readonly id = "totalInterviewingApplications";
 
   private static readonly QUERY = `SELECT

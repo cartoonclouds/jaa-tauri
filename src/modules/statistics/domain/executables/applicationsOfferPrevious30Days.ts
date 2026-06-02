@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -14,7 +14,7 @@ import {
 } from "./statisticSql";
 
 /** Previous-30-day applications currently in offer stage. */
-export class ApplicationsOfferPrevious30Days implements IExecutable {
+export class ApplicationsOfferPrevious30Days implements IMetric {
   public static readonly id = "applicationsOfferPrevious30Days";
 
   private static readonly QUERY = `SELECT

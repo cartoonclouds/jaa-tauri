@@ -1,16 +1,11 @@
 import { DocumentRepository } from "@modules/documents";
-import { describe, expect, it, vi } from "vitest";
-
-function mockDb() {
-  return {
-    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
-  };
-}
+import { createMockDb } from "@testUtils/dbTestUtils";
+import { describe, expect, it } from "vitest";
 
 describe("DocumentRepository.create", () => {
   it("rejects missing required fields", async () => {
-    const db = mockDb();
-    const repository = new DocumentRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new DocumentRepository(db);
 
     await expect(
       repository.create({
@@ -25,8 +20,8 @@ describe("DocumentRepository.create", () => {
   });
 
   it("inserts a document row", async () => {
-    const db = mockDb();
-    const repository = new DocumentRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new DocumentRepository(db);
 
     await repository.create({
       title: "CV",

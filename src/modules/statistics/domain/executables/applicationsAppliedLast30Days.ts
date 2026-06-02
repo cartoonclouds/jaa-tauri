@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -14,7 +14,7 @@ import {
 } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications with applied date in the last 30 days. */
-export class ApplicationsAppliedLast30Days implements IExecutable {
+export class ApplicationsAppliedLast30Days implements IMetric {
   public static readonly id = "applicationsAppliedLast30Days" as const;
 
   public static readonly QUERY = `SELECT

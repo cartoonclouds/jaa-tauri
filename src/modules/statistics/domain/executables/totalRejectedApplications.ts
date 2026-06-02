@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 import { REJECTED_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently marked as rejected. */
-export class TotalRejectedApplications implements IExecutable {
+export class TotalRejectedApplications implements IMetric {
   public static readonly id = "totalRejectedApplications";
 
   private static readonly QUERY = `SELECT

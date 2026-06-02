@@ -1,22 +1,20 @@
 import { CompanyRepository } from "@modules/companies";
-import { describe, expect, it, vi } from "vitest";
+import { createMockDbWithOptions } from "@testUtils/dbTestUtils";
+import { describe, expect, it } from "vitest";
 
 function mockDb() {
+  const { db, selectMock } = createMockDbWithOptions();
+
   return {
-    select: vi.fn((..._args: unknown[]) =>
-      Promise.resolve<Record<string, unknown>[]>([]),
-    ),
-    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
-    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
-      callback(null),
-    ),
+    db,
+    selectMock,
   };
 }
 
 describe("CompanyRepository associations", () => {
   it("derives application status without relying on applications.status column", async () => {
-    const db = mockDb();
-    db.select = vi.fn(() =>
+    const { db, selectMock } = mockDb();
+    selectMock.mockImplementation(() =>
       Promise.resolve([
         {
           id: "app-1",
@@ -27,7 +25,7 @@ describe("CompanyRepository associations", () => {
       ]),
     );
 
-    const repository = new CompanyRepository(db as never);
+    const repository = new CompanyRepository(db);
     const applications =
       await repository.listAssociatedApplications("company-1");
 
@@ -40,8 +38,8 @@ describe("CompanyRepository associations", () => {
       },
     ]);
 
-    expect(db.select).toHaveBeenCalledTimes(1);
-    const query = db.select.mock.calls[0]?.[0];
+    expect(selectMock).toHaveBeenCalledTimes(1);
+    const query = selectMock.mock.calls[0]?.[0];
     if (typeof query !== "string") {
       throw new Error("Expected SQL query to be passed to db.select");
     }
@@ -52,8 +50,8 @@ describe("CompanyRepository associations", () => {
   });
 
   it("falls back to saved status when derived value is missing", async () => {
-    const db = mockDb();
-    db.select = vi.fn(() =>
+    const { db, selectMock } = mockDb();
+    selectMock.mockImplementation(() =>
       Promise.resolve([
         {
           id: "app-2",
@@ -64,7 +62,7 @@ describe("CompanyRepository associations", () => {
       ]),
     );
 
-    const repository = new CompanyRepository(db as never);
+    const repository = new CompanyRepository(db);
     const applications =
       await repository.listAssociatedApplications("company-2");
 

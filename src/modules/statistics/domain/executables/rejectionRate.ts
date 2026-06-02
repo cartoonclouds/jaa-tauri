@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -14,7 +14,7 @@ import {
 import { REJECTED_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Percentage of applied applications currently in rejected stage. */
-export class RejectionRate implements IExecutable {
+export class RejectionRate implements IMetric {
   public static readonly id = "rejectionRate";
 
   private static readonly QUERY = `SELECT

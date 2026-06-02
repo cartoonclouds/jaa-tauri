@@ -1,21 +1,11 @@
 import { ContactRepository } from "@modules/contacts";
-import { describe, expect, it, vi } from "vitest";
-
-function mockDb() {
-  const db = {
-    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
-    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
-      callback(db),
-    ),
-  };
-
-  return db;
-}
+import { createMockDb } from "@testUtils/dbTestUtils";
+import { describe, expect, it } from "vitest";
 
 describe("ContactRepository.create", () => {
   it("rejects empty full name", async () => {
-    const db = mockDb();
-    const repository = new ContactRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new ContactRepository(db);
 
     await expect(
       repository.create({
@@ -34,8 +24,8 @@ describe("ContactRepository.create", () => {
   });
 
   it("inserts a contact row", async () => {
-    const db = mockDb();
-    const repository = new ContactRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new ContactRepository(db);
 
     await repository.create({
       companyId: null,

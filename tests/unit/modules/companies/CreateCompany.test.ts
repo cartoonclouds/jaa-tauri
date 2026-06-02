@@ -1,21 +1,11 @@
 import { CompanyRepository } from "@modules/companies";
-import { describe, expect, it, vi } from "vitest";
-
-function mockDb() {
-  const db = {
-    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
-    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
-      callback(db),
-    ),
-  };
-
-  return db;
-}
+import { createMockDb } from "@testUtils/dbTestUtils";
+import { describe, expect, it } from "vitest";
 
 describe("CompanyRepository.create", () => {
   it("rejects empty company name", async () => {
-    const db = mockDb();
-    const repository = new CompanyRepository(db as never);
+    const { db } = createMockDb();
+    const repository = new CompanyRepository(db);
 
     await expect(repository.create({ name: "  " })).rejects.toThrow(
       "Company name is required",
@@ -23,11 +13,11 @@ describe("CompanyRepository.create", () => {
   });
 
   it("inserts a company row", async () => {
-    const db = mockDb();
-    const repository = new CompanyRepository(db as never);
+    const { db, executeMock } = createMockDb();
+    const repository = new CompanyRepository(db);
 
     await repository.create({ name: "Acme Ltd" });
 
-    expect(db.execute).toHaveBeenCalledTimes(2);
+    expect(executeMock).toHaveBeenCalledTimes(2);
   });
 });

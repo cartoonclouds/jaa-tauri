@@ -1,4 +1,4 @@
-import type { IExecutable } from "../types/executable";
+import type { IMetric } from "../types/metric";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
@@ -14,7 +14,7 @@ import {
 } from "./statisticSql";
 
 /** Last-30-day applications that reached interview or final response stages. */
-export class ApplicationsRespondedLast30Days implements IExecutable {
+export class ApplicationsRespondedLast30Days implements IMetric {
   public static readonly id = "applicationsRespondedLast30Days";
 
   private static readonly QUERY = `SELECT

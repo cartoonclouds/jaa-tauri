@@ -1,4 +1,4 @@
-import type { IExecutable } from "../domain/types/executable";
+import type { IMetric } from "../domain/types/metric";
 
 import { StatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
 import { StatisticService } from "@modules/statistics/services/StatisticService";
@@ -27,7 +27,7 @@ function createStatisticComposable() {
   const service = getStatisticService();
   const isLoading = ref(false);
   const error = ref<unknown>(null);
-  const overview = ref<IExecutable[]>([]);
+  const overview = ref<IMetric[]>([]);
 
   async function refresh(): Promise<void> {
     isLoading.value = true;

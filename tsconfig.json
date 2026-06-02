@@ -36,6 +36,9 @@
       ],
       "@infra/*": [
         "src/infrastructure/*"
+      ],
+      "@testUtils/*": [
+        "tests/unit/shared/utils/*"
       ]
     },
     "types": [
