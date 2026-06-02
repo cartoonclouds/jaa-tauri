@@ -3,7 +3,7 @@ import {
   NullableDateTimeSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "@shared/domain/zod/fields";
+} from "@shared/domain/zod";
 import { z } from "zod";
 
 /** Allowed notification severity values. */

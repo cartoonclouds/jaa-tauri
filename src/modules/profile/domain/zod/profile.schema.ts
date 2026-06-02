@@ -5,7 +5,7 @@ import {
   NullableUrlSchema,
   OptionalNullableIntSchema,
   UuidSchema,
-} from "@shared/domain/zod/fields";
+} from "@shared/domain/zod";
 import { z } from "zod";
 
 /** Runtime schema for persisted profile entities. */

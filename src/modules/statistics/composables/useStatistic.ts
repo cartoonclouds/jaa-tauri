@@ -1,9 +1,9 @@
+import type { IExecutable } from "../domain/types/executable";
+
 import { StatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
 import { StatisticService } from "@modules/statistics/services/StatisticService";
 import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 import { onMounted, ref } from "vue";
-
-import { type IExecutable } from "../domain/types/executable";
 
 const STATISTICS_AUTO_REFRESH_MS = 5_000;
 
@@ -28,7 +28,7 @@ function createStatisticComposable() {
   const isLoading = ref(false);
   const error = ref<unknown>(null);
   const overview = ref<IExecutable[]>([]);
-  
+
   async function refresh(): Promise<void> {
     isLoading.value = true;
     error.value = null;

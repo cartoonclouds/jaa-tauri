@@ -3,7 +3,7 @@ import type {
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
 
 /**
  * Resolve the Tailwind classes used to render an application status badge.

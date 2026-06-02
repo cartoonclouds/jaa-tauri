@@ -1,21 +1,4 @@
-abstract class EnumValue {
-  protected constructor(public readonly value: string) {}
-
-  toString() {
-    return this.value;
-  }
-
-  protected static resolveByValue<TEnum extends EnumValue>(
-    values: readonly TEnum[],
-    value: string | null | undefined,
-  ): TEnum | null {
-    if (!value) {
-      return null;
-    }
-
-    return values.find((instance) => instance.value === value) ?? null;
-  }
-}
+import { EnumValue } from "@shared/domain/enums";
 
 const APPLICATION_STATUS_LABELS: Readonly<Record<string, string>> = {
   saved: "Saved",
@@ -35,7 +18,7 @@ class ApplicationStatusEnum extends EnumValue {
     super(value);
   }
 
-  toLabel(): string {
+  override toLabel(): string {
     return APPLICATION_STATUS_LABELS[this.value] ?? this.value;
   }
 
@@ -46,24 +29,6 @@ class ApplicationStatusEnum extends EnumValue {
   static readonly Interview = new ApplicationStatusEnum("interview");
   static readonly Offer = new ApplicationStatusEnum("offer");
   static readonly Rejected = new ApplicationStatusEnum("rejected");
-
-  static values(): ApplicationStatusEnum[] {
-    return [
-      this.Saved,
-      this.Applied,
-      this.PhoneScreening,
-      this.Technical,
-      this.Interview,
-      this.Offer,
-      this.Rejected,
-    ];
-  }
-
-  static fromValue(
-    value: string | null | undefined,
-  ): ApplicationStatusEnum | null {
-    return this.resolveByValue(this.values(), value);
-  }
 }
 
 /** Public enum facade for application status values. */
@@ -72,9 +37,7 @@ export const ApplicationStatus = ApplicationStatusEnum;
 /**
  * Type alias for application status.
  */
-export type ApplicationStatus = ReturnType<
-  typeof ApplicationStatusEnum.values
->[number];
+export type ApplicationStatus = typeof ApplicationStatusEnum.Saved;
 
 /**
  * PHP-style enum for application event-flow status.
@@ -84,7 +47,7 @@ class ApplicationEventFlowStatusEnum extends EnumValue {
     super(value);
   }
 
-  toLabel(): string {
+  override toLabel(): string {
     return APPLICATION_STATUS_LABELS[this.value] ?? this.value;
   }
 
@@ -93,22 +56,6 @@ class ApplicationEventFlowStatusEnum extends EnumValue {
   static readonly Interview = new ApplicationEventFlowStatusEnum("interview");
   static readonly Offer = new ApplicationEventFlowStatusEnum("offer");
   static readonly Rejected = new ApplicationEventFlowStatusEnum("rejected");
-
-  static values(): ApplicationEventFlowStatusEnum[] {
-    return [
-      this.Saved,
-      this.Applied,
-      this.Interview,
-      this.Offer,
-      this.Rejected,
-    ];
-  }
-
-  static fromValue(
-    value: string | null | undefined,
-  ): ApplicationEventFlowStatusEnum | null {
-    return this.resolveByValue(this.values(), value);
-  }
 }
 
 /** Public enum facade for application event-flow status values. */
@@ -117,9 +64,8 @@ export const ApplicationEventFlowStatus = ApplicationEventFlowStatusEnum;
 /**
  * Type alias for application event-flow status.
  */
-export type ApplicationEventFlowStatus = ReturnType<
-  typeof ApplicationEventFlowStatusEnum.values
->[number];
+export type ApplicationEventFlowStatus =
+  typeof ApplicationEventFlowStatusEnum.Saved;
 
 /**
  * PHP-style enum for application attendance type.
@@ -137,7 +83,7 @@ class ApplicationAttendanceTypeEnum extends EnumValue {
   /**
    * Convert the enum value into a human-readable label.
    */
-  toLabel(): string {
+  override toLabel(): string {
     switch (this.value) {
       case "remote":
         return "Remote";
@@ -156,18 +102,6 @@ class ApplicationAttendanceTypeEnum extends EnumValue {
   static readonly Hybrid = new ApplicationAttendanceTypeEnum("hybrid");
   /** On-site attendance. */
   static readonly OnSite = new ApplicationAttendanceTypeEnum("on-site");
-
-  /** List every attendance type value. */
-  static values(): ApplicationAttendanceTypeEnum[] {
-    return [this.Remote, this.Hybrid, this.OnSite];
-  }
-
-  /** Resolve an enum instance from its raw string value. */
-  static fromValue(
-    value: string | null | undefined,
-  ): ApplicationAttendanceTypeEnum | null {
-    return this.resolveByValue(this.values(), value);
-  }
 }
 
 /** Public enum facade for application attendance type values. */
@@ -176,9 +110,8 @@ export const ApplicationAttendanceType = ApplicationAttendanceTypeEnum;
 /**
  * Union type of all application attendance enum values.
  */
-export type ApplicationAttendanceType = ReturnType<
-  typeof ApplicationAttendanceTypeEnum.values
->[number];
+export type ApplicationAttendanceType =
+  typeof ApplicationAttendanceTypeEnum.Remote;
 
 /**
  * PHP-style enum for application employment type.
@@ -196,7 +129,7 @@ class ApplicationEmploymentTypeEnum extends EnumValue {
   /**
    * Convert the enum value into a human-readable label.
    */
-  toLabel(): string {
+  override toLabel(): string {
     switch (this.value) {
       case "full-time":
         return "Full-time";
@@ -223,24 +156,6 @@ class ApplicationEmploymentTypeEnum extends EnumValue {
   static readonly Internship = new ApplicationEmploymentTypeEnum("internship");
   /** Volunteer engagement. */
   static readonly Volunteer = new ApplicationEmploymentTypeEnum("volunteer");
-
-  /** List every employment type value. */
-  static values(): ApplicationEmploymentTypeEnum[] {
-    return [
-      this.FullTime,
-      this.PartTime,
-      this.Contract,
-      this.Internship,
-      this.Volunteer,
-    ];
-  }
-
-  /** Resolve an enum instance from its raw string value. */
-  static fromValue(
-    value: string | null | undefined,
-  ): ApplicationEmploymentTypeEnum | null {
-    return this.resolveByValue(this.values(), value);
-  }
 }
 
 /** Public enum facade for application employment type values. */
@@ -249,6 +164,5 @@ export const ApplicationEmploymentType = ApplicationEmploymentTypeEnum;
 /**
  * Union type of all application employment enum values.
  */
-export type ApplicationEmploymentType = ReturnType<
-  typeof ApplicationEmploymentTypeEnum.values
->[number];
+export type ApplicationEmploymentType =
+  typeof ApplicationEmploymentTypeEnum.FullTime;

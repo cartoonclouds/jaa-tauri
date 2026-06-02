@@ -1,8 +1,6 @@
 import type { ApplicationBasePayload } from "@modules/applications/types/payloads";
 import type { InteractionStage } from "@modules/events/constants";
 
-import { ApplicationStatus } from "@modules/applications/types/enums";
-
 /**
  * Drawer state used by the application presentation layer.
  */
@@ -41,30 +39,3 @@ export type ApplicationFormSubmitPayload = Omit<
   flowSteps?: ApplicationDraftFlowStep[];
   pendingTagNames?: string[];
 };
-
-/**
- * Build the default empty application form values.
- */
-export function createEmptyApplicationFormValues(): ApplicationFormValues {
-  return {
-    companyId: null,
-    title: "",
-    status: ApplicationStatus.Saved,
-    sourceUrl: "",
-    appliedAt: "",
-    locationText: "",
-    locationLat: null,
-    locationLng: null,
-    attendanceType: null,
-    employmentType: null,
-    salaryMin: null,
-    salaryMax: null,
-    currency: "",
-    description: "",
-    interviewProcess: "",
-    benefits: "",
-    tagIds: [],
-    priority: 3,
-    isArchived: false,
-  };
-}

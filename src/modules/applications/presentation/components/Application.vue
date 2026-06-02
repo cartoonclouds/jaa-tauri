@@ -22,7 +22,7 @@
   import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
-  import { createEmptyApplicationFormValues } from "@modules/applications/types/presentation";
+  import { createEmptyApplicationFormValues } from "@modules/applications/presentation/utils/createEmptyApplicationFormValues";
   import { useCompany } from "@modules/companies";
   import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
   import { useContact } from "@modules/contacts";

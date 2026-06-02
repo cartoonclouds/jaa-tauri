@@ -1,4 +1,4 @@
-import { UuidSchema } from "@shared/domain/zod/fields";
+import { UuidSchema } from "@shared/domain/zod";
 import { z } from "zod";
 
 /**

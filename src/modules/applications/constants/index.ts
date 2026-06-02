@@ -4,7 +4,7 @@ import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
   ApplicationStatus,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
 
 /**
  * Searchable database-backed fields used by the applications datatable.

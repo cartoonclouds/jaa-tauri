@@ -3,14 +3,14 @@ import type {
   ApplicationEmploymentType as ApplicationEmploymentTypeValue,
   ApplicationEventFlowStatus as ApplicationEventFlowStatusValue,
   ApplicationStatus as ApplicationStatusValue,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
 
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
 import {
   DateTimeSchema,
   NullableDateTimeSchema,
@@ -21,7 +21,7 @@ import {
   NullableUrlSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "@shared/domain/zod/fields";
+} from "@shared/domain/zod";
 import { z } from "zod";
 
 /**

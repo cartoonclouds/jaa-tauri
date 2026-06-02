@@ -2,7 +2,7 @@ import {
   DateTimeSchema,
   NullableStringSchema,
   UuidSchema,
-} from "@shared/domain/zod/fields";
+} from "@shared/domain/zod";
 import { z } from "zod";
 
 /** Runtime schema for persisted tag entities. */

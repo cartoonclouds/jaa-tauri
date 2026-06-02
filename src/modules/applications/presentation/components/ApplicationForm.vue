@@ -3,16 +3,16 @@
     ApplicationAttendanceType,
     ApplicationEmploymentType,
     ApplicationStatus,
-  } from "@modules/applications/types/enums";
+  } from "@modules/applications/domain/enums/ApplicationEnums";
 
   import {
     APPLICATION_ATTENDANCE_OPTIONS,
     APPLICATION_EMPLOYMENT_OPTIONS,
     APPLICATION_STATUS_OPTIONS,
   } from "@modules/applications/constants";
+  import { ApplicationStatus as ApplicationStatusEnum } from "@modules/applications/domain/enums/ApplicationEnums";
   import { ApplicationFormSchema } from "@modules/applications/domain/zod/application.schema";
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
-  import { ApplicationStatus as ApplicationStatusEnum } from "@modules/applications/types/enums";
   import {
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,

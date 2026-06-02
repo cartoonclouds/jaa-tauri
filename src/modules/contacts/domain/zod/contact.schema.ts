@@ -6,7 +6,7 @@ import {
   NullableUrlSchema,
   NullableUuidSchema,
   UuidSchema,
-} from "@shared/domain/zod/fields";
+} from "@shared/domain/zod";
 import { z } from "zod";
 
 /** Allowed contact categories persisted by the domain model. */

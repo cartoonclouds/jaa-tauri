@@ -291,6 +291,21 @@ const validated = InsertSchema.parse(data); // throw on failure
 - Never rely on TypeScript interfaces alone for runtime validation
 - Avoid manual trim/typeof checks when Zod can enforce schema
 
+## Enum pattern
+
+When creating enums, follow the shared class-based enum pattern used in this codebase.
+
+- Put feature enums in `src/modules/<feature>/domain/enums/`.
+- Use `EnumValue` from `@shared/domain/enums` as the base class.
+- Implement enum values as `static readonly` instances on a class (for example `Saved`, `Applied`).
+- Provide `static values()` returning the full list of instances.
+- Provide `static fromValue(value)` and resolve values via `this.resolveByValue(this.values(), value)`.
+- Export both:
+  - a runtime facade constant (for example `export const ApplicationStatus = ApplicationStatusEnum`)
+  - a type alias derived from `values()` (for example `export type ApplicationStatus = ReturnType<typeof ApplicationStatusEnum.values>[number]`)
+- In mappers, convert raw DB values with `EnumValue.mapFromDbValue(rawValue, EnumClass)` and return enum instances (or `null`) instead of plain strings.
+- Keep labels on the enum class (`toLabel()`), not in UI components.
+
 ## Do and Don't
 
 Do:

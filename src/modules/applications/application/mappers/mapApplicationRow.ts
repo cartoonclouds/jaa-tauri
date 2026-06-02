@@ -5,7 +5,8 @@ import {
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
+import { EnumValue } from "@shared/domain/enums";
 import {
   fromDbBoolean,
   mapAuditTimestamps,
@@ -14,7 +15,6 @@ import {
   toNullableString,
   toRequiredString,
 } from "@shared/utils/database-mapping/mapperValueUtils";
-import { mapEnumFromDbValue } from "@shared/utils/enum";
 
 /**
  * Map a raw database row into a typed application entity.
@@ -32,21 +32,23 @@ export function mapApplicationRowToEntity(
     companyId: toNullableString(row.company_id),
     title: toRequiredString(row.title),
     status:
-      mapEnumFromDbValue(row.status, ApplicationStatus) ??
+      EnumValue.mapFromDbValue(row.status, ApplicationStatus) ??
       ApplicationStatus.Saved,
     eventFlowStatus:
-      mapEnumFromDbValue(row.event_flow_status, ApplicationEventFlowStatus) ??
-      ApplicationEventFlowStatus.Saved,
+      EnumValue.mapFromDbValue(
+        row.event_flow_status,
+        ApplicationEventFlowStatus,
+      ) ?? ApplicationEventFlowStatus.Saved,
     sourceUrl: toNullableString(row.source_url),
     appliedAt: mapOptionalRowDate(row.applied_at),
     locationText: toNullableString(row.location_text),
     locationLat: (row.location_lat as number | null) ?? null,
     locationLng: (row.location_lng as number | null) ?? null,
-    attendanceType: mapEnumFromDbValue(
+    attendanceType: EnumValue.mapFromDbValue(
       row.attendance_type,
       ApplicationAttendanceType,
     ),
-    employmentType: mapEnumFromDbValue(
+    employmentType: EnumValue.mapFromDbValue(
       row.employment_type,
       ApplicationEmploymentType,
     ),

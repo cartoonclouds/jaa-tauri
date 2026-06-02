@@ -5,7 +5,7 @@ import {
   NullableStringSchema,
   NullableUrlSchema,
   UuidSchema,
-} from "@shared/domain/zod/fields";
+} from "@shared/domain/zod";
 import { z } from "zod";
 
 /** Runtime schema for persisted company entities. */

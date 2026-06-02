@@ -4,7 +4,7 @@
     ApplicationEmploymentType,
     ApplicationEventFlowStatus,
     ApplicationStatus,
-  } from "@modules/applications/types/enums";
+  } from "@modules/applications/domain/enums/ApplicationEnums";
 
   import {
     formatApplicationAttendanceTypeLabel,
