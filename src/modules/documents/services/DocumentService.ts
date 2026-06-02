@@ -7,6 +7,7 @@ import {
   type DocumentUpdatePayload,
   type IDocumentRepository,
 } from "@modules/documents/repositories/DocumentRepository";
+import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
  * Implements document service.
@@ -41,15 +42,15 @@ export class DocumentService {
   }
 
   create(payload: DocumentCreatePayload) {
-    const result = DocumentSchema.pick({
-      title: true,
-      kind: true,
-      filePath: true,
-      mimeType: true,
-    }).safeParse(payload);
-    if (!result.success) {
-      throw new Error(`Validation failed: ${result.error.message}`);
-    }
+    parseWithSchema(
+      DocumentSchema.pick({
+        title: true,
+        kind: true,
+        filePath: true,
+        mimeType: true,
+      }),
+      payload,
+    );
 
     return this.repository.create(payload);
   }
@@ -60,12 +61,10 @@ export class DocumentService {
         title: payload.title,
         filePath: payload.filePath,
       };
-      const result = DocumentSchema.pick({ title: true, filePath: true })
-        .partial()
-        .safeParse(validatePayload);
-      if (!result.success) {
-        throw new Error(`Validation failed: ${result.error.message}`);
-      }
+      parseWithSchema(
+        DocumentSchema.pick({ title: true, filePath: true }).partial(),
+        validatePayload,
+      );
     }
 
     return this.repository.update(payload);

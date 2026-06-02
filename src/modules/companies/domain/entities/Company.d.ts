@@ -1,7 +1,9 @@
+import type { LocationFields, LocationFieldsInput } from "@shared/types";
+
 /**
  * Company entity used for application tracking.
  */
-export interface Company {
+export interface Company extends LocationFields {
   /** Unique company identifier. */
   id: string;
   /** Company name. */
@@ -14,12 +16,6 @@ export interface Company {
   industry: string | null;
   /** Company size descriptor, when available. */
   size: string | null;
-  /** Free-form location text. */
-  locationText: string | null;
-  /** Latitude for geocoded location data. */
-  locationLat: number | null;
-  /** Longitude for geocoded location data. */
-  locationLng: number | null;
   /** Additional notes about the company. */
   notes: string | null;
   /** Associated tag identifiers. */
@@ -33,13 +29,7 @@ export interface Company {
 /**
  * Input required to create a company.
  */
-export interface CreateCompanyInput {
+export interface CreateCompanyInput extends LocationFieldsInput {
   /** Company name. */
   name: string;
-  /** Free-form location text. */
-  locationText?: string | null;
-  /** Latitude for geocoded location data. */
-  locationLat?: number | null;
-  /** Longitude for geocoded location data. */
-  locationLng?: number | null;
 }

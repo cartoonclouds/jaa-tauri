@@ -8,6 +8,8 @@ import {
   type ContactUpdatePayload,
   type IContactRepository,
 } from "@modules/contacts/repositories/ContactRepository";
+import { resolveLocationFields } from "@shared/utils/geocoding";
+import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
  * Implements contact service.
@@ -46,21 +48,33 @@ export class ContactService {
     return this.repository.unlinkFromApplication(applicationId, contactId);
   }
 
-  create(payload: ContactCreatePayload) {
-    const result = ContactSchema.pick({
-      fullName: true,
-      type: true,
-      locationText: true,
-      locationLat: true,
-      locationLng: true,
-    }).safeParse(payload);
-    if (!result.success) {
-      throw new Error(`Validation failed: ${result.error.message}`);
-    }
-    return this.repository.create(payload);
+  async create(payload: ContactCreatePayload) {
+    parseWithSchema(
+      ContactSchema.pick({
+        fullName: true,
+        type: true,
+        locationText: true,
+        locationLat: true,
+        locationLng: true,
+      }),
+      payload,
+    );
+
+    const resolvedLocation = await resolveLocationFields({
+      locationText: payload.locationText,
+      currentLatitude: payload.locationLat,
+      currentLongitude: payload.locationLng,
+    });
+
+    return this.repository.create({
+      ...payload,
+      locationText: resolvedLocation.locationText,
+      locationLat: resolvedLocation.locationLat,
+      locationLng: resolvedLocation.locationLng,
+    });
   }
 
-  update(payload: ContactUpdatePayload) {
+  async update(payload: ContactUpdatePayload) {
     if (
       payload.fullName !== undefined ||
       payload.type !== undefined ||
@@ -75,20 +89,34 @@ export class ContactService {
         locationLat: payload.locationLat,
         locationLng: payload.locationLng,
       };
-      const result = ContactSchema.pick({
-        fullName: true,
-        type: true,
-        locationText: true,
-        locationLat: true,
-        locationLng: true,
-      })
-        .partial()
-        .safeParse(validatePayload);
-      if (!result.success) {
-        throw new Error(`Validation failed: ${result.error.message}`);
-      }
+      parseWithSchema(
+        ContactSchema.pick({
+          fullName: true,
+          type: true,
+          locationText: true,
+          locationLat: true,
+          locationLng: true,
+        }).partial(),
+        validatePayload,
+      );
     }
-    return this.repository.update(payload);
+
+    if (payload.locationText === undefined) {
+      return this.repository.update(payload);
+    }
+
+    const resolvedLocation = await resolveLocationFields({
+      locationText: payload.locationText,
+      currentLatitude: payload.locationLat,
+      currentLongitude: payload.locationLng,
+    });
+
+    return this.repository.update({
+      ...payload,
+      locationText: resolvedLocation.locationText,
+      locationLat: resolvedLocation.locationLat,
+      locationLng: resolvedLocation.locationLng,
+    });
   }
 
   delete(id: string) {

@@ -4,6 +4,7 @@ import type {
   DatatablePageQuery,
   DatatablePageResult,
   IRepository,
+  PartialUpdatePayload,
 } from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
@@ -28,9 +29,7 @@ export type ProfileCreatePayload = Pick<Profile, "fullName"> &
 /**
  * Type alias for profile update payload.
  */
-export type ProfileUpdatePayload = Partial<ProfileCreatePayload> & {
-  id: string;
-};
+export type ProfileUpdatePayload = PartialUpdatePayload<ProfileCreatePayload>;
 
 /**
  * Defines iprofile repository.

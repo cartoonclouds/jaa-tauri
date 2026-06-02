@@ -4,6 +4,7 @@ import type {
   DatatablePageQuery,
   DatatablePageResult,
   IRepository,
+  PartialUpdatePayload,
 } from "@shared/types";
 
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
@@ -34,9 +35,8 @@ export type NotificationCreatePayload = Pick<
 /**
  * Type alias for notification update payload.
  */
-export type NotificationUpdatePayload = Partial<NotificationCreatePayload> & {
-  id: string;
-};
+export type NotificationUpdatePayload =
+  PartialUpdatePayload<NotificationCreatePayload>;
 
 /**
  * Defines inotification repository.

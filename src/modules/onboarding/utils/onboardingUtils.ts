@@ -6,6 +6,29 @@ const resumeMimeTypeByExtension: Record<string, string> = {
 };
 
 /**
+ * Type alias for onboarding step UI state.
+ */
+export type OnboardingStepState = "completed" | "current" | "upcoming";
+
+/**
+ * Resolve onboarding step UI state from current step index.
+ */
+export function getOnboardingStepState(
+  stepIndex: number,
+  currentStepIndex: number,
+): OnboardingStepState {
+  if (stepIndex < currentStepIndex) {
+    return "completed";
+  }
+
+  if (stepIndex === currentStepIndex) {
+    return "current";
+  }
+
+  return "upcoming";
+}
+
+/**
  * Merge comma-separated values into an existing unique list.
  */
 export function mergeCommaSeparated(
@@ -73,6 +96,3 @@ export function getResumeDocumentTitle(filePath: string): string {
   const parts = filePath.split(/[/\\]/);
   return parts[parts.length - 1] ?? "Resume";
 }
-
-
-

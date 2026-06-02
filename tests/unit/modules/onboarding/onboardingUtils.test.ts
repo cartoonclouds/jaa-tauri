@@ -1,5 +1,6 @@
 import {
   getFileExtension,
+  getOnboardingStepState,
   getResumeDocumentTitle,
   isSupportedResumePath,
   mergeCommaSeparated,
@@ -27,5 +28,11 @@ describe("onboardingUtils", () => {
     expect(getResumeDocumentTitle("C:/Users/me/Resume Final.docx")).toBe(
       "Resume Final.docx",
     );
+  });
+
+  it("resolves onboarding step states from current index", () => {
+    expect(getOnboardingStepState(0, 2)).toBe("completed");
+    expect(getOnboardingStepState(2, 2)).toBe("current");
+    expect(getOnboardingStepState(3, 2)).toBe("upcoming");
   });
 });

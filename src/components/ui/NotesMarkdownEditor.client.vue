@@ -1,7 +1,9 @@
 <script setup lang="ts">
   import "quill/dist/quill.snow.css";
-  import { marked } from "marked";
   import { ref, watch } from "vue";
+
+  import { useHtmlToMarkdown } from "../../composables/useHtmlToMarkdown";
+  import { useMarkdownToHtml } from "../../composables/useMarkdownToHtml";
 
   interface Props {
     modelValue: string;
@@ -22,75 +24,8 @@
 
   const htmlValue = ref("");
   let syncingFromModel = false;
-
-  function markdownToHtml(markdown: string): string {
-    return marked.parse(markdown || "", { async: false });
-  }
-
-  function htmlToMarkdown(html: string): string {
-    const parser = new DOMParser();
-    const document = parser.parseFromString(html || "", "text/html");
-
-    function renderNode(node: Node): string {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent ?? "";
-      }
-
-      if (!(node instanceof HTMLElement)) {
-        return "";
-      }
-
-      const content = Array.from(node.childNodes)
-        .map((childNode) => renderNode(childNode))
-        .join("");
-
-      switch (node.tagName.toLowerCase()) {
-        case "strong":
-        case "b":
-          return `**${content}**`;
-        case "em":
-        case "i":
-          return `*${content}*`;
-        case "code":
-          return `\`${content}\``;
-        case "h1":
-          return `# ${content}\n\n`;
-        case "h2":
-          return `## ${content}\n\n`;
-        case "h3":
-          return `### ${content}\n\n`;
-        case "h4":
-          return `#### ${content}\n\n`;
-        case "h5":
-          return `##### ${content}\n\n`;
-        case "h6":
-          return `###### ${content}\n\n`;
-        case "a": {
-          const href = node.getAttribute("href")?.trim();
-          return href ? `[${content}](${href})` : content;
-        }
-        case "li":
-          return `- ${content}\n`;
-        case "ul":
-        case "ol":
-          return `${content}\n`;
-        case "blockquote":
-          return `> ${content}\n\n`;
-        case "p":
-          return `${content}\n\n`;
-        case "br":
-          return "\n";
-        default:
-          return content;
-      }
-    }
-
-    return Array.from(document.body.childNodes)
-      .map((node) => renderNode(node))
-      .join("")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-  }
+  const { htmlToMarkdown } = useHtmlToMarkdown();
+  const { markdownToHtml } = useMarkdownToHtml();
 
   watch(
     () => props.modelValue,

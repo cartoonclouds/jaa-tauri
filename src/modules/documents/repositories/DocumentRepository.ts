@@ -3,7 +3,9 @@ import type { Document } from "@modules/documents/domain/entities/Document";
 import type {
   DatatablePageQuery,
   DatatablePageResult,
+  EntityCreatePayload,
   IRepository,
+  PartialUpdatePayload,
 } from "@shared/types";
 
 import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
@@ -21,16 +23,14 @@ import {
 /**
  * Type alias for document create payload.
  */
-export type DocumentCreatePayload = Pick<
+export type DocumentCreatePayload = EntityCreatePayload<
   Document,
   "title" | "kind" | "filePath" | "mimeType" | "sizeBytes" | "checksum"
 >;
 /**
  * Type alias for document update payload.
  */
-export type DocumentUpdatePayload = Partial<DocumentCreatePayload> & {
-  id: string;
-};
+export type DocumentUpdatePayload = PartialUpdatePayload<DocumentCreatePayload>;
 
 /**
  * Linked document entry for a specific application.

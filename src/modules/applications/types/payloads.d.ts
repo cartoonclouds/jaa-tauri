@@ -1,3 +1,5 @@
+import type { LocationFieldsInput, WithId } from "@shared/types";
+
 import {
   type ApplicationAttendanceType,
   type ApplicationEmploymentType,
@@ -7,7 +9,7 @@ import {
 /**
  * Shared field set used by application payloads and form values.
  */
-export interface ApplicationBasePayload {
+export interface ApplicationBasePayload extends LocationFieldsInput {
   /** Selected company identifier, or null when the application is uncoupled. */
   companyId: string | null;
   /** Application title. */
@@ -18,12 +20,6 @@ export interface ApplicationBasePayload {
   sourceUrl?: string | null;
   /** Optional date the application was submitted. */
   appliedAt?: string | null;
-  /** Free-form location text. */
-  locationText?: string | null;
-  /** Latitude for geocoded location data. */
-  locationLat?: number | null;
-  /** Longitude for geocoded location data. */
-  locationLng?: number | null;
   /** Preferred attendance mode, if known. */
   attendanceType?: ApplicationAttendanceType | null;
   /** Employment type, if known. */
@@ -64,10 +60,7 @@ export type ApplicationFormSubmitPayload = Omit<ApplicationUpdatePayload, "id">;
 /**
  * Payload required to update an application.
  */
-export type ApplicationUpdatePayload = ApplicationBasePayload & {
-  /** Identifier of the application being updated. */
-  id: string;
-};
+export type ApplicationUpdatePayload = ApplicationBasePayload & WithId;
 
 /**
  * Payload required to create an application.

@@ -8,6 +8,8 @@ import {
   type CompanyUpdatePayload,
   type ICompanyRepository,
 } from "@modules/companies/repositories/CompanyRepository";
+import { resolveLocationFields } from "@shared/utils/geocoding";
+import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
  * Implements company service.
@@ -35,26 +37,46 @@ export class CompanyService {
     return this.repository.listAssociatedApplications(companyId);
   }
 
-  create(payload: CompanyCreatePayload) {
-    const result = CompanySchema.pick({ name: true }).safeParse(payload);
-    if (!result.success) {
-      throw new Error(`Validation failed: ${result.error.message}`);
-    }
+  async create(payload: CompanyCreatePayload) {
+    parseWithSchema(CompanySchema.pick({ name: true }), payload);
 
-    return this.repository.create(payload);
+    const resolvedLocation = await resolveLocationFields({
+      locationText: payload.locationText,
+      currentLatitude: payload.locationLat,
+      currentLongitude: payload.locationLng,
+    });
+
+    return this.repository.create({
+      ...payload,
+      locationText: resolvedLocation.locationText,
+      locationLat: resolvedLocation.locationLat,
+      locationLng: resolvedLocation.locationLng,
+    });
   }
 
-  update(payload: CompanyUpdatePayload) {
+  async update(payload: CompanyUpdatePayload) {
     if (payload.name !== undefined) {
-      const result = CompanySchema.pick({ name: true }).safeParse({
+      parseWithSchema(CompanySchema.pick({ name: true }), {
         name: payload.name,
       });
-      if (!result.success) {
-        throw new Error(`Validation failed: ${result.error.message}`);
-      }
     }
 
-    return this.repository.update(payload);
+    if (payload.locationText === undefined) {
+      return this.repository.update(payload);
+    }
+
+    const resolvedLocation = await resolveLocationFields({
+      locationText: payload.locationText,
+      currentLatitude: payload.locationLat,
+      currentLongitude: payload.locationLng,
+    });
+
+    return this.repository.update({
+      ...payload,
+      locationText: resolvedLocation.locationText,
+      locationLat: resolvedLocation.locationLat,
+      locationLng: resolvedLocation.locationLng,
+    });
   }
 
   delete(id: string) {

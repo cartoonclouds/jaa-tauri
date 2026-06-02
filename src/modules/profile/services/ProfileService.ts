@@ -6,6 +6,7 @@ import {
   type ProfileCreatePayload,
   type ProfileUpdatePayload,
 } from "@modules/profile/repositories/ProfileRepository";
+import { parseTrimmedWithSchema } from "@shared/utils/zodValidation";
 
 const ProfileNameSchema = ProfileSchema.pick({ fullName: true });
 
@@ -24,19 +25,21 @@ export class ProfileService {
   }
 
   create(payload: ProfileCreatePayload) {
-    const parsedFullName = ProfileNameSchema.safeParse({
-      fullName: payload.fullName.trim(),
-    });
-
-    if (!parsedFullName.success) {
-      throw new Error(
-        parsedFullName.error.issues[0]?.message ?? "Invalid profile full name",
-      );
-    }
+    const parsedFullName = parseTrimmedWithSchema(
+      ProfileNameSchema,
+      {
+        fullName: payload.fullName,
+      },
+      ["fullName"],
+      {
+        fallbackMessage: "Invalid profile full name",
+        useFirstIssueMessage: true,
+      },
+    );
 
     return this.repository.create({
       ...payload,
-      fullName: parsedFullName.data.fullName,
+      fullName: parsedFullName.fullName,
     });
   }
 
@@ -44,18 +47,19 @@ export class ProfileService {
     let fullName = payload.fullName;
 
     if (fullName !== undefined) {
-      const parsedFullName = ProfileNameSchema.safeParse({
-        fullName: fullName.trim(),
-      });
+      const parsedFullName = parseTrimmedWithSchema(
+        ProfileNameSchema,
+        {
+          fullName,
+        },
+        ["fullName"],
+        {
+          fallbackMessage: "Invalid profile full name",
+          useFirstIssueMessage: true,
+        },
+      );
 
-      if (!parsedFullName.success) {
-        throw new Error(
-          parsedFullName.error.issues[0]?.message ??
-            "Invalid profile full name",
-        );
-      }
-
-      fullName = parsedFullName.data.fullName;
+      fullName = parsedFullName.fullName;
     }
 
     return this.repository.update({
@@ -68,11 +72,3 @@ export class ProfileService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

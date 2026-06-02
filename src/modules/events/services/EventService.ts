@@ -4,6 +4,7 @@ import {
   type EventUpdatePayload,
   type IEventRepository,
 } from "@modules/events/repositories/EventRepository";
+import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
  * Implements event service.
@@ -16,19 +17,17 @@ export class EventService {
   }
 
   create(payload: EventCreatePayload) {
-    const result = EventSchema.pick({
-      applicationId: true,
-      type: true,
-      title: true,
-      notes: true,
-      eventAt: true,
-      sortOrder: true,
-    })
-      .partial({ notes: true, eventAt: true, sortOrder: true })
-      .safeParse(payload);
-    if (!result.success) {
-      throw new Error(`Validation failed: ${result.error.message}`);
-    }
+    parseWithSchema(
+      EventSchema.pick({
+        applicationId: true,
+        type: true,
+        title: true,
+        notes: true,
+        eventAt: true,
+        sortOrder: true,
+      }).partial({ notes: true, eventAt: true, sortOrder: true }),
+      payload,
+    );
     return this.repository.create(payload);
   }
 
@@ -47,18 +46,16 @@ export class EventService {
         eventAt: payload.eventAt,
         sortOrder: payload.sortOrder,
       };
-      const result = EventSchema.pick({
-        type: true,
-        title: true,
-        notes: true,
-        eventAt: true,
-        sortOrder: true,
-      })
-        .partial()
-        .safeParse(validatePayload);
-      if (!result.success) {
-        throw new Error(`Validation failed: ${result.error.message}`);
-      }
+      parseWithSchema(
+        EventSchema.pick({
+          type: true,
+          title: true,
+          notes: true,
+          eventAt: true,
+          sortOrder: true,
+        }).partial(),
+        validatePayload,
+      );
     }
     return this.repository.update(payload);
   }

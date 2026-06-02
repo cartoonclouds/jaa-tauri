@@ -3,7 +3,9 @@ import type { Contact } from "@modules/contacts/domain/entities/Contact";
 import type {
   DatatablePageQuery,
   DatatablePageResult,
+  EntityCreatePayload,
   IRepository,
+  PartialUpdatePayload,
 } from "@shared/types";
 
 import { mapContactRowToEntity } from "@modules/contacts/application/mappers/mapContactRow";
@@ -27,7 +29,7 @@ import {
 /**
  * Type alias for contact create payload.
  */
-export type ContactCreatePayload = Pick<
+export type ContactCreatePayload = EntityCreatePayload<
   Contact,
   | "companyId"
   | "fullName"
@@ -38,16 +40,15 @@ export type ContactCreatePayload = Pick<
   | "locationLat"
   | "locationLng"
   | "type"
-  | "notes"
-> & {
-  tagIds?: string[];
-};
+  | "notes",
+  {
+    tagIds?: string[];
+  }
+>;
 /**
  * Type alias for contact update payload.
  */
-export type ContactUpdatePayload = Partial<ContactCreatePayload> & {
-  id: string;
-};
+export type ContactUpdatePayload = PartialUpdatePayload<ContactCreatePayload>;
 
 /**
  * Defines icontact repository.

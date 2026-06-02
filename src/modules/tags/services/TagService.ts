@@ -6,6 +6,7 @@ import {
   type TagCreatePayload,
   type TagUpdatePayload,
 } from "@modules/tags/repositories/TagRepository";
+import { parseTrimmedWithSchema } from "@shared/utils/zodValidation";
 
 const TagNameSchema = TagSchema.pick({ name: true });
 
@@ -24,19 +25,21 @@ export class TagService {
   }
 
   create(payload: TagCreatePayload) {
-    const parsedName = TagNameSchema.safeParse({
-      name: payload.name.trim(),
-    });
-
-    if (!parsedName.success) {
-      throw new Error(
-        parsedName.error.issues[0]?.message ?? "Invalid tag name",
-      );
-    }
+    const parsedName = parseTrimmedWithSchema(
+      TagNameSchema,
+      {
+        name: payload.name,
+      },
+      ["name"],
+      {
+        fallbackMessage: "Invalid tag name",
+        useFirstIssueMessage: true,
+      },
+    );
 
     return this.repository.create({
       ...payload,
-      name: parsedName.data.name,
+      name: parsedName.name,
     });
   }
 
@@ -44,17 +47,19 @@ export class TagService {
     let name = payload.name;
 
     if (name !== undefined) {
-      const parsedName = TagNameSchema.safeParse({
-        name: name.trim(),
-      });
+      const parsedName = parseTrimmedWithSchema(
+        TagNameSchema,
+        {
+          name,
+        },
+        ["name"],
+        {
+          fallbackMessage: "Invalid tag name",
+          useFirstIssueMessage: true,
+        },
+      );
 
-      if (!parsedName.success) {
-        throw new Error(
-          parsedName.error.issues[0]?.message ?? "Invalid tag name",
-        );
-      }
-
-      name = parsedName.data.name;
+      name = parsedName.name;
     }
 
     return this.repository.update({
@@ -67,11 +72,3 @@ export class TagService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

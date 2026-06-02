@@ -4,11 +4,12 @@ import type {
   ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "../../types/enums";
+import type { LocationFields, LocationFieldsInput } from "@shared/types";
 
 /**
  * Application entity stored by the domain layer.
  */
-export interface Application {
+export interface Application extends LocationFields {
   /** Unique application identifier. */
   id: string;
   /** Related company identifier, when available. */
@@ -23,12 +24,6 @@ export interface Application {
   sourceUrl: string | null;
   /** Application submission date, when available. */
   appliedAt: Date | null;
-  /** Free-form location text. */
-  locationText: string | null;
-  /** Latitude for geocoded location data. */
-  locationLat: number | null;
-  /** Longitude for geocoded location data. */
-  locationLng: number | null;
   /** Preferred attendance mode, when known. */
   attendanceType: ApplicationAttendanceType | null;
   /** Employment type, when known. */
@@ -62,17 +57,11 @@ export interface Application {
 /**
  * Minimal input required to create an application record.
  */
-export interface CreateApplicationInput {
+export interface CreateApplicationInput extends LocationFieldsInput {
   /** Related company identifier, when available. */
   companyId?: string | null;
   /** Application title. */
   title: string;
   /** Application status. */
   status?: ApplicationStatus;
-  /** Free-form location text. */
-  locationText?: string | null;
-  /** Latitude for geocoded location data. */
-  locationLat?: number | null;
-  /** Longitude for geocoded location data. */
-  locationLng?: number | null;
 }

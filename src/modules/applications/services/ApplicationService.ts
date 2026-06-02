@@ -6,6 +6,8 @@ import type { DatatablePageQuery } from "@shared/types";
 
 import { ApplicationSchema } from "@modules/applications/domain/zod/application.schema";
 import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
+import { resolveLocationFields } from "@shared/utils/geocoding";
+import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
  * Implements application service.
@@ -21,35 +23,47 @@ export class ApplicationService {
     return this.repository.listPage(query);
   }
 
-  create(payload: ApplicationCreatePayload) {
-    const result = ApplicationSchema.pick({ title: true }).safeParse(payload);
-    if (!result.success) {
-      throw new Error(`Validation failed: ${result.error.message}`);
-    }
+  async create(payload: ApplicationCreatePayload) {
+    parseWithSchema(ApplicationSchema.pick({ title: true }), payload);
 
-    return this.repository.create(payload);
+    const resolvedLocation = await resolveLocationFields({
+      locationText: payload.locationText,
+      currentLatitude: payload.locationLat,
+      currentLongitude: payload.locationLng,
+    });
+
+    return this.repository.create({
+      ...payload,
+      locationText: resolvedLocation.locationText,
+      locationLat: resolvedLocation.locationLat,
+      locationLng: resolvedLocation.locationLng,
+    });
   }
 
-  update(payload: ApplicationUpdatePayload) {
-    const result = ApplicationSchema.pick({ title: true }).safeParse({
+  async update(payload: ApplicationUpdatePayload) {
+    parseWithSchema(ApplicationSchema.pick({ title: true }), {
       title: payload.title,
     });
-    if (!result.success) {
-      throw new Error(`Validation failed: ${result.error.message}`);
+
+    if (payload.locationText === undefined) {
+      return this.repository.update(payload);
     }
 
-    return this.repository.update(payload);
+    const resolvedLocation = await resolveLocationFields({
+      locationText: payload.locationText,
+      currentLatitude: payload.locationLat,
+      currentLongitude: payload.locationLng,
+    });
+
+    return this.repository.update({
+      ...payload,
+      locationText: resolvedLocation.locationText,
+      locationLat: resolvedLocation.locationLat,
+      locationLng: resolvedLocation.locationLng,
+    });
   }
 
   delete(id: string) {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

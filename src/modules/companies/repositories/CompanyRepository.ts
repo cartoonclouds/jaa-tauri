@@ -4,6 +4,7 @@ import type {
   DatatablePageQuery,
   DatatablePageResult,
   IRepository,
+  LocationFieldsInput,
 } from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
@@ -24,15 +25,12 @@ import {
 /**
  * Defines company create payload.
  */
-export interface CompanyCreatePayload {
+export interface CompanyCreatePayload extends LocationFieldsInput {
   name: string;
   websiteUrl?: string | null;
   linkedinUrl?: string | null;
   industry?: string | null;
   size?: string | null;
-  locationText?: string | null;
-  locationLat?: number | null;
-  locationLng?: number | null;
   notes?: string | null;
   tagIds?: string[];
 }
@@ -40,16 +38,13 @@ export interface CompanyCreatePayload {
 /**
  * Defines company update payload.
  */
-export interface CompanyUpdatePayload {
+export interface CompanyUpdatePayload extends LocationFieldsInput {
   id: string;
   name?: string;
   websiteUrl?: string | null;
   linkedinUrl?: string | null;
   industry?: string | null;
   size?: string | null;
-  locationText?: string | null;
-  locationLat?: number | null;
-  locationLng?: number | null;
   notes?: string | null;
   tagIds?: string[];
 }

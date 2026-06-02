@@ -6,6 +6,7 @@ import {
   type NotificationCreatePayload,
   type NotificationUpdatePayload,
 } from "@modules/notifications/repositories/NotificationRepository";
+import { parseTrimmedWithSchema } from "@shared/utils/zodValidation";
 
 const NotificationContentSchema = NotificationSchema.pick({
   title: true,
@@ -28,22 +29,23 @@ export class NotificationService {
   }
 
   create(payload: NotificationCreatePayload) {
-    const parsedContent = NotificationContentSchema.safeParse({
-      title: payload.title.trim(),
-      body: payload.body.trim(),
-    });
-
-    if (!parsedContent.success) {
-      throw new Error(
-        parsedContent.error.issues[0]?.message ??
-          "Error creating notification content",
-      );
-    }
+    const parsedContent = parseTrimmedWithSchema(
+      NotificationContentSchema,
+      {
+        title: payload.title,
+        body: payload.body,
+      },
+      ["title", "body"],
+      {
+        fallbackMessage: "Error creating notification content",
+        useFirstIssueMessage: true,
+      },
+    );
 
     return this.repository.create({
       ...payload,
-      title: parsedContent.data.title,
-      body: parsedContent.data.body,
+      title: parsedContent.title,
+      body: parsedContent.body,
       severity: payload.severity,
       isRead: payload.isRead,
     });
@@ -51,23 +53,23 @@ export class NotificationService {
 
   update(payload: NotificationUpdatePayload) {
     const contentToValidate = {
-      ...(payload.title !== undefined ? { title: payload.title.trim() } : {}),
-      ...(payload.body !== undefined ? { body: payload.body.trim() } : {}),
+      ...(payload.title !== undefined ? { title: payload.title } : {}),
+      ...(payload.body !== undefined ? { body: payload.body } : {}),
     };
 
-    const parsedContent =
-      NotificationContentUpdateSchema.safeParse(contentToValidate);
-
-    if (!parsedContent.success) {
-      throw new Error(
-        parsedContent.error.issues[0]?.message ??
-          "Error updating notification content",
-      );
-    }
+    const parsedContent = parseTrimmedWithSchema(
+      NotificationContentUpdateSchema,
+      contentToValidate,
+      ["title", "body"],
+      {
+        fallbackMessage: "Error updating notification content",
+        useFirstIssueMessage: true,
+      },
+    );
 
     return this.repository.update({
       ...payload,
-      ...parsedContent.data,
+      ...parsedContent,
     });
   }
 

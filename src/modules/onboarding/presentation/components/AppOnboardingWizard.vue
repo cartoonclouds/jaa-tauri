@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useOnboardingFlow } from "@modules/onboarding/composables/useOnboardingFlow.client";
   import { defaultSkillOptions } from "@modules/onboarding/constants";
+  import { getOnboardingStepState } from "@modules/onboarding/utils/onboardingUtils";
   import { computed, ref } from "vue";
 
   import {
@@ -72,6 +73,8 @@
     resume: "Resume",
     review: "Review",
   } as const;
+
+  const currentStepIndex = computed(() => stepOrder.indexOf(currentStep.value));
 
   const canMoveBack = computed(() => !isFirstStep.value);
   const showCancelConfirmDialog = ref(false);
@@ -192,15 +195,55 @@
         <div
           v-for="(step, index) in stepOrder"
           :key="step"
-          class="rounded-lg border px-3 py-2"
+          class="rounded-lg border px-3 py-2 transition-all"
           :class="
-            currentStep === step
-              ? 'border-primary bg-primary/10'
-              : 'border-surface-300'
+            getOnboardingStepState(index, currentStepIndex) === 'current'
+              ? 'border-primary bg-primary/15 ring-2 ring-primary/30 shadow-sm'
+              : getOnboardingStepState(index, currentStepIndex) === 'completed'
+                ? 'border-green-400 bg-green-50/80'
+                : 'border-surface-300 bg-surface-0'
+          "
+          :aria-current="
+            getOnboardingStepState(index, currentStepIndex) === 'current'
+              ? 'step'
+              : undefined
           "
         >
-          <p class="text-xs text-surface-500">Step {{ index + 1 }}</p>
-          <p class="font-medium">{{ stepLabels[step] }}</p>
+          <div class="flex items-start justify-between gap-2">
+            <p
+              class="text-xs"
+              :class="
+                getOnboardingStepState(index, currentStepIndex) === 'current'
+                  ? 'text-primary-700 font-semibold'
+                  : 'text-surface-500'
+              "
+            >
+              Step {{ index + 1 }}
+            </p>
+
+            <Tag
+              v-if="
+                getOnboardingStepState(index, currentStepIndex) === 'current'
+              "
+              value="Current"
+              severity="info"
+              class="text-[10px]"
+            />
+          </div>
+
+          <p
+            class="font-medium"
+            :class="
+              getOnboardingStepState(index, currentStepIndex) === 'current'
+                ? 'text-primary-900'
+                : getOnboardingStepState(index, currentStepIndex) ===
+                    'completed'
+                  ? 'text-green-800'
+                  : 'text-surface-700'
+            "
+          >
+            {{ stepLabels[step] }}
+          </p>
         </div>
       </div>
 

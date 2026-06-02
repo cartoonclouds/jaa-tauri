@@ -4,6 +4,7 @@ import type {
   DatatablePageQuery,
   DatatablePageResult,
   IRepository,
+  PartialUpdatePayload,
 } from "@shared/types";
 
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
@@ -23,7 +24,7 @@ export type TagCreatePayload = Pick<Tag, "name" | "color">;
 /**
  * Type alias for tag update payload.
  */
-export type TagUpdatePayload = Partial<TagCreatePayload> & { id: string };
+export type TagUpdatePayload = PartialUpdatePayload<TagCreatePayload>;
 
 /**
  * Defines itag repository.
