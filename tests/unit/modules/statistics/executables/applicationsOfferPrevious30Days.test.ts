@@ -1,7 +1,51 @@
-import { ApplicationsOfferPrevious30Days } from "@modules/statistics/domain/executables/applicationsOfferPrevious30Days";
-import { createFailingDb, createMockDb } from "@testUtils/dbTestUtils";
-import { describe, expect, it } from "vitest";
+import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
+import { ApplicationsOfferPrevious30Days } from "@modules/statistics/domain/executables/applicationsOfferPrevious30Days";
+import { describe, expect, it, vi } from "vitest";
+
+type LocalSelectRows = Record<string, unknown>[];
+
+function createMockDb(rows: LocalSelectRows = []): {
+  db: DatabaseDriver;
+  selectMock: ReturnType<typeof vi.fn>;
+  executeMock: ReturnType<typeof vi.fn>;
+  transactionMock: ReturnType<typeof vi.fn>;
+} {
+  const selectMock = vi.fn(() => Promise.resolve(rows));
+  const executeMock = vi.fn(() => Promise.resolve({ rowsAffected: 0 }));
+  const transactionMock = vi.fn(
+    <T>(callback: (tx: DatabaseDriver) => Promise<T>) => callback(db),
+  );
+
+  const db = {
+    name: "mock",
+    select: selectMock,
+    execute: executeMock,
+    transaction: transactionMock,
+  } as unknown as DatabaseDriver;
+
+  return {
+    db,
+    selectMock,
+    executeMock,
+    transactionMock,
+  };
+}
+
+function createFailingDb(error: Error): DatabaseDriver {
+  const selectMock = vi.fn(() => Promise.reject(error));
+
+  const db = {
+    name: "mock",
+    select: selectMock,
+    execute: vi.fn(() => Promise.resolve({ rowsAffected: 0 })),
+    transaction: vi.fn(<T>(callback: (tx: DatabaseDriver) => Promise<T>) =>
+      callback(db),
+    ),
+  } as unknown as DatabaseDriver;
+
+  return db;
+}
 describe("ApplicationsOfferPrevious30Days", () => {
   it("returns count and positive trend", async () => {
     const { db } = createMockDb([{ applicationsOfferPrevious30Days: 4 }]);
