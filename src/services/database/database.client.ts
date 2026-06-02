@@ -1,5 +1,9 @@
 import type { DatabasePublicRuntimeConfig } from "@/types/runtime-config";
 
+import {
+  ConfigurationError,
+  RuntimeEnvironmentError,
+} from "@shared/domain/errors";
 import { isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
@@ -18,13 +22,13 @@ export default defineNuxtPlugin(async () => {
   const isSqliteUrl = configuredUrl.startsWith("sqlite:");
 
   if (!isTauri()) {
-    throw new Error(
+    throw new RuntimeEnvironmentError(
       "SQLite database is only supported inside Tauri runtime. Start the app with Tauri.",
     );
   }
 
   if (!isSqliteUrl) {
-    throw new Error(
+    throw new ConfigurationError(
       `Invalid database URL "${configuredUrl}". This desktop app requires a sqlite:* URL.`,
     );
   }

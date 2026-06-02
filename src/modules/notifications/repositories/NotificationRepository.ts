@@ -10,6 +10,7 @@ import type {
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
 import { NOTIFICATION_SEARCH_FIELDS } from "@modules/notifications/constants";
 import { NotificationRepositoryCreateSchema } from "@modules/notifications/domain/zod/notification.schema";
+import { ValidationError } from "@shared/domain/errors";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -117,13 +118,13 @@ export class NotificationRepository implements INotificationRepository {
   async create(payload: NotificationCreatePayload): Promise<string> {
     const parseResult = NotificationRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Notification title and body are required");
+      throw new ValidationError("Notification title and body are required");
     }
 
     const title = parseResult.data.title.trim();
     const body = parseResult.data.body.trim();
     if (!title || !body) {
-      throw new Error("Notification title and body are required");
+      throw new ValidationError("Notification title and body are required");
     }
 
     const id = crypto.randomUUID();

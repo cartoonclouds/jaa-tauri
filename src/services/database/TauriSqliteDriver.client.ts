@@ -1,6 +1,7 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 import type { QueryBindings, QueryResult } from "./QueryBindings";
 
+import { ConfigurationError } from "@shared/domain/errors";
 import Database from "@tauri-apps/plugin-sql";
 
 /**
@@ -20,7 +21,7 @@ export class TauriSqliteDriver implements DatabaseDriver {
     databaseUrl = "sqlite:applyflow.db",
   ): Promise<TauriSqliteDriver> {
     if (databaseUrl === ":memory:") {
-      throw new Error(
+      throw new ConfigurationError(
         "In-memory SQLite is not supported by the Tauri SQL plugin URL format.",
       );
     }

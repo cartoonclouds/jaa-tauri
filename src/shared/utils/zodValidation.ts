@@ -1,5 +1,7 @@
 import type { ZodType } from "zod";
 
+import { ValidationError } from "@shared/domain/errors";
+
 /**
  * Options for standardized Zod parse error handling.
  */
@@ -28,13 +30,13 @@ export function parseWithSchema<TOutput>(
   const firstIssueMessage = parseResult.error.issues[0]?.message;
 
   if (options.useFirstIssueMessage) {
-    throw new Error(
+    throw new ValidationError(
       firstIssueMessage ?? options.fallbackMessage ?? "Validation failed",
     );
   }
 
   const messagePrefix = options.messagePrefix ?? "Validation failed";
-  throw new Error(`${messagePrefix}: ${parseResult.error.message}`);
+  throw new ValidationError(`${messagePrefix}: ${parseResult.error.message}`);
 }
 
 /**

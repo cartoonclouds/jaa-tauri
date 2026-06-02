@@ -21,6 +21,7 @@ import {
   EVENT_FLOW_STAGE_SET,
   type InteractionStage,
 } from "@modules/events/constants";
+import { ValidationError } from "@shared/domain/errors";
 import {
   buildSearchWhereClause,
   DEFAULT_CREATED_AT_ORDER_BY,
@@ -293,12 +294,12 @@ export class ApplicationRepository implements IApplicationRepository {
   async create(payload: ApplicationCreatePayload): Promise<string> {
     const parseResult = ApplicationRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Application title is required");
+      throw new ValidationError("Application title is required");
     }
 
     const title = parseResult.data.title.trim();
     if (!title) {
-      throw new Error("Application title is required");
+      throw new ValidationError("Application title is required");
     }
 
     const id = crypto.randomUUID();

@@ -1,5 +1,6 @@
 import type * as TauriFs from "@tauri-apps/plugin-fs";
 
+import { RuntimeEnvironmentError } from "@shared/domain/errors";
 import { toErrorMessage } from "@shared/utils/error";
 import { isTauri } from "@tauri-apps/api/core";
 import { ref } from "vue";
@@ -33,11 +34,15 @@ const DEFAULT_FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"];
  */
 async function resolveFileSystemModule(): Promise<TauriFsModule> {
   if (!import.meta.client) {
-    throw new Error("Filesystem is only available on the client runtime.");
+    throw new RuntimeEnvironmentError(
+      "Filesystem is only available on the client runtime.",
+    );
   }
 
   if (!isTauri()) {
-    throw new Error("Filesystem operations require a Tauri runtime.");
+    throw new RuntimeEnvironmentError(
+      "Filesystem operations require a Tauri runtime.",
+    );
   }
 
   tauriFsModulePromise ??= import("@tauri-apps/plugin-fs");

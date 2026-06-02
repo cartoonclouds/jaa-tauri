@@ -13,6 +13,7 @@ import {
   ProfileRepositoryCreateSchema,
   ProfileRepositoryUpdateSchema,
 } from "@modules/profile/domain/zod/profile.schema";
+import { ValidationError } from "@shared/domain/errors";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -123,12 +124,12 @@ export class ProfileRepository implements IProfileRepository {
   async create(payload: ProfileCreatePayload): Promise<string> {
     const parseResult = ProfileRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Profile full name is required");
+      throw new ValidationError("Profile full name is required");
     }
 
     const fullName = parseResult.data.fullName.trim();
     if (!fullName) {
-      throw new Error("Profile full name is required");
+      throw new ValidationError("Profile full name is required");
     }
 
     const id = crypto.randomUUID();
@@ -161,7 +162,7 @@ export class ProfileRepository implements IProfileRepository {
   async update(payload: ProfileUpdatePayload): Promise<void> {
     const payloadParse = ProfileRepositoryUpdateSchema.safeParse(payload);
     if (!payloadParse.success) {
-      throw new Error(
+      throw new ValidationError(
         "Profile update validation failed: " +
           JSON.stringify(payloadParse.error.format()),
       );

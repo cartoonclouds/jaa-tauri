@@ -10,6 +10,7 @@ import type {
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
 import { TAG_SEARCH_FIELDS } from "@modules/tags/constants";
 import { TagRepositoryCreateSchema } from "@modules/tags/domain/zod/tag.schema";
+import { ValidationError } from "@shared/domain/errors";
 import {
   buildSearchWhereClause,
   DEFAULT_CREATED_AT_ORDER_BY,
@@ -98,12 +99,12 @@ export class TagRepository implements ITagRepository {
   async create(payload: TagCreatePayload): Promise<string> {
     const parseResult = TagRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Tag name is required");
+      throw new ValidationError("Tag name is required");
     }
 
     const name = parseResult.data.name.trim().toLowerCase();
     if (!name) {
-      throw new Error("Tag name is required");
+      throw new ValidationError("Tag name is required");
     }
 
     const id = crypto.randomUUID();

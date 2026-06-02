@@ -8,6 +8,7 @@ import { useDocument } from "@modules/documents";
 import { useProfile } from "@modules/profile";
 import { CreateProfileSchema } from "@modules/profile/domain/zod/profile.schema";
 import { setOnboardingCompleted } from "@modules/settings/persistence";
+import { ValidationError } from "@shared/domain/errors";
 
 import {
   getResumeDocumentTitle,
@@ -58,7 +59,7 @@ export class OnboardingRepository {
     const payload = userProfileToProfileCreatePayload(input.profile);
     const parseResult = CreateProfileSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error(
+      throw new ValidationError(
         "Profile validation failed: " +
           JSON.stringify(parseResult.error.format()),
       );

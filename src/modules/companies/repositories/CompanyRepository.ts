@@ -10,6 +10,7 @@ import type {
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
 import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants";
 import { CompanyRepositoryCreateSchema } from "@modules/companies/domain/zod/company.schema";
+import { ValidationError } from "@shared/domain/errors";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -165,12 +166,12 @@ export class CompanyRepository implements ICompanyRepository {
   async create(payload: CompanyCreatePayload): Promise<string> {
     const parseResult = CompanyRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Company name is required");
+      throw new ValidationError("Company name is required");
     }
 
     const name = parseResult.data.name.trim();
     if (!name) {
-      throw new Error("Company name is required");
+      throw new ValidationError("Company name is required");
     }
 
     const id = crypto.randomUUID();

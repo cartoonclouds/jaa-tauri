@@ -1,3 +1,5 @@
+import { ValidationError } from "@shared/domain/errors";
+
 /**
  * Convert an unknown value into a valid Date instance.
  *
@@ -11,7 +13,7 @@ export function toDate(value: unknown): Date {
 
   const parsed = new Date(String(value));
   if (Number.isNaN(parsed.getTime())) {
-    throw new Error(`Invalid date value: ${String(value)}`);
+    throw new ValidationError(`Invalid date value: ${String(value)}`);
   }
 
   return parsed;

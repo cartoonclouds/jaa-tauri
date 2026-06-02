@@ -13,6 +13,7 @@ import {
   CONSTANT_MODULE_SOURCES,
   type PersistedConstantSourceType,
 } from "@shared/constants/persistedConstants";
+import { ValidationError } from "@shared/domain/errors";
 import { normalizeConstantValue } from "@shared/utils/constantValue";
 import { fromDbBoolean } from "@shared/utils/database-mapping/persistenceValueUtils";
 import {
@@ -217,7 +218,7 @@ export class SettingRepository implements ISettingRepository {
   async upsert(payload: SettingUpsertPayload): Promise<string> {
     const parseResult = SettingRepositoryUpsertSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error(
+      throw new ValidationError(
         "Setting validation failed: " +
           JSON.stringify(parseResult.error.format()),
       );
@@ -300,7 +301,7 @@ export class SettingRepository implements ISettingRepository {
     const settingsLabel = resolveSettingsLabel(payload.type);
 
     if (normalizedValue.length === 0) {
-      throw new Error("Constant value cannot be empty");
+      throw new ValidationError("Constant value cannot be empty");
     }
 
     const previousValue = payload.previousValue

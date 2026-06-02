@@ -8,6 +8,7 @@ import {
   type InteractionStage,
 } from "@modules/events/constants";
 import { EventRepositoryCreateSchema } from "@modules/events/domain/zod/event.schema";
+import { ValidationError } from "@shared/domain/errors";
 
 const EVENT_LINK_ID_SEPARATOR = "::";
 
@@ -21,13 +22,13 @@ function parseEventLinkId(id: string): {
 } {
   const separatorIndex = id.indexOf(EVENT_LINK_ID_SEPARATOR);
   if (separatorIndex <= 0) {
-    throw new Error("Event id is invalid");
+    throw new ValidationError("Event id is invalid");
   }
 
   const applicationId = id.slice(0, separatorIndex);
   const eventId = id.slice(separatorIndex + EVENT_LINK_ID_SEPARATOR.length);
   if (!applicationId || !eventId) {
-    throw new Error("Event id is invalid");
+    throw new ValidationError("Event id is invalid");
   }
 
   return { applicationId, eventId };
@@ -133,7 +134,7 @@ export class EventRepository implements IEventRepository {
 
     const eventId = rows[0]?.id;
     if (!eventId) {
-      throw new Error("Event type is invalid");
+      throw new ValidationError("Event type is invalid");
     }
 
     return eventId;
@@ -167,15 +168,21 @@ export class EventRepository implements IEventRepository {
   async create(payload: EventCreatePayload): Promise<string> {
     const parseResult = EventRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Event applicationId, type, and title are required");
+      throw new ValidationError(
+        "Event applicationId, type, and title are required",
+      );
     }
 
     if (!parseResult.data.applicationId) {
-      throw new Error("Event applicationId, type, and title are required");
+      throw new ValidationError(
+        "Event applicationId, type, and title are required",
+      );
     }
 
     if (!parseResult.data.title.trim()) {
-      throw new Error("Event applicationId, type, and title are required");
+      throw new ValidationError(
+        "Event applicationId, type, and title are required",
+      );
     }
 
     const eventId = await this.resolveEventIdByType(parseResult.data.type);

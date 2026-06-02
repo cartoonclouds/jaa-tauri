@@ -1,6 +1,7 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { NuxtApp } from "nuxt/app";
 
+import { RuntimeEnvironmentError } from "@shared/domain/errors";
 import { useNuxtApp } from "nuxt/app";
 
 const databaseByApp = new WeakMap<NuxtApp, DatabaseDriver>();
@@ -45,7 +46,9 @@ export function getNuxtDatabase(): DatabaseDriver {
 
   const injectedDatabase = nuxtApp.$database;
   if (!isDatabaseDriver(injectedDatabase)) {
-    throw new Error("Nuxt database injection is unavailable or invalid.");
+    throw new RuntimeEnvironmentError(
+      "Nuxt database injection is unavailable or invalid.",
+    );
   }
 
   const database = injectedDatabase;

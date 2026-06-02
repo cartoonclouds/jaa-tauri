@@ -1,6 +1,7 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 import type { QueryBindings, QueryResult } from "./QueryBindings";
 
+import { ConfigurationError } from "@shared/domain/errors";
 import Database from "better-sqlite3";
 import path from "node:path";
 
@@ -25,7 +26,9 @@ export class BetterSqliteDriver implements DatabaseDriver {
     if (databaseUrl.startsWith("sqlite:")) {
       const file = databaseUrl.slice("sqlite:".length);
       if (!file) {
-        throw new Error("Invalid sqlite URL. Example: sqlite:applyflow.db");
+        throw new ConfigurationError(
+          "Invalid sqlite URL. Example: sqlite:applyflow.db",
+        );
       }
 
       return new BetterSqliteDriver(
@@ -86,11 +89,3 @@ export class BetterSqliteDriver implements DatabaseDriver {
     }
   }
 }
-
-
-
-
-
-
-
-

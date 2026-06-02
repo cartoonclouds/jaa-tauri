@@ -11,6 +11,7 @@ import type {
 import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
 import { DOCUMENT_SEARCH_FIELDS } from "@modules/documents/constants";
 import { DocumentRepositoryCreateSchema } from "@modules/documents/domain/zod/document.schema";
+import { ValidationError } from "@shared/domain/errors";
 import { toRequiredString } from "@shared/utils/database-mapping/stringValueUtils";
 import {
   buildSearchWhereClause,
@@ -125,14 +126,18 @@ export class DocumentRepository implements IDocumentRepository {
   async create(payload: DocumentCreatePayload): Promise<string> {
     const parseResult = DocumentRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Document title, kind, and file path are required");
+      throw new ValidationError(
+        "Document title, kind, and file path are required",
+      );
     }
 
     const title = parseResult.data.title.trim();
     const kind = parseResult.data.kind.trim();
     const filePath = parseResult.data.filePath.trim();
     if (!title || !kind || !filePath) {
-      throw new Error("Document title, kind, and file path are required");
+      throw new ValidationError(
+        "Document title, kind, and file path are required",
+      );
     }
 
     const id = crypto.randomUUID();

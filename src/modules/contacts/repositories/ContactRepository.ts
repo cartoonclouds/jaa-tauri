@@ -14,6 +14,7 @@ import {
   ContactRepositoryCreateSchema,
   ContactTypeSchema,
 } from "@modules/contacts/domain/zod/contact.schema";
+import { ValidationError } from "@shared/domain/errors";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -238,17 +239,17 @@ export class ContactRepository implements IContactRepository {
   async create(payload: ContactCreatePayload): Promise<string> {
     const parseResult = ContactRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
-      throw new Error("Contact full name is required");
+      throw new ValidationError("Contact full name is required");
     }
 
     const fullName = parseResult.data.fullName.trim();
     if (!fullName) {
-      throw new Error("Contact full name is required");
+      throw new ValidationError("Contact full name is required");
     }
 
     const parsedType = ContactTypeSchema.safeParse(parseResult.data.type);
     if (!parsedType.success) {
-      throw new Error("Invalid contact type");
+      throw new ValidationError("Invalid contact type");
     }
 
     const id = crypto.randomUUID();

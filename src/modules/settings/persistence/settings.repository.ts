@@ -15,6 +15,7 @@ import type {
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { logError } from "@infra/logging/appLogger";
+import { ValidationError } from "@shared/domain/errors";
 import { normalizeAliasedLiteralValue } from "@shared/utils/database-mapping/normalizationUtils";
 import {
   fromDbBoolean,
@@ -233,7 +234,7 @@ export async function setSettings(
 
   const parseResult = SettingsInputSchema.safeParse(updated);
   if (!parseResult.success) {
-    throw new Error(
+    throw new ValidationError(
       "Settings validation failed: " +
         JSON.stringify(parseResult.error.format()),
     );
@@ -265,7 +266,7 @@ export async function setSetting<K extends keyof AppSettings>(
 
   const settingsParse = SettingsInputSchema.safeParse(updated);
   if (!settingsParse.success) {
-    throw new Error(
+    throw new ValidationError(
       "Settings validation failed: " +
         JSON.stringify(settingsParse.error.format()),
     );

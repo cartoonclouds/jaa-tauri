@@ -1,5 +1,7 @@
 import type { DatabaseDriver } from "./DatabaseDriver";
 
+import { DatabaseError } from "@shared/domain/errors";
+
 /**
  * Row shape returned by sqlite_master existence checks.
  */
@@ -51,7 +53,7 @@ export async function ensureMigrationsAppliedOnFirstRun(
     );
 
     if (!rows[0]?.name) {
-      throw new Error(
+      throw new DatabaseError(
         `Database migration missing required table: ${tableName}.`,
       );
     }
@@ -65,7 +67,7 @@ export async function ensureMigrationsAppliedOnFirstRun(
     (column) => column.name === "label",
   );
   if (!hasLabelColumn) {
-    throw new Error(
+    throw new DatabaseError(
       "Database migration missing required constants.label column.",
     );
   }
@@ -74,7 +76,7 @@ export async function ensureMigrationsAppliedOnFirstRun(
     (column) => column.name === "is_visible",
   );
   if (!hasVisibilityColumn) {
-    throw new Error(
+    throw new DatabaseError(
       "Database migration missing required constants.is_visible column.",
     );
   }
