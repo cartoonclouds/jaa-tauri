@@ -58,7 +58,7 @@
     }
 
     if (props.kind === "priority") {
-      return `P${props.priority ?? 3}`;
+      return "P" + String(props.priority ?? 3);
     }
 
     return props.archived ? "Archived" : "Active";
@@ -85,7 +85,7 @@
       return getApplicationPriorityClass(props.priority ?? 3);
     }
 
-    return getApplicationArchivedClass(Boolean(props.archived));
+    return getApplicationArchivedClass(props.archived);
   });
 </script>
 

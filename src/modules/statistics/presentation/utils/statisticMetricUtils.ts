@@ -1,10 +1,3 @@
-import type { StatisticsOverview } from "@modules/statistics/repositories/StatisticRepository";
-
-import {
-  STATISTIC_METRIC_DEFINITIONS,
-  type StatisticCardTone,
-} from "@modules/statistics/statisticMetricDefinitions";
-
 /**
  * Visual trend tone used by statistic cards.
  */
@@ -47,62 +40,18 @@ export function toTrendPointLabel(value: number): string {
   return `${String(value)}pp`;
 }
 
-/**
- * Configuration contract for a single statistic card metric.
- */
-export interface StatisticCardMetricDefinition {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  tone: StatisticCardTone;
-  value: (overview: StatisticsOverview) => number;
-  suffix?: string;
-  trendLabel?: string;
-  trendValue?: (overview: StatisticsOverview) => string;
-  trendTone?: (overview: StatisticsOverview) => StatisticTrendTone;
+export function toRate(numerator: number, denominator: number): number {
+  if (denominator <= 0) {
+    return 0;
+  }
+
+  return Math.round((numerator / denominator) * 100);
 }
 
-/**
- * Shared metric definitions used to render statistics cards consistently.
- */
-export const statisticMetricDefinitions: readonly StatisticCardMetricDefinition[] =
-  STATISTIC_METRIC_DEFINITIONS.flatMap((metric) => {
-    if (!metric.card) {
-      return [];
-    }
+export function toTrendPercent(current: number, previous: number): number {
+  if (previous <= 0) {
+    return current > 0 ? 100 : 0;
+  }
 
-    const valueField = metric.card.valueField ?? metric.id;
-
-    return [
-      {
-        id: metric.id,
-        title: metric.card.title,
-        description: metric.card.description,
-        icon: metric.card.icon,
-        tone: metric.card.tone,
-        value: (overview: StatisticsOverview) => overview[valueField],
-        suffix: metric.card.suffix,
-        trendLabel: metric.card.trendLabel,
-        trendValue: metric.card.trendValueField
-          ? (overview: StatisticsOverview) => {
-              const trendValue =
-                overview[metric.card?.trendValueField ?? metric.id];
-
-              if (metric.card?.trendValueFormat === "points") {
-                return toTrendPointLabel(trendValue);
-              }
-
-              return toTrendPercentLabel(trendValue);
-            }
-          : undefined,
-        trendTone: metric.card.trendToneField
-          ? (overview: StatisticsOverview) =>
-              toTrendTone(overview[metric.card?.trendToneField ?? metric.id])
-          : undefined,
-      },
-    ];
-  });
-
-
-
+  return Math.round(((current - previous) / previous) * 100);
+}

@@ -1,16 +1,3 @@
-import type {
-  StatisticsOverview,
-  StatisticsOverviewBase,
-} from "@modules/statistics/repositories/StatisticRepository";
-
-/**
- * Type alias for statistic metric id.
- */
-export type StatisticMetricId = keyof StatisticsOverview;
-/**
- * Type alias for statistic aggregate field.
- */
-export type StatisticAggregateField = keyof StatisticsOverviewBase;
 /**
  * Type alias for statistic card tone.
  */
@@ -33,11 +20,11 @@ export interface StatisticCardDefinition {
   description: string;
   icon: string;
   tone: StatisticCardTone;
-  valueField?: StatisticMetricId;
+  valueField?: string;
   suffix?: string;
   trendLabel?: string;
-  trendValueField?: StatisticMetricId;
-  trendToneField?: StatisticMetricId;
+  trendValueField?: string;
+  trendToneField?: string;
   trendValueFormat?: StatisticTrendValueFormat;
 }
 
@@ -45,7 +32,7 @@ export interface StatisticCardDefinition {
  * Defines statistic metric definition.
  */
 export interface StatisticMetricDefinition {
-  id: StatisticMetricId;
+  id: string;
   aggregateSql?: string;
   card?: StatisticCardDefinition;
 }
@@ -57,33 +44,12 @@ const LAST_30_DAYS_APPLIED_SQL =
   "applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-30 day')";
 const PREVIOUS_30_DAYS_APPLIED_SQL =
   "applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-60 day') AND datetime(applied_at) < datetime('now', '-30 day')";
-const PREVIOUS_30_DAYS_TREND_LABEL = "vs previous 30 days";
 
 /**
  * Shared single-source metric definitions for repository aggregates and UI cards.
  */
 export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] =
   [
-    {
-      id: "totalApplications",
-      aggregateSql: "COUNT(*)",
-      card: {
-        title: "Total applications",
-        description: "All active records in your tracker",
-        icon: "heroicons:briefcase",
-        tone: "info",
-      },
-    },
-    {
-      id: "totalAppliedApplications",
-      aggregateSql: "SUM(CASE WHEN status = 'applied' THEN 1 ELSE 0 END)",
-      card: {
-        title: "Applied applications",
-        description: "Applications currently in applied stage",
-        icon: "heroicons:paper-airplane",
-        tone: "default",
-      },
-    },
     {
       id: "totalInterviewingApplications",
       aggregateSql: `SUM(CASE WHEN status IN (${INTERVIEWING_STATUS_SQL_LIST}) THEN 1 ELSE 0 END)`,
@@ -112,36 +78,6 @@ export const STATISTIC_METRIC_DEFINITIONS: readonly StatisticMetricDefinition[] 
         description: "Applications closed as rejected",
         icon: "heroicons:x-circle",
         tone: "danger",
-      },
-    },
-    {
-      id: "applicationsCreatedLast30Days",
-      aggregateSql:
-        "SUM(CASE WHEN datetime(created_at) >= datetime('now', '-30 day') THEN 1 ELSE 0 END)",
-      card: {
-        title: "Created last 30 days",
-        description: "New opportunities added this month",
-        icon: "heroicons:calendar-days",
-        tone: "info",
-        trendLabel: PREVIOUS_30_DAYS_TREND_LABEL,
-        trendValueField: "applicationsCreatedDeltaPercent",
-        trendToneField: "applicationsCreatedDelta30Days",
-        trendValueFormat: "percent",
-      },
-    },
-    {
-      id: "applicationsAppliedLast30Days",
-      aggregateSql:
-        "SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-30 day') THEN 1 ELSE 0 END)",
-      card: {
-        title: "Applied last 30 days",
-        description: "Recent application cadence",
-        icon: "heroicons:calendar",
-        tone: "info",
-        trendLabel: PREVIOUS_30_DAYS_TREND_LABEL,
-        trendValueField: "applicationsAppliedDeltaPercent",
-        trendToneField: "applicationsAppliedDelta30Days",
-        trendValueFormat: "percent",
       },
     },
     {

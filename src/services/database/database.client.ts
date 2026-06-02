@@ -25,7 +25,7 @@ export default defineNuxtPlugin(async () => {
 
   if (!isSqliteUrl) {
     throw new Error(
-      `Invalid database URL \"${configuredUrl}\". This desktop app requires a sqlite:* URL.`,
+      `Invalid database URL "${configuredUrl}". This desktop app requires a sqlite:* URL.`,
     );
   }
 
@@ -39,6 +39,3 @@ export default defineNuxtPlugin(async () => {
     },
   };
 });
-
-
-

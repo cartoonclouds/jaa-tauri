@@ -266,8 +266,8 @@
           await eventService.delete(defaultEvent.id);
         }
 
-        for (const [index, step] of (payload.flowSteps ?? []).entries()) {
-          const stepSortOrder = step.sortOrder ?? index + 1;
+        for (const step of payload.flowSteps ?? []) {
+          const stepSortOrder = step.sortOrder;
           const existingEvent = createdEventByType.get(step.type) ?? null;
           if (existingEvent) {
             await eventService.update({

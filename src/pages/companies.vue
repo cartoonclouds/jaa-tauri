@@ -4,13 +4,17 @@
   import { definePageMeta, useRouter } from "#imports";
   import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const router = useRouter();
+
   const { openCompaniesDialog } = useCompaniesDialog();
 
   onMounted(() => {
     openCompaniesDialog();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     void router.replace("/");
   });
 </script>

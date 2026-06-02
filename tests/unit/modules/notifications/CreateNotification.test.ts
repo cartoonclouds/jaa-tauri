@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
   return {
-    execute: vi.fn(async () => ({ rowsAffected: 1 })),
+    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
   };
 }
 

@@ -200,9 +200,8 @@ export class EventRepository implements IEventRepository {
     const nextType = payload.type;
     const hasEventAtOverride = payload.eventAt !== undefined;
     const hasSortOrderOverride = payload.sortOrder !== undefined;
-    const sortOrderBinding = hasSortOrderOverride
-      ? this.normalizeSortOrder(payload.sortOrder!)
-      : null;
+    const resolveProvidedSortOrder = (): number =>
+      this.normalizeSortOrder(payload.sortOrder!);
 
     if (!nextType) {
       if (hasEventAtOverride && hasSortOrderOverride) {
@@ -216,7 +215,7 @@ export class EventRepository implements IEventRepository {
             current.applicationId,
             current.eventId,
             payload.eventAt ?? null,
-            sortOrderBinding,
+            resolveProvidedSortOrder(),
           ],
         );
       } else if (hasEventAtOverride) {
@@ -233,7 +232,7 @@ export class EventRepository implements IEventRepository {
            SET sort_order = $3
            WHERE application_id = $1
              AND event_id = $2`,
-          [current.applicationId, current.eventId, sortOrderBinding],
+          [current.applicationId, current.eventId, resolveProvidedSortOrder()],
         );
       }
 
@@ -254,7 +253,7 @@ export class EventRepository implements IEventRepository {
             current.applicationId,
             current.eventId,
             payload.eventAt ?? null,
-            sortOrderBinding,
+            resolveProvidedSortOrder(),
           ],
         );
       } else if (hasEventAtOverride) {
@@ -271,7 +270,7 @@ export class EventRepository implements IEventRepository {
            SET sort_order = $3
            WHERE application_id = $1
              AND event_id = $2`,
-          [current.applicationId, current.eventId, sortOrderBinding],
+          [current.applicationId, current.eventId, resolveProvidedSortOrder()],
         );
       } else {
         await this.db.execute(
@@ -288,7 +287,7 @@ export class EventRepository implements IEventRepository {
 
     const targetEventAt = hasEventAtOverride ? (payload.eventAt ?? null) : null;
     const targetSortOrder = hasSortOrderOverride
-      ? sortOrderBinding!
+      ? this.normalizeSortOrder(payload.sortOrder!)
       : await this.resolveCurrentSortOrder(
           current.applicationId,
           current.eventId,

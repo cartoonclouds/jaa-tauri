@@ -3,14 +3,16 @@ import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
   return {
-    select: vi.fn(async (sql: unknown) => {
+    select: vi.fn((sql: unknown) => {
       if (String(sql).includes("SELECT id FROM events WHERE type = $1")) {
-        return [{ id: "Interview/Technical Interview" }];
+        return Promise.resolve([{ id: "Interview/Technical Interview" }]);
       }
 
-      return [];
+      return Promise.resolve([]);
     }),
-    execute: vi.fn(async (..._args: unknown[]) => ({ rowsAffected: 1 })),
+    execute: vi.fn((..._args: unknown[]) =>
+      Promise.resolve({ rowsAffected: 1 }),
+    ),
   };
 }
 

@@ -1,12 +1,13 @@
 import type { IStatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
 
+// eslint-disable-next-line no-restricted-imports
 import { StatisticService } from "@modules/statistics/services/StatisticService";
 import { describe, expect, it, vi } from "vitest";
 
 function mockRepository(): IStatisticRepository {
-  return {
-    list: vi.fn(async () => []),
-    getOverview: vi.fn(async () => ({
+  const list = vi.fn(() => Promise.resolve([]));
+  const getOverview = vi.fn(() =>
+    Promise.resolve({
       totalApplications: 0,
       totalAppliedApplications: 0,
       totalInterviewingApplications: 0,
@@ -20,7 +21,12 @@ function mockRepository(): IStatisticRepository {
       applicationsRespondedPrevious30Days: 0,
       applicationsOfferLast30Days: 0,
       applicationsOfferPrevious30Days: 0,
-    })),
+    }),
+  );
+
+  return {
+    list,
+    getOverview,
   };
 }
 
@@ -28,7 +34,8 @@ describe("StatisticService", () => {
   it("returns overview with derived pipeline and rates", async () => {
     const repository = mockRepository();
     const service = new StatisticService(repository);
-    vi.mocked(repository.getOverview).mockResolvedValueOnce({
+    const getOverviewMock = vi.mocked(repository.getOverview);
+    getOverviewMock.mockResolvedValueOnce({
       totalApplications: 20,
       totalAppliedApplications: 10,
       totalInterviewingApplications: 4,
@@ -46,7 +53,7 @@ describe("StatisticService", () => {
 
     const result = await service.getOverview();
 
-    expect(repository.getOverview).toHaveBeenCalledOnce();
+    expect(getOverviewMock).toHaveBeenCalledOnce();
     expect(result.totalApplications).toBe(20);
     expect(result.totalAppliedApplications).toBe(10);
     expect(result.activePipelineApplications).toBe(15);
@@ -68,7 +75,8 @@ describe("StatisticService", () => {
   it("returns zero rates when no applications were applied", async () => {
     const repository = mockRepository();
     const service = new StatisticService(repository);
-    vi.mocked(repository.getOverview).mockResolvedValueOnce({
+    const getOverviewMock = vi.mocked(repository.getOverview);
+    getOverviewMock.mockResolvedValueOnce({
       totalApplications: 5,
       totalAppliedApplications: 0,
       totalInterviewingApplications: 0,

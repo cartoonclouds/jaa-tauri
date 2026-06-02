@@ -121,7 +121,7 @@
     );
     const destinationPath = await join(
       uploadsDirectory,
-      `${Date.now()}-${sanitizeFileName(file.name || "upload.bin")}`,
+      String(Date.now()) + "-" + sanitizeFileName(file.name || "upload.bin"),
     );
 
     await writeBrowserFile(file, destinationPath, {

@@ -34,10 +34,7 @@ export class NotificationService {
     });
 
     if (!parsedContent.success) {
-      throw new Error(
-        parsedContent.error.issues[0]?.message ??
-          "Invalid notification content",
-      );
+      throw new Error(parsedContent.error.issues[0].message);
     }
 
     return this.repository.create({
@@ -59,10 +56,7 @@ export class NotificationService {
       NotificationContentUpdateSchema.safeParse(contentToValidate);
 
     if (!parsedContent.success) {
-      throw new Error(
-        parsedContent.error.issues[0]?.message ??
-          "Invalid notification content",
-      );
+      throw new Error(parsedContent.error.issues[0].message);
     }
 
     return this.repository.update({
@@ -75,11 +69,3 @@ export class NotificationService {
     return this.repository.delete(id);
   }
 }
-
-
-
-
-
-
-
-

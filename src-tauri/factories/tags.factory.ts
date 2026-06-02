@@ -30,7 +30,7 @@ export function createTagRows(count = 8, seed = 1300): TagRow[] {
           ...names,
           ...Array.from(
             { length: count - names.length },
-            (_, index) => `tag-${index + 1}`,
+            (_, index) => "tag-" + String(index + 1),
           ),
         ];
 

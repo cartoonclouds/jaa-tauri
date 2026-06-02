@@ -25,13 +25,13 @@ class MockDatabaseDriver implements DatabaseDriver {
   private settingsRow: SettingsRow | null = null;
   private profileRow: SettingsRow | null = null;
 
-  async select<T = unknown>(sql: string): Promise<T[]> {
+  select<T = unknown>(sql: string): Promise<T[]> {
     if (sql.includes("FROM settings")) {
       if (!this.settingsRow) {
-        return [];
+        return Promise.resolve([]);
       }
 
-      return [
+      return Promise.resolve([
         {
           ...this.settingsRow,
           ...(this.profileRow ?? {}),
@@ -56,24 +56,21 @@ class MockDatabaseDriver implements DatabaseDriver {
             this.profileRow?.interview_availability ?? null,
           profile_location_text: this.profileRow?.location_text ?? null,
         } as T,
-      ];
+      ]);
     }
 
     if (sql.includes("FROM profiles")) {
       if (!this.profileRow) {
-        return [];
+        return Promise.resolve([]);
       }
 
-      return [this.profileRow as T];
+      return Promise.resolve([this.profileRow as T]);
     }
 
-    return [];
+    return Promise.resolve([]);
   }
 
-  async execute(
-    sql: string,
-    bindings: QueryBindings = [],
-  ): Promise<QueryResult> {
+  execute(sql: string, bindings: QueryBindings = []): Promise<QueryResult> {
     if (sql.includes("INSERT INTO profiles")) {
       this.profileRow = {
         id: String(bindings[0] ?? "profile-1"),
@@ -113,10 +110,10 @@ class MockDatabaseDriver implements DatabaseDriver {
       };
     }
 
-    return {
+    return Promise.resolve({
       rowsAffected: 1,
       lastInsertId: 0,
-    };
+    });
   }
 
   async transaction<T>(

@@ -18,22 +18,19 @@ class MockDatabaseDriver implements DatabaseDriver {
 
   private settingsRow: SettingsRow | null = null;
 
-  async select<T = unknown>(sql: string): Promise<T[]> {
+  select<T = unknown>(sql: string): Promise<T[]> {
     if (!sql.includes("FROM settings")) {
-      return [];
+      return Promise.resolve([]);
     }
 
     if (!this.settingsRow) {
-      return [];
+      return Promise.resolve([]);
     }
 
-    return [this.settingsRow as T];
+    return Promise.resolve([this.settingsRow as T]);
   }
 
-  async execute(
-    sql: string,
-    bindings: QueryBindings = [],
-  ): Promise<QueryResult> {
+  execute(sql: string, bindings: QueryBindings = []): Promise<QueryResult> {
     if (sql.includes("INSERT INTO settings")) {
       this.settingsRow = {
         id: String(bindings[0] ?? "app-settings"),
@@ -53,10 +50,10 @@ class MockDatabaseDriver implements DatabaseDriver {
       };
     }
 
-    return {
+    return Promise.resolve({
       rowsAffected: 1,
       lastInsertId: 0,
-    };
+    });
   }
 
   async transaction<T>(

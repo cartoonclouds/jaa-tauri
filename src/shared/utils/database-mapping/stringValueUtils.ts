@@ -2,7 +2,31 @@
  * Converts unknown input to a required string representation.
  */
 export function toRequiredString(value: unknown): string {
-  return String(value);
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
+    return value.toString();
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (value && typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "";
+    }
+  }
+
+  return "";
 }
 
 /**
@@ -13,5 +37,5 @@ export function toNullableString(value: unknown): string | null {
     return null;
   }
 
-  return String(value);
+  return toRequiredString(value);
 }

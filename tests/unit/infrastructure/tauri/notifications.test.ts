@@ -82,7 +82,7 @@ describe("Tauri Notifications Adapter", () => {
     it("should handle non-Error exceptions", async () => {
       mockIsPermissionGranted.mockResolvedValue(true);
       mockSendNotification.mockImplementation(() => {
-        throw "Unknown error";
+        throw new Error("Unknown error");
       });
 
       const result = await sendTauriNotification({
@@ -163,16 +163,22 @@ describe("Tauri Notifications Adapter", () => {
     });
 
     it("should return false when in non-browser environment", async () => {
-      // Mock window being undefined
-      const originalWindow = global.window;
-      (global as any).window = undefined;
+      const originalWindowDescriptor = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "window",
+      );
+      Object.defineProperty(globalThis, "window", {
+        value: undefined,
+        configurable: true,
+      });
 
       const supported = await isNotificationSupported();
 
       expect(supported).toBe(false);
 
-      // Restore
-      (global as any).window = originalWindow;
+      if (originalWindowDescriptor) {
+        Object.defineProperty(globalThis, "window", originalWindowDescriptor);
+      }
     });
 
     it("should return false on import errors", async () => {

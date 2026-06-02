@@ -3,9 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
   return {
-    select: vi.fn(async () => []),
-    execute: vi.fn(async () => ({ rowsAffected: 1 })),
-    transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+    select: vi.fn((..._args: unknown[]) =>
+      Promise.resolve<Record<string, unknown>[]>([]),
+    ),
+    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
+    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
       callback(null),
     ),
   };
@@ -14,14 +16,16 @@ function mockDb() {
 describe("CompanyRepository associations", () => {
   it("derives application status without relying on applications.status column", async () => {
     const db = mockDb();
-    db.select = vi.fn(async () => [
-      {
-        id: "app-1",
-        title: "Frontend Engineer",
-        status: "offer",
-        applied_at: "2026-05-01T10:00:00.000Z",
-      },
-    ]);
+    db.select = vi.fn(() =>
+      Promise.resolve([
+        {
+          id: "app-1",
+          title: "Frontend Engineer",
+          status: "offer",
+          applied_at: "2026-05-01T10:00:00.000Z",
+        },
+      ]),
+    );
 
     const repository = new CompanyRepository(db as never);
     const applications =
@@ -37,7 +41,10 @@ describe("CompanyRepository associations", () => {
     ]);
 
     expect(db.select).toHaveBeenCalledTimes(1);
-    const [query] = db.select.mock.calls[0] as [string, unknown[]];
+    const query = db.select.mock.calls[0]?.[0];
+    if (typeof query !== "string") {
+      throw new Error("Expected SQL query to be passed to db.select");
+    }
     expect(query).toContain("CASE");
     expect(query).toContain("AS status");
     expect(query).toContain("applications.deleted_at IS NULL");
@@ -46,14 +53,16 @@ describe("CompanyRepository associations", () => {
 
   it("falls back to saved status when derived value is missing", async () => {
     const db = mockDb();
-    db.select = vi.fn(async () => [
-      {
-        id: "app-2",
-        title: "Backend Engineer",
-        status: null,
-        applied_at: null,
-      },
-    ]);
+    db.select = vi.fn(() =>
+      Promise.resolve([
+        {
+          id: "app-2",
+          title: "Backend Engineer",
+          status: null,
+          applied_at: null,
+        },
+      ]),
+    );
 
     const repository = new CompanyRepository(db as never);
     const applications =

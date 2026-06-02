@@ -1,4 +1,25 @@
+import type { StatisticMetricDefinition } from "../../statisticMetricDefinitions";
 import type { StatisticScope } from "@modules/statistics/domain/types/StatisticType";
+
+export type IStatisticMetricDefinition = Required<
+  Pick<StatisticMetricDefinition, "id" | "aggregateSql" | "card">
+>;
+
+/**
+ * Configuration contract for a single statistic card metric.
+ */
+export interface StatisticCardMetricDefinition {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  tone: StatisticCardTone;
+  value: number;
+  suffix?: string;
+  trendLabel?: string;
+  trendValue?: string;
+  trendTone?: StatisticTrendTone;
+}
 
 /**
  * Statistic aggregate used by the statistics module.
@@ -33,6 +54,3 @@ export interface CreateStatisticInput {
   /** Optional timestamp when the metric was captured. */
   recordedAt?: Date | null;
 }
-
-
-

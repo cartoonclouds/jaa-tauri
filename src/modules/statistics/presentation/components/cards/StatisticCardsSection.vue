@@ -1,42 +1,41 @@
 <script setup lang="ts">
-  import type { StatisticsOverview } from "@modules/statistics/repositories/StatisticRepository";
+  import type { StatisticCardMetricDefinition } from "@modules/statistics/domain/entities/Statistic";
+  import type { IExecutable } from "@modules/statistics/domain/types/executable";
 
-  import StatisticCard from "@modules/statistics/presentation/components/cards/StatisticCard.vue";
-  import { statisticMetricDefinitions } from "@modules/statistics/presentation/utils/statisticMetricUtils";
+  import { computed } from "vue";
+
+  import StatisticCard from "./StatisticCard.vue";
 
   /**
    * Defines statistic cards section props.
    */
   interface StatisticCardsSectionProps {
-    overview: StatisticsOverview;
+    overview: IExecutable[];
   }
 
-  defineProps<StatisticCardsSectionProps>();
+  const props = defineProps<StatisticCardsSectionProps>();
+
+  const metricViews = computed<StatisticCardMetricDefinition[]>(() => {
+    return props.overview.map((executable: IExecutable) => {
+      return executable.toView();
+    });
+  });
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
     <StatisticCard
-      v-for="metric in statisticMetricDefinitions"
+      v-for="metric in metricViews"
       :key="metric.id"
       :title="metric.title"
-      :value="metric.value(overview)"
+      :value="metric.value"
       :description="metric.description"
       :icon="metric.icon"
       :tone="metric.tone"
       :suffix="metric.suffix ?? ''"
       :trend-label="metric.trendLabel ?? ''"
-      :trend-value="metric.trendValue ? metric.trendValue(overview) : ''"
-      :trend-tone="metric.trendTone ? metric.trendTone(overview) : 'neutral'"
+      :trend-value="metric.trendValue ?? ''"
+      :trend-tone="metric.trendTone ?? 'neutral'"
     />
   </div>
 </template>
-
-
-
-
-
-
-
-
-

@@ -1,9 +1,9 @@
-import type { StatisticsOverview } from "@modules/statistics/repositories/StatisticRepository";
-
 import { StatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
 import { StatisticService } from "@modules/statistics/services/StatisticService";
 import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
 import { onMounted, ref } from "vue";
+
+import { type IExecutable } from "../domain/types/executable";
 
 const STATISTICS_AUTO_REFRESH_MS = 5_000;
 
@@ -27,36 +27,8 @@ function createStatisticComposable() {
   const service = getStatisticService();
   const isLoading = ref(false);
   const error = ref<unknown>(null);
-  const overview = ref<StatisticsOverview>({
-    totalApplications: 0,
-    totalAppliedApplications: 0,
-    totalInterviewingApplications: 0,
-    totalOffers: 0,
-    totalRejectedApplications: 0,
-    applicationsCreatedLast30Days: 0,
-    applicationsAppliedLast30Days: 0,
-    applicationsCreatedPrevious30Days: 0,
-    applicationsAppliedPrevious30Days: 0,
-    applicationsRespondedLast30Days: 0,
-    applicationsRespondedPrevious30Days: 0,
-    applicationsOfferLast30Days: 0,
-    applicationsOfferPrevious30Days: 0,
-    activePipelineApplications: 0,
-    responseRate: 0,
-    offerRate: 0,
-    rejectionRate: 0,
-    applicationsCreatedDelta30Days: 0,
-    applicationsAppliedDelta30Days: 0,
-    applicationsCreatedDeltaPercent: 0,
-    applicationsAppliedDeltaPercent: 0,
-    responseRateLast30Days: 0,
-    responseRatePrevious30Days: 0,
-    responseRateDeltaPercent: 0,
-    offerRateLast30Days: 0,
-    offerRatePrevious30Days: 0,
-    offerRateDeltaPercent: 0,
-  });
-
+  const overview = ref<IExecutable[]>([]);
+  
   async function refresh(): Promise<void> {
     isLoading.value = true;
     error.value = null;

@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 
 function mockDb() {
   const db = {
-    execute: vi.fn(async () => ({ rowsAffected: 1 })),
-    transaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+    execute: vi.fn(() => Promise.resolve({ rowsAffected: 1 })),
+    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
       callback(db),
     ),
   };

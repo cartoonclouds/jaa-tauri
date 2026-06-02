@@ -9,6 +9,7 @@ import type {
 import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
 import { DOCUMENT_SEARCH_FIELDS } from "@modules/documents/constants";
 import { DocumentRepositoryCreateSchema } from "@modules/documents/domain/zod/document.schema";
+import { toRequiredString } from "@shared/utils/database-mapping/stringValueUtils";
 import {
   buildSearchWhereClause,
   buildSelectAllOrderedQuery,
@@ -166,7 +167,7 @@ export class DocumentRepository implements IDocumentRepository {
 
     return rows.map((row) => ({
       document: mapDocumentRowToEntity(row),
-      relationType: String(row.relation_type ?? "attachment"),
+      relationType: toRequiredString(row.relation_type ?? "attachment"),
     }));
   }
 

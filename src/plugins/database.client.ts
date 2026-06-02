@@ -14,13 +14,13 @@ import { TauriSqliteDriver } from "@/services/database/TauriSqliteDriver.client"
 function createBrowserNoopDatabaseDriver(): DatabaseDriver {
   const driver: DatabaseDriver = {
     name: "browser-noop",
-    async select<T = unknown>(): Promise<T[]> {
-      return [];
+    select<T = unknown>(): Promise<T[]> {
+      return Promise.resolve([]);
     },
-    async execute() {
-      return {
+    execute() {
+      return Promise.resolve({
         rowsAffected: 0,
-      };
+      });
     },
     async transaction<T>(
       callback: (tx: DatabaseDriver) => Promise<T>,
@@ -82,7 +82,3 @@ export default defineNuxtPlugin(async () => {
     },
   };
 });
-
-
-
-

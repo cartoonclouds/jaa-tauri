@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { StatisticsOverview } from "@modules/statistics/repositories/StatisticRepository";
+  import type { IExecutable } from "@modules/statistics/domain/types/executable";
 
   import { Icon } from "#components";
 
@@ -7,7 +7,7 @@
    * Defines statistics momentum summary props.
    */
   interface StatisticsMomentumSummaryProps {
-    overview: StatisticsOverview;
+    overview: IExecutable[];
   }
 
   defineProps<StatisticsMomentumSummaryProps>();
@@ -38,12 +38,3 @@
     </p>
   </div>
 </template>
-
-
-
-
-
-
-
-
-
