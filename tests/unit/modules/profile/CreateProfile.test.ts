@@ -3,7 +3,7 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import { ProfileRepository } from "@modules/profile";
 import { describe, expect, it, vi } from "vitest";
 
-function createProfileDbMock(): {
+function createMockDb(): {
   db: DatabaseDriver;
   executeMock: ReturnType<typeof vi.fn>;
 } {
@@ -22,7 +22,7 @@ function createProfileDbMock(): {
 
 describe("ProfileRepository.create", () => {
   it("rejects missing full name", async () => {
-    const { db } = createProfileDbMock();
+    const { db } = createMockDb();
     const repository = new ProfileRepository(db);
 
     await expect(repository.create({ fullName: "" })).rejects.toThrow(
@@ -31,7 +31,7 @@ describe("ProfileRepository.create", () => {
   });
 
   it("inserts profile row", async () => {
-    const { db, executeMock } = createProfileDbMock();
+    const { db, executeMock } = createMockDb();
     const repository = new ProfileRepository(db);
 
     await repository.create({ fullName: "John Doe" });

@@ -3,7 +3,7 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import { CompanyRepository } from "@modules/companies";
 import { describe, expect, it, vi } from "vitest";
 
-function createCompanyDbMock(): {
+function createMockDb(): {
   db: DatabaseDriver;
   executeMock: ReturnType<typeof vi.fn>;
 } {
@@ -22,7 +22,7 @@ function createCompanyDbMock(): {
 
 describe("CompanyRepository.create", () => {
   it("rejects empty company name", async () => {
-    const { db } = createCompanyDbMock();
+    const { db } = createMockDb();
     const repository = new CompanyRepository(db);
 
     await expect(repository.create({ name: "  " })).rejects.toThrow(
@@ -31,7 +31,7 @@ describe("CompanyRepository.create", () => {
   });
 
   it("inserts a company row", async () => {
-    const { db, executeMock } = createCompanyDbMock();
+    const { db, executeMock } = createMockDb();
     const repository = new CompanyRepository(db);
 
     await repository.create({ name: "Acme Ltd" });
