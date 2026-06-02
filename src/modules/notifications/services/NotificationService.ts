@@ -34,15 +34,18 @@ export class NotificationService {
     });
 
     if (!parsedContent.success) {
-      throw new Error(parsedContent.error.issues[0].message);
+      throw new Error(
+        parsedContent.error.issues[0]?.message ??
+          "Error creating notification content",
+      );
     }
 
     return this.repository.create({
       ...payload,
       title: parsedContent.data.title,
       body: parsedContent.data.body,
-      severity: payload.severity ?? "info",
-      isRead: payload.isRead ?? false,
+      severity: payload.severity,
+      isRead: payload.isRead,
     });
   }
 
@@ -56,7 +59,10 @@ export class NotificationService {
       NotificationContentUpdateSchema.safeParse(contentToValidate);
 
     if (!parsedContent.success) {
-      throw new Error(parsedContent.error.issues[0].message);
+      throw new Error(
+        parsedContent.error.issues[0]?.message ??
+          "Error updating notification content",
+      );
     }
 
     return this.repository.update({

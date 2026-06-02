@@ -201,7 +201,7 @@ export class EventRepository implements IEventRepository {
     const hasEventAtOverride = payload.eventAt !== undefined;
     const hasSortOrderOverride = payload.sortOrder !== undefined;
     const resolveProvidedSortOrder = (): number =>
-      this.normalizeSortOrder(payload.sortOrder!);
+      this.normalizeSortOrder(payload.sortOrder ?? 0);
 
     if (!nextType) {
       if (hasEventAtOverride && hasSortOrderOverride) {
@@ -287,7 +287,7 @@ export class EventRepository implements IEventRepository {
 
     const targetEventAt = hasEventAtOverride ? (payload.eventAt ?? null) : null;
     const targetSortOrder = hasSortOrderOverride
-      ? this.normalizeSortOrder(payload.sortOrder!)
+      ? this.normalizeSortOrder(payload.sortOrder ?? 0)
       : await this.resolveCurrentSortOrder(
           current.applicationId,
           current.eventId,

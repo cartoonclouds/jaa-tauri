@@ -7,7 +7,6 @@
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const router = useRouter();
 
   const { openContactsDialog } = useContactsDialog();
