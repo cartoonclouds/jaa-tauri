@@ -1,4 +1,4 @@
-import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/Statistic";
+import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/statistic";
 import type { IExecutable } from "@modules/statistics/domain/types/executable";
 import type { IStatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
 

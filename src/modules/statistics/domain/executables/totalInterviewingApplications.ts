@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -12,7 +12,7 @@ import { INTERVIEWING_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently in interview pipeline stages. */
 export class TotalInterviewingApplications implements IExecutable<number> {
-  public static id = "totalInterviewingApplications";
+  public static readonly id = "totalInterviewingApplications";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN ${INTERVIEWING_STAGE_PREDICATE_SQL} THEN 1 ELSE 0 END) AS ${TotalInterviewingApplications.id}

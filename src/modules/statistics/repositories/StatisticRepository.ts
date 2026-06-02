@@ -2,7 +2,7 @@ import type {
   ExecutableConstructor,
   IExecutable,
 } from "../domain/types/executable";
-import type { Statistic } from "@/modules/statistics/domain/types/Statistic";
+import type { Statistic } from "@/modules/statistics/domain/types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { mapStatisticRowToEntity } from "@modules/statistics/application/mappers/mapStatisticRow";

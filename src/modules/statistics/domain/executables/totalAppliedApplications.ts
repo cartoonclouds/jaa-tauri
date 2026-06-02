@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -14,7 +14,7 @@ import {
 
 /** Total applications currently tracked (excluding deleted rows). */
 export class TotalAppliedApplications implements IExecutable<number> {
-  public static id = "totalAppliedApplications";
+  public static readonly id = "totalAppliedApplications";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN applied_at IS NOT NULL THEN 1 ELSE 0 END) AS ${TotalAppliedApplications.id}

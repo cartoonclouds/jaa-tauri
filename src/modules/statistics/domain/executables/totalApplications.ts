@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -14,7 +14,7 @@ import {
 
 /** Total applications currently tracked (excluding deleted rows). */
 export class TotalApplications implements IExecutable<number> {
-  public static id = "totalApplications";
+  public static readonly id = "totalApplications";
 
   private static readonly QUERY = `SELECT
 COUNT(*) AS ${TotalApplications.id}

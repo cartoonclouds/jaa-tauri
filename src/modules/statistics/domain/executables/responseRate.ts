@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -20,7 +20,7 @@ import {
 
 /** Percentage of applied applications that advanced to response stages. */
 export class ResponseRate implements IExecutable<number> {
-  public static id = "responseRate";
+  public static readonly id = "responseRate";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN ${RESPONDED_STAGE_PREDICATE_SQL} THEN 1 ELSE 0 END) AS responded,

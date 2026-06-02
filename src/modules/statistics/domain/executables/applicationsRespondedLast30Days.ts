@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -15,7 +15,7 @@ import {
 
 /** Last-30-day applications that reached interview or final response stages. */
 export class ApplicationsRespondedLast30Days implements IExecutable<number> {
-  public static id = "applicationsRespondedLast30Days";
+  public static readonly id = "applicationsRespondedLast30Days";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN ${LAST_30_DAYS_APPLIED_SQL} AND ${RESPONDED_STAGE_PREDICATE_SQL} THEN 1 ELSE 0 END) AS ${ApplicationsRespondedLast30Days.id}

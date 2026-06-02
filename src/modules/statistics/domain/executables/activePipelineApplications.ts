@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -15,7 +15,7 @@ import {
 
 /** Active pipeline applications excluding offer and rejected outcomes. */
 export class ActivePipelineApplications implements IExecutable<number> {
-  public static id = "activePipelineApplications";
+  public static readonly id = "activePipelineApplications";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN NOT (${OFFER_STAGE_PREDICATE_SQL}) AND NOT (${REJECTED_STAGE_PREDICATE_SQL}) THEN 1 ELSE 0 END) AS ${ActivePipelineApplications.id}

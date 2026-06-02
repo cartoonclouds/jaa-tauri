@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications created in the 30-day window before the last 30 days. */
 export class ApplicationsCreatedPrevious30Days implements IExecutable<number> {
-  public static id = "applicationsCreatedPrevious30Days";
+  public static readonly id = "applicationsCreatedPrevious30Days";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN datetime(created_at) >= datetime('now', '-60 day') AND datetime(created_at) < datetime('now', '-30 day') THEN 1 ELSE 0 END) AS ${ApplicationsCreatedPrevious30Days.id}

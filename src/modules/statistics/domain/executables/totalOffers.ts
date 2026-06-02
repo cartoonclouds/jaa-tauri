@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -12,7 +12,7 @@ import { OFFER_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently marked as offer. */
 export class TotalOffers implements IExecutable<number> {
-  public static id = "totalOffers";
+  public static readonly id = "totalOffers";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN ${OFFER_STAGE_PREDICATE_SQL} THEN 1 ELSE 0 END) AS ${TotalOffers.id}

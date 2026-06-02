@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -20,7 +20,7 @@ import {
 
 /** Percentage of applied applications currently in offer stage. */
 export class OfferRate implements IExecutable<number> {
-  public static id = "offerRate";
+  public static readonly id = "offerRate";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN ${OFFER_STAGE_PREDICATE_SQL} THEN 1 ELSE 0 END) AS offers,

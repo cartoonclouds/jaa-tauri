@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications applied in the 30-day window before the last 30 days. */
 export class ApplicationsAppliedPrevious30Days implements IExecutable<number> {
-  public static id = "applicationsAppliedPrevious30Days";
+  public static readonly id = "applicationsAppliedPrevious30Days";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-60 day') AND datetime(applied_at) < datetime('now', '-30 day') THEN 1 ELSE 0 END) AS ${ApplicationsAppliedPrevious30Days.id}

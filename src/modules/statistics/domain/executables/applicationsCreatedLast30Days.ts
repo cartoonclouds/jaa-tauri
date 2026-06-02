@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -15,7 +15,7 @@ import {
 
 /** Total applications created in the last 30 days. */
 export class ApplicationsCreatedLast30Days implements IExecutable<number> {
-  public static id = "applicationsCreatedLast30Days";
+  public static readonly id = "applicationsCreatedLast30Days";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN datetime(created_at) >= datetime('now', '-30 day') THEN 1 ELSE 0 END) AS ${ApplicationsCreatedLast30Days.id}

@@ -2,7 +2,7 @@ import type { IExecutable } from "../types/executable";
 import type {
   MetricCardDefinition,
   StatisticCardMetricDefinition,
-} from "../types/Statistic";
+} from "../types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
@@ -15,7 +15,7 @@ import { REJECTED_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Percentage of applied applications currently in rejected stage. */
 export class RejectionRate implements IExecutable<number> {
-  public static id = "rejectionRate";
+  public static readonly id = "rejectionRate";
 
   private static readonly QUERY = `SELECT
 SUM(CASE WHEN ${REJECTED_STAGE_PREDICATE_SQL} THEN 1 ELSE 0 END) AS rejected,

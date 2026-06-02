@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/Statistic";
+  import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/statistic";
   import type { IExecutable } from "@modules/statistics/domain/types/executable";
 
   import { computed } from "vue";

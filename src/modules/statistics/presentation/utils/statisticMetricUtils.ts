@@ -1,4 +1,4 @@
-import type { StatisticTrendTone } from "../../domain/types/Statistic";
+import type { StatisticTrendTone } from "../../domain/types/statistic";
 
 /**
  * Resolve trend tone from a signed numeric delta.
