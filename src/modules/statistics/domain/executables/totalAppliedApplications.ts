@@ -13,7 +13,7 @@ import {
 } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications currently tracked (excluding deleted rows). */
-export class TotalAppliedApplications implements IExecutable<number> {
+export class TotalAppliedApplications implements IExecutable {
   public static readonly id = "totalAppliedApplications";
 
   private static readonly QUERY = `SELECT

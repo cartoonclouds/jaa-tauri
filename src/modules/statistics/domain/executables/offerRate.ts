@@ -19,7 +19,7 @@ import {
 } from "./statisticSql";
 
 /** Percentage of applied applications currently in offer stage. */
-export class OfferRate implements IExecutable<number> {
+export class OfferRate implements IExecutable {
   public static readonly id = "offerRate";
 
   private static readonly QUERY = `SELECT

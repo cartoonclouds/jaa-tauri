@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 import { INTERVIEWING_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently in interview pipeline stages. */
-export class TotalInterviewingApplications implements IExecutable<number> {
+export class TotalInterviewingApplications implements IExecutable {
   public static readonly id = "totalInterviewingApplications";
 
   private static readonly QUERY = `SELECT

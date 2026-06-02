@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 import { REJECTED_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently marked as rejected. */
-export class TotalRejectedApplications implements IExecutable<number> {
+export class TotalRejectedApplications implements IExecutable {
   public static readonly id = "totalRejectedApplications";
 
   private static readonly QUERY = `SELECT

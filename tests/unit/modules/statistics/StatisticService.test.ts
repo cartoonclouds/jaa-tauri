@@ -6,7 +6,7 @@ import type { IStatisticRepository } from "@modules/statistics/repositories/Stat
 import { StatisticService } from "@modules/statistics/services/StatisticService";
 import { describe, expect, it, vi } from "vitest";
 
-function createExecutable(id: string, value = 0): IExecutable<number> {
+function createExecutable(id: string, value = 0): IExecutable {
   return {
     execute: vi.fn(() => Promise.resolve(value)),
     toView: vi.fn(

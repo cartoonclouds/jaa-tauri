@@ -10,7 +10,7 @@ import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils
 import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications created in the 30-day window before the last 30 days. */
-export class ApplicationsCreatedPrevious30Days implements IExecutable<number> {
+export class ApplicationsCreatedPrevious30Days implements IExecutable {
   public static readonly id = "applicationsCreatedPrevious30Days";
 
   private static readonly QUERY = `SELECT

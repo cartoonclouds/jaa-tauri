@@ -14,7 +14,7 @@ import {
 } from "./statisticSql";
 
 /** Last-30-day applications that reached interview or final response stages. */
-export class ApplicationsRespondedLast30Days implements IExecutable<number> {
+export class ApplicationsRespondedLast30Days implements IExecutable {
   public static readonly id = "applicationsRespondedLast30Days";
 
   private static readonly QUERY = `SELECT

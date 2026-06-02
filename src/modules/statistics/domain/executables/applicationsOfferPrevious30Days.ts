@@ -14,7 +14,7 @@ import {
 } from "./statisticSql";
 
 /** Previous-30-day applications currently in offer stage. */
-export class ApplicationsOfferPrevious30Days implements IExecutable<number> {
+export class ApplicationsOfferPrevious30Days implements IExecutable {
   public static readonly id = "applicationsOfferPrevious30Days";
 
   private static readonly QUERY = `SELECT

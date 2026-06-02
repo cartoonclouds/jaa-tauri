@@ -14,7 +14,7 @@ import {
 import { REJECTED_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Percentage of applied applications currently in rejected stage. */
-export class RejectionRate implements IExecutable<number> {
+export class RejectionRate implements IExecutable {
   public static readonly id = "rejectionRate";
 
   private static readonly QUERY = `SELECT

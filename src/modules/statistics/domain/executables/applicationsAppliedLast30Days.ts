@@ -14,7 +14,7 @@ import {
 } from "../../presentation/utils/statisticMetricUtils";
 
 /** Total applications with applied date in the last 30 days. */
-export class ApplicationsAppliedLast30Days implements IExecutable<number> {
+export class ApplicationsAppliedLast30Days implements IExecutable {
   public static readonly id = "applicationsAppliedLast30Days" as const;
 
   public static readonly QUERY = `SELECT

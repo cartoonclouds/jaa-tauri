@@ -11,7 +11,7 @@ import { toTrendTone } from "../../presentation/utils/statisticMetricUtils";
 import { OFFER_STAGE_PREDICATE_SQL } from "./statisticSql";
 
 /** Total applications currently marked as offer. */
-export class TotalOffers implements IExecutable<number> {
+export class TotalOffers implements IExecutable {
   public static readonly id = "totalOffers";
 
   private static readonly QUERY = `SELECT

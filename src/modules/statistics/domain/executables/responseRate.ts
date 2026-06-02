@@ -19,7 +19,7 @@ import {
 } from "./statisticSql";
 
 /** Percentage of applied applications that advanced to response stages. */
-export class ResponseRate implements IExecutable<number> {
+export class ResponseRate implements IExecutable {
   public static readonly id = "responseRate";
 
   private static readonly QUERY = `SELECT

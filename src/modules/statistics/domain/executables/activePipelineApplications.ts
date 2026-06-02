@@ -14,7 +14,7 @@ import {
 } from "./statisticSql";
 
 /** Active pipeline applications excluding offer and rejected outcomes. */
-export class ActivePipelineApplications implements IExecutable<number> {
+export class ActivePipelineApplications implements IExecutable {
   public static readonly id = "activePipelineApplications";
 
   private static readonly QUERY = `SELECT
