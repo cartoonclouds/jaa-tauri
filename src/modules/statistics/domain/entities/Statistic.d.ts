@@ -1,9 +1,18 @@
-import type { StatisticMetricDefinition } from "../../statisticMetricDefinitions";
+import type { StatisticCardTone } from "../../statisticMetricDefinitions";
+import type { HeroIcon } from "@/shared/types";
 import type { StatisticScope } from "@modules/statistics/domain/types/StatisticType";
 
-export type IStatisticMetricDefinition = Required<
-  Pick<StatisticMetricDefinition, "id" | "aggregateSql" | "card">
->;
+export interface MetricCardDefinition {
+  title: string;
+  description: string;
+  icon: HeroIcon;
+  tone: StatisticCardTone;
+  suffix?: string;
+  trendLabel?: string;
+  trendValueField?: string;
+  trendToneField?: string;
+  trendValueFormat?: StatisticTrendValueFormat;
+}
 
 /**
  * Configuration contract for a single statistic card metric.
@@ -12,7 +21,7 @@ export interface StatisticCardMetricDefinition {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: HeroIcon;
   tone: StatisticCardTone;
   value: number;
   suffix?: string;

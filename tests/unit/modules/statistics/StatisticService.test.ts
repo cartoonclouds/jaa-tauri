@@ -1,27 +1,31 @@
+import type { StatisticCardMetricDefinition } from "@modules/statistics/domain/entities/Statistic";
+import type { IExecutable } from "@modules/statistics/domain/types/executable";
 import type { IStatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
 
 // eslint-disable-next-line no-restricted-imports
 import { StatisticService } from "@modules/statistics/services/StatisticService";
 import { describe, expect, it, vi } from "vitest";
 
+function createExecutable(id: string, value = 0): IExecutable<number> {
+  return {
+    execute: vi.fn(() => Promise.resolve(value)),
+    toView: vi.fn(
+      (): StatisticCardMetricDefinition => ({
+        id,
+        title: id,
+        description: id,
+        icon: "heroicons:chart-bar",
+        tone: "info",
+        value,
+      }),
+    ),
+  };
+}
+
 function mockRepository(): IStatisticRepository {
   const list = vi.fn(() => Promise.resolve([]));
   const getOverview = vi.fn(() =>
-    Promise.resolve({
-      totalApplications: 0,
-      totalAppliedApplications: 0,
-      totalInterviewingApplications: 0,
-      totalOffers: 0,
-      totalRejectedApplications: 0,
-      applicationsCreatedLast30Days: 0,
-      applicationsAppliedLast30Days: 0,
-      applicationsCreatedPrevious30Days: 0,
-      applicationsAppliedPrevious30Days: 0,
-      applicationsRespondedLast30Days: 0,
-      applicationsRespondedPrevious30Days: 0,
-      applicationsOfferLast30Days: 0,
-      applicationsOfferPrevious30Days: 0,
-    }),
+    Promise.resolve([createExecutable("metric")]),
   );
 
   return {
@@ -31,81 +35,29 @@ function mockRepository(): IStatisticRepository {
 }
 
 describe("StatisticService", () => {
-  it("returns overview with derived pipeline and rates", async () => {
+  it("returns executable overview from repository", async () => {
     const repository = mockRepository();
     const service = new StatisticService(repository);
     const getOverviewMock = vi.mocked(repository.getOverview);
-    getOverviewMock.mockResolvedValueOnce({
-      totalApplications: 20,
-      totalAppliedApplications: 10,
-      totalInterviewingApplications: 4,
-      totalOffers: 2,
-      totalRejectedApplications: 3,
-      applicationsCreatedLast30Days: 8,
-      applicationsAppliedLast30Days: 6,
-      applicationsCreatedPrevious30Days: 4,
-      applicationsAppliedPrevious30Days: 3,
-      applicationsRespondedLast30Days: 4,
-      applicationsRespondedPrevious30Days: 1,
-      applicationsOfferLast30Days: 2,
-      applicationsOfferPrevious30Days: 0,
-    });
+    const executableA = createExecutable("totalApplications", 20);
+    const executableB = createExecutable("totalAppliedApplications", 10);
+    const expectedOverview = [executableA, executableB];
+    getOverviewMock.mockResolvedValueOnce(expectedOverview);
 
     const result = await service.getOverview();
 
     expect(getOverviewMock).toHaveBeenCalledOnce();
-    expect(result.totalApplications).toBe(20);
-    expect(result.totalAppliedApplications).toBe(10);
-    expect(result.activePipelineApplications).toBe(15);
-    expect(result.responseRate).toBe(90);
-    expect(result.offerRate).toBe(20);
-    expect(result.rejectionRate).toBe(30);
-    expect(result.applicationsCreatedDelta30Days).toBe(4);
-    expect(result.applicationsAppliedDelta30Days).toBe(3);
-    expect(result.applicationsCreatedDeltaPercent).toBe(100);
-    expect(result.applicationsAppliedDeltaPercent).toBe(100);
-    expect(result.responseRateLast30Days).toBe(67);
-    expect(result.responseRatePrevious30Days).toBe(33);
-    expect(result.responseRateDeltaPercent).toBe(34);
-    expect(result.offerRateLast30Days).toBe(33);
-    expect(result.offerRatePrevious30Days).toBe(0);
-    expect(result.offerRateDeltaPercent).toBe(33);
+    expect(result).toBe(expectedOverview);
   });
 
-  it("returns zero rates when no applications were applied", async () => {
+  it("returns an empty overview when repository returns none", async () => {
     const repository = mockRepository();
     const service = new StatisticService(repository);
     const getOverviewMock = vi.mocked(repository.getOverview);
-    getOverviewMock.mockResolvedValueOnce({
-      totalApplications: 5,
-      totalAppliedApplications: 0,
-      totalInterviewingApplications: 0,
-      totalOffers: 0,
-      totalRejectedApplications: 0,
-      applicationsCreatedLast30Days: 2,
-      applicationsAppliedLast30Days: 0,
-      applicationsCreatedPrevious30Days: 1,
-      applicationsAppliedPrevious30Days: 0,
-      applicationsRespondedLast30Days: 0,
-      applicationsRespondedPrevious30Days: 0,
-      applicationsOfferLast30Days: 0,
-      applicationsOfferPrevious30Days: 0,
-    });
+    getOverviewMock.mockResolvedValueOnce([]);
 
     const result = await service.getOverview();
 
-    expect(result.responseRate).toBe(0);
-    expect(result.offerRate).toBe(0);
-    expect(result.rejectionRate).toBe(0);
-    expect(result.applicationsCreatedDelta30Days).toBe(1);
-    expect(result.applicationsAppliedDelta30Days).toBe(0);
-    expect(result.applicationsCreatedDeltaPercent).toBe(100);
-    expect(result.applicationsAppliedDeltaPercent).toBe(0);
-    expect(result.responseRateLast30Days).toBe(0);
-    expect(result.responseRatePrevious30Days).toBe(0);
-    expect(result.responseRateDeltaPercent).toBe(0);
-    expect(result.offerRateLast30Days).toBe(0);
-    expect(result.offerRatePrevious30Days).toBe(0);
-    expect(result.offerRateDeltaPercent).toBe(0);
+    expect(result).toEqual([]);
   });
 });

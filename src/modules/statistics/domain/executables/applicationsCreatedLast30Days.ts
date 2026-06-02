@@ -1,5 +1,5 @@
 import type {
-  IStatisticMetricDefinition,
+  MetricCardDefinition,
   StatisticCardMetricDefinition,
 } from "../entities/Statistic";
 import type { IExecutable } from "../types/executable";
@@ -8,8 +8,8 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils";
 
 import {
+  toTrendPercent,
   toTrendPercentLabel,
-  toTrendPointLabel,
   toTrendTone,
 } from "../../presentation/utils/statisticMetricUtils";
 
@@ -17,79 +17,70 @@ import {
 export class ApplicationsCreatedLast30Days implements IExecutable<number> {
   public static id = "applicationsCreatedLast30Days";
 
-  private static readonly METRIC_DEFINITION: IStatisticMetricDefinition = {
-    id: "applicationsCreatedLast30Days",
-    aggregateSql:
-      "SUM(CASE WHEN datetime(created_at) >= datetime('now', '-30 day') THEN 1 ELSE 0 END)",
-    card: {
-      title: "Created last 30 days",
-      description: "New opportunities added this month",
-      icon: "heroicons:calendar-days",
-      tone: "info",
-      trendLabel: "vs previous 30 days",
-      trendValueField: "applicationsCreatedDeltaPercent",
-      trendToneField: "applicationsCreatedDelta30Days",
-      trendValueFormat: "percent",
-    },
-  };
+  private static readonly QUERY = `SELECT
+SUM(CASE WHEN datetime(created_at) >= datetime('now', '-30 day') THEN 1 ELSE 0 END) AS ${ApplicationsCreatedLast30Days.id}
+FROM applications
+WHERE deleted_at IS NULL` as const;
+
+  private static readonly CARD_DEFINITION: MetricCardDefinition = {
+    title: "Created last 30 days",
+    description: "New opportunities added this month",
+    icon: "heroicons:calendar-days",
+    tone: "info",
+    trendLabel: "vs previous 30 days",
+    trendValueField: "applicationsCreatedDeltaPercent",
+    trendToneField: "applicationsCreatedDelta30Days",
+    trendValueFormat: "percent",
+  } as const;
 
   private value: number | null = null;
+
+  private trendPercent: number | null = null;
+
+  private trendDelta: number | null = null;
 
   constructor(private readonly db: DatabaseDriver) {}
 
   public async execute(): Promise<number> {
     const rows = await this.db.select<Partial<Record<string, unknown>>>(
-      `SELECT
-${ApplicationsCreatedLast30Days.METRIC_DEFINITION.aggregateSql} AS ${ApplicationsCreatedLast30Days.METRIC_DEFINITION.id}
-FROM applications
-WHERE deleted_at IS NULL`,
+      ApplicationsCreatedLast30Days.QUERY,
     );
 
-    console.error("Query result rows", rows);
-
-    const result = toFiniteNumber(
-      rows[0]?.[ApplicationsCreatedLast30Days.METRIC_DEFINITION.id],
+    const current = toFiniteNumber(
+      rows[0]?.[ApplicationsCreatedLast30Days.id],
+      0,
+    );
+    const previous = toFiniteNumber(
+      rows[0]?.applicationsCreatedPrevious30Days,
       0,
     );
 
-    this.value = result;
+    this.value = current;
+    this.trendDelta = current - previous;
+    this.trendPercent = toTrendPercent(current, previous);
 
-    return result;
+    return current;
   }
 
   private get trendValue(): string | undefined {
-    if (
-      typeof this.value !== "number" ||
-      ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.trendValueFormat ===
-        undefined
-    ) {
+    if (typeof this.trendPercent !== "number") {
       return undefined;
     }
 
-    if (
-      ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.trendValueFormat ===
-      "points"
-    ) {
-      return toTrendPointLabel(this.value);
-    }
-
-    return toTrendPercentLabel(this.value);
+    return toTrendPercentLabel(this.trendPercent);
   }
 
   public toView(): StatisticCardMetricDefinition {
     return {
-      id: ApplicationsCreatedLast30Days.METRIC_DEFINITION.id,
-      title: ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.title,
-      description:
-        ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.description,
-      icon: ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.icon,
-      tone: ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.tone,
+      id: ApplicationsCreatedLast30Days.id,
+      title: ApplicationsCreatedLast30Days.CARD_DEFINITION.title,
+      description: ApplicationsCreatedLast30Days.CARD_DEFINITION.description,
+      icon: ApplicationsCreatedLast30Days.CARD_DEFINITION.icon,
+      tone: ApplicationsCreatedLast30Days.CARD_DEFINITION.tone,
       value: this.value ?? 0,
-      suffix: ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.suffix,
-      trendLabel:
-        ApplicationsCreatedLast30Days.METRIC_DEFINITION.card.trendLabel,
+      trendLabel: ApplicationsCreatedLast30Days.CARD_DEFINITION.trendLabel,
       trendValue: this.trendValue,
-      trendTone: toTrendTone(this.value ?? 0),
+      trendTone: toTrendTone(this.trendDelta ?? 0),
     };
   }
 }

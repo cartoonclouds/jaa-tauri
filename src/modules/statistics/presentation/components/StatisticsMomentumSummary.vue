@@ -1,5 +1,8 @@
 <script setup lang="ts">
+  import type { StatisticCardMetricDefinition } from "@modules/statistics/domain/entities/Statistic";
   import type { IExecutable } from "@modules/statistics/domain/types/executable";
+
+  import { computed } from "vue";
 
   import { Icon } from "#components";
 
@@ -10,7 +13,34 @@
     overview: IExecutable[];
   }
 
-  defineProps<StatisticsMomentumSummaryProps>();
+  const props = defineProps<StatisticsMomentumSummaryProps>();
+
+  const metricViewsById = computed(() => {
+    const result = new Map<string, StatisticCardMetricDefinition>();
+
+    props.overview.forEach((executable) => {
+      const metric = executable.toView();
+      result.set(metric.id, metric);
+    });
+
+    return result;
+  });
+
+  const applicationsCreatedMetric = computed(() =>
+    metricViewsById.value.get("applicationsCreatedLast30Days"),
+  );
+
+  const applicationsAppliedMetric = computed(() =>
+    metricViewsById.value.get("applicationsAppliedLast30Days"),
+  );
+
+  const createdTrendValue = computed(
+    () => applicationsCreatedMetric.value?.trendValue ?? "0%",
+  );
+
+  const appliedTrendValue = computed(
+    () => applicationsAppliedMetric.value?.trendValue ?? "0%",
+  );
 </script>
 
 <template>
@@ -22,19 +52,17 @@
       <Icon name="heroicons:calendar-days" class="h-4 w-4 text-surface-500" />
       <span>Applications created:</span>
       <span class="font-semibold">{{
-        overview.applicationsCreatedLast30Days
+        applicationsCreatedMetric?.value ?? 0
       }}</span>
-      ({{ overview.applicationsCreatedDelta30Days >= 0 ? "+" : ""
-      }}{{ overview.applicationsCreatedDelta30Days }} vs previous 30 days)
+      ({{ createdTrendValue }} vs previous 30 days)
     </p>
     <p class="mt-2 flex items-center gap-2">
       <Icon name="heroicons:calendar" class="h-4 w-4 text-surface-500" />
       <span>Applications applied:</span>
       <span class="font-semibold">{{
-        overview.applicationsAppliedLast30Days
+        applicationsAppliedMetric?.value ?? 0
       }}</span>
-      ({{ overview.applicationsAppliedDelta30Days >= 0 ? "+" : ""
-      }}{{ overview.applicationsAppliedDelta30Days }} vs previous 30 days)
+      ({{ appliedTrendValue }} vs previous 30 days)
     </p>
   </div>
 </template>

@@ -1,5 +1,5 @@
 import type {
-  IStatisticMetricDefinition,
+  MetricCardDefinition,
   StatisticCardMetricDefinition,
 } from "../entities/Statistic";
 import type { IExecutable } from "../types/executable";
@@ -9,7 +9,6 @@ import { toFiniteNumber } from "@/shared/utils/database-mapping/numberValueUtils
 
 import {
   toTrendPercentLabel,
-  toTrendPointLabel,
   toTrendTone,
 } from "../../presentation/utils/statisticMetricUtils";
 
@@ -17,16 +16,19 @@ import {
 export class TotalAppliedApplications implements IExecutable<number> {
   public static id = "totalAppliedApplications";
 
-  private static readonly METRIC_DEFINITION: IStatisticMetricDefinition = {
-    id: "totalAppliedApplications",
-    aggregateSql: "SUM(CASE WHEN status = 'applied' THEN 1 ELSE 0 END)",
-    card: {
-      title: "Applied applications",
-      description: "Applications currently in applied stage",
-      icon: "heroicons:paper-airplane",
-      tone: "default",
-    },
-  };
+  private static readonly QUERY = `SELECT
+SUM(CASE WHEN applied_at IS NOT NULL THEN 1 ELSE 0 END) AS ${TotalAppliedApplications.id}
+FROM applications
+WHERE deleted_at IS NULL` as const;
+
+  private static readonly CARD_DEFINITION: MetricCardDefinition = {
+    title: "Total applied",
+    description: "All applications with an applied date",
+    icon: "heroicons:check-circle",
+    tone: "success",
+    trendLabel: "Change vs total applications",
+    trendValueFormat: "percent",
+  } as const;
 
   private value: number | null = null;
 
@@ -34,16 +36,10 @@ export class TotalAppliedApplications implements IExecutable<number> {
 
   public async execute(): Promise<number> {
     const rows = await this.db.select<Partial<Record<string, unknown>>>(
-      `SELECT
-${TotalAppliedApplications.METRIC_DEFINITION.aggregateSql} AS ${TotalAppliedApplications.METRIC_DEFINITION.id}
-FROM applications
-WHERE deleted_at IS NULL`,
+      TotalAppliedApplications.QUERY,
     );
 
-    const result = toFiniteNumber(
-      rows[0]?.[TotalAppliedApplications.METRIC_DEFINITION.id],
-      0,
-    );
+    const result = toFiniteNumber(rows[0]?.[TotalAppliedApplications.id], 0);
 
     this.value = result;
 
@@ -51,19 +47,8 @@ WHERE deleted_at IS NULL`,
   }
 
   private get trendValue(): string | undefined {
-    if (
-      typeof this.value !== "number" ||
-      TotalAppliedApplications.METRIC_DEFINITION.card.trendValueFormat ===
-        undefined
-    ) {
+    if (typeof this.value !== "number") {
       return undefined;
-    }
-
-    if (
-      TotalAppliedApplications.METRIC_DEFINITION.card.trendValueFormat ===
-      "points"
-    ) {
-      return toTrendPointLabel(this.value);
     }
 
     return toTrendPercentLabel(this.value);
@@ -71,14 +56,13 @@ WHERE deleted_at IS NULL`,
 
   public toView(): StatisticCardMetricDefinition {
     return {
-      id: TotalAppliedApplications.METRIC_DEFINITION.id,
-      title: TotalAppliedApplications.METRIC_DEFINITION.card.title,
-      description: TotalAppliedApplications.METRIC_DEFINITION.card.description,
-      icon: TotalAppliedApplications.METRIC_DEFINITION.card.icon,
-      tone: TotalAppliedApplications.METRIC_DEFINITION.card.tone,
+      id: TotalAppliedApplications.id,
+      title: TotalAppliedApplications.CARD_DEFINITION.title,
+      description: TotalAppliedApplications.CARD_DEFINITION.description,
+      icon: TotalAppliedApplications.CARD_DEFINITION.icon,
+      tone: TotalAppliedApplications.CARD_DEFINITION.tone,
       value: this.value ?? 0,
-      suffix: TotalAppliedApplications.METRIC_DEFINITION.card.suffix,
-      trendLabel: TotalAppliedApplications.METRIC_DEFINITION.card.trendLabel,
+      trendLabel: TotalAppliedApplications.CARD_DEFINITION.trendLabel,
       trendValue: this.trendValue,
       trendTone: toTrendTone(this.value ?? 0),
     };
