@@ -18,7 +18,7 @@
   const metricViews = computed<StatisticCardMetricDefinition[]>(() => {
     return props.overview.map(
       (executable: IExecutable): StatisticCardMetricDefinition => {
-        return executable.toView() as StatisticCardMetricDefinition;
+        return executable.toView();
       },
     );
   });
