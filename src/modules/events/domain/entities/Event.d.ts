@@ -16,6 +16,8 @@ export interface Event {
   title: string;
   /** Free-form event description. */
   description: string | null;
+  /** Markdown notes scoped to this application stage event. */
+  notes: string | null;
   /** Completion timestamp; null means this stage is still pending. */
   eventAt: Date | null;
   /** Creation timestamp. */

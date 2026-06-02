@@ -15,6 +15,7 @@ export const EventSchema = z.object({
   type: z.enum(INTERACTION_STAGES),
   title: z.string().min(1),
   description: NullableStringSchema,
+  notes: NullableStringSchema,
   eventAt: NullableDateTimeSchema,
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
@@ -26,6 +27,7 @@ export const CreateEventSchema = EventSchema.pick({
   type: true,
   title: true,
   description: true,
+  notes: true,
 }).partial({ description: true });
 
 /** Runtime schema for repository-level event inserts. */

@@ -33,7 +33,19 @@
 
 <template>
   <main class="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-    <div class="mx-auto mb-6 flex max-w-6xl justify-end">
+    <div class="mx-auto mb-6 flex justify-end">
+      <div class="grow">
+        <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
+          <Icon name="heroicons:briefcase" class="text-emerald-400" />
+          Apply-Flow
+        </h1>
+
+        <p class="text-slate-300">
+          Feature modules are wired with repository, service, query composable,
+          and CRUD pages.
+        </p>
+      </div>
+
       <SelectButton
         v-model="topView"
         :options="topViewOptions"
@@ -43,71 +55,13 @@
       />
     </div>
 
-    <div v-if="topView === 'overview'" class="mx-auto max-w-3xl space-y-6">
-      <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
-        <Icon name="heroicons:briefcase" class="text-emerald-400" />
-        Apply-Flow
-      </h1>
-
-      <p class="text-slate-300">
-        Feature modules are wired with repository, service, query composable,
-        and CRUD pages.
-      </p>
-
+    <div v-if="topView === 'overview'" class="mx-auto space-y-6">
       <div class="flex">
         <Button severity="contrast" @click="openOnboarding">
           <Icon name="heroicons:rocket-launch-solid" class="h-4 w-4" />
           <span>Open Onboarding</span>
         </Button>
       </div>
-
-      <nav class="grid gap-2 text-sm sm:grid-cols-2">
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/applications"
-          >Applications</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/companies"
-          >Companies</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/contacts"
-          >Contacts</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/tags"
-          >Tags</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/documents"
-          >Documents</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/events"
-          >Events</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/notifications"
-          >Notifications</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/settings"
-          >Settings</NuxtLink
-        >
-        <NuxtLink
-          class="rounded border border-slate-700 px-3 py-2 hover:bg-slate-900"
-          to="/profile"
-          >Profile</NuxtLink
-        >
-      </nav>
 
       <p
         class="inline-flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300"
@@ -118,14 +72,14 @@
       </p>
     </div>
 
-    <div v-else class="mx-auto mb-6 max-w-6xl">
+    <div v-else class="mx-auto mb-6">
       <ClientOnly>
         <EntityLocationsMapBrowser />
       </ClientOnly>
     </div>
 
     <ClientOnly>
-      <section class="mx-auto mb-8 max-w-6xl">
+      <section class="mx-auto mb-8">
         <StatisticsSection title="Job Hunt Snapshot" />
       </section>
     </ClientOnly>

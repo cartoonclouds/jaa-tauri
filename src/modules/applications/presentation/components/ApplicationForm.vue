@@ -17,11 +17,13 @@
     type ApplicationFormSubmitPayload,
     type ApplicationFormValues,
     type ApplicationSelectOption,
-  } from "@modules/applications/types/presentation";
+  } from "@modules/applications/types";
   import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { computed, ref, watch } from "vue";
+
+  import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
 
   /**
    * Defines props.
@@ -49,6 +51,7 @@
 
   const selectedTagIds = ref<string[]>([]);
   const pendingTagNames = ref<string[]>([]);
+  const descriptionMarkdown = ref("");
   const isEditMode = computed(() => props.mode === "edit");
 
   watch(
@@ -56,6 +59,14 @@
     (tagIds) => {
       selectedTagIds.value = [...(tagIds ?? [])];
       pendingTagNames.value = [];
+    },
+    { immediate: true },
+  );
+
+  watch(
+    () => props.initialValues.description,
+    (description) => {
+      descriptionMarkdown.value = description ?? "";
     },
     { immediate: true },
   );
@@ -84,14 +95,56 @@
     };
   });
 
+  interface FormFieldStateLike {
+    value: unknown;
+  }
+
+  function isFormSubmitEvent(event: unknown): event is FormSubmitEvent {
+    return typeof event === "object" && event !== null && "valid" in event;
+  }
+
+  function resolveSubmittedValues(
+    event: unknown,
+  ): Record<string, unknown> | null {
+    if (!isFormSubmitEvent(event)) {
+      return null;
+    }
+
+    const eventValues = event.values as
+      | Record<string, unknown>
+      | undefined
+      | null;
+    if (eventValues) {
+      return eventValues;
+    }
+
+    const stateEntries = Object.entries(
+      event.states as Record<string, FormFieldStateLike>,
+    );
+    if (stateEntries.length === 0) {
+      return null;
+    }
+
+    const valuesFromStates: Record<string, unknown> = {};
+    for (const [name, state] of stateEntries) {
+      valuesFromStates[name] = state.value;
+    }
+
+    return valuesFromStates;
+  }
+
   /**
    * Handles on form submit.
    */
-  function onFormSubmit(event: FormSubmitEvent): void {
-    if (!event.valid) return;
+  function onFormSubmit(event: unknown): void {
+    if (isFormSubmitEvent(event) && !event.valid) {
+      return;
+    }
 
-    const values = event.values as Record<string, unknown> | undefined;
-    if (!values) return;
+    const values = resolveSubmittedValues(event);
+    if (!values) {
+      return;
+    }
 
     emit("submit", {
       companyId: (values.companyId as string) || null,
@@ -115,8 +168,8 @@
       currency: values.currency
         ? (values.currency as string).trim().toUpperCase()
         : null,
-      description: values.description
-        ? (values.description as string).trim()
+      description: descriptionMarkdown.value.trim()
+        ? descriptionMarkdown.value
         : null,
       interviewProcess: values.interviewProcess
         ? (values.interviewProcess as string).trim()
@@ -472,13 +525,15 @@
       </div>
 
       <div class="space-y-1 md:col-span-2">
-        <label
-          for="application-description"
-          class="text-sm font-medium text-surface-700"
-        >
-          Description
+        <label class="text-sm font-medium text-surface-700">
+          Application Notes
         </label>
-        <Textarea name="description" auto-resize rows="3" fluid />
+        <p class="text-xs text-surface-500">Stored as Markdown.</p>
+        <NotesMarkdownEditor
+          v-model="descriptionMarkdown"
+          editor-style="height: 12rem"
+          placeholder="Write application notes in Markdown..."
+        />
       </div>
 
       <div class="space-y-1 md:col-span-2">

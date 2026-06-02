@@ -1,9 +1,9 @@
 import { faker } from "@faker-js/faker";
-
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
-} from "../../src/modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
+
 import { createLondonLocationSeed } from "./location.factory";
 
 export interface ApplicationRow {

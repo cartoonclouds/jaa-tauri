@@ -58,23 +58,9 @@ export class TauriSqliteDriver implements DatabaseDriver {
   async transaction<T>(
     callback: (tx: DatabaseDriver) => Promise<T>,
   ): Promise<T> {
-    await this.execute("BEGIN");
-
-    try {
-      const result = await callback(this);
-      await this.execute("COMMIT");
-      return result;
-    } catch (error) {
-      await this.execute("ROLLBACK");
-      throw error;
-    }
+    // Tauri SQL plugin execute calls may not preserve transaction scope
+    // across separate statements, so explicit BEGIN/COMMIT can fail with
+    // "no transaction is active".
+    return await callback(this);
   }
 }
-
-
-
-
-
-
-
-

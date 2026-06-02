@@ -3,7 +3,9 @@ import prettier from "eslint-config-prettier";
 import perfectionist from "eslint-plugin-perfectionist";
 import unusedImports from "eslint-plugin-unused-imports";
 import vue from "eslint-plugin-vue";
-import { defineConfig } from "eslint/config";
+import {
+ defineConfig 
+} from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import vueParser from "vue-eslint-parser";
@@ -297,4 +299,14 @@ export default defineConfig(
   },
 
   prettier,
+
+  {
+    files: ["**/*.{ts,tsx,vue}"],
+
+    rules: {
+      curly: ["error", "all"],
+
+      "object-curly-newline": ["error", ],
+    },
+  },
 );

@@ -17,6 +17,7 @@
   import { computed, reactive, ref } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
+  import NotesMarkdownViewerClient from "@/components/ui/NotesMarkdownViewer.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   /**
@@ -52,10 +53,12 @@
     id: string;
     type: InteractionStage;
     eventAt: Date | null;
+    notes: string;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
     eventAt: null,
+    notes: "",
   });
 
   useBodyScrollLock(isEditDialogVisible);
@@ -220,10 +223,12 @@
       editForm.id = event.id;
       editForm.type = event.type;
       editForm.eventAt = event.eventAt ? new Date(event.eventAt) : null;
+      editForm.notes = event.notes ?? "";
     } else {
       editForm.id = "";
       editForm.type = stage;
       editForm.eventAt = null;
+      editForm.notes = "";
     }
 
     isEditDialogVisible.value = true;
@@ -240,6 +245,7 @@
         id: editForm.id,
         type: editForm.type,
         eventAt: eventAtIso,
+        notes: editForm.notes.trim() ? editForm.notes : null,
       });
     } else if (props.application) {
       await create({
@@ -247,6 +253,7 @@
         type: editForm.type,
         title: EVENT_COPY_BY_STAGE[editForm.type].title,
         description: null,
+        notes: editForm.notes.trim() ? editForm.notes : null,
         eventAt: eventAtIso,
       });
     }
@@ -354,6 +361,15 @@
         </p>
       </ApplicationDetailsCard>
     </div>
+
+    <ApplicationDetailsCard title="Application Notes">
+      <div class="space-y-2">
+        <p v-if="!application.description" class="text-sm text-surface-500">
+          No application notes yet.
+        </p>
+        <NotesMarkdownViewerClient v-else :markdown="application.description" />
+      </div>
+    </ApplicationDetailsCard>
   </div>
 
   <Message v-else severity="info">
@@ -364,6 +380,7 @@
     v-model:visible="isEditDialogVisible"
     v-model:stage-type="editForm.type"
     v-model:event-at="editForm.eventAt"
+    v-model:notes="editForm.notes"
     :selected-stage-event-id="selectedStageEventId"
     :is-mutating-event="isMutatingEvent"
     @save="saveStageEdit"

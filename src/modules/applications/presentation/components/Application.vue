@@ -4,7 +4,7 @@
     ApplicationDrawerMode,
     ApplicationFormSubmitPayload,
     ApplicationFormValues,
-  } from "@modules/applications/types/presentation";
+  } from "@modules/applications/types";
   import type {
     Company,
     CompanyCreatePayload,
@@ -31,7 +31,9 @@
   import { EVENT_COPY_BY_STAGE } from "@modules/events/constants";
   import { useTag } from "@modules/tags";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
+  import { toErrorMessage } from "@shared/utils/error";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
+  import { useToast } from "primevue/usetoast";
   import { ref } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -55,6 +57,7 @@
   const { service: contactService } = useContact();
   const { service: eventService } = useEvent();
   const { service: tagService } = useTag();
+  const toast = useToast();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -188,6 +191,11 @@
     payload: ApplicationFormSubmitPayload,
   ): Promise<void> {
     isSubmitting.value = true;
+    const isEditMode =
+      drawerMode.value === "edit" && selectedApplication.value !== null;
+    const editApplicationId = isEditMode
+      ? (selectedApplication.value?.id ?? null)
+      : null;
 
     try {
       const resolvedTagIds = await resolveTagIdsWithPendingTags({
@@ -196,7 +204,7 @@
         tagService,
       });
 
-      if (drawerMode.value === "edit" && selectedApplication.value) {
+      if (isEditMode && selectedApplication.value) {
         await service.update({
           id: selectedApplication.value.id,
           companyId: payload.companyId,
@@ -282,15 +290,32 @@
             type: step.type,
             title: EVENT_COPY_BY_STAGE[step.type].title,
             description: null,
+            notes: step.notes ?? null,
             sortOrder: stepSortOrder,
           });
         }
       }
 
-      isDrawerOpen.value = false;
-      drawerMode.value = "view";
-      selectedApplication.value = null;
       await refresh();
+      if (editApplicationId) {
+        await refetchSelectedApplication(editApplicationId);
+      }
+
+      toast.add({
+        severity: "success",
+        summary: "Application saved",
+        detail: isEditMode
+          ? "Application updated successfully."
+          : "Application created successfully.",
+        life: 3000,
+      });
+    } catch (error) {
+      toast.add({
+        severity: "error",
+        summary: "Save failed",
+        detail: toErrorMessage(error),
+        life: 4000,
+      });
     } finally {
       isSubmitting.value = false;
     }
@@ -331,6 +356,17 @@
    */
   function onRowClick(application: ApplicationEntity): void {
     openViewDrawer(application);
+  }
+
+  /**
+   * Refetches a single application and updates the selected value.
+   */
+  async function refetchSelectedApplication(id: string): Promise<void> {
+    const applications = await service.list();
+    const refetchedApplication =
+      applications.find((entry) => entry.id === id) ?? null;
+    selectedApplication.value = refetchedApplication;
+    initialFormValues.value = toFormValues(refetchedApplication);
   }
 
   /**
@@ -504,7 +540,7 @@
 </script>
 
 <template>
-  <div class="space-y-6 p-6">
+  <div class="space-y-6">
     <div class="flex items-center justify-between gap-3">
       <h2 class="text-2xl font-semibold">Applications</h2>
       <Button type="button" @click="openCreateDrawer">

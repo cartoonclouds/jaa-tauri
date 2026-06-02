@@ -5,6 +5,9 @@ export interface EnumFromValue<TEnum> {
   fromValue(value: string | null | undefined): TEnum | null;
 }
 
+/**
+ * Interface for enum-like classes that can convert their value to a human-readable label.
+ */
 interface EnumToLabel {
   toLabel(): string;
 }

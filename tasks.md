@@ -36,3 +36,11 @@ Incorporate all constants module code into settings.
 When editing a flow state event, remove all options already associated with that application from the selectbox (except for that selected event)
 
 Add the Temporal polyfill and update all usages of Date to use either the native browser's Temporal implementation or the polyfill.
+
+Note on stages
+
+Timeline tab
+
+VueUse drag and drop
+
+When saving an application, contact or company - using the location - automatically get the lat/long and save it the database.

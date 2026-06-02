@@ -25,6 +25,7 @@ export function mapEventRowToEntity(row: Record<string, unknown>): Event {
     type: toInteractionStage(row.type),
     title: toRequiredString(row.title),
     description: toNullableString(row.description),
+    notes: toNullableString(row.notes),
     eventAt: mapOptionalRowDate(row.event_at),
     ...timestamps,
   };

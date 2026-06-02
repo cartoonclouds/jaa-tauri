@@ -132,6 +132,8 @@ export default defineNuxtConfig({
     clearScreen: false,
     optimizeDeps: {
       include: [
+        "quill",
+        "quill-delta",
         "@tauri-apps/api/core",
         "@tauri-apps/api/dpi",
         "@tauri-apps/api/menu",

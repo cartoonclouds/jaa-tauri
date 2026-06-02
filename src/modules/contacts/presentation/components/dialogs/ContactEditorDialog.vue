@@ -10,6 +10,7 @@
   import { computed, ref, watch } from "vue";
   import { z } from "zod";
 
+  import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   const props = withDefaults(defineProps<Props>(), {
@@ -71,6 +72,7 @@
   const isLoadingAssociatedCompanies = ref(false);
   const associatedCompaniesError = ref<string | null>(null);
   const isEditMode = computed(() => Boolean(props.contact));
+  const notesMarkdown = ref("");
 
   const dialogTitle = computed(() =>
     isEditMode.value ? "Edit Contact" : "Create Contact",
@@ -125,6 +127,25 @@
     { immediate: true },
   );
 
+  watch(
+    () => props.contact,
+    (contact) => {
+      notesMarkdown.value = contact?.notes ?? "";
+    },
+    { immediate: true },
+  );
+
+  watch(
+    () => props.visible,
+    (visible) => {
+      if (!visible) {
+        return;
+      }
+
+      notesMarkdown.value = props.contact?.notes ?? "";
+    },
+  );
+
   /**
    * Handles on form submit.
    */
@@ -149,7 +170,7 @@
         locationText: normalizeString(values.locationText) || null,
         locationLat: props.contact.locationLat,
         locationLng: props.contact.locationLng,
-        notes: normalizeString(values.notes) || null,
+        notes: notesMarkdown.value.trim() ? notesMarkdown.value : null,
       });
       return;
     }
@@ -164,7 +185,7 @@
       locationText: normalizeString(values.locationText) || null,
       locationLat: null,
       locationLng: null,
-      notes: normalizeString(values.notes) || null,
+      notes: notesMarkdown.value.trim() ? notesMarkdown.value : null,
       tagIds: [],
     });
   }
@@ -306,9 +327,15 @@
           </div>
         </template>
 
-        <div class="space-y-1 md:col-span-2">
-          <label class="text-sm font-medium text-surface-700">Notes</label>
-          <Textarea name="notes" rows="4" auto-resize fluid />
+        <div class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4">
+          <h4 class="text-sm font-semibold text-surface-900">Contact Notes</h4>
+          <p class="text-xs text-surface-500">Notes are stored as Markdown.</p>
+
+          <NotesMarkdownEditor
+            v-model="notesMarkdown"
+            editor-style="height: 12rem"
+            placeholder="Write contact notes in Markdown..."
+          />
         </div>
 
         <div class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4">

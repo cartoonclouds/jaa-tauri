@@ -5,10 +5,13 @@
   } from "@modules/events/constants";
   import { computed } from "vue";
 
+  import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
+
   interface Props {
     visible: boolean;
     stageType: InteractionStage;
     eventAt: Date | null;
+    notes: string;
     selectedStageEventId: string | null;
     isMutatingEvent: boolean;
   }
@@ -19,6 +22,7 @@
     "update:visible": [value: boolean];
     "update:stageType": [value: InteractionStage];
     "update:eventAt": [value: Date | null];
+    "update:notes": [value: string];
     save: [];
     "request-delete": [];
   }>();
@@ -41,6 +45,13 @@
     get: () => props.eventAt,
     set: (value: Date | null) => {
       emit("update:eventAt", value);
+    },
+  });
+
+  const notesModel = computed({
+    get: () => props.notes,
+    set: (value: string) => {
+      emit("update:notes", value);
     },
   });
 </script>
@@ -73,6 +84,16 @@
           show-icon
           show-clear
           fluid
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-sm font-medium text-surface-700">Stage Notes</label>
+        <p class="text-xs text-surface-500">Stored as Markdown.</p>
+        <NotesMarkdownEditor
+          v-model="notesModel"
+          editor-style="height: 10rem"
+          placeholder="Write stage notes in Markdown..."
         />
       </div>
     </div>

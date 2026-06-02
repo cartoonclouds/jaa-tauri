@@ -41,6 +41,7 @@ export interface EventCreatePayload {
   type: InteractionStage;
   title: string;
   description: string | null;
+  notes?: string | null;
   eventAt?: string | null;
   sortOrder?: number;
 }
@@ -52,6 +53,7 @@ export interface EventUpdatePayload {
   type?: InteractionStage;
   title?: string;
   description?: string | null;
+  notes?: string | null;
   eventAt?: string | null;
   sortOrder?: number;
 }
@@ -143,6 +145,7 @@ export class EventRepository implements IEventRepository {
          ae.application_id || '${EVENT_LINK_ID_SEPARATOR}' || ae.event_id AS id,
          ae.application_id,
          ae.sort_order,
+         ae.notes,
          e.type,
          e.title,
          e.description,
@@ -177,19 +180,27 @@ export class EventRepository implements IEventRepository {
 
     const eventId = await this.resolveEventIdByType(parseResult.data.type);
     const eventAtBinding = payload.eventAt ?? null;
+    const notesBinding = payload.notes ?? null;
     const sortOrder =
       payload.sortOrder !== undefined
         ? this.normalizeSortOrder(payload.sortOrder)
         : await this.resolveNextSortOrder(parseResult.data.applicationId);
 
     await this.db.execute(
-      `INSERT INTO application_events (application_id, event_id, event_at, sort_order, created_at)
-       VALUES ($1, $2, COALESCE($3, CURRENT_TIMESTAMP), $4, CURRENT_TIMESTAMP)
+      `INSERT INTO application_events (application_id, event_id, event_at, notes, sort_order, created_at)
+       VALUES ($1, $2, COALESCE($3, CURRENT_TIMESTAMP), $4, $5, CURRENT_TIMESTAMP)
        ON CONFLICT(application_id, event_id)
        DO UPDATE SET
          event_at = COALESCE($3, CURRENT_TIMESTAMP),
-         sort_order = $4`,
-      [parseResult.data.applicationId, eventId, eventAtBinding, sortOrder],
+         notes = $4,
+         sort_order = $5`,
+      [
+        parseResult.data.applicationId,
+        eventId,
+        eventAtBinding,
+        notesBinding,
+        sortOrder,
+      ],
     );
 
     return toEventLinkId(parseResult.data.applicationId, eventId);
@@ -199,12 +210,43 @@ export class EventRepository implements IEventRepository {
     const current = parseEventLinkId(payload.id);
     const nextType = payload.type;
     const hasEventAtOverride = payload.eventAt !== undefined;
+    const hasNotesOverride = payload.notes !== undefined;
     const hasSortOrderOverride = payload.sortOrder !== undefined;
     const resolveProvidedSortOrder = (): number =>
       this.normalizeSortOrder(payload.sortOrder ?? 0);
 
     if (!nextType) {
-      if (hasEventAtOverride && hasSortOrderOverride) {
+      if (hasEventAtOverride && hasNotesOverride && hasSortOrderOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET event_at = $3,
+               notes = $4,
+               sort_order = $5
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [
+            current.applicationId,
+            current.eventId,
+            payload.eventAt ?? null,
+            payload.notes ?? null,
+            resolveProvidedSortOrder(),
+          ],
+        );
+      } else if (hasEventAtOverride && hasNotesOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET event_at = $3,
+               notes = $4
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [
+            current.applicationId,
+            current.eventId,
+            payload.eventAt ?? null,
+            payload.notes ?? null,
+          ],
+        );
+      } else if (hasEventAtOverride && hasSortOrderOverride) {
         await this.db.execute(
           `UPDATE application_events
            SET event_at = $3,
@@ -225,6 +267,28 @@ export class EventRepository implements IEventRepository {
            WHERE application_id = $1
              AND event_id = $2`,
           [current.applicationId, current.eventId, payload.eventAt ?? null],
+        );
+      } else if (hasNotesOverride && hasSortOrderOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET notes = $3,
+               sort_order = $4
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [
+            current.applicationId,
+            current.eventId,
+            payload.notes ?? null,
+            resolveProvidedSortOrder(),
+          ],
+        );
+      } else if (hasNotesOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET notes = $3
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [current.applicationId, current.eventId, payload.notes ?? null],
         );
       } else if (hasSortOrderOverride) {
         await this.db.execute(
@@ -242,7 +306,37 @@ export class EventRepository implements IEventRepository {
     const targetEventId = await this.resolveEventIdByType(nextType);
 
     if (targetEventId === current.eventId) {
-      if (hasEventAtOverride && hasSortOrderOverride) {
+      if (hasEventAtOverride && hasNotesOverride && hasSortOrderOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET event_at = $3,
+               notes = $4,
+               sort_order = $5
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [
+            current.applicationId,
+            current.eventId,
+            payload.eventAt ?? null,
+            payload.notes ?? null,
+            resolveProvidedSortOrder(),
+          ],
+        );
+      } else if (hasEventAtOverride && hasNotesOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET event_at = $3,
+               notes = $4
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [
+            current.applicationId,
+            current.eventId,
+            payload.eventAt ?? null,
+            payload.notes ?? null,
+          ],
+        );
+      } else if (hasEventAtOverride && hasSortOrderOverride) {
         await this.db.execute(
           `UPDATE application_events
            SET event_at = $3,
@@ -263,6 +357,28 @@ export class EventRepository implements IEventRepository {
            WHERE application_id = $1
              AND event_id = $2`,
           [current.applicationId, current.eventId, payload.eventAt ?? null],
+        );
+      } else if (hasNotesOverride && hasSortOrderOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET notes = $3,
+               sort_order = $4
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [
+            current.applicationId,
+            current.eventId,
+            payload.notes ?? null,
+            resolveProvidedSortOrder(),
+          ],
+        );
+      } else if (hasNotesOverride) {
+        await this.db.execute(
+          `UPDATE application_events
+           SET notes = $3
+           WHERE application_id = $1
+             AND event_id = $2`,
+          [current.applicationId, current.eventId, payload.notes ?? null],
         );
       } else if (hasSortOrderOverride) {
         await this.db.execute(
@@ -286,6 +402,7 @@ export class EventRepository implements IEventRepository {
     }
 
     const targetEventAt = hasEventAtOverride ? (payload.eventAt ?? null) : null;
+    const targetNotes = hasNotesOverride ? (payload.notes ?? null) : null;
     const targetSortOrder = hasSortOrderOverride
       ? this.normalizeSortOrder(payload.sortOrder ?? 0)
       : await this.resolveCurrentSortOrder(
@@ -294,13 +411,20 @@ export class EventRepository implements IEventRepository {
         );
 
     await this.db.execute(
-      `INSERT INTO application_events (application_id, event_id, event_at, sort_order, created_at)
-       VALUES ($1, $2, COALESCE($3, CURRENT_TIMESTAMP), $4, CURRENT_TIMESTAMP)
+      `INSERT INTO application_events (application_id, event_id, event_at, notes, sort_order, created_at)
+       VALUES ($1, $2, COALESCE($3, CURRENT_TIMESTAMP), $4, $5, CURRENT_TIMESTAMP)
        ON CONFLICT(application_id, event_id)
        DO UPDATE SET
          event_at = COALESCE($3, CURRENT_TIMESTAMP),
-         sort_order = $4`,
-      [current.applicationId, targetEventId, targetEventAt, targetSortOrder],
+         notes = $4,
+         sort_order = $5`,
+      [
+        current.applicationId,
+        targetEventId,
+        targetEventAt,
+        targetNotes,
+        targetSortOrder,
+      ],
     );
 
     await this.db.execute(

@@ -5,7 +5,7 @@
     ApplicationFormSubmitPayload,
     ApplicationFormValues,
     ApplicationSelectOption,
-  } from "@modules/applications/types/presentation";
+  } from "@modules/applications/types";
   import type { Company } from "@modules/companies/domain/entities/Company";
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
   import type { EditableContact } from "@modules/contacts/types/presentation";

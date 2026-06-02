@@ -6,7 +6,7 @@
     ApplicationFormSubmitPayload,
     ApplicationFormValues,
     ApplicationSelectOption,
-  } from "@modules/applications/types/presentation";
+  } from "@modules/applications/types";
   import type { Event } from "@modules/events/domain/entities/Event";
 
   import ApplicationDetailsView from "@modules/applications/presentation/components/ApplicationDetailsView.vue";
@@ -67,9 +67,11 @@
   const stageForm = reactive<{
     id: string;
     type: InteractionStage;
+    notes: string;
   }>({
     id: "",
     type: INTERACTION_STAGES[0],
+    notes: "",
   });
 
   const createFlowSteps = ref<(ApplicationDraftFlowStep & { id: string })[]>(
@@ -162,6 +164,7 @@
       id: crypto.randomUUID(),
       type: stage,
       sortOrder: index + 1,
+      notes: null,
     }));
   }
 
@@ -183,6 +186,7 @@
     stageDialogDraftId.value = null;
     stageForm.id = "";
     stageForm.type = INTERACTION_STAGES[0];
+    stageForm.notes = "";
     isStageDialogVisible.value = true;
   }
 
@@ -194,6 +198,7 @@
     stageDialogDraftId.value = null;
     stageForm.id = event.id;
     stageForm.type = event.type;
+    stageForm.notes = event.notes ?? "";
     isStageDialogVisible.value = true;
   }
 
@@ -207,6 +212,7 @@
     stageDialogDraftId.value = step.id;
     stageForm.id = "";
     stageForm.type = step.type;
+    stageForm.notes = step.notes ?? "";
     isStageDialogVisible.value = true;
   }
 
@@ -222,6 +228,7 @@
           id: crypto.randomUUID(),
           type: stageForm.type,
           sortOrder: createFlowSteps.value.length + 1,
+          notes: stageForm.notes.trim() ? stageForm.notes : null,
         });
       } else if (stageDialogDraftId.value) {
         const target = createFlowSteps.value.find(
@@ -229,6 +236,7 @@
         );
         if (target) {
           target.type = stageForm.type;
+          target.notes = stageForm.notes.trim() ? stageForm.notes : null;
         }
       }
 
@@ -248,11 +256,13 @@
         type: stageForm.type,
         title: EVENT_COPY_BY_STAGE[stageForm.type].title,
         description: null,
+        notes: stageForm.notes.trim() ? stageForm.notes : null,
       });
     } else if (stageForm.id) {
       await update({
         id: stageForm.id,
         type: stageForm.type,
+        notes: stageForm.notes.trim() ? stageForm.notes : null,
       });
     }
 
@@ -393,6 +403,7 @@
         flowSteps: createFlowSteps.value.map((step) => ({
           type: step.type,
           sortOrder: step.sortOrder,
+          notes: step.notes ?? null,
         })),
       });
       return;
@@ -624,6 +635,7 @@
   <ApplicationDetailsStageDialog
     v-model:visible="isStageDialogVisible"
     v-model:stage-type="stageForm.type"
+    v-model:notes="stageForm.notes"
     :mode="stageDialogMode"
     :is-mutating-event="isMutatingEvent"
     @save="saveStageDialog"

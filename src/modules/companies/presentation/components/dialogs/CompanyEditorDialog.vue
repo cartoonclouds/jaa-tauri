@@ -16,6 +16,7 @@
   import { computed, ref, watch } from "vue";
   import { z } from "zod";
 
+  import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   const props = withDefaults(defineProps<Props>(), {
@@ -64,6 +65,7 @@
   const associatedContactsError = ref<string | null>(null);
   const isLoadingAssociatedApplications = ref(false);
   const associatedApplicationsError = ref<string | null>(null);
+  const notesMarkdown = ref("");
 
   const dialogVisible = computed({
     get: () => props.visible,
@@ -92,8 +94,20 @@
     (company) => {
       selectedTagIds.value = [...(company?.tagIds ?? [])];
       pendingTagNames.value = [];
+      notesMarkdown.value = company?.notes ?? "";
     },
     { immediate: true },
+  );
+
+  watch(
+    () => props.visible,
+    (visible) => {
+      if (!visible) {
+        return;
+      }
+
+      notesMarkdown.value = props.company?.notes ?? "";
+    },
   );
 
   watch(
@@ -110,7 +124,9 @@
       }
 
       isLoadingAssociatedContacts.value = true;
-      isLoadingAssociatedApplications.value = showJobsAppliedForSection;
+      isLoadingAssociatedApplications.value = Boolean(
+        showJobsAppliedForSection,
+      );
       associatedContactsError.value = null;
       associatedApplicationsError.value = null;
 
@@ -200,6 +216,7 @@
         locationLng: isEditMode.value
           ? (props.company?.locationLng ?? null)
           : ((values.locationLng as number | null) ?? null),
+        notes: notesMarkdown.value.trim() ? notesMarkdown.value : null,
         tagIds: resolvedTagIds,
       };
 
@@ -309,6 +326,17 @@
             v-model:pending-tag-names="pendingTagNames"
             placeholder="Select tags"
             class="w-full"
+          />
+        </div>
+
+        <div class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4">
+          <h4 class="text-sm font-semibold text-surface-900">Company Notes</h4>
+          <p class="text-xs text-surface-500">Notes are stored as Markdown.</p>
+
+          <NotesMarkdownEditor
+            v-model="notesMarkdown"
+            editor-style="height: 12rem"
+            placeholder="Write company notes in Markdown..."
           />
         </div>
 

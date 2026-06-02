@@ -1,4 +1,4 @@
-import type { ApplicationSelectOption } from "@modules/applications/types/presentation";
+import type { ApplicationSelectOption } from "@modules/applications/types";
 
 import {
   ApplicationAttendanceType,

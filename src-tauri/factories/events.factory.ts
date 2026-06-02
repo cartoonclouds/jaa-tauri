@@ -139,6 +139,7 @@ export function createApplicationEventRows(
         application_id: application.id,
         event_id: eventId,
         event_at: stageEventAt,
+        notes: faker.lorem.sentence(),
         sort_order: stageIndex + 1,
         created_at: new Date(baseTime).toISOString(),
       };

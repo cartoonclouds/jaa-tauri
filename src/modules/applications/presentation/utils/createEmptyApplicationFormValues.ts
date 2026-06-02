@@ -1,4 +1,4 @@
-import type { ApplicationFormValues } from "@modules/applications/types/presentation";
+import type { ApplicationFormValues } from "@modules/applications/types";
 
 import { ApplicationStatus } from "@modules/applications/domain/enums/ApplicationEnums";
 
