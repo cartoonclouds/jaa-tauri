@@ -3,13 +3,9 @@
 
   import { definePageMeta } from "#imports";
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 </script>
 
 <template>
   <ApplicationComponent />
 </template>
-
-
-

@@ -1,10 +1,10 @@
 <script setup lang="ts">
   import { onMounted } from "vue";
+  import { useRouter } from "vue-router";
 
-  import { definePageMeta, useRouter } from "#imports";
+  import { definePageMeta } from "#imports";
   import { useContactsDialog } from "@/composables/useContactsDialog";
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   definePageMeta({ ssr: false });
 
   const router = useRouter();
@@ -13,7 +13,7 @@
 
   onMounted(() => {
     openContactsDialog();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
     void router.replace("/");
   });
 </script>

@@ -5,6 +5,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
+    ".nuxt/**/*.d.ts",
     "src-tauri/**/*.ts",
     "src-tauri/**/*.d.ts",
     "tests/**/*.ts",

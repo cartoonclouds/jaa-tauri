@@ -10,6 +10,18 @@
       "#components": [
         "./.nuxt/components"
       ],
+      "#app": [
+        "./node_modules/nuxt/dist/app"
+      ],
+      "#app/*": [
+        "./node_modules/nuxt/dist/app/*"
+      ],
+      "#pages": [
+        "./node_modules/nuxt/dist/pages/runtime"
+      ],
+      "#pages/*": [
+        "./node_modules/nuxt/dist/pages/runtime/*"
+      ],
       "@/*": [
         "src/*"
       ],
