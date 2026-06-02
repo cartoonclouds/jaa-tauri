@@ -1,4 +1,4 @@
-import type { StatisticCardMetricDefinition } from "../entities/Statistic";
+import type { StatisticCardMetricDefinition } from "./Statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 /**

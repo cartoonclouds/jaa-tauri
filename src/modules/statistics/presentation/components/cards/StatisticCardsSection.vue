@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { StatisticCardMetricDefinition } from "@modules/statistics/domain/entities/Statistic";
+  import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/Statistic.js";
   import type { IExecutable } from "@modules/statistics/domain/types/executable";
 
   import { computed } from "vue";
@@ -16,9 +16,11 @@
   const props = defineProps<StatisticCardsSectionProps>();
 
   const metricViews = computed<StatisticCardMetricDefinition[]>(() => {
-    return props.overview.map((executable: IExecutable) => {
-      return executable.toView();
-    });
+    return props.overview.map(
+      (executable: IExecutable): StatisticCardMetricDefinition => {
+        return executable.toView() as StatisticCardMetricDefinition;
+      },
+    );
   });
 </script>
 

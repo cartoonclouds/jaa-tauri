@@ -1,4 +1,4 @@
-import type { Statistic } from "@modules/statistics/domain/entities/Statistic";
+import type { Statistic } from "@/modules/statistics/domain/types/Statistic";
 
 import {
   StatisticSchema,

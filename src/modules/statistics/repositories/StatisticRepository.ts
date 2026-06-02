@@ -2,8 +2,8 @@ import type {
   ExecutableConstructor,
   IExecutable,
 } from "../domain/types/executable";
+import type { Statistic } from "@/modules/statistics/domain/types/Statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
-import type { Statistic } from "@modules/statistics/domain/entities/Statistic";
 
 import { mapStatisticRowToEntity } from "@modules/statistics/application/mappers/mapStatisticRow";
 import { StatisticSchema } from "@modules/statistics/domain/zod/statistic.schema";

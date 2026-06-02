@@ -2,7 +2,7 @@
   import type {
     StatisticCardTone,
     StatisticTrendTone,
-  } from "@modules/statistics/domain/entities/Statistic";
+  } from "@/modules/statistics/domain/types/Statistic";
 
   import { computed } from "vue";
 
