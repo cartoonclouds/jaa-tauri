@@ -4,6 +4,8 @@
 
   import { Icon } from "#components";
 
+  import StatisticsMomentumSummary from "./StatisticsMomentumSummary.vue";
+
   /**
    * Defines statistics section props.
    */
@@ -30,6 +32,6 @@
     </div>
 
     <StatisticCardsSection :overview="overview" />
-    <!-- <StatisticsMomentumSummary :overview="overview" /> -->
+    <StatisticsMomentumSummary :overview="overview" />
   </section>
 </template>

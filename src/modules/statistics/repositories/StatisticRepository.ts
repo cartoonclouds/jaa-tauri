@@ -1,4 +1,7 @@
-import type { IExecutable } from "../domain/types/executable";
+import type {
+  ExecutableConstructor,
+  IExecutable,
+} from "../domain/types/executable";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Statistic } from "@modules/statistics/domain/entities/Statistic";
 
@@ -22,11 +25,6 @@ import { TotalAppliedApplications } from "../domain/executables/totalAppliedAppl
 import { TotalInterviewingApplications } from "../domain/executables/totalInterviewingApplications";
 import { TotalOffers } from "../domain/executables/totalOffers";
 import { TotalRejectedApplications } from "../domain/executables/totalRejectedApplications";
-
-interface ExecutableConstructor {
-  new (db: DatabaseDriver): IExecutable;
-  id: string;
-}
 
 /** Metrics intended for card rendering in the statistics dashboard. */
 export const CARD_METRIC_DEFINITIONS: readonly ExecutableConstructor[] = [
@@ -52,68 +50,6 @@ export const INTERNAL_METRIC_DEFINITIONS: readonly ExecutableConstructor[] = [
   ApplicationsOfferLast30Days,
   ApplicationsOfferPrevious30Days,
 ];
-
-// export type StatisticsOverviewMetric = keyof StatisticsOverview;
-
-// /**
-//  * Aggregated read model returned by statistics queries.
-//  */
-// export interface StatisticsOverview {
-//   /** Total applications currently tracked (excluding deleted rows). */
-//   totalApplications: number;
-//   /** Total applications currently marked as applied. */
-//   totalAppliedApplications: number;
-//   /** Total applications currently in interview pipeline stages. */
-//   totalInterviewingApplications: number;
-//   /** Total applications currently marked as offer. */
-//   totalOffers: number;
-//   /** Total applications currently marked as rejected. */
-//   totalRejectedApplications: number;
-//   /** Total applications created in the last 30 days. */
-//   applicationsCreatedLast30Days: number;
-//   /** Total applications with applied date in the last 30 days. */
-//   applicationsAppliedLast30Days: number;
-//   /** Total applications created in the 30-day window before the last 30 days. */
-//   applicationsCreatedPrevious30Days: number;
-//   /** Total applications applied in the 30-day window before the last 30 days. */
-//   applicationsAppliedPrevious30Days: number;
-//   /** Last-30-day applications that reached interview or final response stages. */
-//   applicationsRespondedLast30Days: number;
-//   /** Previous-30-day applications that reached interview or final response stages. */
-//   applicationsRespondedPrevious30Days: number;
-//   /** Last-30-day applications currently in offer stage. */
-//   applicationsOfferLast30Days: number;
-//   /** Previous-30-day applications currently in offer stage. */
-//   applicationsOfferPrevious30Days: number;
-//   /** Active pipeline applications excluding offer and rejected outcomes. */
-//   activePipelineApplications: number;
-//   /** Percentage of applied applications that advanced to response stages. */
-//   responseRate: number;
-//   /** Percentage of applied applications currently in offer stage. */
-//   offerRate: number;
-//   /** Percentage of applied applications currently in rejected stage. */
-//   rejectionRate: number;
-//   /** Difference between current and previous 30-day created applications. */
-//   applicationsCreatedDelta30Days: number;
-//   /** Difference between current and previous 30-day applied applications. */
-//   applicationsAppliedDelta30Days: number;
-//   /** Percentage change for created applications compared to previous 30 days. */
-//   applicationsCreatedDeltaPercent: number;
-//   /** Percentage change for applied applications compared to previous 30 days. */
-//   applicationsAppliedDeltaPercent: number;
-//   /** Last-30-day response rate for applied cohorts. */
-//   responseRateLast30Days: number;
-//   /** Previous-30-day response rate for applied cohorts. */
-//   responseRatePrevious30Days: number;
-//   /** Delta between last and previous 30-day response rates. */
-//   responseRateDeltaPercent: number;
-//   /** Last-30-day offer rate for applied cohorts. */
-//   offerRateLast30Days: number;
-//   /** Previous-30-day offer rate for applied cohorts. */
-//   offerRatePrevious30Days: number;
-//   /** Delta between last and previous 30-day offer rates. */
-//   offerRateDeltaPercent: number;
-// }
 
 /**
  * Persistence contract for statistics metrics.
@@ -143,19 +79,18 @@ export class StatisticRepository implements IStatisticRepository {
   async getOverview(): Promise<IExecutable[]> {
     const overview: IExecutable[] = [];
 
-    const metricDefinitions: readonly ExecutableConstructor[] = [
-      ...CARD_METRIC_DEFINITIONS,
-      ...INTERNAL_METRIC_DEFINITIONS,
-    ];
+    const metricDefinitions: readonly ExecutableConstructor[] =
+      CARD_METRIC_DEFINITIONS.concat(INTERNAL_METRIC_DEFINITIONS);
 
     for (const ExecutableClass of metricDefinitions) {
       try {
-        const executable = new ExecutableClass(this.db);
-
+        const executable: IExecutable = new ExecutableClass(this.db);
         await executable.execute();
         overview.push(executable);
-      } catch (error) {
-        console.error(`Error executing metric ${ExecutableClass.id}:`, error);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const metricId = ExecutableClass.id;
+        console.error(`Error executing metric ${metricId}:`, message);
       }
     }
 

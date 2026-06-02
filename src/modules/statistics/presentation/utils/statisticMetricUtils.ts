@@ -1,7 +1,4 @@
-/**
- * Visual trend tone used by statistic cards.
- */
-export type StatisticTrendTone = "positive" | "negative" | "neutral";
+import type { StatisticTrendTone } from "../../domain/entities/Statistic";
 
 /**
  * Resolve trend tone from a signed numeric delta.

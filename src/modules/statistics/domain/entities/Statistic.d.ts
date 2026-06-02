@@ -1,6 +1,4 @@
-import type { StatisticCardTone } from "../../statisticMetricDefinitions";
 import type { HeroIcon } from "@/shared/types";
-import type { StatisticScope } from "@modules/statistics/domain/types/StatisticType";
 
 export interface MetricCardDefinition {
   title: string;
@@ -63,3 +61,52 @@ export interface CreateStatisticInput {
   /** Optional timestamp when the metric was captured. */
   recordedAt?: Date | null;
 }
+
+/**
+ * Type alias for statistic card tone.
+ */
+export type StatisticCardTone =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info";
+/**
+ * Type alias for statistic trend value format.
+ */
+export type StatisticTrendValueFormat = "percent" | "points";
+
+/**
+ * Defines statistic card definition.
+ */
+export interface StatisticCardDefinition {
+  title: string;
+  description: string;
+  icon: string;
+  tone: StatisticCardTone;
+  valueField?: string;
+  suffix?: string;
+  trendLabel?: string;
+  trendValueField?: string;
+  trendToneField?: string;
+  trendValueFormat?: StatisticTrendValueFormat;
+}
+
+/**
+ * Defines statistic metric definition.
+ */
+export interface StatisticMetricDefinition {
+  id: string;
+  aggregateSql?: string;
+  card?: StatisticCardDefinition;
+}
+
+/**
+ * Classification used to scope where a statistic is collected.
+ */
+export type StatisticScope = "global" | "company" | "application";
+
+/**
+ * Type alias for statistic trend tone.
+ */
+export type StatisticTrendTone = "positive" | "negative" | "neutral";

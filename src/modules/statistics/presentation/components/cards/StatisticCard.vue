@@ -1,21 +1,12 @@
 <script setup lang="ts">
+  import type {
+    StatisticCardTone,
+    StatisticTrendTone,
+  } from "@modules/statistics/domain/entities/Statistic";
+
   import { computed } from "vue";
 
   import { Icon } from "#components";
-
-  /**
-   * Type alias for statistic card tone.
-   */
-  type StatisticCardTone =
-    | "default"
-    | "success"
-    | "warning"
-    | "danger"
-    | "info";
-  /**
-   * Type alias for statistic trend tone.
-   */
-  type StatisticTrendTone = "positive" | "negative" | "neutral";
 
   /**
    * Defines statistic card props.
@@ -111,12 +102,3 @@
     </template>
   </Card>
 </template>
-
-
-
-
-
-
-
-
-

@@ -139,6 +139,12 @@ export default defineNuxtConfig({
         "@vue/devtools-kit",
       ],
     },
+    server: {
+      forwardConsole: {
+        unhandledErrors: true,
+        logLevels: ["error", "warn", "info", "log", "debug"],
+      },
+    },
   },
 
   typescript: {
