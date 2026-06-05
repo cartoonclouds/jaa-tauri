@@ -9,14 +9,22 @@
 
   interface Props {
     visible: boolean;
+    mode?: "create" | "edit";
     stageType: InteractionStage;
-    eventAt: Date | null;
-    notes: string;
-    selectedStageEventId: string | null;
+    eventAt?: Date | null;
+    notes?: string;
+    showDetails?: boolean;
+    selectedStageEventId?: string | null;
     isMutatingEvent: boolean;
   }
 
-  const props = defineProps<Props>();
+  const props = withDefaults(defineProps<Props>(), {
+    mode: "edit",
+    eventAt: null,
+    notes: "",
+    showDetails: false,
+    selectedStageEventId: null,
+  });
 
   const emit = defineEmits<{
     "update:visible": [value: boolean];
@@ -54,13 +62,31 @@
       emit("update:notes", value);
     },
   });
+
+  const isDetailedMode = computed(() => props.showDetails);
+
+  const dialogHeader = computed(() =>
+    isDetailedMode.value
+      ? "Edit Flow Step"
+      : props.mode === "create"
+        ? "Add Flow Step"
+        : "Edit Flow Step",
+  );
+
+  const saveLabel = computed(() =>
+    isDetailedMode.value
+      ? "Save"
+      : props.mode === "create"
+        ? "Add Step"
+        : "Save",
+  );
 </script>
 
 <template>
   <Dialog
     v-model:visible="visibleModel"
     modal
-    header="Edit Flow Step"
+    :header="dialogHeader"
     class="w-full! max-w-lg"
   >
     <div class="space-y-3">
@@ -73,34 +99,36 @@
         />
       </div>
 
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700"
-          >Event Date/Time</label
-        >
-        <DatePicker
-          v-model="eventAtModel"
-          show-time
-          hour-format="24"
-          show-icon
-          show-clear
-          fluid
-        />
-      </div>
+      <template v-if="isDetailedMode">
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-surface-700"
+            >Event Date/Time</label
+          >
+          <DatePicker
+            v-model="eventAtModel"
+            show-time
+            hour-format="24"
+            show-icon
+            show-clear
+            fluid
+          />
+        </div>
 
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-surface-700">Stage Notes</label>
-        <NotesMarkdownEditor
-          v-model="notesModel"
-          editor-style="height: 10rem"
-          placeholder="Write stage notes in Markdown..."
-        />
-      </div>
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-surface-700">Stage Notes</label>
+          <NotesMarkdownEditor
+            v-model="notesModel"
+            editor-style="height: 10rem"
+            placeholder="Write stage notes in Markdown..."
+          />
+        </div>
+      </template>
     </div>
 
     <template #footer>
-      <div class="flex justify-end gap-2 w-full">
+      <div class="flex justify-end gap-2" :class="{ 'w-full': isDetailedMode }">
         <Button
-          v-if="selectedStageEventId"
+          v-if="isDetailedMode && selectedStageEventId"
           type="button"
           label="Delete"
           severity="danger"
@@ -119,7 +147,7 @@
         />
         <Button
           type="button"
-          label="Save"
+          :label="saveLabel"
           :loading="isMutatingEvent"
           @click="emit('save')"
         />

@@ -12,7 +12,7 @@
 
   import ApplicationDetailsView from "@modules/applications/presentation/components/ApplicationDetailsView.vue";
   import ApplicationForm from "@modules/applications/presentation/components/ApplicationForm.vue";
-  import ApplicationDetailsStageDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsStageDialog.vue";
+  import ApplicationDetailsFlowStepDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsFlowStepDialog.vue";
   import { useEvent } from "@modules/events/composables/useEvent";
   import {
     EVENT_COPY_BY_STAGE,
@@ -521,7 +521,7 @@
     No application details are currently available.
   </Message>
 
-  <ApplicationDetailsStageDialog
+  <ApplicationDetailsFlowStepDialog
     v-model:visible="isStageDialogVisible"
     v-model:stage-type="stageForm.type"
     :mode="stageDialogMode"

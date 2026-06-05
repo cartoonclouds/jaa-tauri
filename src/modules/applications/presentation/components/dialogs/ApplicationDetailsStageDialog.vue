@@ -5,19 +5,34 @@
   } from "@modules/events/constants";
   import { computed } from "vue";
 
+  import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
+
   interface Props {
     visible: boolean;
-    mode: "create" | "edit";
+    mode?: "create" | "edit";
     stageType: InteractionStage;
+    eventAt?: Date | null;
+    notes?: string;
+    showDetails?: boolean;
+    selectedStageEventId?: string | null;
     isMutatingEvent: boolean;
   }
 
-  const props = defineProps<Props>();
+  const props = withDefaults(defineProps<Props>(), {
+    mode: "edit",
+    eventAt: null,
+    notes: "",
+    showDetails: false,
+    selectedStageEventId: null,
+  });
 
   const emit = defineEmits<{
     "update:visible": [value: boolean];
     "update:stageType": [value: InteractionStage];
+    "update:eventAt": [value: Date | null];
+    "update:notes": [value: string];
     save: [];
+    "request-delete": [];
   }>();
 
   const visibleModel = computed({
@@ -34,12 +49,36 @@
     },
   });
 
+  const eventAtModel = computed({
+    get: () => props.eventAt,
+    set: (value: Date | null) => {
+      emit("update:eventAt", value);
+    },
+  });
+
+  const notesModel = computed({
+    get: () => props.notes,
+    set: (value: string) => {
+      emit("update:notes", value);
+    },
+  });
+
+  const isDetailedMode = computed(() => props.showDetails);
+
   const dialogHeader = computed(() =>
-    props.mode === "create" ? "Add Flow Step" : "Edit Flow Step",
+    isDetailedMode.value
+      ? "Edit Flow Step"
+      : props.mode === "create"
+        ? "Add Flow Step"
+        : "Edit Flow Step",
   );
 
   const saveLabel = computed(() =>
-    props.mode === "create" ? "Add Step" : "Save",
+    isDetailedMode.value
+      ? "Save"
+      : props.mode === "create"
+        ? "Add Step"
+        : "Save",
   );
 </script>
 
@@ -59,10 +98,47 @@
           fluid
         />
       </div>
+
+      <template v-if="isDetailedMode">
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-surface-700"
+            >Event Date/Time</label
+          >
+          <DatePicker
+            v-model="eventAtModel"
+            show-time
+            hour-format="24"
+            show-icon
+            show-clear
+            fluid
+          />
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-surface-700"
+            >Stage Notes</label
+          >
+          <NotesMarkdownEditor
+            v-model="notesModel"
+            editor-style="height: 10rem"
+            placeholder="Write stage notes in Markdown..."
+          />
+        </div>
+      </template>
     </div>
 
     <template #footer>
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-end gap-2" :class="{ 'w-full': isDetailedMode }">
+        <Button
+          v-if="isDetailedMode && selectedStageEventId"
+          type="button"
+          label="Delete"
+          severity="danger"
+          text
+          :disabled="isMutatingEvent"
+          class="mr-auto"
+          @click="emit('request-delete')"
+        />
         <Button
           type="button"
           label="Cancel"

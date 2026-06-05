@@ -4,7 +4,7 @@
 
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
-  import ApplicationDetailsSummaryEditFlowStepDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsSummaryEditFlowStepDialog.vue";
+  import ApplicationDetailsFlowStepDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsFlowStepDialog.vue";
   import { useEvent } from "@modules/events/composables/useEvent";
   import {
     EVENT_COPY_BY_STAGE,
@@ -376,11 +376,12 @@
     Summary details are available after selecting or saving an application.
   </Message>
 
-  <ApplicationDetailsSummaryEditFlowStepDialog
+  <ApplicationDetailsFlowStepDialog
     v-model:visible="isEditDialogVisible"
     v-model:stage-type="editForm.type"
     v-model:event-at="editForm.eventAt"
     v-model:notes="editForm.notes"
+    show-details
     :selected-stage-event-id="selectedStageEventId"
     :is-mutating-event="isMutatingEvent"
     @save="saveStageEdit"
