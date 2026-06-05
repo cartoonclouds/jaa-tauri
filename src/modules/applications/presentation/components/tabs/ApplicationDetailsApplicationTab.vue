@@ -129,6 +129,7 @@
   useSortable(editStageListEl, editableStageSortedList, {
     handle: ".stage-drag-handle",
     animation: 150,
+    forceFallback: true,
     watchElement: true,
     onUpdate: async (e: SortableEvent) => {
       if (e.oldIndex === undefined || e.newIndex === undefined) {
@@ -143,6 +144,7 @@
   useSortable(createStageListEl, createFlowSteps, {
     handle: ".stage-drag-handle",
     animation: 150,
+    forceFallback: true,
     watchElement: true,
     onUpdate: async (e: SortableEvent) => {
       if (e.oldIndex === undefined || e.newIndex === undefined) {
