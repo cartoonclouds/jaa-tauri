@@ -16,6 +16,7 @@
   import { computed, ref, watch } from "vue";
   import { z } from "zod";
 
+  import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
@@ -78,8 +79,8 @@
 
   const isEditMode = computed(() => Boolean(props.company));
 
-  const dialogTitle = computed(() =>
-    isEditMode.value ? "Edit Company" : "Create Company",
+  const dialogMode = computed<"create" | "edit">(() =>
+    isEditMode.value ? "edit" : "create",
   );
 
   const initialValues = computed(() => ({
@@ -236,13 +237,20 @@
 </script>
 
 <template>
-  <Dialog
+  <CreateEditDialog
     v-model:visible="dialogVisible"
-    modal
-    :header="dialogTitle"
+    :mode="dialogMode"
+    create-title="Create Company"
+    edit-title="Edit Company"
+    create-save-label="Create Company"
+    edit-save-label="Save Changes"
+    cancel-label="Cancel"
+    :is-saving="busy || isResolvingTags"
+    save-form-id="company-editor-form"
     class="w-full! max-w-2xl"
   >
     <Form
+      id="company-editor-form"
       v-slot="$form"
       :initial-values="initialValues"
       :resolver="zodResolver(CompanyEditorFormSchema)"
@@ -476,21 +484,6 @@
           </div>
         </div>
       </div>
-
-      <div class="flex justify-end gap-2 border-t border-surface-200 pt-4">
-        <Button
-          type="button"
-          severity="secondary"
-          text
-          label="Cancel"
-          @click="dialogVisible = false"
-        />
-        <Button
-          type="submit"
-          :label="isEditMode ? 'Save Changes' : 'Create Company'"
-          :loading="busy || isResolvingTags"
-        />
-      </div>
     </Form>
-  </Dialog>
+  </CreateEditDialog>
 </template>

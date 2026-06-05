@@ -40,5 +40,3 @@ Add the Temporal polyfill and update all usages of Date to use either the native
 Note on stages
 
 Timeline tab
-
-When saving an application, contact or company - using the location - automatically get the lat/long and save it the database.

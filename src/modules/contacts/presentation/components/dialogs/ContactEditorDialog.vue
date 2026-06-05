@@ -10,6 +10,7 @@
   import { computed, ref, watch } from "vue";
   import { z } from "zod";
 
+  import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
@@ -72,11 +73,10 @@
   const isLoadingAssociatedCompanies = ref(false);
   const associatedCompaniesError = ref<string | null>(null);
   const isEditMode = computed(() => Boolean(props.contact));
-  const notesMarkdown = ref("");
-
-  const dialogTitle = computed(() =>
-    isEditMode.value ? "Edit Contact" : "Create Contact",
+  const dialogMode = computed<"create" | "edit">(() =>
+    isEditMode.value ? "edit" : "create",
   );
+  const notesMarkdown = ref("");
 
   const dialogVisible = computed({
     get: () => props.visible,
@@ -192,13 +192,20 @@
 </script>
 
 <template>
-  <Dialog
+  <CreateEditDialog
     v-model:visible="dialogVisible"
-    modal
-    :header="dialogTitle"
+    :mode="dialogMode"
+    create-title="Create Contact"
+    edit-title="Edit Contact"
+    create-save-label="Create Contact"
+    edit-save-label="Save Changes"
+    cancel-label="Cancel"
+    :is-saving="busy"
+    save-form-id="contact-editor-form"
     class="w-full! max-w-2xl"
   >
     <Form
+      id="contact-editor-form"
       v-slot="$form"
       :initial-values="initialValues"
       :resolver="zodResolver(ContactEditorSchema)"
@@ -425,17 +432,6 @@
           </div>
         </div>
       </div>
-
-      <div class="flex justify-end gap-2 border-t border-surface-200 pt-4">
-        <Button
-          type="button"
-          severity="secondary"
-          text
-          label="Cancel"
-          @click="dialogVisible = false"
-        />
-        <Button type="submit" label="Save Changes" :loading="busy" />
-      </div>
     </Form>
-  </Dialog>
+  </CreateEditDialog>
 </template>

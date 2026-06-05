@@ -19,29 +19,14 @@
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
-  /**
-   * Defines event tree node data.
-   */
   interface EventTreeNodeData {
     kind: "application" | "stage" | "event";
     event?: Event;
   }
 
-  /**
-   * Defines create event form state.
-   */
-  interface CreateEventFormState {
-    applicationId: string;
-    type: InteractionStage;
-    title: string;
-    description: string;
-  }
-
-  /**
-   * Defines edit event form state.
-   */
-  interface EditEventFormState {
+  interface InteractionDialogFormState {
     id: string;
+    applicationId: string;
     type: InteractionStage | "";
     title: string;
     description: string;
@@ -50,24 +35,19 @@
   const { items, isLoading, error, clearError, create, update, remove } =
     useEvent();
 
-  const createForm = reactive<CreateEventFormState>({
+  const interactionDialogMode = ref<"create" | "edit">("create");
+  const interactionForm = reactive<InteractionDialogFormState>({
+    id: "",
     applicationId: "",
     type: INTERACTION_STAGES[0],
     title: "",
     description: "",
   });
 
-  const isEditDialogVisible = ref(false);
-  const isSavingEdit = ref(false);
-  const isSavingCreate = ref(false);
-  const editForm = reactive<EditEventFormState>({
-    id: "",
-    type: "",
-    title: "",
-    description: "",
-  });
+  const isInteractionDialogVisible = ref(false);
+  const isSavingInteraction = ref(false);
 
-  useBodyScrollLock(isEditDialogVisible);
+  useBodyScrollLock(isInteractionDialogVisible);
 
   const expandedKeys = ref<Record<string, boolean>>({});
 
@@ -89,16 +69,7 @@
     color: "var(--p-text-muted-color)",
   } as const;
 
-  /**
-   * Handles get node card style.
-   */
   function getNodeCardStyle(): Record<string, string> {
-    /**
-     * Gets node card style.
-     */
-    /**
-     * Gets node card style.
-     */
     return {
       background: "var(--p-content-background)",
       borderColor: "var(--p-content-border-color)",
@@ -106,16 +77,7 @@
     };
   }
 
-  /**
-   * Handles get node meta style.
-   */
   function getNodeMetaStyle(): Record<string, string> {
-    /**
-     * Gets node meta style.
-     */
-    /**
-     * Gets node meta style.
-     */
     return {
       color: "var(--p-text-muted-color)",
     };
@@ -129,16 +91,7 @@
     return toErrorMessage(error.value, "Failed to manage interaction.");
   });
 
-  /**
-   * Handles build tree nodes.
-   */
   function buildTreeNodes(events: Event[]): TreeNode[] {
-    /**
-     * Builds tree nodes.
-     */
-    /**
-     * Builds tree nodes.
-     */
     const sorted = [...events].sort((a, b) => {
       const left = a.createdAt.getTime();
       const right = b.createdAt.getTime();
@@ -205,9 +158,6 @@
 
   const treeNodes = computed(() => buildTreeNodes(items.value));
 
-  /**
-   * Handles expand all nodes.
-   */
   function expandAllNodes(
     nodes: TreeNode[],
     target: Record<string, boolean>,
@@ -220,18 +170,12 @@
     }
   }
 
-  /**
-   * Handles expand all.
-   */
   function expandAll(): void {
     const allExpanded: Record<string, boolean> = {};
     expandAllNodes(treeNodes.value, allExpanded);
     expandedKeys.value = allExpanded;
   }
 
-  /**
-   * Handles collapse all.
-   */
   function collapseAll(): void {
     expandedKeys.value = {};
   }
@@ -246,9 +190,6 @@
     { immediate: true },
   );
 
-  /**
-   * Handles format node meta.
-   */
   function formatNodeMeta(event: Event | undefined): string {
     if (!event) {
       return "";
@@ -258,98 +199,99 @@
     return `${eventAtLabel} | ${event.type}`;
   }
 
-  /**
-   * Handles on node dbl click.
-   */
   function onNodeDblClick(node: TreeNode): void {
     const data = node.data as EventTreeNodeData | undefined;
     if (data?.kind !== "event" || !data.event) {
       return;
     }
 
-    editForm.id = data.event.id;
-    editForm.type = isInteractionStage(data.event.type)
+    interactionDialogMode.value = "edit";
+    interactionForm.id = data.event.id;
+    interactionForm.applicationId = data.event.applicationId;
+    interactionForm.type = isInteractionStage(data.event.type)
       ? data.event.type
       : INTERACTION_STAGES[0];
-    editForm.title = data.event.title;
-    editForm.description = data.event.description ?? "";
-    isEditDialogVisible.value = true;
+    interactionForm.title = data.event.title;
+    interactionForm.description = data.event.description ?? "";
+    isInteractionDialogVisible.value = true;
   }
 
-  /**
-   * Handles submit create.
-   */
-  async function submitCreate(): Promise<void> {
+  function openCreateInteractionDialog(): void {
+    interactionDialogMode.value = "create";
+    interactionForm.id = "";
+    interactionForm.applicationId = "";
+    interactionForm.type = INTERACTION_STAGES[0];
+    interactionForm.title = "";
+    interactionForm.description = "";
+    isInteractionDialogVisible.value = true;
+  }
+
+  async function submitInteraction(): Promise<void> {
+    if (interactionDialogMode.value === "create") {
+      if (
+        !interactionForm.applicationId.trim() ||
+        !interactionForm.title.trim() ||
+        !isInteractionStage(interactionForm.type)
+      ) {
+        return;
+      }
+
+      isSavingInteraction.value = true;
+      try {
+        await create({
+          applicationId: interactionForm.applicationId.trim(),
+          type: interactionForm.type,
+          title: interactionForm.title.trim(),
+          description: interactionForm.description.trim() || null,
+        });
+
+        isInteractionDialogVisible.value = false;
+      } finally {
+        isSavingInteraction.value = false;
+      }
+
+      return;
+    }
+
     if (
-      !createForm.applicationId.trim() ||
-      !createForm.title.trim() ||
-      !isInteractionStage(createForm.type)
+      !interactionForm.id ||
+      !interactionForm.title.trim() ||
+      !isInteractionStage(interactionForm.type)
     ) {
       return;
     }
 
-    isSavingCreate.value = true;
-    try {
-      await create({
-        applicationId: createForm.applicationId.trim(),
-        type: createForm.type,
-        title: createForm.title.trim(),
-        description: createForm.description.trim() || null,
-      });
-
-      createForm.title = "";
-      createForm.description = "";
-    } finally {
-      isSavingCreate.value = false;
-    }
-  }
-
-  /**
-   * Handles submit edit.
-   */
-  async function submitEdit(): Promise<void> {
-    if (
-      !editForm.id ||
-      !editForm.title.trim() ||
-      !isInteractionStage(editForm.type)
-    ) {
-      return;
-    }
-
-    isSavingEdit.value = true;
+    isSavingInteraction.value = true;
     try {
       const payload: EventUpdatePayload = {
-        id: editForm.id,
-        type: editForm.type,
-        title: editForm.title.trim(),
-        description: editForm.description.trim() || null,
+        id: interactionForm.id,
+        type: interactionForm.type,
+        title: interactionForm.title.trim(),
+        description: interactionForm.description.trim() || null,
       };
 
       await update(payload);
-      isEditDialogVisible.value = false;
+      isInteractionDialogVisible.value = false;
     } finally {
-      isSavingEdit.value = false;
+      isSavingInteraction.value = false;
     }
   }
 
-  /**
-   * Handles delete from edit dialog.
-   */
-  async function deleteFromEditDialog(): Promise<void> {
-    if (!editForm.id) {
+  async function deleteFromInteractionDialog(): Promise<void> {
+    if (interactionDialogMode.value !== "edit" || !interactionForm.id) {
       return;
     }
 
-    isSavingEdit.value = true;
+    isSavingInteraction.value = true;
     try {
-      await remove(editForm.id);
-      isEditDialogVisible.value = false;
+      await remove(interactionForm.id);
+      isInteractionDialogVisible.value = false;
     } finally {
-      isSavingEdit.value = false;
+      isSavingInteraction.value = false;
     }
   }
 
-  watch(isEditDialogVisible, (isVisible) => {
+  watch(isInteractionDialogVisible, (isVisible) => {
     if (!isVisible) {
       clearError();
     }
@@ -363,95 +305,27 @@
     </h1>
 
     <div class="rounded-xl border p-4 shadow-sm" :style="surfaceCardStyle">
-      <h2 class="text-sm font-semibold" :style="titleTextStyle">
-        Add interaction event
-      </h2>
-      <p class="mb-4 text-xs" :style="mutedTextStyle">
-        Use stage paths like
-        <span class="font-mono">Interview/Technical/Final</span>
-        to create any tree depth.
-      </p>
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-semibold" :style="titleTextStyle">
+            Add interaction event
+          </h2>
+          <p class="text-xs" :style="mutedTextStyle">
+            Use stage paths like
+            <span class="font-mono">Interview/Technical/Final</span>
+            to create any tree depth.
+          </p>
+        </div>
 
-      <Message v-if="eventErrorMessage" severity="error" class="mb-4">
+        <Button type="button" @click="openCreateInteractionDialog">
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          <span>Add event</span>
+        </Button>
+      </div>
+
+      <Message v-if="eventErrorMessage" severity="error">
         {{ eventErrorMessage }}
       </Message>
-
-      <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submitCreate">
-        <div class="space-y-1">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="event-application-id"
-          >
-            Application ID
-          </label>
-          <InputText
-            id="event-application-id"
-            v-model="createForm.applicationId"
-            fluid
-            placeholder="Application UUID"
-          />
-        </div>
-
-        <div class="space-y-1">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="event-type"
-          >
-            Interaction stage
-          </label>
-          <InputText
-            id="event-type"
-            v-model="createForm.type"
-            fluid
-            list="interaction-stage-options"
-            placeholder="Interview/Technical"
-          />
-        </div>
-
-        <div class="space-y-1 md:col-span-2">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="event-title"
-          >
-            Title
-          </label>
-          <InputText
-            id="event-title"
-            v-model="createForm.title"
-            fluid
-            placeholder="Technical interview scheduled"
-          />
-        </div>
-
-        <div class="space-y-1 md:col-span-2">
-          <label
-            class="text-sm font-medium"
-            :style="mutedTextStyle"
-            for="event-description"
-          >
-            Description
-          </label>
-          <Textarea
-            id="event-description"
-            v-model="createForm.description"
-            fluid
-            auto-resize
-            rows="2"
-            placeholder="Notes from recruiter or follow-up action"
-          />
-        </div>
-
-        <div class="flex items-end justify-end">
-          <Button type="submit" label="Add event" :loading="isSavingCreate" />
-        </div>
-      </form>
-
-      <datalist id="interaction-stage-options">
-        <option v-for="stage in stageSuggestions" :key="stage" :value="stage" />
-      </datalist>
     </div>
 
     <div class="rounded-xl border p-4 shadow-sm" :style="surfaceCardStyle">
@@ -514,18 +388,22 @@
     </div>
 
     <EventInteractionEditDialog
-      v-model:visible="isEditDialogVisible"
-      :event-type="editForm.type"
-      :title="editForm.title"
-      :description="editForm.description"
-      :is-saving="isSavingEdit"
+      v-model:visible="isInteractionDialogVisible"
+      :mode="interactionDialogMode"
+      :application-id="interactionForm.applicationId"
+      :event-type="interactionForm.type"
+      :title="interactionForm.title"
+      :description="interactionForm.description"
+      :is-saving="isSavingInteraction"
       :error-message="eventErrorMessage"
+      :stage-suggestions="stageSuggestions"
       :muted-text-style="mutedTextStyle"
-      @update:event-type="editForm.type = $event"
-      @update:title="editForm.title = $event"
-      @update:description="editForm.description = $event"
-      @save="submitEdit"
-      @delete="deleteFromEditDialog"
+      @update:application-id="interactionForm.applicationId = $event"
+      @update:event-type="interactionForm.type = $event"
+      @update:title="interactionForm.title = $event"
+      @update:description="interactionForm.description = $event"
+      @save="submitInteraction"
+      @delete="deleteFromInteractionDialog"
     />
   </div>
 </template>

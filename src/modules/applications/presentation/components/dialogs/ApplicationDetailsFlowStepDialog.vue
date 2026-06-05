@@ -5,6 +5,7 @@
   } from "@modules/events/constants";
   import { computed } from "vue";
 
+  import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
 
   interface Props {
@@ -64,30 +65,26 @@
   });
 
   const isDetailedMode = computed(() => props.showDetails);
-
-  const dialogHeader = computed(() =>
-    isDetailedMode.value
-      ? "Edit Flow Step"
-      : props.mode === "create"
-        ? "Add Flow Step"
-        : "Edit Flow Step",
-  );
-
-  const saveLabel = computed(() =>
-    isDetailedMode.value
-      ? "Save"
-      : props.mode === "create"
-        ? "Add Step"
-        : "Save",
+  const dialogMode = computed<"create" | "edit">(() =>
+    isDetailedMode.value ? "edit" : props.mode,
   );
 </script>
 
 <template>
-  <Dialog
+  <CreateEditDialog
     v-model:visible="visibleModel"
-    modal
-    :header="dialogHeader"
+    :mode="dialogMode"
+    create-title="Add Flow Step"
+    edit-title="Edit Flow Step"
+    create-save-label="Add Step"
+    edit-save-label="Save"
+    cancel-label="Cancel"
+    delete-label="Delete"
+    :show-delete="isDetailedMode && Boolean(selectedStageEventId)"
+    :is-saving="isMutatingEvent"
     class="w-full! max-w-lg"
+    @save="emit('save')"
+    @delete="emit('request-delete')"
   >
     <div class="space-y-3">
       <div class="space-y-1">
@@ -115,7 +112,9 @@
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700">Stage Notes</label>
+          <label class="text-sm font-medium text-surface-700"
+            >Stage Notes</label
+          >
           <NotesMarkdownEditor
             v-model="notesModel"
             editor-style="height: 10rem"
@@ -124,34 +123,5 @@
         </div>
       </template>
     </div>
-
-    <template #footer>
-      <div class="flex justify-end gap-2" :class="{ 'w-full': isDetailedMode }">
-        <Button
-          v-if="isDetailedMode && selectedStageEventId"
-          type="button"
-          label="Delete"
-          severity="danger"
-          text
-          :disabled="isMutatingEvent"
-          class="mr-auto"
-          @click="emit('request-delete')"
-        />
-        <Button
-          type="button"
-          label="Cancel"
-          severity="secondary"
-          text
-          :disabled="isMutatingEvent"
-          @click="visibleModel = false"
-        />
-        <Button
-          type="button"
-          :label="saveLabel"
-          :loading="isMutatingEvent"
-          @click="emit('save')"
-        />
-      </div>
-    </template>
-  </Dialog>
+  </CreateEditDialog>
 </template>

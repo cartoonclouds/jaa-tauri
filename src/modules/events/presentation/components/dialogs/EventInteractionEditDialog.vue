@@ -3,13 +3,18 @@
 
   import { computed } from "vue";
 
+  import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
+
   interface Props {
     visible: boolean;
+    mode: "create" | "edit";
+    applicationId: string;
     eventType: InteractionStage | "";
     title: string;
     description: string;
     isSaving: boolean;
     errorMessage: string;
+    stageSuggestions: readonly InteractionStage[];
     mutedTextStyle: Record<string, string>;
   }
 
@@ -17,6 +22,7 @@
 
   const emit = defineEmits<{
     "update:visible": [value: boolean];
+    "update:applicationId": [value: string];
     "update:eventType": [value: InteractionStage | ""];
     "update:title": [value: string];
     "update:description": [value: string];
@@ -38,6 +44,13 @@
     },
   });
 
+  const applicationIdModel = computed({
+    get: () => props.applicationId,
+    set: (value: string) => {
+      emit("update:applicationId", value);
+    },
+  });
+
   const titleModel = computed({
     get: () => props.title,
     set: (value: string) => {
@@ -54,18 +67,43 @@
 </script>
 
 <template>
-  <Dialog
+  <CreateEditDialog
     v-model:visible="visibleModel"
-    modal
-    header="Edit interaction"
-    :style="{ width: '38rem' }"
+    :mode="mode"
+    create-title="Add interaction"
+    edit-title="Edit interaction"
+    create-save-label="Add event"
+    edit-save-label="Save"
+    cancel-label="Cancel"
+    delete-label="Delete"
+    :show-delete="mode === 'edit'"
+    :is-saving="isSaving"
+    :dialog-style="{ width: '38rem' }"
     :breakpoints="{ '1199px': '70vw', '575px': '95vw' }"
+    @save="emit('save')"
+    @delete="emit('delete')"
   >
     <Message v-if="errorMessage" severity="error" class="mb-4">
       {{ errorMessage }}
     </Message>
 
     <div class="grid gap-3 md:grid-cols-2">
+      <div v-if="mode === 'create'" class="space-y-1 md:col-span-2">
+        <label
+          class="text-sm font-medium"
+          :style="mutedTextStyle"
+          for="event-application-id"
+        >
+          Application ID
+        </label>
+        <InputText
+          id="event-application-id"
+          v-model="applicationIdModel"
+          fluid
+          placeholder="Application UUID"
+        />
+      </div>
+
       <div class="space-y-1 md:col-span-2">
         <label
           class="text-sm font-medium"
@@ -112,32 +150,8 @@
       </div>
     </div>
 
-    <template #footer>
-      <div class="flex w-full justify-between gap-2">
-        <Button
-          type="button"
-          severity="danger"
-          outlined
-          label="Delete"
-          :loading="isSaving"
-          @click="emit('delete')"
-        />
-        <div class="flex gap-2">
-          <Button
-            type="button"
-            severity="secondary"
-            label="Cancel"
-            :disabled="isSaving"
-            @click="visibleModel = false"
-          />
-          <Button
-            type="button"
-            label="Save"
-            :loading="isSaving"
-            @click="emit('save')"
-          />
-        </div>
-      </div>
-    </template>
-  </Dialog>
+    <datalist id="interaction-stage-options">
+      <option v-for="stage in stageSuggestions" :key="stage" :value="stage" />
+    </datalist>
+  </CreateEditDialog>
 </template>
