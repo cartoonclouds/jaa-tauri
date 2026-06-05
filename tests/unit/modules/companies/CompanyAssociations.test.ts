@@ -2,6 +2,14 @@ import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
 import { CompanyRepository } from "@modules/companies";
 import { describe, expect, it, vi } from "vitest";
+
+class CompanyAssociationsAssertionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CompanyAssociationsAssertionError";
+  }
+}
+
 type LocalSelectRows = Record<string, unknown>[];
 
 type LocalSelectImplementation = (
@@ -97,7 +105,9 @@ describe("CompanyRepository associations", () => {
     expect(selectMock).toHaveBeenCalledTimes(1);
     const query = selectMock.mock.calls[0]?.[0];
     if (typeof query !== "string") {
-      throw new Error("Expected SQL query to be passed to db.select");
+      throw new CompanyAssociationsAssertionError(
+        "Expected SQL query to be passed to db.select",
+      );
     }
     expect(query).toContain("CASE");
     expect(query).toContain("AS status");

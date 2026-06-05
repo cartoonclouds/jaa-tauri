@@ -9,6 +9,7 @@ import {
   EVENT_COPY_BY_STAGE,
   EVENT_FLOW_STAGE_SET,
 } from "../../src/modules/events/constants";
+import { FactoryDataError } from "./errors";
 
 export interface EventRow {
   id: string;
@@ -132,7 +133,9 @@ export function createApplicationEventRows(
       const eventId = eventIdByStage.get(stage);
 
       if (!eventId) {
-        throw new Error(`Missing canonical event row for stage: ${stage}`);
+        throw new FactoryDataError(
+          `Missing canonical event row for stage: ${stage}`,
+        );
       }
 
       return {

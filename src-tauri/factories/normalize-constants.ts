@@ -3,6 +3,11 @@ import Database from "better-sqlite3";
 import path from "node:path";
 import { loadEnv } from "vite";
 
+import {
+  FactoryConfigurationError,
+  FactoryDatabaseError,
+} from "./errors";
+
 type SqlValue = string | number | bigint | Uint8Array | null;
 
 type AppSeedEnv = Record<string, string>;
@@ -58,7 +63,9 @@ function resolveSqliteFile(databaseUrl: string): string {
   if (databaseUrl.startsWith("sqlite:")) {
     const file = databaseUrl.slice("sqlite:".length);
     if (!file) {
-      throw new Error("Invalid sqlite URL. Example: sqlite:applyflow.db");
+      throw new FactoryConfigurationError(
+        "Invalid sqlite URL. Example: sqlite:applyflow.db",
+      );
     }
 
     return path.isAbsolute(file) ? file : path.resolve(process.cwd(), file);
@@ -80,7 +87,9 @@ function ensureConstantsTableExists(db: SqliteDatabaseLike): void {
     .get() as { name?: string } | undefined;
 
   if (!row?.name) {
-    throw new Error("constants table not found. Run migrations first.");
+    throw new FactoryDatabaseError(
+      "constants table not found. Run migrations first.",
+    );
   }
 }
 

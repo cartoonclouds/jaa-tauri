@@ -20,6 +20,7 @@ import { createProductionTagRows } from "./production/tags.factory";
 import { createProfileRow } from "./profiles.factory";
 import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
+import { FactoryConfigurationError } from "./errors";
 
 type SqlValue = string | number | bigint | Uint8Array | null;
 
@@ -187,7 +188,9 @@ function resolveSqliteFile(databaseUrl: string): string {
   if (databaseUrl.startsWith("sqlite:")) {
     const file = databaseUrl.slice("sqlite:".length);
     if (!file) {
-      throw new Error("Invalid sqlite URL. Example: sqlite:applyflow.db");
+      throw new FactoryConfigurationError(
+        "Invalid sqlite URL. Example: sqlite:applyflow.db",
+      );
     }
 
     return path.isAbsolute(file) ? file : path.resolve(process.cwd(), file);

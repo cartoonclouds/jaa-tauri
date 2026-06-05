@@ -4,6 +4,13 @@ import {
 } from "@infra/tauri/notifications";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+class NotificationTestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotificationTestError";
+  }
+}
+
 const { mockSendNotification, mockIsPermissionGranted, mockRequestPermission } =
   vi.hoisted(() => ({
     mockSendNotification: vi.fn(),
@@ -82,7 +89,7 @@ describe("Tauri Notifications Adapter", () => {
     it("should handle non-Error exceptions", async () => {
       mockIsPermissionGranted.mockResolvedValue(true);
       mockSendNotification.mockImplementation(() => {
-        throw new Error("Unknown error");
+        throw new NotificationTestError("Unknown error");
       });
 
       const result = await sendTauriNotification({

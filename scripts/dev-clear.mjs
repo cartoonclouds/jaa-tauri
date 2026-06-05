@@ -13,6 +13,13 @@ const pathsToRemove = [
   "applyflow.db",
 ].map((pathToRemove) => resolve(projectRoot, pathToRemove));
 
+class DevClearScriptError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "DevClearScriptError";
+  }
+}
+
 async function removePath(pathToRemove) {
   const displayPath = relative(projectRoot, pathToRemove) || ".";
 
@@ -33,7 +40,7 @@ async function main() {
   const npmCliPath = process.env.npm_execpath;
 
   if (!npmCliPath) {
-    throw new Error("npm_execpath is not available");
+    throw new DevClearScriptError("npm_execpath is not available");
   }
 
   const result = spawnSync(

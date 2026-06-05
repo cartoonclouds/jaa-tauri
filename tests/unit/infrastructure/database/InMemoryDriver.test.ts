@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { InMemoryDriver } from "@/services/database/InMemoryDriver";
 
+class TransactionRollbackTestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TransactionRollbackTestError";
+  }
+}
+
 describe("InMemoryDriver", () => {
   it("executes SQL statements and returns selected rows", async () => {
     const db = await InMemoryDriver.connect();
@@ -35,7 +42,7 @@ describe("InMemoryDriver", () => {
     await expect(
       db.transaction(async (tx) => {
         await tx.execute("INSERT INTO tags (name) VALUES (?)", ["alpha"]);
-        throw new Error("force rollback");
+        throw new TransactionRollbackTestError("force rollback");
       }),
     ).rejects.toThrow("force rollback");
 
