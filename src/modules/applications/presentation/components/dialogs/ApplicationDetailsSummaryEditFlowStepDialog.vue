@@ -89,7 +89,6 @@
 
       <div class="space-y-1">
         <label class="text-sm font-medium text-surface-700">Stage Notes</label>
-        <p class="text-xs text-surface-500">Stored as Markdown.</p>
         <NotesMarkdownEditor
           v-model="notesModel"
           editor-style="height: 10rem"

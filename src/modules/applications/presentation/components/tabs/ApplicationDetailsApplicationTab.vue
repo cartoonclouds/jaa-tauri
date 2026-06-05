@@ -8,6 +8,7 @@
     ApplicationSelectOption,
   } from "@modules/applications/types";
   import type { Event } from "@modules/events/domain/entities/Event";
+  import type { SortableEvent } from "sortablejs";
 
   import ApplicationDetailsView from "@modules/applications/presentation/components/ApplicationDetailsView.vue";
   import ApplicationForm from "@modules/applications/presentation/components/ApplicationForm.vue";
@@ -21,7 +22,19 @@
     isInteractionStage,
   } from "@modules/events/constants";
   import { formatDisplayDateTime } from "@shared/utils/toDate";
-  import { computed, reactive, ref, watch } from "vue";
+  import {
+    moveArrayElement,
+    useSortable,
+  } from "@vueuse/integrations/useSortable";
+  import {
+    computed,
+    nextTick,
+    reactive,
+    ref,
+    shallowRef,
+    useTemplateRef,
+    watch,
+  } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
@@ -77,10 +90,10 @@
   const createFlowSteps = ref<(ApplicationDraftFlowStep & { id: string })[]>(
     [],
   );
-  const draggedCreateStepId = ref<string | null>(null);
-  const draggedEditStepId = ref<string | null>(null);
-  const createDropTargetStepId = ref<string | null>(null);
-  const editDropTargetEventId = ref<string | null>(null);
+
+  const editStageListEl = useTemplateRef<HTMLElement>("editStageList");
+  const createStageListEl = useTemplateRef<HTMLElement>("createStageList");
+  const editableStageSortedList = shallowRef<Event[]>([]);
 
   useBodyScrollLock(isStageDialogVisible);
 
@@ -105,6 +118,42 @@
       });
   });
 
+  watch(
+    editableStageEvents,
+    (events) => {
+      editableStageSortedList.value = [...events];
+    },
+    { immediate: true },
+  );
+
+  useSortable(editStageListEl, editableStageSortedList, {
+    handle: ".stage-drag-handle",
+    animation: 150,
+    watchElement: true,
+    onUpdate: async (e: SortableEvent) => {
+      if (e.oldIndex === undefined || e.newIndex === undefined) {
+        return;
+      }
+      moveArrayElement(editableStageSortedList, e.oldIndex, e.newIndex, e);
+      await nextTick();
+      await persistEditableStageSortOrder(editableStageSortedList.value);
+    },
+  });
+
+  useSortable(createStageListEl, createFlowSteps, {
+    handle: ".stage-drag-handle",
+    animation: 150,
+    watchElement: true,
+    onUpdate: async (e: SortableEvent) => {
+      if (e.oldIndex === undefined || e.newIndex === undefined) {
+        return;
+      }
+      moveArrayElement(createFlowSteps, e.oldIndex, e.newIndex, e);
+      await nextTick();
+      normalizeCreateFlowStepSortOrder();
+    },
+  });
+
   /**
    * Ensures draft flow steps use contiguous sort order values.
    */
@@ -113,31 +162,6 @@
       ...step,
       sortOrder: index + 1,
     }));
-  }
-
-  /**
-   * Reorders a list by moving one id before another id.
-   */
-  function reorderById<T extends { id: string }>(
-    items: readonly T[],
-    draggedId: string,
-    targetId: string,
-  ): T[] {
-    const sourceIndex = items.findIndex((item) => item.id === draggedId);
-    const targetIndex = items.findIndex((item) => item.id === targetId);
-
-    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
-      return [...items];
-    }
-
-    const next = [...items];
-    const [moved] = next.splice(sourceIndex, 1);
-    if (!moved) {
-      return [...items];
-    }
-
-    next.splice(targetIndex, 0, moved);
-    return next;
   }
 
   /**
@@ -287,113 +311,6 @@
   }
 
   /**
-   * Handles edit-mode stage row drag start.
-   */
-  function onEditStageDragStart(eventId: string, event: DragEvent): void {
-    draggedEditStepId.value = eventId;
-    editDropTargetEventId.value = null;
-
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", eventId);
-    }
-  }
-
-  /**
-   * Handles edit-mode stage row drag over to allow dropping.
-   */
-  function onEditStageDragOver(targetEventId: string, event: DragEvent): void {
-    event.preventDefault();
-
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-
-    const draggedId =
-      draggedEditStepId.value ?? event.dataTransfer?.getData("text/plain");
-    editDropTargetEventId.value =
-      draggedId && draggedId !== targetEventId ? targetEventId : null;
-  }
-
-  /**
-   * Handles edit-mode stage row drop and persists new sort order.
-   */
-  async function onEditStageDrop(
-    targetEventId: string,
-    event: DragEvent,
-  ): Promise<void> {
-    event.preventDefault();
-
-    const draggedId =
-      draggedEditStepId.value ?? event.dataTransfer?.getData("text/plain");
-    draggedEditStepId.value = null;
-    editDropTargetEventId.value = null;
-
-    if (!draggedId || draggedId === targetEventId || isMutatingEvent.value) {
-      return;
-    }
-
-    const reordered = reorderById(
-      editableStageEvents.value,
-      draggedId,
-      targetEventId,
-    );
-    await persistEditableStageSortOrder(reordered);
-  }
-
-  /**
-   * Handles create-mode stage row drag start.
-   */
-  function onCreateStageDragStart(stepId: string, event: DragEvent): void {
-    draggedCreateStepId.value = stepId;
-    createDropTargetStepId.value = null;
-
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", stepId);
-    }
-  }
-
-  /**
-   * Handles create-mode stage row drag over to allow dropping.
-   */
-  function onCreateStageDragOver(targetStepId: string, event: DragEvent): void {
-    event.preventDefault();
-
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-
-    const draggedId =
-      draggedCreateStepId.value ?? event.dataTransfer?.getData("text/plain");
-    createDropTargetStepId.value =
-      draggedId && draggedId !== targetStepId ? targetStepId : null;
-  }
-
-  /**
-   * Handles create-mode stage row drop.
-   */
-  function onCreateStageDrop(targetStepId: string, event: DragEvent): void {
-    event.preventDefault();
-
-    const draggedId =
-      draggedCreateStepId.value ?? event.dataTransfer?.getData("text/plain");
-    draggedCreateStepId.value = null;
-    createDropTargetStepId.value = null;
-
-    if (!draggedId || draggedId === targetStepId) {
-      return;
-    }
-
-    createFlowSteps.value = reorderById(
-      createFlowSteps.value,
-      draggedId,
-      targetStepId,
-    );
-    normalizeCreateFlowStepSortOrder();
-  }
-
-  /**
    * Handles on submit.
    */
   function onSubmit(payload: ApplicationFormSubmitPayload): void {
@@ -456,37 +373,23 @@
       </div>
 
       <div
-        v-if="editableStageEvents.length === 0"
+        v-if="editableStageSortedList.length === 0"
         class="text-sm text-surface-500"
       >
         No flow steps yet.
       </div>
 
-      <div v-else class="space-y-2">
+      <div v-else ref="editStageList" class="space-y-2">
         <div
-          v-for="stageEvent in editableStageEvents"
+          v-for="stageEvent in editableStageSortedList"
           :key="stageEvent.id"
-          class="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors"
-          :class="
-            editDropTargetEventId === stageEvent.id
-              ? 'border-primary-400 bg-primary-50/20'
-              : 'border-surface-200'
-          "
-          @dragover="onEditStageDragOver(stageEvent.id, $event)"
-          @dragleave="editDropTargetEventId = null"
-          @drop.prevent="onEditStageDrop(stageEvent.id, $event)"
+          class="flex items-center justify-between gap-3 rounded-lg border border-surface-200 px-3 py-2 transition-colors"
         >
           <div class="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing"
-              draggable="true"
+              class="stage-drag-handle inline-flex h-6 w-6 shrink-0 items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing"
               :aria-label="`Drag ${EVENT_COPY_BY_STAGE[stageEvent.type]?.title ?? stageEvent.type}`"
-              @dragstart="onEditStageDragStart(stageEvent.id, $event)"
-              @dragend="
-                draggedEditStepId = null;
-                editDropTargetEventId = null;
-              "
             >
               <Icon name="heroicons:bars-3" class="h-4 w-4" />
             </button>
@@ -556,31 +459,17 @@
         No flow steps configured.
       </div>
 
-      <div v-else class="space-y-2">
+      <div v-else ref="createStageList" class="space-y-2">
         <div
           v-for="step in createFlowSteps"
           :key="step.id"
-          class="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors"
-          :class="
-            createDropTargetStepId === step.id
-              ? 'border-primary-400 bg-primary-50/20'
-              : 'border-surface-200'
-          "
-          @dragover="onCreateStageDragOver(step.id, $event)"
-          @dragleave="createDropTargetStepId = null"
-          @drop.prevent="onCreateStageDrop(step.id, $event)"
+          class="flex items-center justify-between gap-3 rounded-lg border border-surface-200 px-3 py-2 transition-colors"
         >
           <div class="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing"
-              draggable="true"
+              class="stage-drag-handle inline-flex h-6 w-6 shrink-0 items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing"
               :aria-label="`Drag ${EVENT_COPY_BY_STAGE[step.type].title}`"
-              @dragstart="onCreateStageDragStart(step.id, $event)"
-              @dragend="
-                draggedCreateStepId = null;
-                createDropTargetStepId = null;
-              "
             >
               <Icon name="heroicons:bars-3" class="h-4 w-4" />
             </button>
@@ -635,7 +524,6 @@
   <ApplicationDetailsStageDialog
     v-model:visible="isStageDialogVisible"
     v-model:stage-type="stageForm.type"
-    v-model:notes="stageForm.notes"
     :mode="stageDialogMode"
     :is-mutating-event="isMutatingEvent"
     @save="saveStageDialog"

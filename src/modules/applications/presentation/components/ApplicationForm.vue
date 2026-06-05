@@ -528,7 +528,6 @@
         <label class="text-sm font-medium text-surface-700">
           Application Notes
         </label>
-        <p class="text-xs text-surface-500">Stored as Markdown.</p>
         <NotesMarkdownEditor
           v-model="descriptionMarkdown"
           editor-style="height: 12rem"
