@@ -142,12 +142,41 @@
   });
 
   const drawerHeader = computed(() => {
+    const role = props.application?.title ?? props.initialValues.title;
+    const normalizedRole = role.trim();
+    const hasCompany = companyName.value !== "-";
+    const hasRole = normalizedRole.length > 0;
+
     if (props.mode === "create") {
+      if (hasCompany && hasRole) {
+        return `Create Application | ${companyName.value} - ${normalizedRole}`;
+      }
+
+      if (hasRole) {
+        return `Create Application | ${normalizedRole}`;
+      }
+
       return "Create Application";
     }
 
     if (props.mode === "edit") {
+      if (hasCompany && hasRole) {
+        return `Edit Application | ${companyName.value} - ${normalizedRole}`;
+      }
+
+      if (hasRole) {
+        return `Edit Application | ${normalizedRole}`;
+      }
+
       return "Edit Application";
+    }
+
+    if (hasCompany && hasRole) {
+      return `Application Details | ${companyName.value} - ${normalizedRole}`;
+    }
+
+    if (hasRole) {
+      return `Application Details | ${normalizedRole}`;
     }
 
     return "Application Details";
