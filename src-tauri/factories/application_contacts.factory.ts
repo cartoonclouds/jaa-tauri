@@ -9,12 +9,12 @@ export interface ApplicationContactRow {
 
 interface ApplicationContactApplicationInput {
   id: string;
-  company_id: string;
+  company_id: string | null;
 }
 
 interface ApplicationContactInput {
   id: string;
-  company_id: string;
+  company_id: string | null;
 }
 
 export function createApplicationContactRows(

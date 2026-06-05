@@ -1,5 +1,8 @@
 import type { Tag } from "@modules/tags/domain/entities/Tag";
+import type { TagModelType as TagModelTypeValue } from "@modules/tags/domain/enums/TagModelType";
 
+import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+import { EnumValue } from "@shared/domain/enums";
 import {
   mapAuditTimestamps,
   toNullableString,
@@ -15,10 +18,15 @@ export function mapTagRowToEntity(row: Record<string, unknown>): Tag {
     updated_at: row.updated_at,
   });
 
+  const modelType: TagModelTypeValue =
+    EnumValue.mapFromDbValue(row.model_type, TagModelType) ??
+    TagModelType.General;
+
   return {
     id: toRequiredString(row.id),
     name: toRequiredString(row.name),
     color: toNullableString(row.color),
+    modelType,
     ...timestamps,
   };
 }

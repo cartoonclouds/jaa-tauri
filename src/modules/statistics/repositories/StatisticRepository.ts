@@ -64,22 +64,156 @@ export interface IStatisticRepository {
 export class StatisticRepository implements IStatisticRepository {
   constructor(private readonly db: DatabaseDriver) {}
 
+  private async getStatsVisibility(): Promise<
+    Record<string, { visible: boolean; sortOrder: number | null }>
+  > {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT stats_visibility
+       FROM settings
+       WHERE id = $1
+       LIMIT 1`,
+      ["app-settings"],
+    );
+
+    const value = rows[0]?.stats_visibility;
+
+    if (typeof value !== "string") {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return {};
+      }
+
+      return Object.entries(parsed).reduce<
+        Record<string, { visible: boolean; sortOrder: number | null }>
+      >((accumulator, [key, mapValue]) => {
+        if (typeof mapValue === "boolean") {
+          accumulator[key] = {
+            visible: mapValue,
+            sortOrder: null,
+          };
+          return accumulator;
+        }
+
+        if (
+          mapValue &&
+          typeof mapValue === "object" &&
+          !Array.isArray(mapValue)
+        ) {
+          const candidate = mapValue as Record<string, unknown>;
+          if (typeof candidate.visible === "boolean") {
+            accumulator[key] = {
+              visible: candidate.visible,
+              sortOrder:
+                typeof candidate.sortOrder === "number" &&
+                Number.isInteger(candidate.sortOrder)
+                  ? candidate.sortOrder
+                  : null,
+            };
+            return accumulator;
+          }
+        }
+
+        accumulator[key] = {
+          visible: Boolean(mapValue),
+          sortOrder: null,
+        };
+        return accumulator;
+      }, {});
+    } catch {
+      return {};
+    }
+  }
+
   async list(): Promise<Statistic[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM statistics ORDER BY created_at DESC",
     );
 
     const mapped = rows.map((row) => mapStatisticRowToEntity(row));
-    return StatisticSchema.array().parse(mapped);
+    const validated = StatisticSchema.array().parse(mapped);
+    return validated;
   }
 
   async getOverview(): Promise<IMetric[]> {
     const overview: IMetric[] = [];
+    const visibilityByMetricId = await this.getStatsVisibility();
+    const hasVisibilitySettings = Object.keys(visibilityByMetricId).length > 0;
 
     const metricDefinitions: readonly ExecutableConstructor[] =
-      CARD_METRIC_DEFINITIONS.concat(INTERNAL_METRIC_DEFINITIONS);
+      CARD_METRIC_DEFINITIONS.concat(INTERNAL_METRIC_DEFINITIONS).filter(
+        (metricDefinition) => {
+          if (!hasVisibilitySettings) {
+            return true;
+          }
 
-    for (const ExecutableClass of metricDefinitions) {
+          const hasPersistedVisibility = Object.prototype.hasOwnProperty.call(
+            visibilityByMetricId,
+            metricDefinition.id,
+          );
+
+          return (
+            hasPersistedVisibility &&
+            visibilityByMetricId[metricDefinition.id].visible
+          );
+        },
+      );
+
+    const metricDefinitionOrder = new Map<string, number>(
+      metricDefinitions.map((metricDefinition, index) => [
+        metricDefinition.id,
+        index,
+      ]),
+    );
+
+    const sortedMetricDefinitions = [...metricDefinitions].sort(
+      (left, right) => {
+        const leftHasConfig = Object.prototype.hasOwnProperty.call(
+          visibilityByMetricId,
+          left.id,
+        );
+        const rightHasConfig = Object.prototype.hasOwnProperty.call(
+          visibilityByMetricId,
+          right.id,
+        );
+
+        const leftSortOrder = leftHasConfig
+          ? visibilityByMetricId[left.id].sortOrder
+          : null;
+        const rightSortOrder = rightHasConfig
+          ? visibilityByMetricId[right.id].sortOrder
+          : null;
+
+        const leftHasSortOrder = typeof leftSortOrder === "number";
+        const rightHasSortOrder = typeof rightSortOrder === "number";
+
+        if (
+          leftHasSortOrder &&
+          rightHasSortOrder &&
+          leftSortOrder !== rightSortOrder
+        ) {
+          return leftSortOrder - rightSortOrder;
+        }
+
+        if (leftHasSortOrder && !rightHasSortOrder) {
+          return -1;
+        }
+
+        if (!leftHasSortOrder && rightHasSortOrder) {
+          return 1;
+        }
+
+        return (
+          (metricDefinitionOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+          (metricDefinitionOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+        );
+      },
+    );
+
+    for (const ExecutableClass of sortedMetricDefinitions) {
       try {
         const executable: IMetric = new ExecutableClass(this.db);
         await executable.execute();

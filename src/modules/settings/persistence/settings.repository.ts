@@ -33,6 +33,15 @@ const SettingsInputSchema = z.object({
   developerMode: z.boolean(),
   recentSearches: z.array(z.string()),
   tableColumnVisibility: z.record(z.boolean()),
+  statsVisibility: z.record(
+    z.union([
+      z.boolean(),
+      z.object({
+        visible: z.boolean(),
+        sortOrder: z.number().int().nullable().optional(),
+      }),
+    ]),
+  ),
   onboardingCompleted: z.boolean(),
 });
 
@@ -44,6 +53,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   developerMode: false,
   recentSearches: [],
   tableColumnVisibility: {},
+  statsVisibility: {},
   onboardingCompleted: false,
 };
 
@@ -64,6 +74,7 @@ function cloneSettings(settings: AppSettings): AppSettings {
     ...settings,
     recentSearches: [...settings.recentSearches],
     tableColumnVisibility: { ...settings.tableColumnVisibility },
+    statsVisibility: { ...settings.statsVisibility },
   };
 }
 
@@ -101,11 +112,63 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
       row.table_column_visibility,
       DEFAULT_SETTINGS.tableColumnVisibility,
     ),
+    statsVisibility: parseStatsVisibilityValue(row.stats_visibility),
     onboardingCompleted: fromDbBoolean(
       row.onboarding_completed,
       DEFAULT_SETTINGS.onboardingCompleted,
     ),
   };
+}
+
+/**
+ * Parses the stored stats visibility JSON with backward compatibility.
+ */
+function parseStatsVisibilityValue(
+  value: unknown,
+): AppSettings["statsVisibility"] {
+  if (typeof value !== "string") {
+    return { ...DEFAULT_SETTINGS.statsVisibility };
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { ...DEFAULT_SETTINGS.statsVisibility };
+    }
+
+    return Object.entries(parsed as Record<string, unknown>).reduce<
+      AppSettings["statsVisibility"]
+    >((accumulator, [metricId, rawEntry]) => {
+      if (typeof rawEntry === "boolean") {
+        accumulator[metricId] = rawEntry;
+        return accumulator;
+      }
+
+      if (
+        rawEntry &&
+        typeof rawEntry === "object" &&
+        !Array.isArray(rawEntry)
+      ) {
+        const candidate = rawEntry as Record<string, unknown>;
+        if (typeof candidate.visible === "boolean") {
+          const rawSortOrder = candidate.sortOrder;
+          const normalizedSortOrder =
+            typeof rawSortOrder === "number" && Number.isInteger(rawSortOrder)
+              ? rawSortOrder
+              : null;
+
+          accumulator[metricId] = {
+            visible: candidate.visible,
+            sortOrder: normalizedSortOrder,
+          };
+        }
+      }
+
+      return accumulator;
+    }, {});
+  } catch {
+    return { ...DEFAULT_SETTINGS.statsVisibility };
+  }
 }
 
 /**
@@ -139,6 +202,7 @@ async function upsertSettingsRow(
       developer_mode,
       recent_searches,
       table_column_visibility,
+      stats_visibility,
       onboarding_completed,
       created_at,
       updated_at
@@ -150,6 +214,7 @@ async function upsertSettingsRow(
       developer_mode = excluded.developer_mode,
       recent_searches = excluded.recent_searches,
       table_column_visibility = excluded.table_column_visibility,
+      stats_visibility = excluded.stats_visibility,
       onboarding_completed = excluded.onboarding_completed,
       updated_at = CURRENT_TIMESTAMP
     `,
@@ -161,6 +226,7 @@ async function upsertSettingsRow(
       toDbBooleanInt(settings.developerMode),
       JSON.stringify(settings.recentSearches),
       JSON.stringify(settings.tableColumnVisibility),
+      JSON.stringify(settings.statsVisibility),
       toDbBooleanInt(settings.onboardingCompleted),
     ],
   );
@@ -180,13 +246,13 @@ async function readSettingsRow(db: DatabaseDriver): Promise<AppSettings> {
     `,
     [STORE_KEY],
   );
-  const row = rows[0];
-
-  if (!row) {
+  if (rows.length === 0) {
     const defaults = cloneSettings(DEFAULT_SETTINGS);
     await upsertSettingsRow(db, defaults);
     return defaults;
   }
+
+  const row = rows[0];
 
   return mapRowToSettings(row);
 }
@@ -297,6 +363,7 @@ export async function getUiPreferences(): Promise<UiPreferences> {
   const settings = await getSettings();
   return {
     tableColumnVisibility: settings.tableColumnVisibility,
+    statsVisibility: settings.statsVisibility,
   };
 }
 

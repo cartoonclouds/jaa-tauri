@@ -62,6 +62,7 @@ describe("SettingsService", () => {
       developerMode: false,
       recentSearches: [],
       tableColumnVisibility: {},
+      statsVisibility: {},
       onboardingCompleted: false,
     };
 

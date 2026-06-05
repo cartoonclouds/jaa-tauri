@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 
+import { TagModelType } from "@modules/tags";
 import { TagRepository } from "@modules/tags";
 import { describe, expect, it, vi } from "vitest";
 type LocalSelectRows = Record<string, unknown>[];
@@ -31,7 +32,6 @@ function createMockDb(rows: LocalSelectRows = []): {
   };
 }
 
-
 describe("TagRepository.create", () => {
   it("rejects empty tag name", async () => {
     const { db } = createMockDb();
@@ -42,12 +42,29 @@ describe("TagRepository.create", () => {
     ).rejects.toThrow("Tag name is required");
   });
 
-  it("inserts tag row", async () => {
-    const { db } = createMockDb();
+  it("inserts tag row with default model type", async () => {
+    const { db, executeMock } = createMockDb();
     const repository = new TagRepository(db);
 
     await repository.create({ name: "urgent", color: null });
 
-    expect(db.execute).toHaveBeenCalledOnce();
+    expect(executeMock).toHaveBeenCalledOnce();
+    const [sql, params] = executeMock.mock.calls[0] as [string, unknown[]];
+    expect(sql).toContain("model_type");
+    expect(params).toContain("general");
+  });
+
+  it("inserts tag row with provided model type", async () => {
+    const { db, executeMock } = createMockDb();
+    const repository = new TagRepository(db);
+
+    await repository.create({
+      name: "referral",
+      color: null,
+      modelType: TagModelType.Application,
+    });
+
+    const [, params] = executeMock.mock.calls[0] as [string, unknown[]];
+    expect(params).toContain("application");
   });
 });

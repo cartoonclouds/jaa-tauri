@@ -5,6 +5,7 @@ import { defineNuxtPlugin } from "nuxt/app";
 
 import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
 import { useContactsDialog } from "@/composables/useContactsDialog";
+import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
 import { useSettingsDialog } from "@/composables/useSettingsDialog";
 
 /**
@@ -18,6 +19,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     const { openCompaniesDialog } = useCompaniesDialog();
     const { openContactsDialog } = useContactsDialog();
+    const { openOnboarding } = useOnboardingNavigation();
     const { openSettingsDialog } = useSettingsDialog();
 
     try {
@@ -46,6 +48,14 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
       });
 
+      const onboardingItem = await MenuItem.new({
+        id: "open-onboarding",
+        text: "Onboarding",
+        action: () => {
+          void openOnboarding();
+        },
+      });
+
       const exitItem = await MenuItem.new({
         id: "exit-app",
         text: "Exit",
@@ -57,7 +67,13 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       const appSubmenu = await Submenu.new({
         text: "App",
-        items: [companiesItem, contactsItem, settingsItem, exitItem],
+        items: [
+          companiesItem,
+          contactsItem,
+          settingsItem,
+          onboardingItem,
+          exitItem,
+        ],
       });
 
       const appMenu = await Menu.new({

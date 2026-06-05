@@ -12,14 +12,7 @@
 
   import { scrollDrawerContentToTop } from "@modules/applications/presentation/utils/drawerScrollUtils";
   import { formatDisplayDateTime } from "@shared/utils/toDate";
-  import {
-    computed,
-    defineAsyncComponent,
-    nextTick,
-    onBeforeUnmount,
-    ref,
-    watch,
-  } from "vue";
+  import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -31,6 +24,7 @@
     contactRefreshKey: 0,
     hasUnsavedChanges: false,
   });
+
   const emit = defineEmits<{
     "update:visible": [value: boolean];
     submit: [payload: ApplicationFormSubmitPayload];
@@ -45,6 +39,7 @@
     "cancel-edit": [];
     "dirty-change": [value: boolean];
   }>();
+
   const DEFAULT_DRAWER_WIDTH = 768;
   const MIN_DRAWER_WIDTH = 520;
   const MAX_DRAWER_WIDTH = 1200;
@@ -65,27 +60,6 @@
     type: "switch-tab";
     tab: string;
   }
-
-  const ApplicationDetailsApplicationTab = defineAsyncComponent(
-    () =>
-      import("@modules/applications/presentation/components/tabs/ApplicationDetailsApplicationTab.vue"),
-  );
-  const ApplicationDetailsContactTab = defineAsyncComponent(
-    () =>
-      import("@modules/applications/presentation/components/tabs/ApplicationDetailsContactTab.vue"),
-  );
-  const ApplicationDetailsMapTab = defineAsyncComponent(
-    () =>
-      import("@modules/applications/presentation/components/tabs/ApplicationDetailsMapTab.vue"),
-  );
-  const ApplicationDetailsFilesTab = defineAsyncComponent(
-    () =>
-      import("@modules/applications/presentation/components/tabs/ApplicationDetailsFilesTab.vue"),
-  );
-  const ApplicationDetailsSummaryTab = defineAsyncComponent(
-    () =>
-      import("@modules/applications/presentation/components/tabs/ApplicationDetailsSummaryTab.vue"),
-  );
 
   /**
    * Defines props.
@@ -356,7 +330,7 @@
       <div class="flex w-full items-center justify-between gap-3 pr-2">
         <span>{{ drawerHeader }}</span>
         <Button
-          v-if="mode === 'view' && application"
+          v-if="props.mode === 'view' && props.application"
           type="button"
           size="small"
           @click="emit('request-edit')"
@@ -378,21 +352,21 @@
 
       <TabPanels>
         <TabPanel value="summary">
-          <ApplicationDetailsSummaryTab
-            :application="application"
+          <LazyApplicationDetailsSummaryTab
+            :application="props.application"
             :company-name="companyName"
             :applied-at-label="appliedAtLabel"
           />
         </TabPanel>
 
         <TabPanel value="application">
-          <ApplicationDetailsApplicationTab
-            :mode="mode"
-            :application="application"
-            :initial-values="initialValues"
+          <LazyApplicationDetailsApplicationTab
+            :mode="props.mode"
+            :application="props.application"
+            :initial-values="props.initialValues"
             :companies="companyOptions"
-            :busy="busy"
-            :is-deleting="isDeleting"
+            :busy="props.busy"
+            :is-deleting="props.isDeleting"
             :company-name="companyName"
             :applied-at-label="appliedAtLabel"
             @submit="onSubmit"
@@ -404,10 +378,10 @@
         </TabPanel>
 
         <TabPanel value="contact">
-          <ApplicationDetailsContactTab
-            :application="application"
+          <LazyApplicationDetailsContactTab
+            :application="props.application"
             :company-name="companyName"
-            :refresh-key="contactRefreshKey"
+            :refresh-key="props.contactRefreshKey"
             @request-create-contact="emit('request-create-contact', $event)"
             @request-link-contact="emit('request-link-contact', $event)"
             @request-unlink-contact="emit('request-unlink-contact', $event)"
@@ -416,11 +390,11 @@
         </TabPanel>
 
         <TabPanel value="map">
-          <ApplicationDetailsMapTab :application="application" />
+          <LazyApplicationDetailsMapTab :application="props.application" />
         </TabPanel>
 
         <TabPanel value="files">
-          <ApplicationDetailsFilesTab :application="application" />
+          <LazyApplicationDetailsFilesTab :application="props.application" />
         </TabPanel>
       </TabPanels>
     </Tabs>

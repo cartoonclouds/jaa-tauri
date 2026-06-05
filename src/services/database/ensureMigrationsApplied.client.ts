@@ -80,4 +80,18 @@ export async function ensureMigrationsAppliedOnFirstRun(
       "Database migration missing required constants.is_visible column.",
     );
   }
+
+  const tagsColumns = await database.select<SqliteColumnInfoRow>(
+    "PRAGMA table_info(tags)",
+  );
+
+  const hasModelTypeColumn = tagsColumns.some(
+    (column) => column.name === "model_type",
+  );
+
+  if (!hasModelTypeColumn) {
+    await database.execute(
+      "ALTER TABLE tags ADD COLUMN model_type TEXT NOT NULL DEFAULT 'general'",
+    );
+  }
 }

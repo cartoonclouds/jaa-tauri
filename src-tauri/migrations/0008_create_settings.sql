@@ -6,6 +6,12 @@ CREATE TABLE IF NOT EXISTS settings (
   developer_mode INTEGER NOT NULL DEFAULT 0,
   recent_searches TEXT NOT NULL DEFAULT '[]',
   table_column_visibility TEXT NOT NULL DEFAULT '{}',
+  /**
+    * Visibility settings for statistics, stored as a JSON object where keys are statistic IDs 
+    * and values can be either a boolean indicating visibility or an object containing visibility 
+    * and sort order information.
+    */
+  stats_visibility TEXT NOT NULL DEFAULT '{}',
   onboarding_completed INTEGER NOT NULL DEFAULT 0,
   profile_id TEXT REFERENCES profiles(id) ON DELETE SET NULL ON UPDATE CASCADE,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

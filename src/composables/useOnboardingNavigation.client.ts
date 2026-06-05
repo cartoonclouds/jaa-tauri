@@ -19,6 +19,13 @@ export function useOnboardingNavigation() {
           label: "onboarding-dialog",
           url: "/onboarding",
           title: "Complete Onboarding",
+          focus: true,
+          resizable: true,
+          minimizable: false,
+          maximizable: false,
+          skipTaskbar: true,
+          alwaysOnTop: true,
+          hideNativeMenuBar: true,
         });
         return;
       }
@@ -33,6 +40,3 @@ export function useOnboardingNavigation() {
     openOnboarding,
   };
 }
-
-
-

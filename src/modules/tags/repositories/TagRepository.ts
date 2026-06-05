@@ -1,5 +1,6 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Tag } from "@modules/tags/domain/entities/Tag";
+import type { TagModelType as TagModelTypeValue } from "@modules/tags/domain/enums/TagModelType";
 import type {
   DatatablePageQuery,
   DatatablePageResult,
@@ -9,6 +10,7 @@ import type {
 
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
 import { TAG_SEARCH_FIELDS } from "@modules/tags/constants";
+import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
 import { TagRepositoryCreateSchema } from "@modules/tags/domain/zod/tag.schema";
 import { ValidationError } from "@shared/domain/errors";
 import {
@@ -21,7 +23,9 @@ import {
 /**
  * Type alias for tag create payload.
  */
-export type TagCreatePayload = Pick<Tag, "name" | "color">;
+export type TagCreatePayload = Pick<Tag, "name" | "color"> & {
+  modelType?: TagModelTypeValue;
+};
 /**
  * Type alias for tag update payload.
  */
@@ -36,6 +40,8 @@ export interface ITagRepository extends IRepository<
   TagUpdatePayload
 > {
   listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Tag>>;
+  /** List tags scoped to a specific model type, including general-purpose tags. */
+  listByModelType(modelType: TagModelTypeValue): Promise<Tag[]>;
 }
 
 /**
@@ -47,6 +53,14 @@ export class TagRepository implements ITagRepository {
   async list(): Promise<Tag[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM tags ORDER BY name ASC",
+    );
+    return rows.map((row) => mapTagRowToEntity(row));
+  }
+
+  async listByModelType(modelType: TagModelTypeValue): Promise<Tag[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      "SELECT * FROM tags WHERE model_type = $1 OR model_type = $2 ORDER BY name ASC",
+      [modelType.value, TagModelType.General.value],
     );
     return rows.map((row) => mapTagRowToEntity(row));
   }
@@ -102,15 +116,18 @@ export class TagRepository implements ITagRepository {
       throw new ValidationError("Tag name is required");
     }
 
-    const name = parseResult.data.name.trim().toLowerCase();
+    const parsedData = parseResult.data;
+
+    const name = parsedData.name.trim().toLowerCase();
     if (!name) {
       throw new ValidationError("Tag name is required");
     }
 
     const id = crypto.randomUUID();
+    const modelType = parsedData.modelType ?? TagModelType.General;
     await this.db.execute(
-      "INSERT INTO tags (id, name, color, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-      [id, name, parseResult.data.color ?? null],
+      "INSERT INTO tags (id, name, color, model_type, created_at, updated_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+      [id, name, parsedData.color ?? null, modelType.value],
     );
     return id;
   }

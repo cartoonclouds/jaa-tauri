@@ -1,9 +1,15 @@
 import { faker } from "@faker-js/faker";
 
+import {
+  TAG_MODEL_TYPES,
+  type TagModelTypeValue,
+} from "../../src/modules/tags/types";
+
 export interface TagRow {
   id: string;
   name: string;
   color: string;
+  model_type: TagModelTypeValue;
   created_at: string;
   updated_at: string;
 }
@@ -22,6 +28,17 @@ export function createTagRows(count = 8, seed = 1300): TagRow[] {
     "senior",
     "follow-up",
   ];
+
+  const modelTypeByName: Record<string, TagModelTypeValue> = {
+    urgent: TAG_MODEL_TYPES.general,
+    "follow-up": TAG_MODEL_TYPES.general,
+    referral: TAG_MODEL_TYPES.application,
+    "dream-role": TAG_MODEL_TYPES.application,
+    remote: TAG_MODEL_TYPES.application,
+    hybrid: TAG_MODEL_TYPES.application,
+    junior: TAG_MODEL_TYPES.application,
+    senior: TAG_MODEL_TYPES.application,
+  };
 
   const resolvedNames =
     count <= names.length
@@ -42,6 +59,7 @@ export function createTagRows(count = 8, seed = 1300): TagRow[] {
       id: faker.string.uuid(),
       name,
       color: faker.color.rgb(),
+      model_type: modelTypeByName[name] ?? TAG_MODEL_TYPES.general,
       created_at: createdAt,
       updated_at: createdAt,
     };

@@ -18,6 +18,7 @@
     type ApplicationFormValues,
     type ApplicationSelectOption,
   } from "@modules/applications/types";
+  import { TagModelType } from "@modules/tags";
   import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
@@ -295,6 +296,7 @@
             v-model="selectedTagIds"
             v-model:pending-tag-names="pendingTagNames"
             placeholder="Select tags"
+            :tag-model-type="TagModelType.Application"
             class="w-full"
           />
         </div>

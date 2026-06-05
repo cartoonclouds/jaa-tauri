@@ -45,7 +45,8 @@ class MockSettingsDatabaseDriver implements DatabaseDriver {
         developer_mode: Number(bindings[4] ?? 0),
         recent_searches: String(bindings[5] ?? "[]"),
         table_column_visibility: String(bindings[6] ?? "{}"),
-        onboarding_completed: Number(bindings[7] ?? 0),
+        stats_visibility: String(bindings[7] ?? "{}"),
+        onboarding_completed: Number(bindings[8] ?? 0),
         profile_id: null,
       };
     }

@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
 
+import { STATISTIC_METRIC_IDS } from "../../src/modules/statistics/domain/constants/statisticMetricIds";
+
 export interface SettingRow {
   id: string;
   theme: string;
@@ -8,10 +10,27 @@ export interface SettingRow {
   developer_mode: number;
   recent_searches: string;
   table_column_visibility: string;
+  stats_visibility: string;
   onboarding_completed: number;
   profile_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+function createDefaultStatsVisibility(): Record<
+  string,
+  { visible: boolean; sortOrder: number; sort_order: number }
+> {
+  return Object.fromEntries(
+    STATISTIC_METRIC_IDS.map((metricId, index) => [
+      metricId,
+      {
+        visible: true,
+        sortOrder: index,
+        sort_order: index,
+      },
+    ]),
+  );
 }
 
 export function createSettingRow(
@@ -34,6 +53,7 @@ export function createSettingRow(
       applications_salary: true,
       documents_kind: true,
     }),
+    stats_visibility: JSON.stringify(createDefaultStatsVisibility()),
     onboarding_completed: profileId ? 1 : 0,
     profile_id: profileId,
     created_at: createdAt,

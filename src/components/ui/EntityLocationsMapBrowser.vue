@@ -107,16 +107,10 @@
   });
 
   const selectedEntity = computed<MappableEntity | null>(() => {
-    if (!selectedEntityId.value) {
-      return filteredEntities.value[0] ?? null;
-    }
-
     return (
       filteredEntities.value.find(
         (entity) => entity.id === selectedEntityId.value,
-      ) ??
-      filteredEntities.value[0] ??
-      null
+      ) ?? filteredEntities.value[0]
     );
   });
 

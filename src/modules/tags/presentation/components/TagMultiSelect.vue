@@ -1,5 +1,8 @@
 <script setup lang="ts">
+  import type { TagModelType as TagModelTypeValue } from "@modules/tags/domain/enums/TagModelType";
+
   import { useTag } from "@modules/tags/composables/useTag";
+  import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
   import { normalizeTagName } from "@modules/tags/utils/pendingTagResolution";
   import { computed, onMounted, ref } from "vue";
 
@@ -7,12 +10,15 @@
     modelValue?: string[];
     pendingTagNames?: string[];
     placeholder?: string;
+    /** Scope tags to a model type. Only tags matching this type (plus 'general') are shown. */
+    tagModelType?: TagModelTypeValue;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     modelValue: () => [],
     pendingTagNames: () => [],
     placeholder: "Tags",
+    tagModelType: () => TagModelType.General,
   });
 
   const emit = defineEmits<{
@@ -25,8 +31,16 @@
   const { items, refresh } = useTag();
   const searchDraft = ref("");
 
+  const scopedItems = computed(() =>
+    items.value.filter(
+      (tag) =>
+        tag.modelType.value === props.tagModelType.value ||
+        tag.modelType.value === TagModelType.General.value,
+    ),
+  );
+
   const tagOptions = computed(() =>
-    items.value.map((tag) => ({
+    scopedItems.value.map((tag) => ({
       label: tag.name,
       value: tag.id,
     })),
@@ -83,10 +97,11 @@
     }
 
     emit("update:modelValue", [...new Set(nextTagIds)]);
-    emit(
-      "update:pendingTagNames",
-      [...new Set(nextPendingTagNames.map((name) => name.trim()).filter(Boolean))],
-    );
+    emit("update:pendingTagNames", [
+      ...new Set(
+        nextPendingTagNames.map((name) => name.trim()).filter(Boolean),
+      ),
+    ]);
   }
 
   function appendSelectedTagId(tagId: string): void {
@@ -119,7 +134,8 @@
     emit(
       "update:pendingTagNames",
       props.pendingTagNames.filter(
-        (pendingName) => normalizeTagName(pendingName) !== normalizedNameToRemove,
+        (pendingName) =>
+          normalizeTagName(pendingName) !== normalizedNameToRemove,
       ),
     );
   }
@@ -130,7 +146,7 @@
       return null;
     }
 
-    const existingTag = items.value.find(
+    const existingTag = scopedItems.value.find(
       (tag) => normalizeTagName(tag.name) === normalizedName,
     );
 
@@ -223,4 +239,3 @@
     </template>
   </MultiSelect>
 </template>
-

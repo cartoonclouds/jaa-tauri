@@ -11,8 +11,15 @@
   import { z } from "zod";
 
   import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
+  import NumberFormField from "@/components/ui/forms/NumberFormField.vue";
+  import ReadonlyField from "@/components/ui/forms/ReadonlyField.vue";
+  import SelectFormField from "@/components/ui/forms/SelectFormField.vue";
+  import TextFormField from "@/components/ui/forms/TextFormField.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+  import { useCreateEditMode } from "@/composables/useCreateEditMode";
+
+  import ContactAssociatedCompaniesSection from "./ContactAssociatedCompaniesSection.vue";
 
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
@@ -72,10 +79,7 @@
   const associatedCompanies = ref<ContactAssociatedCompany[]>([]);
   const isLoadingAssociatedCompanies = ref(false);
   const associatedCompaniesError = ref<string | null>(null);
-  const isEditMode = computed(() => Boolean(props.contact));
-  const dialogMode = computed<"create" | "edit">(() =>
-    isEditMode.value ? "edit" : "create",
-  );
+  const { isEditMode, dialogMode } = useCreateEditMode(() => props.contact);
   const notesMarkdown = ref("");
 
   const dialogVisible = computed({
@@ -213,125 +217,53 @@
       @submit="onFormSubmit"
     >
       <div class="grid gap-3 md:grid-cols-2">
-        <div class="space-y-1 md:col-span-2">
-          <label class="text-sm font-medium text-surface-700">Name</label>
-          <InputText
-            name="fullName"
-            placeholder="Full name"
-            fluid
-            :invalid="$form.fullName?.invalid"
-          />
-          <Message
-            v-if="$form.fullName?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{ $form.fullName?.error?.message }}
-          </Message>
-        </div>
+        <TextFormField
+          label="Name"
+          wrapper-class="space-y-1 md:col-span-2"
+          name="fullName"
+          placeholder="Full name"
+          :invalid="$form.fullName?.invalid"
+          :error-message="$form.fullName?.error?.message"
+        />
 
-        <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700">Type</label>
-          <Select
-            name="type"
-            :options="[...typeOptions]"
-            option-label="label"
-            option-value="value"
-            fluid
-          />
-        </div>
+        <SelectFormField label="Type" name="type" :options="[...typeOptions]" />
 
-        <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700">Email</label>
-          <InputText
-            name="email"
-            placeholder="name@example.com"
-            fluid
-            :invalid="$form.email?.invalid"
-          />
-          <Message
-            v-if="$form.email?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{ $form.email?.error?.message }}
-          </Message>
-        </div>
+        <TextFormField
+          label="Email"
+          name="email"
+          placeholder="name@example.com"
+          :invalid="$form.email?.invalid"
+          :error-message="$form.email?.error?.message"
+        />
 
-        <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700">Phone</label>
-          <InputText name="phone" placeholder="Phone number" fluid />
-        </div>
+        <TextFormField label="Phone" name="phone" placeholder="Phone number" />
 
-        <div class="space-y-1">
-          <label class="text-sm font-medium text-surface-700">LinkedIn</label>
-          <InputText
-            name="linkedinUrl"
-            placeholder="https://linkedin.com/in/..."
-            fluid
-            :invalid="$form.linkedinUrl?.invalid"
-          />
-          <Message
-            v-if="$form.linkedinUrl?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{ $form.linkedinUrl?.error?.message }}
-          </Message>
-        </div>
+        <TextFormField
+          label="LinkedIn"
+          name="linkedinUrl"
+          placeholder="https://linkedin.com/in/..."
+          :invalid="$form.linkedinUrl?.invalid"
+          :error-message="$form.linkedinUrl?.error?.message"
+        />
 
-        <div class="space-y-1 md:col-span-2">
-          <label class="text-sm font-medium text-surface-700">Location</label>
-          <InputText name="locationText" placeholder="Location" fluid />
-        </div>
+        <TextFormField
+          label="Location"
+          name="locationText"
+          placeholder="Location"
+          wrapper-class="space-y-1 md:col-span-2"
+        />
 
         <template v-if="isEditMode">
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700">Latitude</label>
-            <p
-              class="rounded-md border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-surface-700"
-            >
-              {{ props.contact?.locationLat ?? "-" }}
-            </p>
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700"
-              >Longitude</label
-            >
-            <p
-              class="rounded-md border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-surface-700"
-            >
-              {{ props.contact?.locationLng ?? "-" }}
-            </p>
-          </div>
+          <ReadonlyField label="Latitude" :value="props.contact?.locationLat" />
+          <ReadonlyField
+            label="Longitude"
+            :value="props.contact?.locationLng"
+          />
         </template>
 
         <template v-else>
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700">Latitude</label>
-            <InputNumber
-              name="locationLat"
-              :min-fraction-digits="0"
-              :max-fraction-digits="8"
-              fluid
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700"
-              >Longitude</label
-            >
-            <InputNumber
-              name="locationLng"
-              :min-fraction-digits="0"
-              :max-fraction-digits="8"
-              fluid
-            />
-          </div>
+          <NumberFormField label="Latitude" name="locationLat" />
+          <NumberFormField label="Longitude" name="locationLng" />
         </template>
 
         <div class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4">
@@ -345,92 +277,13 @@
           />
         </div>
 
-        <div class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4">
-          <h4 class="text-sm font-semibold text-surface-900">
-            Associated Companies
-          </h4>
-
-          <Message v-if="!isEditMode" severity="info" size="small">
-            Associated companies are available after the contact is created.
-          </Message>
-
-          <Message
-            v-else-if="associatedCompaniesError"
-            severity="error"
-            size="small"
-          >
-            {{ associatedCompaniesError }}
-          </Message>
-
-          <Message
-            v-else-if="isLoadingAssociatedCompanies"
-            severity="info"
-            size="small"
-          >
-            Loading associated companies...
-          </Message>
-
-          <Message
-            v-else-if="associatedCompanies.length === 0"
-            severity="info"
-            size="small"
-          >
-            No companies are associated with this contact.
-          </Message>
-
-          <div
-            v-else
-            class="overflow-x-auto rounded-lg border border-surface-200"
-          >
-            <table class="min-w-full divide-y divide-surface-200 text-sm">
-              <thead class="bg-surface-50 text-left text-surface-600">
-                <tr>
-                  <th class="px-3 py-2 font-medium">Name</th>
-                  <th class="px-3 py-2 font-medium">Industry</th>
-                  <th class="px-3 py-2 font-medium">Website</th>
-                  <th class="px-3 py-2 font-medium">Location</th>
-                  <th class="px-3 py-2 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody
-                class="divide-y divide-surface-200 bg-surface-0 text-surface-700"
-              >
-                <tr v-for="company in associatedCompanies" :key="company.id">
-                  <td class="px-3 py-2">{{ company.name }}</td>
-                  <td class="px-3 py-2">{{ company.industry || "-" }}</td>
-                  <td class="px-3 py-2">
-                    <a
-                      v-if="company.websiteUrl"
-                      :href="company.websiteUrl"
-                      target="_blank"
-                      rel="noreferrer"
-                      class="text-primary-600 hover:underline"
-                    >
-                      {{ company.websiteUrl }}
-                    </a>
-                    <span v-else>-</span>
-                  </td>
-                  <td class="px-3 py-2">{{ company.locationText || "-" }}</td>
-                  <td class="px-3 py-2 text-right">
-                    <Button
-                      type="button"
-                      text
-                      size="small"
-                      aria-label="Open company"
-                      @click="emit('request-open-company', company.id)"
-                    >
-                      <Icon
-                        name="heroicons:arrow-top-right-on-square"
-                        class="h-4 w-4"
-                      />
-                      <span>Open</span>
-                    </Button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ContactAssociatedCompaniesSection
+          :is-edit-mode="isEditMode"
+          :associated-companies="associatedCompanies"
+          :associated-companies-error="associatedCompaniesError"
+          :is-loading-associated-companies="isLoadingAssociatedCompanies"
+          @request-open-company="emit('request-open-company', $event)"
+        />
       </div>
     </Form>
   </CreateEditDialog>

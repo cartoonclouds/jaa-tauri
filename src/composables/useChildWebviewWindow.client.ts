@@ -1,5 +1,6 @@
 import type { RouteNamedMap } from "vue-router/auto-routes";
 
+import { Menu } from "@tauri-apps/api/menu";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
@@ -38,6 +39,8 @@ export interface ChildWebviewWindowOptions {
   skipTaskbar?: boolean;
   /** Keep the window above other windows. */
   alwaysOnTop?: boolean;
+  /** Remove native top menu bar for this child window. */
+  hideNativeMenuBar?: boolean;
 }
 
 /**
@@ -82,6 +85,11 @@ export function useChildWebviewWindow() {
         );
       });
     });
+
+    if (options.hideNativeMenuBar) {
+      const emptyWindowMenu = await Menu.new({ items: [] });
+      await emptyWindowMenu.setAsWindowMenu(childWindow);
+    }
 
     await mainWindow.setEnabled(false);
     await childWindow.setFocus();

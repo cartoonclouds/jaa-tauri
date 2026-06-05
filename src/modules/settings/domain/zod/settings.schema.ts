@@ -7,6 +7,15 @@ export const SettingsSchema = z.object({
   developerMode: z.boolean(),
   recentSearches: z.array(z.string()),
   tableColumnVisibility: z.record(z.boolean()),
+  statsVisibility: z.record(
+    z.union([
+      z.boolean(),
+      z.object({
+        visible: z.boolean(),
+        sortOrder: z.number().int().nullable().optional(),
+      }),
+    ]),
+  ),
   onboardingCompleted: z.boolean(),
 });
 

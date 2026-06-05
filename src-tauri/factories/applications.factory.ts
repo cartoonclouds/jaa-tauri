@@ -1,14 +1,14 @@
 import { faker } from "@faker-js/faker";
+
 import {
   ApplicationAttendanceType,
   ApplicationEmploymentType,
-} from "@modules/applications/domain/enums/ApplicationEnums";
-
+} from "../../src/modules/applications/domain/enums/ApplicationEnums.ts";
 import { createLondonLocationSeed } from "./location.factory";
 
 export interface ApplicationRow {
   id: string;
-  company_id: string | null;
+  company_id: string;
   title: string;
   source_url: string | null;
   applied_at: string;
@@ -101,18 +101,22 @@ export function createApplicationRows(
         location_text: location.locationText,
         location_lat: location.locationLat,
         location_lng: location.locationLng,
-        attendance_type: faker.helpers.arrayElement([
-          ApplicationAttendanceType.Remote,
-          ApplicationAttendanceType.Hybrid,
-          ApplicationAttendanceType.OnSite,
-        ]).value,
-        employment_type: faker.helpers.arrayElement([
-          ApplicationEmploymentType.PartTime,
-          ApplicationEmploymentType.Contract,
-          ApplicationEmploymentType.Internship,
-          ApplicationEmploymentType.FullTime,
-          ApplicationEmploymentType.Volunteer,
-        ]).value,
+        attendance_type: faker.helpers
+          .arrayElement([
+            ApplicationAttendanceType.Remote,
+            ApplicationAttendanceType.Hybrid,
+            ApplicationAttendanceType.OnSite,
+          ])
+          .toString(),
+        employment_type: faker.helpers
+          .arrayElement([
+            ApplicationEmploymentType.PartTime,
+            ApplicationEmploymentType.Contract,
+            ApplicationEmploymentType.Internship,
+            ApplicationEmploymentType.FullTime,
+            ApplicationEmploymentType.Volunteer,
+          ])
+          .toString(),
         salary_min: salaryMin,
         salary_max: salaryMax,
         currency: "GBP",

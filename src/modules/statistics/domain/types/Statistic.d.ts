@@ -1,4 +1,7 @@
 import type { HeroIcon } from "@/shared/types";
+import type { STATISTIC_METRIC_IDS } from "@modules/statistics/domain/constants/statisticMetricIds";
+
+export type StatisticMetricId = (typeof STATISTIC_METRIC_IDS)[number];
 
 export interface MetricCardDefinition {
   title: string;
@@ -16,7 +19,7 @@ export interface MetricCardDefinition {
  * Configuration contract for a single statistic card metric.
  */
 export interface StatisticCardMetricDefinition {
-  id: string;
+  id: StatisticMetricId;
   title: string;
   description: string;
   icon: HeroIcon;
@@ -96,7 +99,7 @@ export interface StatisticCardDefinition {
  * Defines statistic metric definition.
  */
 export interface StatisticMetricDefinition {
-  id: string;
+  id: StatisticMetricId;
   aggregateSql?: string;
   card?: StatisticCardDefinition;
 }

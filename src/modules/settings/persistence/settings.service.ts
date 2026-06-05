@@ -5,7 +5,7 @@
  * Wraps settings.repository with business logic.
  */
 
-import type { AppSettings } from "./types";
+import type { AppSettings, StatsVisibilityMap } from "./types";
 
 import {
   addRecentSearch,
@@ -71,6 +71,13 @@ export class SettingsService {
     set: setUiPreferences,
     setTableColumnVisibility,
     getTableColumnVisibility,
+    async getStatsVisibility(): Promise<StatsVisibilityMap> {
+      const prefs = await getUiPreferences();
+      return prefs.statsVisibility;
+    },
+    async setStatsVisibility(value: StatsVisibilityMap): Promise<void> {
+      await setSetting("statsVisibility", value);
+    },
   };
 
   /**

@@ -66,6 +66,26 @@ export default defineNuxtConfig({
     ],
   },
 
+  components: {
+    dirs: [
+      {
+        path: "~/components/global",
+        global: true,
+      },
+      {
+        path: "~/components/ui",
+        pathPrefix: false,
+      },
+      "~/components",
+      {
+        path: "~/modules",
+        pattern: "**/presentation/components/**/*.vue",
+        pathPrefix: false,
+      },
+    ],
+    generateMetadata: true,
+  },
+
   modules: [
     "@vueuse/nuxt",
     "@nuxt/icon",

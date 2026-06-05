@@ -1,3 +1,5 @@
+import type { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+
 /**
  * Minimal shape needed to resolve IDs from tag names.
  */
@@ -11,7 +13,11 @@ interface TagLookupItem {
  */
 interface TagResolutionService {
   list(): Promise<TagLookupItem[]>;
-  create(payload: { name: string; color: string | null }): Promise<unknown>;
+  create(payload: {
+    name: string;
+    color: string | null;
+    modelType?: TagModelType;
+  }): Promise<string>;
 }
 
 /**
@@ -28,6 +34,7 @@ export async function resolveTagIdsWithPendingTags(params: {
   selectedTagIds: string[];
   pendingTagNames?: string[];
   tagService: TagResolutionService;
+  modelType?: TagModelType;
 }): Promise<string[]> {
   const normalizedPendingNames = [
     ...new Set(
@@ -37,10 +44,14 @@ export async function resolveTagIdsWithPendingTags(params: {
     ),
   ];
 
-  if (normalizedPendingNames.length) {
+  if (normalizedPendingNames.length > 0) {
     for (const name of normalizedPendingNames) {
       try {
-        await params.tagService.create({ name, color: null });
+        await params.tagService.create({
+          name,
+          color: null,
+          modelType: params.modelType,
+        });
       } catch {
         // Existing names can fail unique constraints; list() resolves IDs below.
       }

@@ -15,7 +15,7 @@ import {
 
 /** Total applications with applied date in the last 30 days. */
 export class ApplicationsAppliedLast30Days implements IMetric {
-  public static readonly id = "applicationsAppliedLast30Days" as const;
+  public static readonly id = "applicationsAppliedLast30Days";
 
   public static readonly QUERY = `SELECT
 SUM(CASE WHEN applied_at IS NOT NULL AND datetime(applied_at) >= datetime('now', '-30 day') THEN 1 ELSE 0 END) AS ${ApplicationsAppliedLast30Days.id},

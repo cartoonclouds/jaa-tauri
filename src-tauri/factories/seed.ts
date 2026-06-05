@@ -13,14 +13,15 @@ import { createConstantRows } from "./constants.factory";
 import { createContactTagRows } from "./contact_tags.factory";
 import { createContactRows } from "./contacts.factory";
 import { createDocumentRows } from "./documents.factory";
+import { FactoryConfigurationError } from "./errors";
 import { createEventRows } from "./events.factory";
 import { createNotificationRows } from "./notifications.factory";
 import { createProductionConstantRows } from "./production/constants.factory";
+import { createProductionSettingRow } from "./production/settings.factory";
 import { createProductionTagRows } from "./production/tags.factory";
 import { createProfileRow } from "./profiles.factory";
 import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
-import { FactoryConfigurationError } from "./errors";
 
 type SqlValue = string | number | bigint | Uint8Array | null;
 
@@ -35,6 +36,7 @@ interface ProductionSeedResult {
   mode: SeedMode;
   tags: UpsertStats;
   constants: UpsertStats;
+  settings: UpsertStats;
 }
 
 interface DevelopmentSeedResult {
@@ -56,6 +58,10 @@ interface ExistingTagRow {
 interface ExistingConstantRow {
   type: string;
   value: string;
+}
+
+interface ExistingSettingRow {
+  id: string;
 }
 
 interface SqliteStatement {
@@ -316,10 +322,10 @@ function upsertTags(
 ): UpsertStats {
   const selectExisting = db.prepare("SELECT id FROM tags WHERE name = ?");
   const insertTag = db.prepare(
-    "INSERT INTO tags (id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO tags (id, name, color, model_type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
   );
   const updateTag = db.prepare(
-    "UPDATE tags SET color = ?, updated_at = ? WHERE name = ?",
+    "UPDATE tags SET color = ?, model_type = ?, updated_at = ? WHERE name = ?",
   );
 
   let inserted = 0;
@@ -332,6 +338,7 @@ function upsertTags(
         row.id,
         row.name,
         row.color,
+        row.model_type,
         row.created_at,
         row.updated_at,
       );
@@ -341,6 +348,7 @@ function upsertTags(
 
     const result = updateTag.run(
       row.color,
+      row.model_type,
       row.updated_at,
       row.name,
     ) as SqliteRunResult;
@@ -402,6 +410,82 @@ function upsertConstants(
   return { inserted, updated };
 }
 
+function upsertSettings(
+  db: SqliteDatabaseLike,
+  row: ReturnType<typeof createProductionSettingRow>,
+): UpsertStats {
+  const existing = db
+    .prepare("SELECT id FROM settings WHERE id = ?")
+    .get(row.id) as ExistingSettingRow | undefined;
+
+  if (!existing) {
+    db.prepare(
+      `INSERT INTO settings (
+         id,
+         theme,
+         locale,
+         notifications_enabled,
+         developer_mode,
+         recent_searches,
+         table_column_visibility,
+         stats_visibility,
+         onboarding_completed,
+         profile_id,
+         created_at,
+         updated_at
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      row.id,
+      row.theme,
+      row.locale,
+      row.notifications_enabled,
+      row.developer_mode,
+      row.recent_searches,
+      row.table_column_visibility,
+      row.stats_visibility,
+      row.onboarding_completed,
+      row.profile_id,
+      row.created_at,
+      row.updated_at,
+    );
+
+    return { inserted: 1, updated: 0 };
+  }
+
+  const result = db
+    .prepare(
+      `UPDATE settings
+       SET
+         theme = ?,
+         locale = ?,
+         notifications_enabled = ?,
+         developer_mode = ?,
+         recent_searches = ?,
+         table_column_visibility = ?,
+         stats_visibility = ?,
+         onboarding_completed = ?,
+         profile_id = ?,
+         updated_at = ?
+       WHERE id = ?`,
+    )
+    .run(
+      row.theme,
+      row.locale,
+      row.notifications_enabled,
+      row.developer_mode,
+      row.recent_searches,
+      row.table_column_visibility,
+      row.stats_visibility,
+      row.onboarding_completed,
+      row.profile_id,
+      row.updated_at,
+      row.id,
+    ) as SqliteRunResult;
+
+  return { inserted: 0, updated: result.changes > 0 ? 1 : 0 };
+}
+
 function main(): void {
   const env = loadEnv("", process.cwd(), "");
   const seedMode = readSeedMode(env, process.argv.slice(2));
@@ -423,11 +507,16 @@ function main(): void {
       const timestamp = new Date().toISOString();
       const tags = upsertTags(db, createProductionTagRows(timestamp));
       const constants = upsertConstants(db, createProductionConstantRows());
+      const settings = upsertSettings(
+        db,
+        createProductionSettingRow(timestamp),
+      );
 
       return {
         mode: "production",
         tags,
         constants,
+        settings,
       };
     }
 
@@ -543,15 +632,19 @@ function main(): void {
       seed + 140,
     );
 
+    const applicationsWithCompany = applications.map((application) => ({
+      id: application.id,
+      company_id: application.company_id,
+    }));
+
+    const contactsWithCompany = contacts.map((contact) => ({
+      id: contact.id,
+      company_id: contact.company_id,
+    }));
+
     const applicationContacts = createApplicationContactRows(
-      applications.map((application) => ({
-        id: application.id,
-        company_id: application.company_id,
-      })),
-      contacts.map((contact) => ({
-        id: contact.id,
-        company_id: contact.company_id,
-      })),
+      applicationsWithCompany,
+      contactsWithCompany,
       seedConfig.contactsPerApplication,
       seed + 150,
     );

@@ -1,3 +1,7 @@
+import type { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+
+export type { TagModelType };
+
 /**
  * Tag entity used for labeling and filtering.
  */
@@ -8,6 +12,8 @@ export interface Tag {
   name: string;
   /** Optional color associated with the tag. */
   color: string | null;
+  /** Model scope this tag belongs to. */
+  modelType: TagModelType;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -22,7 +28,6 @@ export interface CreateTagInput {
   name: string;
   /** Optional color associated with the tag. */
   color?: string | null;
+  /** Model scope this tag belongs to. */
+  modelType?: TagModelType;
 }
-
-
-

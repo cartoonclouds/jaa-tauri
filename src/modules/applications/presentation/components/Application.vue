@@ -30,6 +30,7 @@
   import { useEvent } from "@modules/events";
   import { EVENT_COPY_BY_STAGE } from "@modules/events/constants";
   import { useTag } from "@modules/tags";
+  import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { toErrorMessage } from "@shared/utils/error";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
@@ -225,6 +226,7 @@
         selectedTagIds: payload.tagIds,
         pendingTagNames: payload.pendingTagNames,
         tagService,
+        modelType: TagModelType.Application,
       });
 
       if (isEditMode && selectedApplication.value) {

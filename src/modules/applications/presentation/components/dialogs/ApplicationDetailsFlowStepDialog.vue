@@ -7,6 +7,7 @@
 
   import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
+  import { useCreateEditModeByFlag } from "@/composables/useCreateEditMode";
 
   interface Props {
     visible: boolean;
@@ -65,8 +66,11 @@
   });
 
   const isDetailedMode = computed(() => props.showDetails);
+  const { dialogMode: baseDialogMode } = useCreateEditModeByFlag(
+    () => props.mode === "edit",
+  );
   const dialogMode = computed<"create" | "edit">(() =>
-    isDetailedMode.value ? "edit" : props.mode,
+    isDetailedMode.value ? "edit" : baseDialogMode.value,
   );
 </script>
 

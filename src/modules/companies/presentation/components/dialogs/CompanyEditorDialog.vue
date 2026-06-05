@@ -9,6 +9,7 @@
 
   import { useCompany } from "@modules/companies";
   import { useTag } from "@modules/tags";
+  import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
   import TagMultiSelect from "@modules/tags/presentation/components/TagMultiSelect.vue";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { Form, type FormSubmitEvent } from "@primevue/forms";
@@ -17,8 +18,15 @@
   import { z } from "zod";
 
   import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
+  import NumberFormField from "@/components/ui/forms/NumberFormField.vue";
+  import ReadonlyField from "@/components/ui/forms/ReadonlyField.vue";
+  import TextFormField from "@/components/ui/forms/TextFormField.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+  import { useCreateEditMode } from "@/composables/useCreateEditMode";
+
+  import CompanyAssociatedContactsSection from "./CompanyAssociatedContactsSection.vue";
+  import CompanyJobsAppliedSection from "./CompanyJobsAppliedSection.vue";
 
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
@@ -77,11 +85,7 @@
 
   useBodyScrollLock(dialogVisible);
 
-  const isEditMode = computed(() => Boolean(props.company));
-
-  const dialogMode = computed<"create" | "edit">(() =>
-    isEditMode.value ? "edit" : "create",
-  );
+  const { isEditMode, dialogMode } = useCreateEditMode(() => props.company);
 
   const initialValues = computed(() => ({
     name: props.company?.name ?? "",
@@ -203,6 +207,7 @@
         selectedTagIds: selectedTagIds.value,
         pendingTagNames: pendingTagNames.value,
         tagService,
+        modelType: TagModelType.Company,
       });
 
       const payloadBase: CompanyCreatePayload = {
@@ -258,73 +263,33 @@
       @submit="onFormSubmit"
     >
       <div class="grid gap-3 md:grid-cols-2">
-        <div class="space-y-1 md:col-span-2">
-          <label class="text-sm font-medium text-surface-700">Name</label>
-          <InputText
-            name="name"
-            placeholder="Company name"
-            fluid
-            :invalid="$form.name?.invalid"
-          />
-          <Message
-            v-if="$form.name?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{ $form.name?.error?.message }}
-          </Message>
-        </div>
+        <TextFormField
+          label="Name"
+          name="name"
+          placeholder="Company name"
+          wrapper-class="space-y-1 md:col-span-2"
+          :invalid="$form.name?.invalid"
+          :error-message="$form.name?.error?.message"
+        />
 
-        <div class="space-y-1 md:col-span-2">
-          <label class="text-sm font-medium text-surface-700">Location</label>
-          <InputText name="locationText" placeholder="Location" fluid />
-        </div>
+        <TextFormField
+          label="Location"
+          name="locationText"
+          placeholder="Location"
+          wrapper-class="space-y-1 md:col-span-2"
+        />
 
         <template v-if="!isEditMode">
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700">Latitude</label>
-            <InputNumber
-              name="locationLat"
-              :min-fraction-digits="0"
-              :max-fraction-digits="8"
-              fluid
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700"
-              >Longitude</label
-            >
-            <InputNumber
-              name="locationLng"
-              :min-fraction-digits="0"
-              :max-fraction-digits="8"
-              fluid
-            />
-          </div>
+          <NumberFormField label="Latitude" name="locationLat" />
+          <NumberFormField label="Longitude" name="locationLng" />
         </template>
 
         <template v-else>
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700">Latitude</label>
-            <p
-              class="rounded-md border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-surface-700"
-            >
-              {{ props.company?.locationLat ?? "-" }}
-            </p>
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-surface-700"
-              >Longitude</label
-            >
-            <p
-              class="rounded-md border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-surface-700"
-            >
-              {{ props.company?.locationLng ?? "-" }}
-            </p>
-          </div>
+          <ReadonlyField label="Latitude" :value="props.company?.locationLat" />
+          <ReadonlyField
+            label="Longitude"
+            :value="props.company?.locationLng"
+          />
         </template>
 
         <div class="space-y-1 md:col-span-2">
@@ -333,6 +298,7 @@
             v-model="selectedTagIds"
             v-model:pending-tag-names="pendingTagNames"
             placeholder="Select tags"
+            :tag-model-type="TagModelType.Company"
             class="w-full"
           />
         </div>
@@ -348,141 +314,21 @@
           />
         </div>
 
-        <div class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4">
-          <h4 class="text-sm font-semibold text-surface-900">
-            Associated Contacts
-          </h4>
+        <CompanyAssociatedContactsSection
+          :is-edit-mode="isEditMode"
+          :associated-contacts="associatedContacts"
+          :associated-contacts-error="associatedContactsError"
+          :is-loading-associated-contacts="isLoadingAssociatedContacts"
+          @request-open-contact="emit('request-open-contact', $event)"
+        />
 
-          <Message v-if="!isEditMode" severity="info" size="small">
-            Associated contacts are available after the company is created.
-          </Message>
-
-          <Message
-            v-else-if="associatedContactsError"
-            severity="error"
-            size="small"
-          >
-            {{ associatedContactsError }}
-          </Message>
-
-          <Message
-            v-else-if="isLoadingAssociatedContacts"
-            severity="info"
-            size="small"
-          >
-            Loading associated contacts...
-          </Message>
-
-          <Message
-            v-else-if="associatedContacts.length === 0"
-            severity="info"
-            size="small"
-          >
-            No contacts are associated with this company yet.
-          </Message>
-
-          <div
-            v-else
-            class="overflow-x-auto rounded-lg border border-surface-200"
-          >
-            <table class="min-w-full divide-y divide-surface-200 text-sm">
-              <thead class="bg-surface-50 text-left text-surface-600">
-                <tr>
-                  <th class="px-3 py-2 font-medium">Name</th>
-                  <th class="px-3 py-2 font-medium">Type</th>
-                  <th class="px-3 py-2 font-medium">Email</th>
-                  <th class="px-3 py-2 font-medium">Phone</th>
-                  <th class="px-3 py-2 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody
-                class="divide-y divide-surface-200 bg-surface-0 text-surface-700"
-              >
-                <tr v-for="contact in associatedContacts" :key="contact.id">
-                  <td class="px-3 py-2">{{ contact.fullName }}</td>
-                  <td class="px-3 py-2 capitalize">{{ contact.type }}</td>
-                  <td class="px-3 py-2">{{ contact.email || "-" }}</td>
-                  <td class="px-3 py-2">{{ contact.phone || "-" }}</td>
-                  <td class="px-3 py-2 text-right">
-                    <Button
-                      type="button"
-                      text
-                      size="small"
-                      aria-label="Open contact"
-                      @click="emit('request-open-contact', contact.id)"
-                    >
-                      <Icon
-                        name="heroicons:arrow-top-right-on-square"
-                        class="h-4 w-4"
-                      />
-                      <span>Open</span>
-                    </Button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div
-          v-if="isEditMode && showJobsAppliedForSection"
-          class="space-y-2 md:col-span-2 border-t border-surface-200 pt-4"
-        >
-          <h4 class="text-sm font-semibold text-surface-900">
-            Jobs Applied For
-          </h4>
-
-          <Message
-            v-if="associatedApplicationsError"
-            severity="error"
-            size="small"
-          >
-            {{ associatedApplicationsError }}
-          </Message>
-
-          <Message
-            v-else-if="isLoadingAssociatedApplications"
-            severity="info"
-            size="small"
-          >
-            Loading jobs applied for...
-          </Message>
-
-          <Message
-            v-else-if="associatedApplications.length === 0"
-            severity="info"
-            size="small"
-          >
-            No jobs are associated with this company yet.
-          </Message>
-
-          <div
-            v-else
-            class="overflow-x-auto rounded-lg border border-surface-200"
-          >
-            <table class="min-w-full divide-y divide-surface-200 text-sm">
-              <thead class="bg-surface-50 text-left text-surface-600">
-                <tr>
-                  <th class="px-3 py-2 font-medium">Job Title</th>
-                  <th class="px-3 py-2 font-medium">Status</th>
-                  <th class="px-3 py-2 font-medium">Applied At</th>
-                </tr>
-              </thead>
-              <tbody
-                class="divide-y divide-surface-200 bg-surface-0 text-surface-700"
-              >
-                <tr
-                  v-for="application in associatedApplications"
-                  :key="application.id"
-                >
-                  <td class="px-3 py-2">{{ application.title }}</td>
-                  <td class="px-3 py-2 capitalize">{{ application.status }}</td>
-                  <td class="px-3 py-2">{{ application.appliedAt || "-" }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <CompanyJobsAppliedSection
+          :is-edit-mode="isEditMode"
+          :show-jobs-applied-for-section="showJobsAppliedForSection"
+          :associated-applications="associatedApplications"
+          :associated-applications-error="associatedApplicationsError"
+          :is-loading-associated-applications="isLoadingAssociatedApplications"
+        />
       </div>
     </Form>
   </CreateEditDialog>

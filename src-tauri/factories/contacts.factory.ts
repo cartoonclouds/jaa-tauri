@@ -4,7 +4,7 @@ import { createLondonLocationSeed } from "./location.factory";
 
 export interface ContactRow {
   id: string;
-  company_id: string | null;
+  company_id: string;
   full_name: string;
   email: string | null;
   phone: string | null;

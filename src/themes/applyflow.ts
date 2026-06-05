@@ -542,7 +542,7 @@ const ApplyFlowPreset = definePreset(Aura, {
         invalidPlaceholderColor: "#ffa3b6",
         shadow: "none",
         paddingX: "1rem",
-        paddingY: "0.625rem",
+        paddingY: "0.75rem",
         borderRadius: radius.md,
         focusRing: {
           width: "2px",
@@ -1293,7 +1293,7 @@ const ApplyFlowPreset = definePreset(Aura, {
         paddingY: "0.375rem",
         gap: "0.5rem",
         transitionDuration: "160ms",
-        background: flow.surface2,
+        background: flow.surface,
         color: flow.text,
       },
       image: {
