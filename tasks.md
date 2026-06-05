@@ -41,6 +41,4 @@ Note on stages
 
 Timeline tab
 
-VueUse drag and drop
-
 When saving an application, contact or company - using the location - automatically get the lat/long and save it the database.

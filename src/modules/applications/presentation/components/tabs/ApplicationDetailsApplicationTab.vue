@@ -62,6 +62,7 @@
     "request-delete": [id: string];
     "request-open-company": [companyId: string];
     "cancel-edit": [];
+    "dirty-change": [value: boolean];
   }>();
 
   const {
@@ -349,6 +350,7 @@
       :show-cancel="mode === 'edit'"
       @submit="onSubmit"
       @cancel="emit('cancel-edit')"
+      @dirty-change="emit('dirty-change', $event)"
     />
 
     <section

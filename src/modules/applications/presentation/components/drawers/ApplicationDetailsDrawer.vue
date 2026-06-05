@@ -21,17 +21,21 @@
     watch,
   } from "vue";
 
+  import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+  import { useUnsavedChangesGuard } from "@/composables/useUnsavedChangesGuard";
 
   const props = withDefaults(defineProps<Props>(), {
     busy: false,
     isDeleting: false,
     contactRefreshKey: 0,
+    hasUnsavedChanges: false,
   });
   const emit = defineEmits<{
     "update:visible": [value: boolean];
     submit: [payload: ApplicationFormSubmitPayload];
     "request-edit": [];
+    "request-close": [];
     "request-delete": [id: string];
     "request-open-company": [companyId: string];
     "request-open-contact": [contact: EditableContact];
@@ -39,6 +43,7 @@
     "request-link-contact": [contactId: string];
     "request-unlink-contact": [contactId: string];
     "cancel-edit": [];
+    "dirty-change": [value: boolean];
   }>();
   const DEFAULT_DRAWER_WIDTH = 768;
   const MIN_DRAWER_WIDTH = 520;
@@ -54,6 +59,11 @@
     linkedinUrl: string | null;
     locationText: string | null;
     notes: string | null;
+  }
+
+  interface TabSwitchIntent {
+    type: "switch-tab";
+    tab: string;
   }
 
   const ApplicationDetailsApplicationTab = defineAsyncComponent(
@@ -89,11 +99,21 @@
     busy?: boolean;
     isDeleting?: boolean;
     contactRefreshKey?: number;
+    hasUnsavedChanges?: boolean;
   }
 
   const drawerVisible = computed({
     get: () => props.visible,
     set: (value: boolean) => {
+      if (
+        !value &&
+        props.hasUnsavedChanges &&
+        (props.mode === "create" || props.mode === "edit")
+      ) {
+        emit("request-close");
+        return;
+      }
+
       emit("update:visible", value);
     },
   });
@@ -110,6 +130,16 @@
   const activeTab = ref("summary");
   const drawerWidthPx = ref(DEFAULT_DRAWER_WIDTH);
   const isResizingDrawer = ref(false);
+  const {
+    isConfirmVisible: isDiscardChangesConfirmVisible,
+    confirmMessage: discardChangesMessage,
+    requestConfirmation: requestDiscardChangesConfirmation,
+    confirmAndGetIntent,
+    cancelConfirmation: onDiscardChangesCancel,
+    clearConfirmation,
+  } = useUnsavedChangesGuard<TabSwitchIntent>(() => {
+    return "You have unsaved edits in the application form. Switch tabs and discard them?";
+  });
 
   const drawerHeader = computed(() => {
     if (props.mode === "create") {
@@ -204,10 +234,43 @@
     drawerWidthPx.value = clampDrawerWidth(drawerWidthPx.value + delta);
   }
 
+  /**
+   * Handles tab changes with unsaved-change protection when leaving the form tab.
+   */
+  function onTabChange(nextTab: string | number): void {
+    const nextTabValue = String(nextTab);
+    const isEditing = props.mode === "create" || props.mode === "edit";
+    const leavingApplicationTab =
+      activeTab.value === "application" && nextTabValue !== "application";
+
+    if (isEditing && props.hasUnsavedChanges && leavingApplicationTab) {
+      requestDiscardChangesConfirmation({
+        type: "switch-tab",
+        tab: nextTabValue,
+      });
+      return;
+    }
+
+    activeTab.value = nextTabValue;
+  }
+
+  /**
+   * Confirms discarding changes and applies the pending tab switch.
+   */
+  function confirmDiscardAndSwitchTab(): void {
+    const intent = confirmAndGetIntent();
+    emit("dirty-change", false);
+
+    if (intent?.type === "switch-tab") {
+      activeTab.value = intent.tab;
+    }
+  }
+
   watch(
     () => [props.visible, props.mode],
     ([visible, mode]) => {
       if (!visible) {
+        clearConfirmation();
         return;
       }
 
@@ -275,7 +338,7 @@
       </div>
     </template>
 
-    <Tabs v-model:value="activeTab">
+    <Tabs :value="activeTab" @update:value="onTabChange">
       <TabList>
         <Tab value="summary">Summary</Tab>
         <Tab value="application">Application</Tab>
@@ -305,6 +368,7 @@
             :applied-at-label="appliedAtLabel"
             @submit="onSubmit"
             @cancel-edit="emit('cancel-edit')"
+            @dirty-change="emit('dirty-change', $event)"
             @request-delete="emit('request-delete', $event)"
             @request-open-company="emit('request-open-company', $event)"
           />
@@ -331,5 +395,15 @@
         </TabPanel>
       </TabPanels>
     </Tabs>
+
+    <ConfirmActionDialog
+      v-model:visible="isDiscardChangesConfirmVisible"
+      title="Discard unsaved changes?"
+      :message="discardChangesMessage"
+      confirm-label="Discard"
+      confirm-severity="warn"
+      @confirm="confirmDiscardAndSwitchTab"
+      @cancel="onDiscardChangesCancel"
+    />
   </Drawer>
 </template>

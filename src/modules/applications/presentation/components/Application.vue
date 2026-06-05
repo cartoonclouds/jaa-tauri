@@ -36,7 +36,9 @@
   import { useToast } from "primevue/usetoast";
   import { ref } from "vue";
 
+  import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+  import { useUnsavedChangesGuard } from "@/composables/useUnsavedChangesGuard";
 
   interface ApplicationContactCreatePayload {
     fullName: string;
@@ -47,6 +49,10 @@
     locationText: string | null;
     notes: string | null;
   }
+
+  type DiscardChangesIntent =
+    | { type: "close-drawer" }
+    | { type: "cancel-edit" };
 
   const { service } = useApplication();
   const {
@@ -85,6 +91,7 @@
   const isContactEditorVisible = ref(false);
   const isSavingCompany = ref(false);
   const isSavingContact = ref(false);
+  const hasUnsavedDrawerEdits = ref(false);
   const selectedApplication = ref<ApplicationEntity | null>(null);
   const selectedCompany = ref<Company | null>(null);
   const selectedContact = ref<EditableContact | null>(null);
@@ -93,6 +100,21 @@
     createEmptyApplicationFormValues(),
   );
 
+  const {
+    isConfirmVisible: isDiscardChangesConfirmVisible,
+    confirmMessage: discardChangesMessage,
+    requestConfirmation: requestDiscardChangesConfirmation,
+    confirmAndGetIntent,
+    cancelConfirmation: onDiscardChangesCancel,
+    clearConfirmation,
+  } = useUnsavedChangesGuard<DiscardChangesIntent>((intent) => {
+    if (intent?.type === "cancel-edit") {
+      return "You have unsaved edits in the application form. Cancel edit mode and discard them?";
+    }
+
+    return "You have unsaved edits in the application form. Close the drawer and discard them?";
+  });
+
   useBodyScrollLock(isDrawerOpen);
 
   /**
@@ -100,9 +122,6 @@
    */
   function toFormValues(
     application: ApplicationEntity | null,
-    /**
-     * Handles to form values.
-     */
   ): ApplicationFormValues {
     if (!application) {
       return createEmptyApplicationFormValues();
@@ -137,6 +156,7 @@
   function openCreateDrawer(): void {
     selectedApplication.value = null;
     initialFormValues.value = toFormValues(null);
+    hasUnsavedDrawerEdits.value = false;
     drawerMode.value = "create";
     isDrawerOpen.value = true;
   }
@@ -145,11 +165,9 @@
    * Handles open view drawer.
    */
   function openViewDrawer(application: ApplicationEntity): void {
-    /**
-     * Handles open create drawer.
-     */
     selectedApplication.value = application;
     initialFormValues.value = toFormValues(application);
+    hasUnsavedDrawerEdits.value = false;
     drawerMode.value = "view";
     isDrawerOpen.value = true;
   }
@@ -163,24 +181,29 @@
     }
 
     initialFormValues.value = toFormValues(selectedApplication.value);
+    hasUnsavedDrawerEdits.value = false;
     drawerMode.value = "edit";
-    /**
-     * Handles open view drawer.
-     */
   }
 
   /**
    * Handles cancel edit mode.
    */
   function cancelEditMode(): void {
+    if (hasUnsavedDrawerEdits.value && drawerMode.value === "edit") {
+      requestDiscardChangesConfirmation({ type: "cancel-edit" });
+      return;
+    }
+
     /**
      * Checks whether cel edit mode is true.
      */
     if (!selectedApplication.value) {
+      hasUnsavedDrawerEdits.value = false;
       drawerMode.value = "create";
       return;
     }
 
+    hasUnsavedDrawerEdits.value = false;
     drawerMode.value = "view";
   }
 
@@ -209,9 +232,6 @@
           id: selectedApplication.value.id,
           companyId: payload.companyId,
           title: payload.title,
-          /**
-           * Handles cancel edit mode.
-           */
           status: payload.status,
           sourceUrl: payload.sourceUrl,
           appliedAt: payload.appliedAt,
@@ -228,9 +248,6 @@
           benefits: payload.benefits,
           tagIds: resolvedTagIds,
           priority: payload.priority,
-          /**
-           * Handles on drawer submit.
-           */
           isArchived: payload.isArchived,
         });
       } else {
@@ -301,6 +318,8 @@
         await refetchSelectedApplication(editApplicationId);
       }
 
+      hasUnsavedDrawerEdits.value = false;
+
       toast.add({
         severity: "success",
         summary: "Application saved",
@@ -347,8 +366,52 @@
       return;
     }
 
+    clearConfirmation();
+    hasUnsavedDrawerEdits.value = false;
     drawerMode.value = "view";
     selectedApplication.value = null;
+  }
+
+  /**
+   * Tracks dirty state changes from the application form tab.
+   */
+  function onDrawerDirtyChange(value: boolean): void {
+    hasUnsavedDrawerEdits.value = value;
+  }
+
+  /**
+   * Handles drawer close requests and prompts when there are unsaved edits.
+   */
+  function onDrawerRequestClose(): void {
+    if (
+      hasUnsavedDrawerEdits.value &&
+      (drawerMode.value === "create" || drawerMode.value === "edit")
+    ) {
+      requestDiscardChangesConfirmation({ type: "close-drawer" });
+      return;
+    }
+
+    onDrawerVisibilityChange(false);
+  }
+
+  /**
+   * Discards pending edits and closes the drawer.
+   */
+  function confirmDiscardAndCloseDrawer(): void {
+    const intent = confirmAndGetIntent();
+    hasUnsavedDrawerEdits.value = false;
+
+    if (intent?.type === "cancel-edit") {
+      if (!selectedApplication.value) {
+        drawerMode.value = "create";
+        return;
+      }
+
+      drawerMode.value = "view";
+      return;
+    }
+
+    onDrawerVisibilityChange(false);
   }
 
   /**
@@ -578,16 +641,29 @@
       :busy="isSubmitting"
       :is-deleting="isDeleting"
       :contact-refresh-key="contactRefreshKey"
+      :has-unsaved-changes="hasUnsavedDrawerEdits"
       @update:visible="onDrawerVisibilityChange"
       @submit="onDrawerSubmit"
       @request-edit="switchToEditMode"
+      @request-close="onDrawerRequestClose"
       @cancel-edit="cancelEditMode"
+      @dirty-change="onDrawerDirtyChange"
       @request-delete="onRequestDelete"
       @request-open-company="openCompanyEditor"
       @request-open-contact="openContactEditor"
       @request-create-contact="onRequestCreateContact"
       @request-link-contact="onRequestLinkContact"
       @request-unlink-contact="onRequestUnlinkContact"
+    />
+
+    <ConfirmActionDialog
+      v-model:visible="isDiscardChangesConfirmVisible"
+      title="Discard unsaved changes?"
+      :message="discardChangesMessage"
+      confirm-label="Discard"
+      confirm-severity="warn"
+      @confirm="confirmDiscardAndCloseDrawer"
+      @cancel="onDiscardChangesCancel"
     />
 
     <CompanyEditorDialog
