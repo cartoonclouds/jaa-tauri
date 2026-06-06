@@ -1,11 +1,10 @@
 import type { LocationFields, LocationFieldsInput } from "@shared/types";
 
 /**
- * Company entity used for application tracking.
+ * All mutable data fields shared across company read and write models,
+ * excluding system-managed identifiers and audit timestamps.
  */
-export interface Company extends LocationFields {
-  /** Unique company identifier. */
-  id: string;
+export interface CompanyBase extends LocationFields {
   /** Company name. */
   name: string;
   /** Company website URL, when available. */
@@ -20,6 +19,15 @@ export interface Company extends LocationFields {
   notes: string | null;
   /** Associated tag identifiers. */
   tagIds: string[];
+}
+
+/**
+ * Company entity used for application tracking.
+ * Extends {@link CompanyBase} with system-managed fields.
+ */
+export interface Company extends CompanyBase {
+  /** Unique company identifier. */
+  id: string;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -28,8 +36,9 @@ export interface Company extends LocationFields {
 
 /**
  * Input required to create a company.
+ * Derived from {@link CompanyBase}: `name` is required; all other base fields
+ * are optional; location fields accept undefined via {@link LocationFieldsInput}.
  */
-export interface CreateCompanyInput extends LocationFieldsInput {
-  /** Company name. */
-  name: string;
-}
+export type CreateCompanyInput = Pick<CompanyBase, "name"> &
+  Partial<Omit<CompanyBase, "name" | keyof LocationFields>> &
+  LocationFieldsInput;

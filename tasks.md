@@ -47,4 +47,4 @@ Fix stages
 
 For all module types, create a base type with all properties and update all the others based off that. For example, Application with all fields (as per it's migration) used to create the edit/create type.
 
-Rename all references to "stats" into "metrics"
+Rename all references from metrics into use statistics

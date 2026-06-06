@@ -6,11 +6,10 @@ import type { LocationFields, LocationFieldsInput } from "@shared/types";
 export type ContactType = "company" | "recruiter";
 
 /**
- * Contact entity used for application networking data.
+ * All mutable data fields shared across contact read and write models,
+ * excluding system-managed identifiers and audit timestamps.
  */
-export interface Contact extends LocationFields {
-  /** Unique contact identifier. */
-  id: string;
+export interface ContactBase extends LocationFields {
   /** Related company identifier, when available. */
   companyId: string | null;
   /** Full name of the contact. */
@@ -27,6 +26,15 @@ export interface Contact extends LocationFields {
   notes: string | null;
   /** Associated tag identifiers. */
   tagIds: string[];
+}
+
+/**
+ * Contact entity used for application networking data.
+ * Extends {@link ContactBase} with system-managed fields.
+ */
+export interface Contact extends ContactBase {
+  /** Unique contact identifier. */
+  id: string;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -35,12 +43,10 @@ export interface Contact extends LocationFields {
 
 /**
  * Input required to create a contact.
+ * Derived from {@link ContactBase}: `fullName` and `type` are required; all
+ * other base fields are optional; location fields accept undefined via
+ * {@link LocationFieldsInput}.
  */
-export interface CreateContactInput extends LocationFieldsInput {
-  /** Related company identifier, when available. */
-  companyId?: string | null;
-  /** Full name of the contact. */
-  fullName: string;
-  /** Contact category. */
-  type: ContactType;
-}
+export type CreateContactInput = Pick<ContactBase, "fullName" | "type"> &
+  Partial<Omit<ContactBase, "fullName" | "type" | keyof LocationFields>> &
+  LocationFieldsInput;

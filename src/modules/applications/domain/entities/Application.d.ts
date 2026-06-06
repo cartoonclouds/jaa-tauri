@@ -3,23 +3,23 @@ import type {
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
+import type {
+  ApplicationAttendanceType,
+  ApplicationEmploymentType,
+  ApplicationEventFlowStatus,
+  ApplicationStatus,
 } from "../../types/enums";
 import type { LocationFields, LocationFieldsInput } from "@shared/types";
 
 /**
- * Application entity stored by the domain layer.
+ * All mutable data fields shared across application read and write models,
+ * excluding system-managed identifiers, derived fields, and audit timestamps.
  */
-export interface Application extends LocationFields {
-  /** Unique application identifier. */
-  id: string;
+export interface ApplicationBase extends LocationFields {
   /** Related company identifier, when available. */
   companyId: string | null;
   /** Application title. */
   title: string;
-  /** Current application status. */
-  status: ApplicationStatus;
-  /** Current high-level event flow status. */
-  eventFlowStatus: ApplicationEventFlowStatus;
   /** Source URL where the application was discovered, when available. */
   sourceUrl: string | null;
   /** Application submission date, when available. */
@@ -46,6 +46,19 @@ export interface Application extends LocationFields {
   priority: number;
   /** Whether the application has been archived. */
   isArchived: boolean;
+}
+
+/**
+ * Application entity stored by the domain layer.
+ * Extends {@link ApplicationBase} with system-managed and derived fields.
+ */
+export interface Application extends ApplicationBase {
+  /** Unique application identifier. */
+  id: string;
+  /** Current application status, derived from associated events. */
+  status: ApplicationStatus;
+  /** Current high-level event flow status, derived from associated events. */
+  eventFlowStatus: ApplicationEventFlowStatus;
   /** Whether the application has been soft-deleted. */
   isDeleted: boolean;
   /** Creation timestamp. */
@@ -55,13 +68,13 @@ export interface Application extends LocationFields {
 }
 
 /**
- * Minimal input required to create an application record.
+ * Input required to create an application record.
+ * Derived from {@link ApplicationBase}: `title` is required; all other base
+ * fields are optional; location fields accept undefined via {@link LocationFieldsInput}.
  */
-export interface CreateApplicationInput extends LocationFieldsInput {
-  /** Related company identifier, when available. */
-  companyId?: string | null;
-  /** Application title. */
-  title: string;
-  /** Application status. */
-  status?: ApplicationStatus;
-}
+export type CreateApplicationInput = Pick<ApplicationBase, "title"> &
+  Partial<Omit<ApplicationBase, "title" | keyof LocationFields>> &
+  LocationFieldsInput & {
+    /** Optional initial application status. */
+    status?: ApplicationStatus;
+  };

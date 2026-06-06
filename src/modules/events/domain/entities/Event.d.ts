@@ -1,11 +1,10 @@
 import type { InteractionStage } from "@modules/events/constants";
 
 /**
- * Event entity used to track application interactions.
+ * All mutable data fields shared across event read and write models,
+ * excluding system-managed identifiers and audit timestamps.
  */
-export interface Event {
-  /** Unique application-event link identifier. */
-  id: string;
+export interface EventBase {
   /** Related application identifier. */
   applicationId: string;
   /** Display order of this flow step within an application timeline. */
@@ -20,6 +19,15 @@ export interface Event {
   notes: string | null;
   /** Completion timestamp; null means this stage is still pending. */
   eventAt: Date | null;
+}
+
+/**
+ * Event entity used to track application interactions.
+ * Extends {@link EventBase} with system-managed fields.
+ */
+export interface Event extends EventBase {
+  /** Unique application-event link identifier. */
+  id: string;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -28,12 +36,11 @@ export interface Event {
 
 /**
  * Input required to create an event.
+ * Derived from {@link EventBase}: `applicationId`, `type`, and `title` are
+ * required; all other base fields are optional.
  */
-export interface CreateEventInput {
-  /** Related application identifier. */
-  applicationId: string;
-  /** Event type identifier. */
-  type: InteractionStage;
-  /** Event title. */
-  title: string;
-}
+export type CreateEventInput = Pick<
+  EventBase,
+  "applicationId" | "type" | "title"
+> &
+  Partial<Omit<EventBase, "applicationId" | "type" | "title">>;

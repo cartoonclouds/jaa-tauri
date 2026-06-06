@@ -1,17 +1,29 @@
 /**
- * Persisted application setting.
+/** Theme preference values for the application UI. */
+export type SettingTheme = "system" | "light" | "dark";
+
+/**
+ * All mutable data fields shared across setting read and write models,
+ * excluding system-managed identifiers and audit timestamps.
  */
-export interface Setting {
-  /** Unique setting identifier. */
-  id: string;
+export interface SettingBase {
   /** Theme preference. */
-  theme: "system" | "light" | "dark";
+  theme: SettingTheme;
   /** Locale identifier. */
   locale: string;
   /** Whether notifications are enabled. */
   notificationsEnabled: boolean;
   /** Whether developer mode is enabled. */
   developerMode: boolean;
+}
+
+/**
+ * Persisted application setting.
+ * Extends {@link SettingBase} with system-managed fields.
+ */
+export interface Setting extends SettingBase {
+  /** Unique setting identifier. */
+  id: string;
   /** Creation timestamp. */
   createdAt: Date;
   /** Last update timestamp. */
@@ -20,19 +32,10 @@ export interface Setting {
 
 /**
  * Input required to create or update a setting record.
+ * Derived from {@link SettingBase}: all fields are optional plus an optional
+ * identifier for targeting an existing row.
  */
-export interface UpsertSettingInput {
+export type UpsertSettingInput = Partial<SettingBase> & {
   /** Optional setting identifier. */
   id?: string;
-  /** Theme preference. */
-  theme?: Setting["theme"];
-  /** Locale identifier. */
-  locale?: string;
-  /** Whether notifications are enabled. */
-  notificationsEnabled?: boolean;
-  /** Whether developer mode is enabled. */
-  developerMode?: boolean;
-}
-
-
-
+};
