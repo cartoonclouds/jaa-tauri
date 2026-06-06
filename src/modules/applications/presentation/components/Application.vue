@@ -455,9 +455,10 @@
     payload: CompanyCreatePayload | CompanyUpdatePayload,
   ): Promise<void> {
     isSavingCompany.value = true;
+    const isEditMode = "id" in payload;
 
     try {
-      if ("id" in payload) {
+      if (isEditMode) {
         await companyService.update(payload);
       } else {
         await companyService.create(payload);
@@ -465,6 +466,21 @@
 
       await refreshCompanies();
       isCompanyEditorVisible.value = false;
+      toast.add({
+        severity: "success",
+        summary: "Company saved",
+        detail: isEditMode
+          ? "Company updated successfully."
+          : "Company created successfully.",
+        life: 3000,
+      });
+    } catch (error) {
+      toast.add({
+        severity: "error",
+        summary: "Save failed",
+        detail: toErrorMessage(error),
+        life: 4000,
+      });
     } finally {
       isSavingCompany.value = false;
     }
@@ -580,9 +596,10 @@
     payload: ContactEditorSubmitPayload,
   ): Promise<void> {
     isSavingContact.value = true;
+    const isEditMode = "id" in payload;
 
     try {
-      if ("id" in payload) {
+      if (isEditMode) {
         await contactService.update(payload as ContactUpdatePayload);
       } else {
         const contactId = await contactService.create(
@@ -599,6 +616,21 @@
 
       contactRefreshKey.value += 1;
       isContactEditorVisible.value = false;
+      toast.add({
+        severity: "success",
+        summary: "Contact saved",
+        detail: isEditMode
+          ? "Contact updated successfully."
+          : "Contact created successfully.",
+        life: 3000,
+      });
+    } catch (error) {
+      toast.add({
+        severity: "error",
+        summary: "Save failed",
+        detail: toErrorMessage(error),
+        life: 4000,
+      });
     } finally {
       isSavingContact.value = false;
     }

@@ -103,6 +103,44 @@
     notes: props.contact?.notes ?? "",
   }));
 
+  interface FormFieldStateLike {
+    value: unknown;
+  }
+
+  function isFormSubmitEvent(event: unknown): event is FormSubmitEvent {
+    return typeof event === "object" && event !== null && "valid" in event;
+  }
+
+  function resolveSubmittedValues(
+    event: unknown,
+  ): Record<string, unknown> | null {
+    if (!isFormSubmitEvent(event)) {
+      return null;
+    }
+
+    const eventValues = event.values as
+      | Record<string, unknown>
+      | undefined
+      | null;
+    if (eventValues) {
+      return eventValues;
+    }
+
+    const stateEntries = Object.entries(
+      event.states as Record<string, FormFieldStateLike>,
+    );
+    if (stateEntries.length === 0) {
+      return null;
+    }
+
+    const valuesFromStates: Record<string, unknown> = {};
+    for (const [name, state] of stateEntries) {
+      valuesFromStates[name] = state.value;
+    }
+
+    return valuesFromStates;
+  }
+
   watch(
     () => [props.visible, props.contact?.id],
     async ([visible, contactId]) => {
@@ -153,12 +191,12 @@
   /**
    * Handles on form submit.
    */
-  function onFormSubmit(event: FormSubmitEvent): void {
-    if (!event.valid) {
+  function onFormSubmit(event: unknown): void {
+    if (isFormSubmitEvent(event) && !event.valid) {
       return;
     }
 
-    const values = event.values as Record<string, unknown> | undefined;
+    const values = resolveSubmittedValues(event);
     if (!values) {
       return;
     }
