@@ -15,8 +15,6 @@ export interface IMetric {
    * @returns The view definition of the executed metric.
    */
   toView(): StatisticCardMetricDefinition;
-
-  public static readonly id: string;
 }
 
 /**
