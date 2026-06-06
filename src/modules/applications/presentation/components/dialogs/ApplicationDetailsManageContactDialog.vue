@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
 
+  import { ref, watch } from "vue";
+
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   interface ContactCreateFormState {
@@ -16,8 +18,16 @@
   interface ContactLinkOption {
     label: string;
     value: string;
-    relationType: ContactType;
+    fullName: string;
+    type: ContactType;
+    email: string | null;
+    phone: string | null;
+    linkedinUrl: string | null;
+    locationText: string | null;
+    notes: string | null;
   }
+
+  type ContactNameInputValue = ContactLinkOption | string | null;
 
   interface Props {
     availableContactsError: string | null;
@@ -25,24 +35,81 @@
     unlinkedContactOptions: ContactLinkOption[];
   }
 
-  defineProps<Props>();
+  const props = defineProps<Props>();
 
   const emit = defineEmits<{
     submit: [];
   }>();
   const visible = defineModel<boolean>("visible", { required: true });
-  const contactActionMode = defineModel<"create" | "link">(
-    "contactActionMode",
-    {
-      required: true,
-    },
-  );
   const createForm = defineModel<ContactCreateFormState>("createForm", {
     required: true,
   });
   const selectedContactId = defineModel<string | null>("selectedContactId", {
     required: true,
   });
+  const contactNameInput = ref<ContactNameInputValue>(
+    createForm.value.fullName,
+  );
+  const filteredContactOptions = ref<ContactLinkOption[]>([]);
+
+  watch(
+    () => createForm.value.fullName,
+    (fullName) => {
+      if (typeof contactNameInput.value === "string") {
+        contactNameInput.value = fullName;
+      }
+    },
+  );
+
+  watch(
+    () => props.unlinkedContactOptions,
+    (options) => {
+      filteredContactOptions.value = options;
+    },
+    { immediate: true },
+  );
+
+  watch(
+    () => contactNameInput.value,
+    (value) => {
+      if (typeof value === "string") {
+        createForm.value.fullName = value;
+        selectedContactId.value = null;
+        return;
+      }
+
+      if (!value) {
+        createForm.value.fullName = "";
+        selectedContactId.value = null;
+        return;
+      }
+
+      selectedContactId.value = value.value;
+      createForm.value = {
+        fullName: value.fullName,
+        type: value.type,
+        email: value.email ?? "",
+        phone: value.phone ?? "",
+        linkedinUrl: value.linkedinUrl ?? "",
+        locationText: value.locationText ?? "",
+        notes: value.notes ?? "",
+      };
+    },
+  );
+
+  function searchContacts(event: { query: string }): void {
+    const query = event.query.trim().toLowerCase();
+    if (!query) {
+      filteredContactOptions.value = props.unlinkedContactOptions;
+      return;
+    }
+
+    filteredContactOptions.value = props.unlinkedContactOptions.filter(
+      (option) =>
+        option.fullName.toLowerCase().includes(query) ||
+        option.label.toLowerCase().includes(query),
+    );
+  }
 
   useBodyScrollLock(visible);
 </script>
@@ -55,33 +122,45 @@
     class="w-full! max-w-lg"
   >
     <div class="space-y-3">
-      <div class="flex gap-2">
-        <Button
-          type="button"
-          size="small"
-          :text="contactActionMode !== 'create'"
-          @click="contactActionMode = 'create'"
-        >
-          <span>Create New</span>
-        </Button>
-        <Button
-          type="button"
-          size="small"
-          :text="contactActionMode !== 'link'"
-          @click="contactActionMode = 'link'"
-        >
-          <span>Link Existing</span>
-        </Button>
-      </div>
+      <Message v-if="availableContactsError" severity="warn" size="small">
+        {{ availableContactsError }}
+      </Message>
 
-      <div v-if="contactActionMode === 'create'" class="space-y-2">
+      <Message
+        v-else-if="isLoadingAvailableContacts"
+        severity="info"
+        size="small"
+      >
+        Loading contacts for name suggestions...
+      </Message>
+
+      <Message
+        v-else-if="unlinkedContactOptions.length === 0"
+        severity="info"
+        size="small"
+      >
+        No existing contacts available. Enter details to create a new contact.
+      </Message>
+
+      <div class="space-y-2">
         <div class="space-y-1">
           <label class="text-sm font-medium text-surface-700">Name</label>
-          <InputText
-            v-model="createForm.fullName"
-            placeholder="Full name"
+          <AutoComplete
+            v-model="contactNameInput"
+            :suggestions="filteredContactOptions"
+            option-label="label"
+            placeholder="Type a full name or select an existing contact"
+            dropdown
             fluid
-          />
+            @complete="searchContacts"
+          >
+            <template #option="slotProps">
+              <div class="flex items-center justify-between gap-2">
+                <span>{{ slotProps.option.label }}</span>
+                <Tag :value="slotProps.option.type" severity="secondary" />
+              </div>
+            </template>
+          </AutoComplete>
         </div>
 
         <div class="space-y-1">
@@ -139,50 +218,6 @@
           <Textarea v-model="createForm.notes" rows="3" auto-resize fluid />
         </div>
       </div>
-
-      <template v-else>
-        <Message v-if="availableContactsError" severity="error" size="small">
-          {{ availableContactsError }}
-        </Message>
-
-        <Message
-          v-else-if="isLoadingAvailableContacts"
-          severity="info"
-          size="small"
-        >
-          Loading contacts...
-        </Message>
-
-        <Message
-          v-else-if="unlinkedContactOptions.length === 0"
-          severity="info"
-          size="small"
-        >
-          No available contacts to link.
-        </Message>
-
-        <div v-else class="space-y-1">
-          <label class="text-sm font-medium text-surface-700">Contact</label>
-          <Select
-            v-model="selectedContactId"
-            :options="unlinkedContactOptions"
-            option-label="label"
-            option-value="value"
-            placeholder="Select a contact"
-            fluid
-          >
-            <template #option="slotProps">
-              <div class="flex items-center justify-between gap-2">
-                <span>{{ slotProps.option.label }}</span>
-                <Tag
-                  :value="slotProps.option.relationType"
-                  severity="secondary"
-                />
-              </div>
-            </template>
-          </Select>
-        </div>
-      </template>
     </div>
 
     <template #footer>
@@ -196,14 +231,8 @@
         />
         <Button
           type="button"
-          :label="
-            contactActionMode === 'create' ? 'Create and Add' : 'Link Contact'
-          "
-          :disabled="
-            contactActionMode === 'create'
-              ? !createForm.fullName.trim()
-              : !selectedContactId || isLoadingAvailableContacts
-          "
+          :label="selectedContactId ? 'Link Contact' : 'Create and Add'"
+          :disabled="!createForm.fullName.trim()"
           @click="emit('submit')"
         />
       </div>

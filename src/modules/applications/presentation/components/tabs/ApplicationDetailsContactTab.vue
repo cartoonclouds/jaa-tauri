@@ -39,7 +39,13 @@
   interface ContactLinkOption {
     label: string;
     value: string;
-    relationType: ContactType;
+    fullName: string;
+    type: ContactType;
+    email: string | null;
+    phone: string | null;
+    linkedinUrl: string | null;
+    locationText: string | null;
+    notes: string | null;
   }
 
   /**
@@ -105,7 +111,6 @@
   const pendingUnlinkContactName = ref<string>("");
   const selectedContactId = ref<string | null>(null);
   const availableContacts = ref<LinkedContact[]>([]);
-  const contactActionMode = ref<"create" | "link">("create");
   const createForm = ref<ContactCreateFormState>({
     fullName: "",
     type: "company",
@@ -130,7 +135,13 @@
           ? `${contact.fullName} (${contact.email})`
           : contact.fullName,
         value: contact.id,
-        relationType: contact.type,
+        fullName: contact.fullName,
+        type: contact.type,
+        email: contact.email,
+        phone: contact.phone,
+        linkedinUrl: contact.linkedinUrl,
+        locationText: contact.locationText,
+        notes: contact.notes,
       }));
   });
 
@@ -176,7 +187,6 @@
     }
 
     isManageContactDialogVisible.value = true;
-    contactActionMode.value = "create";
     selectedContactId.value = null;
     createForm.value = {
       fullName: "",
@@ -205,11 +215,7 @@
    * Handles submit add contact dialog.
    */
   function submitManageContact(): void {
-    if (contactActionMode.value === "link") {
-      if (!selectedContactId.value) {
-        return;
-      }
-
+    if (selectedContactId.value) {
       emit("request-link-contact", selectedContactId.value);
       isManageContactDialogVisible.value = false;
       selectedContactId.value = null;
@@ -379,7 +385,6 @@
 
     <ApplicationDetailsManageContactDialog
       v-model:visible="isManageContactDialogVisible"
-      v-model:contact-action-mode="contactActionMode"
       v-model:create-form="createForm"
       v-model:selected-contact-id="selectedContactId"
       :available-contacts-error="availableContactsError"
