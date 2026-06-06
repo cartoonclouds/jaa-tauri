@@ -118,6 +118,10 @@ export class NotificationRepository implements INotificationRepository {
   async create(payload: NotificationCreatePayload): Promise<string> {
     const parseResult = NotificationRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("NotificationRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError("Notification title and body are required");
     }
 

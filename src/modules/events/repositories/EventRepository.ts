@@ -168,6 +168,10 @@ export class EventRepository implements IEventRepository {
   async create(payload: EventCreatePayload): Promise<string> {
     const parseResult = EventRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("EventRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError(
         "Event applicationId, type, and title are required",
       );

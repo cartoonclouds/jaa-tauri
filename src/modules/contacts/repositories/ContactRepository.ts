@@ -239,6 +239,10 @@ export class ContactRepository implements IContactRepository {
   async create(payload: ContactCreatePayload): Promise<string> {
     const parseResult = ContactRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("ContactRepository.create payload validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError("Contact full name is required");
     }
 
@@ -249,6 +253,10 @@ export class ContactRepository implements IContactRepository {
 
     const parsedType = ContactTypeSchema.safeParse(parseResult.data.type);
     if (!parsedType.success) {
+      console.error("ContactRepository.create type validation failed", {
+        type: parseResult.data.type,
+        error: parsedType.error,
+      });
       throw new ValidationError("Invalid contact type");
     }
 

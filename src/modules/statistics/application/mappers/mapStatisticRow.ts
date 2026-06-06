@@ -30,12 +30,17 @@ export function mapStatisticRowToEntity(
     updated_at: row.updated_at,
   });
 
-  return StatisticSchema.parse({
-    id: toRequiredString(row.id),
-    name: toRequiredString(row.name),
-    value: toFiniteNumber(row.value, Number.NaN),
-    scope: toScope(row.scope),
-    recordedAt: mapOptionalRowDate(row.recorded_at),
-    ...timestamps,
-  });
+  try {
+    return StatisticSchema.parse({
+      id: toRequiredString(row.id),
+      name: toRequiredString(row.name),
+      value: toFiniteNumber(row.value, Number.NaN),
+      scope: toScope(row.scope),
+      recordedAt: mapOptionalRowDate(row.recorded_at),
+      ...timestamps,
+    });
+  } catch (error) {
+    console.error("mapStatisticRowToEntity validation failed", { row, error });
+    throw error;
+  }
 }

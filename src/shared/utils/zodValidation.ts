@@ -27,6 +27,8 @@ export function parseWithSchema<TOutput>(
     return parseResult.data;
   }
 
+  console.error("Zod schema parsing failed", parseResult.error);
+
   const firstIssueMessage = parseResult.error.issues[0]?.message;
 
   if (options.useFirstIssueMessage) {

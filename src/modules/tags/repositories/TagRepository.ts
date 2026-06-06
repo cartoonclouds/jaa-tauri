@@ -113,6 +113,10 @@ export class TagRepository implements ITagRepository {
   async create(payload: TagCreatePayload): Promise<string> {
     const parseResult = TagRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("TagRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError("Tag name is required");
     }
 

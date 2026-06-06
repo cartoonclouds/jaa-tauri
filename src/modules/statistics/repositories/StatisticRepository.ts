@@ -134,8 +134,16 @@ export class StatisticRepository implements IStatisticRepository {
     );
 
     const mapped = rows.map((row) => mapStatisticRowToEntity(row));
-    const validated = StatisticSchema.array().parse(mapped);
-    return validated;
+    try {
+      const validated = StatisticSchema.array().parse(mapped);
+      return validated;
+    } catch (error) {
+      console.error("StatisticRepository.list validation failed", {
+        mapped,
+        error,
+      });
+      throw error;
+    }
   }
 
   async getOverview(): Promise<IMetric[]> {

@@ -294,6 +294,10 @@ export class ApplicationRepository implements IApplicationRepository {
   async create(payload: ApplicationCreatePayload): Promise<string> {
     const parseResult = ApplicationRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("ApplicationRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError("Application title is required");
     }
 

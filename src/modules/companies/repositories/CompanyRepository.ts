@@ -166,6 +166,10 @@ export class CompanyRepository implements ICompanyRepository {
   async create(payload: CompanyCreatePayload): Promise<string> {
     const parseResult = CompanyRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("CompanyRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError("Company name is required");
     }
 

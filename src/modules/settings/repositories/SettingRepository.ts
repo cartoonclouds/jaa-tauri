@@ -218,6 +218,10 @@ export class SettingRepository implements ISettingRepository {
   async upsert(payload: SettingUpsertPayload): Promise<string> {
     const parseResult = SettingRepositoryUpsertSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("SettingRepository.upsert validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError(
         "Setting validation failed: " +
           JSON.stringify(parseResult.error.format()),

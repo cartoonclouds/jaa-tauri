@@ -300,6 +300,10 @@ export async function setSettings(
 
   const parseResult = SettingsInputSchema.safeParse(updated);
   if (!parseResult.success) {
+    console.error("settings.persistence.setSettings validation failed", {
+      updated,
+      error: parseResult.error,
+    });
     throw new ValidationError(
       "Settings validation failed: " +
         JSON.stringify(parseResult.error.format()),
@@ -332,6 +336,12 @@ export async function setSetting<K extends keyof AppSettings>(
 
   const settingsParse = SettingsInputSchema.safeParse(updated);
   if (!settingsParse.success) {
+    console.error("settings.persistence.setSetting validation failed", {
+      key,
+      value,
+      updated,
+      error: settingsParse.error,
+    });
     throw new ValidationError(
       "Settings validation failed: " +
         JSON.stringify(settingsParse.error.format()),

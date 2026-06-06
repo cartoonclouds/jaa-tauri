@@ -126,6 +126,10 @@ export class DocumentRepository implements IDocumentRepository {
   async create(payload: DocumentCreatePayload): Promise<string> {
     const parseResult = DocumentRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("DocumentRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError(
         "Document title, kind, and file path are required",
       );

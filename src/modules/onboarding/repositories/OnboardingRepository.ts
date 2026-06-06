@@ -59,6 +59,10 @@ export class OnboardingRepository {
     const payload = userProfileToProfileCreatePayload(input.profile);
     const parseResult = CreateProfileSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("OnboardingRepository.complete profile validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError(
         "Profile validation failed: " +
           JSON.stringify(parseResult.error.format()),

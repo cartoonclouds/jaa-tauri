@@ -124,6 +124,10 @@ export class ProfileRepository implements IProfileRepository {
   async create(payload: ProfileCreatePayload): Promise<string> {
     const parseResult = ProfileRepositoryCreateSchema.safeParse(payload);
     if (!parseResult.success) {
+      console.error("ProfileRepository.create validation failed", {
+        payload,
+        error: parseResult.error,
+      });
       throw new ValidationError("Profile full name is required");
     }
 
@@ -162,6 +166,10 @@ export class ProfileRepository implements IProfileRepository {
   async update(payload: ProfileUpdatePayload): Promise<void> {
     const payloadParse = ProfileRepositoryUpdateSchema.safeParse(payload);
     if (!payloadParse.success) {
+      console.error("ProfileRepository.update validation failed", {
+        payload,
+        error: payloadParse.error,
+      });
       throw new ValidationError(
         "Profile update validation failed: " +
           JSON.stringify(payloadParse.error.format()),
