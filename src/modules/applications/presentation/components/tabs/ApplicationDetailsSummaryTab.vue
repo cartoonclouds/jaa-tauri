@@ -324,8 +324,8 @@
           />
 
           <p class="text-xs text-surface-500">
-            Tip: Double-click completed steps or the next upcoming step to set
-            the date/time.
+            Tip: Double-click completed steps or the next upcoming step to
+            update.
           </p>
         </div>
       </div>

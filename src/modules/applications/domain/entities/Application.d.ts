@@ -3,11 +3,6 @@ import type {
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
-import type {
-  ApplicationAttendanceType,
-  ApplicationEmploymentType,
-  ApplicationEventFlowStatus,
-  ApplicationStatus,
 } from "../../types/enums";
 import type { LocationFields, LocationFieldsInput } from "@shared/types";
 

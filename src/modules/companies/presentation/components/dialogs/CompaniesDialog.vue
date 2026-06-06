@@ -9,6 +9,7 @@
   import { useCompanyDatatable } from "@modules/companies/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/constants";
   import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
+  import { useToast } from "primevue/usetoast";
   import { computed, ref } from "vue";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
@@ -24,6 +25,7 @@
   }>();
 
   const { service } = useCompany();
+  const toast = useToast();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -73,9 +75,10 @@
     payload: CompanyCreatePayload | CompanyUpdatePayload,
   ): Promise<void> {
     isSavingCompany.value = true;
+    const isEditMode = "id" in payload;
 
     try {
-      if ("id" in payload) {
+      if (isEditMode) {
         await service.update(payload);
       } else {
         await service.create(payload);
@@ -83,6 +86,14 @@
 
       await refresh();
       isEditorDialogVisible.value = false;
+      toast.add({
+        severity: "success",
+        summary: "Company saved",
+        detail: isEditMode
+          ? "Company updated successfully."
+          : "Company created successfully.",
+        life: 3000,
+      });
     } finally {
       isSavingCompany.value = false;
     }

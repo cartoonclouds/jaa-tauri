@@ -11,6 +11,7 @@
   import { contactsSearchPlaceholder } from "@modules/contacts/constants";
   import ContactEditorDialog from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import ContactLocationMapDialog from "@modules/contacts/presentation/components/dialogs/ContactLocationMapDialog.vue";
+  import { useToast } from "primevue/usetoast";
   import { computed, ref } from "vue";
 
   import LocationMapPreview from "@/components/ui/LocationMapPreview.vue";
@@ -27,6 +28,7 @@
   }>();
 
   const { service } = useContact();
+  const toast = useToast();
   const {
     currentPageReportTemplate,
     globalFilter,
@@ -97,9 +99,10 @@
     payload: ContactCreatePayload | ContactUpdatePayload,
   ): Promise<void> {
     isSavingContact.value = true;
+    const isEditMode = "id" in payload;
 
     try {
-      if ("id" in payload) {
+      if (isEditMode) {
         await service.update(payload);
       } else {
         await service.create(payload);
@@ -108,6 +111,14 @@
       await refresh();
       isEditorDialogVisible.value = false;
       selectedContact.value = null;
+      toast.add({
+        severity: "success",
+        summary: "Contact saved",
+        detail: isEditMode
+          ? "Contact updated successfully."
+          : "Contact created successfully.",
+        life: 3000,
+      });
     } finally {
       isSavingContact.value = false;
     }

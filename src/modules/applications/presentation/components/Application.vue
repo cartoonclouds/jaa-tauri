@@ -318,6 +318,7 @@
       await refresh();
       if (editApplicationId) {
         await refetchSelectedApplication(editApplicationId);
+        drawerMode.value = "view";
       }
 
       hasUnsavedDrawerEdits.value = false;
