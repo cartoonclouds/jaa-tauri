@@ -1,6 +1,6 @@
 import type { MetricVisibilityBuckets } from "@modules/statistics/types";
 
-import { getSetting, setSetting } from "@modules/settings/persistence";
+import { getSetting, setSetting } from "@modules/settings";
 import { ref } from "vue";
 
 interface StatsVisibilityMeta {

@@ -6,7 +6,7 @@
   import {
     getOnboardingCompleted,
     setOnboardingCompleted,
-  } from "@modules/settings/persistence";
+  } from "@modules/settings";
   import SettingsDialog from "@modules/settings/presentation/components/dialogs/SettingsDialog.vue";
   import { invoke, isTauri } from "@tauri-apps/api/core";
   import { onMounted } from "vue";

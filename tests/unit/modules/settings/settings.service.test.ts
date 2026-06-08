@@ -4,6 +4,9 @@
  * Tests for class-based settings service integration with persistence helpers.
  */
 
+import type { ISettingRepository } from "@modules/settings";
+
+import { SettingService } from "@modules/settings";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -13,17 +16,13 @@ import {
   setSetting,
   setSettings,
   setThemeSettings,
-} from "@modules/settings/persistence/settings.repository";
-import {
-  SettingsService,
-  useSettingsService,
-} from "@modules/settings/persistence/settings.service";
+} from "@modules/settings/repositories/SettingRepository";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildSettingsDto } from "../../../fixtures/factories/testPayloadFactories";
 
 // Mock the settings repository
-vi.mock("@modules/settings/persistence/settings.repository", () => ({
+vi.mock("@modules/settings/repositories/SettingRepository", () => ({
   addRecentSearch: vi.fn(),
   clearRecentSearches: vi.fn(),
   getSettings: vi.fn(),
@@ -43,7 +42,7 @@ vi.mock("@modules/settings/persistence/settings.repository", () => ({
   setDeveloperSettings: vi.fn(),
 }));
 
-describe("SettingsService", () => {
+describe("SettingService", () => {
   const mockedGetSettings = vi.mocked(getSettings);
   const mockedSetSettings = vi.mocked(setSettings);
   const mockedSetSetting = vi.mocked(setSetting);
@@ -53,6 +52,22 @@ describe("SettingsService", () => {
   const mockedClearRecentSearches = vi.mocked(clearRecentSearches);
   const mockedSetOnboardingCompleted = vi.mocked(setOnboardingCompleted);
 
+  function createRepositoryMock(): ISettingRepository {
+    return {
+      create: vi.fn(),
+      delete: vi.fn(),
+      deleteConstantRow: vi.fn(),
+      get: vi.fn(),
+      getConstantRow: vi.fn(),
+      list: vi.fn(),
+      listConstantRows: vi.fn(),
+      listPage: vi.fn(),
+      update: vi.fn(),
+      upsert: vi.fn(),
+      upsertConstantRow: vi.fn(),
+    };
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -61,7 +76,7 @@ describe("SettingsService", () => {
     const mockSettings = buildSettingsDto();
 
     mockedGetSettings.mockResolvedValue(mockSettings);
-    const service = new SettingsService();
+    const service = new SettingService(createRepositoryMock());
 
     const result = await service.fetchSettings();
 
@@ -69,7 +84,7 @@ describe("SettingsService", () => {
   });
 
   it("should update all settings", async () => {
-    const service = new SettingsService();
+    const service = new SettingService(createRepositoryMock());
 
     await service.updateSettings({ theme: "dark" });
 
@@ -77,7 +92,7 @@ describe("SettingsService", () => {
   });
 
   it("should update a single setting", async () => {
-    const service = new SettingsService();
+    const service = new SettingService(createRepositoryMock());
 
     await service.updateSetting("theme", "dark");
 
@@ -86,7 +101,7 @@ describe("SettingsService", () => {
 
   it("should expose theme sub-service", async () => {
     mockedGetThemeSettings.mockResolvedValue({ theme: "dark" });
-    const service = new SettingsService();
+    const service = new SettingService(createRepositoryMock());
 
     const theme = await service.themeService.get();
     await service.themeService.set({ theme: "light" });
@@ -96,7 +111,7 @@ describe("SettingsService", () => {
   });
 
   it("should expose recent search helpers", async () => {
-    const service = new SettingsService();
+    const service = new SettingService(createRepositoryMock());
 
     await service.recentSearchService.add("nuxt");
     await service.recentSearchService.clear();
@@ -106,18 +121,10 @@ describe("SettingsService", () => {
   });
 
   it("should update onboarding completion", async () => {
-    const service = new SettingsService();
+    const service = new SettingService(createRepositoryMock());
 
     await service.setOnboardingCompleted(true);
 
     expect(mockedSetOnboardingCompleted).toHaveBeenCalledWith(true);
-  });
-
-  it("should return singleton from useSettingsService", () => {
-    const getSettingsService = useSettingsService as () => SettingsService;
-    const first = getSettingsService();
-    const second = getSettingsService();
-
-    expect(first).toBe(second);
   });
 });

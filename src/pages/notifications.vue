@@ -6,10 +6,6 @@
   import { notificationsSearchPlaceholder } from "@modules/notifications/constants";
   import { reactive, ref } from "vue";
 
-  import { definePageMeta } from "#imports";
-
-  definePageMeta({ ssr: false });
-
   const { create, update, remove } = useNotification();
   const {
     currentPageReportTemplate,

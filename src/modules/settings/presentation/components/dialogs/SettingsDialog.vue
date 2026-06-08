@@ -3,7 +3,7 @@
   import type { PersistedConstantSourceType } from "@shared/constants/persistedConstants";
 
   import { logError } from "@infra/logging/tauriLog.client";
-  import { useSetting } from "@modules/settings";
+  import { useSettingsService } from "@modules/settings";
   import { Form } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { CONSTANT_MODULE_SOURCES } from "@shared/constants/persistedConstants";
@@ -55,7 +55,7 @@
     "update:visible": [value: boolean];
   }>();
 
-  const { service: settingService } = useSetting();
+  const { service: settingService } = useSettingsService();
 
   /**
    * Returns whether an exported constant value can be persisted.
@@ -213,12 +213,12 @@
       ]);
 
       const current = settings[0];
-      currentSettingId.value = current?.id ?? null;
+      currentSettingId.value = current.id;
       initialGeneralValues.value = {
-        developerMode: current?.developerMode ?? false,
-        locale: current?.locale ?? "en-GB",
-        notificationsEnabled: current?.notificationsEnabled ?? true,
-        theme: current?.theme ?? "system",
+        developerMode: current.developerMode,
+        locale: current.locale,
+        notificationsEnabled: current.notificationsEnabled,
+        theme: current.theme,
       };
       generalFormVersion.value += 1;
 

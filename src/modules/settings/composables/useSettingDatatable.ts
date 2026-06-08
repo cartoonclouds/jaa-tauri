@@ -1,6 +1,6 @@
 import type { Setting } from "@modules/settings/domain/entities/Setting";
 
-import { useSetting } from "@modules/settings";
+import { useSettingsService } from "@modules/settings";
 import {
   SETTING_SEARCH_FIELDS,
   type SettingSearchField,
@@ -12,7 +12,7 @@ import { useServerDatatable } from "@/composables/useServerDatatable";
  * Create server-backed datatable state for settings.
  */
 export function useSettingDatatable() {
-  const { service } = useSetting();
+  const { service } = useSettingsService();
 
   return useServerDatatable<Setting, SettingSearchField>({
     fetchPage: (query) => service.listPage(query),

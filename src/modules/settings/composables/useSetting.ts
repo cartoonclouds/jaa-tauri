@@ -45,7 +45,7 @@ let settingComposableInstance: SettingComposable | null = null;
 /**
  * Create upsert-style state and handlers for settings.
  */
-export function useSetting() {
+export function useSettingsService() {
   settingComposableInstance ??= createSettingComposable();
 
   return settingComposableInstance;

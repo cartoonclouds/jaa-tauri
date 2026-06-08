@@ -2,4 +2,4 @@ export * from "./composables/useNotification";
 export * from "./composables/useNotificationDatatable";
 export type * from "./domain/entities/Notification";
 export * from "./repositories/NotificationRepository";
-export * from "./types";
+export type * from "./types";

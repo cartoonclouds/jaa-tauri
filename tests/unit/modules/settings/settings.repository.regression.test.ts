@@ -8,7 +8,7 @@ import {
   getOnboardingCompleted,
   initializeSettingsStore,
   setOnboardingCompleted,
-} from "@modules/settings/persistence";
+} from "@modules/settings";
 import { describe, expect, it } from "vitest";
 
 type SettingsRow = Record<string, unknown>;
@@ -59,7 +59,7 @@ class MockSettingsDatabaseDriver implements DatabaseDriver {
   }
 }
 
-describe("settings.repository regression", () => {
+describe("SettingRepository regression", () => {
   it("does not leak onboarding completion into new databases", async () => {
     const firstDb = new MockSettingsDatabaseDriver();
     await initializeSettingsStore(firstDb);

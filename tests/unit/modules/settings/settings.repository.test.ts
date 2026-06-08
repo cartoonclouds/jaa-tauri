@@ -8,7 +8,7 @@ import {
   getSettings,
   initializeSettingsStore,
   setSettings,
-} from "@modules/settings/persistence";
+} from "@modules/settings";
 import { describe, expect, it } from "vitest";
 
 import { buildSettingsRow } from "../../../fixtures/factories/testPayloadFactories";
@@ -66,7 +66,7 @@ class MockSettingsDatabaseDriver implements DatabaseDriver {
   }
 }
 
-describe("settings.repository", () => {
+describe("SettingRepository", () => {
   it("initializes and returns default settings", async () => {
     const db = new MockSettingsDatabaseDriver();
 

@@ -8,7 +8,7 @@ import type {
 import { useDocument } from "@modules/documents";
 import { useProfile } from "@modules/profile";
 import { CreateProfileSchema } from "@modules/profile/domain/zod/profile.schema";
-import { setOnboardingCompleted } from "@modules/settings/persistence";
+import { setOnboardingCompleted } from "@modules/settings";
 import { ValidationError } from "@shared/domain/errors";
 
 import {

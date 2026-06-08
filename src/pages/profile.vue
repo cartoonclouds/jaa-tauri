@@ -6,10 +6,6 @@
   import { profileSearchPlaceholder } from "@modules/profile/constants";
   import { reactive, ref } from "vue";
 
-  import { definePageMeta } from "#imports";
-
-  definePageMeta({ ssr: false });
-
   const { create, update, remove } = useProfile();
   const {
     currentPageReportTemplate,
