@@ -114,8 +114,9 @@ describe("SettingsService", () => {
   });
 
   it("should return singleton from useSettingsService", () => {
-    const first = useSettingsService();
-    const second = useSettingsService();
+    const getSettingsService = useSettingsService as () => SettingsService;
+    const first = getSettingsService();
+    const second = getSettingsService();
 
     expect(first).toBe(second);
   });
