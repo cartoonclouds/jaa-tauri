@@ -4,9 +4,8 @@
   import { toErrorMessage } from "@shared/utils/error";
   import { isTauri } from "@tauri-apps/api/core";
   import { getCurrentWindow } from "@tauri-apps/api/window";
-  import { useRouter } from "vue-router";
 
-  import { definePageMeta } from "#imports";
+  import { definePageMeta, useRouter } from "#imports";
 
   definePageMeta({ ssr: false });
 

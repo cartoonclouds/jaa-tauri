@@ -1,8 +1,7 @@
 <script setup lang="ts">
   import { onMounted } from "vue";
-  import { useRouter } from "vue-router";
 
-  import { definePageMeta } from "#imports";
+  import { definePageMeta, useRouter } from "#imports";
   import { useContactsDialog } from "@/composables/useContactsDialog";
 
   definePageMeta({ ssr: false });

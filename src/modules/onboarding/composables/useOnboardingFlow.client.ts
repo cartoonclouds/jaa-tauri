@@ -18,7 +18,7 @@ import { computed, ref } from "vue";
 
 import { useFileSystem } from "@/composables/useFileSystem";
 
-import { onboardingRepository } from "../repositories/OnboardingRepository";
+import { completeOnboarding } from "../repositories/OnboardingRepository";
 
 const stepOrder = ["profile", "preferences", "resume", "review"] as const;
 
@@ -130,11 +130,9 @@ function createOnboardingFlowComposable() {
         documentService.list(),
       ]);
 
-      const existingProfile = profiles[0] ?? null;
+      const existingProfile = profiles[0];
 
-      profile.value = existingProfile
-        ? mapProfileToUserProfile(existingProfile)
-        : defaultProfile();
+      profile.value = mapProfileToUserProfile(existingProfile);
 
       const latestResume = documents.find(
         (document) => document.kind === "resume",
@@ -302,7 +300,7 @@ function createOnboardingFlowComposable() {
         addLocations();
       }
 
-      await onboardingRepository.complete({
+      await completeOnboarding({
         profile: profile.value,
         resumePath: resumePath.value,
         resumeMimeType: resumeMimeType.value,

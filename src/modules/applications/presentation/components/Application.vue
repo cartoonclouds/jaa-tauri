@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { Application as ApplicationEntity } from "@modules/applications/domain/entities/Application";
+  import type { ApplicationService } from "@modules/applications/services/ApplicationService";
   import type {
     ApplicationDrawerMode,
     ApplicationFormSubmitPayload,
@@ -10,13 +11,19 @@
     CompanyCreatePayload,
     CompanyUpdatePayload,
   } from "@modules/companies";
+  import type { CompanyService } from "@modules/companies/services/CompanyService";
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
   import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import type {
     ContactCreatePayload,
     ContactUpdatePayload,
   } from "@modules/contacts/repositories/ContactRepository";
+  import type { ContactService } from "@modules/contacts/services/ContactService";
   import type { EditableContact } from "@modules/contacts/types/presentation";
+  import type { Event } from "@modules/events/domain/entities/Event";
+  import type { EventService } from "@modules/events/services/EventService";
+  import type { TagService } from "@modules/tags/services/TagService";
+  import type { Ref } from "vue";
 
   import { useApplication } from "@modules/applications";
   import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
@@ -55,15 +62,22 @@
     | { type: "close-drawer" }
     | { type: "cancel-edit" };
 
-  const { service } = useApplication();
-  const {
-    service: companyService,
-    items: companyItems,
-    refresh: refreshCompanies,
-  } = useCompany();
-  const { service: contactService } = useContact();
-  const { service: eventService } = useEvent();
-  const { service: tagService } = useTag();
+  const applicationComposable = useApplication();
+  const service = applicationComposable.service as ApplicationService;
+
+  const companyComposable = useCompany();
+  const companyService = companyComposable.service as CompanyService;
+  const companyItems = companyComposable.items as Ref<Company[]>;
+  const refreshCompanies = companyComposable.refresh;
+
+  const contactComposable = useContact();
+  const contactService = contactComposable.service as ContactService;
+
+  const eventComposable = useEvent();
+  const eventService = eventComposable.service as EventService;
+
+  const tagComposable = useTag();
+  const tagService: TagService = tagComposable.service;
   const toast = useToast();
   const {
     currentPageReportTemplate,
@@ -281,7 +295,7 @@
         const selectedTypes = new Set(
           (payload.flowSteps ?? []).map((step) => step.type),
         );
-        const createdEventByType = new Map(
+        const createdEventByType = new Map<string, Event>(
           createdApplicationEvents.map((event) => [event.type, event]),
         );
 

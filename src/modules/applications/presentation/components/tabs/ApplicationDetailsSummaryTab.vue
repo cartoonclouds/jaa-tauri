@@ -127,14 +127,7 @@
   });
 
   const editableFlowStages = computed<InteractionStage[]>(() => {
-    const editableStages = [...completedFlowStages.value];
-    const firstFutureStage = futureFlowStages.value[0];
-
-    if (firstFutureStage) {
-      editableStages.push(firstFutureStage);
-    }
-
-    return editableStages;
+    return [...completedFlowStages.value, futureFlowStages.value[0]];
   });
 
   const displayedFlowStages = computed<DisplayedFlowStageItem[]>(() => {

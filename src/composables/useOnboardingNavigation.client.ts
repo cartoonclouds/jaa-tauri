@@ -1,8 +1,8 @@
 import { logError } from "@infra/logging/tauriLog.client";
 import { toErrorMessage } from "@shared/utils/error";
 import { isTauri } from "@tauri-apps/api/core";
-import { useRouter } from "vue-router";
 
+import { useRouter } from "#imports";
 import { useChildWebviewWindow } from "@/composables/useChildWebviewWindow.client";
 
 /**
