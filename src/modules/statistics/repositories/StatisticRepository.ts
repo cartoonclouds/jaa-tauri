@@ -1,6 +1,7 @@
 import type { ExecutableConstructor, IMetric } from "../domain/types/metric";
 import type { Statistic } from "@/modules/statistics/domain/types/statistic";
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
+import type { IStatisticRepository } from "@modules/statistics/types";
 
 import { mapStatisticRowToEntity } from "@modules/statistics/application/mappers/mapStatisticRow";
 import { StatisticSchema } from "@modules/statistics/domain/zod/statistic.schema";
@@ -47,16 +48,6 @@ export const INTERNAL_METRIC_DEFINITIONS: readonly ExecutableConstructor[] = [
   ApplicationsOfferLast30Days,
   ApplicationsOfferPrevious30Days,
 ];
-
-/**
- * Persistence contract for statistics metrics.
- */
-export interface IStatisticRepository {
-  /** Read all persisted statistic records. */
-  list(): Promise<Statistic[]>;
-  /** Fetch aggregated statistics for the job applications dashboard. */
-  getOverview(): Promise<IMetric[]>;
-}
 
 /**
  * SQLite-backed repository for statistics metrics.

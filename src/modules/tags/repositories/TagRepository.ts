@@ -1,13 +1,11 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Tag } from "@modules/tags/domain/entities/Tag";
-import type { TagModelType as TagModelTypeValue } from "@modules/tags/domain/enums/TagModelType";
 import type {
-  DatatablePageQuery,
-  DatatablePageResult,
-  IPaginatedRepository,
-  IRepository,
-  PartialUpdatePayload,
-} from "@shared/types";
+  ITagRepository,
+  TagCreatePayload,
+  TagUpdatePayload,
+} from "@modules/tags/types";
+import type { DatatablePageQuery, DatatablePageResult } from "@shared/types";
 
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
 import { TAG_SEARCH_FIELDS } from "@modules/tags/constants";
@@ -22,28 +20,6 @@ import {
 } from "@shared/utils/datatableQuery";
 
 /**
- * Type alias for tag create payload.
- */
-export type TagCreatePayload = Pick<Tag, "name" | "color"> & {
-  modelType?: TagModelTypeValue;
-};
-/**
- * Type alias for tag update payload.
- */
-export type TagUpdatePayload = PartialUpdatePayload<TagCreatePayload>;
-
-/**
- * Defines itag repository.
- */
-export interface ITagRepository
-  extends
-    IRepository<Tag, TagCreatePayload, TagUpdatePayload>,
-    IPaginatedRepository<Tag> {
-  /** List tags scoped to a specific model type, including general-purpose tags. */
-  listByModelType(modelType: TagModelTypeValue): Promise<Tag[]>;
-}
-
-/**
  * Implements tag repository.
  */
 export class TagRepository implements ITagRepository {
@@ -56,7 +32,7 @@ export class TagRepository implements ITagRepository {
     return rows.map((row) => mapTagRowToEntity(row));
   }
 
-  async listByModelType(modelType: TagModelTypeValue): Promise<Tag[]> {
+  async listByModelType(modelType: TagModelType): Promise<Tag[]> {
     const rows = await this.db.select<Record<string, unknown>>(
       "SELECT * FROM tags WHERE model_type = $1 OR model_type = $2 ORDER BY name ASC",
       [modelType.value, TagModelType.General.value],

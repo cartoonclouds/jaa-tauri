@@ -208,6 +208,10 @@ modules/
     domain/
     application/
     presentation/
+    composables/
+    repositories/
+    services/
+    types/
     index.ts
 ```
 

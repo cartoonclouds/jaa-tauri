@@ -1,11 +1,11 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Notification } from "@modules/notifications/domain/entities/Notification";
 import type {
-  DatatablePageQuery,
-  DatatablePageResult,
-  IRepository,
-  PartialUpdatePayload,
-} from "@shared/types";
+  INotificationRepository,
+  NotificationCreatePayload,
+  NotificationUpdatePayload,
+} from "@modules/notifications/types";
+import type { DatatablePageQuery, DatatablePageResult } from "@shared/types";
 
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
 import { NOTIFICATION_SEARCH_FIELDS } from "@modules/notifications/constants";
@@ -18,39 +18,6 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
-
-/**
- * Type alias for notification create payload.
- */
-export type NotificationCreatePayload = Pick<
-  Notification,
-  | "applicationId"
-  | "eventId"
-  | "severity"
-  | "title"
-  | "body"
-  | "isRead"
-  | "scheduledFor"
-  | "sentAt"
->;
-/**
- * Type alias for notification update payload.
- */
-export type NotificationUpdatePayload =
-  PartialUpdatePayload<NotificationCreatePayload>;
-
-/**
- * Defines inotification repository.
- */
-export interface INotificationRepository extends IRepository<
-  Notification,
-  NotificationCreatePayload,
-  NotificationUpdatePayload
-> {
-  listPage(
-    query: DatatablePageQuery,
-  ): Promise<DatatablePageResult<Notification>>;
-}
 
 /**
  * Implements notification repository.

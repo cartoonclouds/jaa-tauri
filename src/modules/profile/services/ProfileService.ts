@@ -5,7 +5,7 @@ import {
   type IProfileRepository,
   type ProfileCreatePayload,
   type ProfileUpdatePayload,
-} from "@modules/profile/repositories/ProfileRepository";
+} from "@modules/profile/types";
 import { parseTrimmedWithSchema } from "@shared/utils/zodValidation";
 
 const ProfileNameSchema = ProfileSchema.pick({ fullName: true });

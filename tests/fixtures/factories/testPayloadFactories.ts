@@ -5,20 +5,20 @@ import type {
 import type {
   CompanyCreatePayload,
   CompanyUpdatePayload,
-} from "@modules/companies/repositories/CompanyRepository";
+} from "@modules/companies/types";
 import type {
   ContactCreatePayload,
   ContactUpdatePayload,
 } from "@modules/contacts/repositories/ContactRepository";
-import type { DocumentCreatePayload } from "@modules/documents/repositories/DocumentRepository";
+import type { DocumentCreatePayload } from "@modules/documents/types";
 import type {
   EventCreatePayload,
   EventUpdatePayload,
-} from "@modules/events/repositories/EventRepository";
-import type { NotificationCreatePayload } from "@modules/notifications/repositories/NotificationRepository";
-import type { ProfileCreatePayload } from "@modules/profile/repositories/ProfileRepository";
-import type { SettingUpsertPayload } from "@modules/settings/repositories/SettingRepository";
-import type { TagCreatePayload } from "@modules/tags/repositories/TagRepository";
+} from "@modules/events/types";
+import type { NotificationCreatePayload } from "@modules/notifications/types";
+import type { ProfileCreatePayload } from "@modules/profile/types";
+import type { SettingUpsertPayload } from "@modules/settings/types";
+import type { TagCreatePayload } from "@modules/tags/types";
 
 import { ApplicationStatus } from "@modules/applications/domain/enums/ApplicationEnums";
 import { TagModelType } from "@modules/tags/domain/enums/TagModelType";

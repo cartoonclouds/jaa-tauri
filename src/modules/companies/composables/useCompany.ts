@@ -2,7 +2,7 @@ import type { Company } from "@modules/companies/domain/entities/Company";
 import type {
   CompanyCreatePayload,
   CompanyUpdatePayload,
-} from "@modules/companies/repositories/CompanyRepository";
+} from "@modules/companies/types";
 
 import { CompanyRepository } from "@modules/companies/repositories/CompanyRepository";
 import { CompanyService } from "@modules/companies/services/CompanyService";

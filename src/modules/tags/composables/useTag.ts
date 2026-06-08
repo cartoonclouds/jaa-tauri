@@ -1,8 +1,5 @@
 import type { Tag } from "@modules/tags/domain/entities/Tag";
-import type {
-  TagCreatePayload,
-  TagUpdatePayload,
-} from "@modules/tags/repositories/TagRepository";
+import type { TagCreatePayload, TagUpdatePayload } from "@modules/tags/types";
 
 import { TagRepository } from "@modules/tags/repositories/TagRepository";
 import { TagService } from "@modules/tags/services/TagService";

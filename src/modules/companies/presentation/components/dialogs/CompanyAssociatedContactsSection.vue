@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { CompanyAssociatedContact } from "@modules/companies/repositories/CompanyRepository";
+  import type { CompanyAssociatedContact } from "@modules/companies/types";
 
   /**
    * Defines associated contacts section props.

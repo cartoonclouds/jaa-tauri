@@ -1,3 +1,4 @@
+import type { CompleteOnboardingInput } from "@modules/onboarding/types";
 import type {
   ProfileCreatePayload,
   ProfileUpdatePayload,
@@ -40,15 +41,6 @@ function userProfileToProfileCreatePayload(
     noticePeriodDays: profile.noticePeriodDays ?? null,
     interviewAvailability: profile.interviewAvailability,
   };
-}
-
-/**
- * Input contract for completing onboarding and optional resume import.
- */
-export interface CompleteOnboardingInput {
-  profile: UserProfile;
-  resumePath: string | null;
-  resumeMimeType?: string | null;
 }
 
 /**

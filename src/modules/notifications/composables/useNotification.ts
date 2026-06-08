@@ -2,7 +2,7 @@ import type { Notification } from "@modules/notifications/domain/entities/Notifi
 import type {
   NotificationCreatePayload,
   NotificationUpdatePayload,
-} from "@modules/notifications/repositories/NotificationRepository";
+} from "@modules/notifications/types";
 
 import { NotificationRepository } from "@modules/notifications/repositories/NotificationRepository";
 import { NotificationService } from "@modules/notifications/services/NotificationService";

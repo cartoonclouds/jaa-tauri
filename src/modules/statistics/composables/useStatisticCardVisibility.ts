@@ -1,3 +1,5 @@
+import type { MetricVisibilityBuckets } from "@modules/statistics/types";
+
 import { getSetting, setSetting } from "@modules/settings/persistence";
 import { ref } from "vue";
 
@@ -7,14 +9,6 @@ interface StatsVisibilityMeta {
 }
 
 type StatsVisibilityEntry = boolean | StatsVisibilityMeta;
-
-/**
- * Shared visibility buckets for metrics with an id.
- */
-export interface MetricVisibilityBuckets<TMetric extends { id: string }> {
-  visible: TMetric[];
-  hidden: TMetric[];
-}
 
 /**
  * Encapsulates card edit mode and persisted visibility state.

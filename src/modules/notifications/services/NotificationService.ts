@@ -5,7 +5,7 @@ import {
   type INotificationRepository,
   type NotificationCreatePayload,
   type NotificationUpdatePayload,
-} from "@modules/notifications/repositories/NotificationRepository";
+} from "@modules/notifications/types";
 import { parseTrimmedWithSchema } from "@shared/utils/zodValidation";
 
 const NotificationContentSchema = NotificationSchema.pick({

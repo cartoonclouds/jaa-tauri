@@ -7,7 +7,7 @@ import {
   type CompanyCreatePayload,
   type CompanyUpdatePayload,
   type ICompanyRepository,
-} from "@modules/companies/repositories/CompanyRepository";
+} from "@modules/companies/types";
 import { resolveLocationFields } from "@shared/utils/geocoding";
 import { parseWithSchema } from "@shared/utils/zodValidation";
 

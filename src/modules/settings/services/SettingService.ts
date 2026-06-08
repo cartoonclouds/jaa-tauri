@@ -6,7 +6,7 @@ import {
   type ISettingRepository,
   type ListConstantRowsOptions,
   type SettingUpsertPayload,
-} from "@modules/settings/repositories/SettingRepository";
+} from "@modules/settings/types";
 
 /**
  * Application service facade for reading and mutating settings domain data.
@@ -45,6 +45,3 @@ export class SettingService {
     return this.repository.deleteConstantRow(type, value);
   }
 }
-
-
-

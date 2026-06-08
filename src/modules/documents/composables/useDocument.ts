@@ -2,7 +2,7 @@ import type { Document } from "@modules/documents/domain/entities/Document";
 import type {
   DocumentCreatePayload,
   DocumentUpdatePayload,
-} from "@modules/documents/repositories/DocumentRepository";
+} from "@modules/documents/types";
 
 import { DocumentRepository } from "@modules/documents/repositories/DocumentRepository";
 import { DocumentService } from "@modules/documents/services/DocumentService";

@@ -2,7 +2,7 @@ import type { Profile } from "@modules/profile/domain/entities/Profile";
 import type {
   ProfileCreatePayload,
   ProfileUpdatePayload,
-} from "@modules/profile/repositories/ProfileRepository";
+} from "@modules/profile/types";
 
 import { ProfileRepository } from "@modules/profile/repositories/ProfileRepository";
 import { ProfileService } from "@modules/profile/services/ProfileService";

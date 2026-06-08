@@ -1,4 +1,4 @@
-import type { IStatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
+import type { IStatisticRepository } from "@modules/statistics/types";
 
 /**
  * Application service for read-only statistics metrics.

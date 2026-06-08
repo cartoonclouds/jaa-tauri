@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import type { Event } from "@modules/events/domain/entities/Event";
-  import type { EventUpdatePayload } from "@modules/events/repositories/EventRepository";
+  import type { EventUpdatePayload } from "@modules/events/types";
   import type { TreeNode } from "primevue/treenode";
 
   import { useEvent } from "@modules/events/composables/useEvent";

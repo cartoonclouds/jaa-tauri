@@ -1,6 +1,10 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Event } from "@modules/events/domain/entities/Event";
-import type { IRepository } from "@shared/types";
+import type {
+  EventCreatePayload,
+  EventUpdatePayload,
+  IEventRepository,
+} from "@modules/events/types";
 
 import { mapEventRowToEntity } from "@modules/events/application/mappers/mapEventRow";
 import {
@@ -33,40 +37,6 @@ function parseEventLinkId(id: string): {
 
   return { applicationId, eventId };
 }
-
-/**
- * Type alias for event create payload.
- */
-export interface EventCreatePayload {
-  applicationId: string;
-  type: InteractionStage;
-  title: string;
-  description: string | null;
-  notes?: string | null;
-  eventAt?: string | null;
-  sortOrder?: number;
-}
-/**
- * Type alias for event update payload.
- */
-export interface EventUpdatePayload {
-  id: string;
-  type?: InteractionStage;
-  title?: string;
-  description?: string | null;
-  notes?: string | null;
-  eventAt?: string | null;
-  sortOrder?: number;
-}
-
-/**
- * Defines ievent repository.
- */
-export interface IEventRepository extends IRepository<
-  Event,
-  EventCreatePayload,
-  EventUpdatePayload
-> {}
 
 /**
  * Implements event repository.

@@ -2,7 +2,7 @@ import type { Event } from "@modules/events/domain/entities/Event";
 import type {
   EventCreatePayload,
   EventUpdatePayload,
-} from "@modules/events/repositories/EventRepository";
+} from "@modules/events/types";
 
 import { EventRepository } from "@modules/events/repositories/EventRepository";
 import { EventService } from "@modules/events/services/EventService";

@@ -5,7 +5,7 @@
     CompanyAssociatedContact,
     CompanyCreatePayload,
     CompanyUpdatePayload,
-  } from "@modules/companies/repositories/CompanyRepository";
+  } from "@modules/companies/types";
 
   import { useCompany } from "@modules/companies";
   import { useTag } from "@modules/tags";

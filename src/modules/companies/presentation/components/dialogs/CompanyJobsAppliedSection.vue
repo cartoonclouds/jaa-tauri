@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { CompanyAssociatedApplication } from "@modules/companies/repositories/CompanyRepository";
+  import type { CompanyAssociatedApplication } from "@modules/companies/types";
 
   /**
    * Defines jobs applied section props.

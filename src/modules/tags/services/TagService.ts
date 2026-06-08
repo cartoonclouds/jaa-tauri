@@ -5,7 +5,7 @@ import {
   type ITagRepository,
   type TagCreatePayload,
   type TagUpdatePayload,
-} from "@modules/tags/repositories/TagRepository";
+} from "@modules/tags/types";
 import { parseTrimmedWithSchema } from "@shared/utils/zodValidation";
 
 const TagNameSchema = TagSchema.pick({ name: true });

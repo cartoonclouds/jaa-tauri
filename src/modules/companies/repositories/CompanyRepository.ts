@@ -1,12 +1,13 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Company } from "@modules/companies/domain/entities/Company";
 import type {
-  DatatablePageQuery,
-  DatatablePageResult,
-  IPaginatedRepository,
-  IRepository,
-  LocationFieldsInput,
-} from "@shared/types";
+  CompanyAssociatedApplication,
+  CompanyAssociatedContact,
+  CompanyCreatePayload,
+  CompanyUpdatePayload,
+  ICompanyRepository,
+} from "@modules/companies/types";
+import type { DatatablePageQuery, DatatablePageResult } from "@shared/types";
 
 import { mapCompanyRowToEntity } from "@modules/companies/application/mappers/mapCompanyRow";
 import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants";
@@ -23,69 +24,6 @@ import {
   listTagIdsForEntity,
   syncTagIdsForEntity,
 } from "@shared/utils/tagAssociations";
-
-/**
- * Defines company create payload.
- */
-export interface CompanyCreatePayload extends LocationFieldsInput {
-  name: string;
-  websiteUrl?: string | null;
-  linkedinUrl?: string | null;
-  industry?: string | null;
-  size?: string | null;
-  notes?: string | null;
-  tagIds?: string[];
-}
-
-/**
- * Defines company update payload.
- */
-export interface CompanyUpdatePayload extends LocationFieldsInput {
-  id: string;
-  name?: string;
-  websiteUrl?: string | null;
-  linkedinUrl?: string | null;
-  industry?: string | null;
-  size?: string | null;
-  notes?: string | null;
-  tagIds?: string[];
-}
-
-/**
- * Lightweight contact row associated with a company.
- */
-export interface CompanyAssociatedContact {
-  id: string;
-  fullName: string;
-  email: string | null;
-  phone: string | null;
-  type: string;
-}
-
-/**
- * Lightweight application row associated with a company.
- */
-export interface CompanyAssociatedApplication {
-  id: string;
-  title: string;
-  status: string;
-  appliedAt: string | null;
-}
-
-/**
- * Defines icompany repository.
- */
-export interface ICompanyRepository
-  extends
-    IRepository<Company, CompanyCreatePayload, CompanyUpdatePayload>,
-    IPaginatedRepository<Company> {
-  listAssociatedContacts(
-    companyId: string,
-  ): Promise<CompanyAssociatedContact[]>;
-  listAssociatedApplications(
-    companyId: string,
-  ): Promise<CompanyAssociatedApplication[]>;
-}
 
 /**
  * Implements company repository.

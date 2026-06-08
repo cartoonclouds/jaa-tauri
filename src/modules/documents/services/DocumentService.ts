@@ -6,7 +6,7 @@ import {
   type DocumentCreatePayload,
   type DocumentUpdatePayload,
   type IDocumentRepository,
-} from "@modules/documents/repositories/DocumentRepository";
+} from "@modules/documents/types";
 import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**

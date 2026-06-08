@@ -1,13 +1,12 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Document } from "@modules/documents/domain/entities/Document";
 import type {
-  DatatablePageQuery,
-  DatatablePageResult,
-  EntityCreatePayload,
-  IPaginatedRepository,
-  IRepository,
-  PartialUpdatePayload,
-} from "@shared/types";
+  ApplicationLinkedDocument,
+  DocumentCreatePayload,
+  DocumentUpdatePayload,
+  IDocumentRepository,
+} from "@modules/documents/types";
+import type { DatatablePageQuery, DatatablePageResult } from "@shared/types";
 
 import { mapDocumentRowToEntity } from "@modules/documents/application/mappers/mapDocumentRow";
 import { DOCUMENT_SEARCH_FIELDS } from "@modules/documents/constants";
@@ -21,43 +20,6 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
-
-/**
- * Type alias for document create payload.
- */
-export type DocumentCreatePayload = EntityCreatePayload<
-  Document,
-  "title" | "kind" | "filePath" | "mimeType" | "sizeBytes" | "checksum"
->;
-/**
- * Type alias for document update payload.
- */
-export type DocumentUpdatePayload = PartialUpdatePayload<DocumentCreatePayload>;
-
-/**
- * Linked document entry for a specific application.
- */
-export interface ApplicationLinkedDocument {
-  document: Document;
-  relationType: string;
-}
-
-/**
- * Defines idocument repository.
- */
-export interface IDocumentRepository
-  extends
-    IRepository<Document, DocumentCreatePayload, DocumentUpdatePayload>,
-    IPaginatedRepository<Document> {
-  listByApplicationId(
-    applicationId: string,
-  ): Promise<ApplicationLinkedDocument[]>;
-  linkToApplication(
-    applicationId: string,
-    documentId: string,
-    relationType?: string,
-  ): Promise<void>;
-}
 
 /**
  * Implements document repository.

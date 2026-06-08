@@ -1,12 +1,11 @@
 import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { Profile } from "@modules/profile/domain/entities/Profile";
 import type {
-  DatatablePageQuery,
-  DatatablePageResult,
-  IPaginatedRepository,
-  IRepository,
-  PartialUpdatePayload,
-} from "@shared/types";
+  IProfileRepository,
+  ProfileCreatePayload,
+  ProfileUpdatePayload,
+} from "@modules/profile/types";
+import type { DatatablePageQuery, DatatablePageResult } from "@shared/types";
 
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
 import { PROFILE_SEARCH_FIELDS } from "@modules/profile/constants";
@@ -22,26 +21,6 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
-
-/**
- * Type alias for profile create payload.
- */
-export type ProfileCreatePayload = Pick<Profile, "fullName"> &
-  Partial<Omit<Profile, "id" | "fullName" | "createdAt" | "updatedAt">>;
-/**
- * Type alias for profile update payload.
- */
-export type ProfileUpdatePayload = PartialUpdatePayload<ProfileCreatePayload>;
-
-/**
- * Defines iprofile repository.
- */
-export interface IProfileRepository
-  extends
-    IRepository<Profile, ProfileCreatePayload, ProfileUpdatePayload>,
-    IPaginatedRepository<Profile> {
-  get(id: string): Promise<Profile | null>;
-}
 
 /**
  * Implements profile repository.

@@ -1,5 +1,5 @@
 import type { Setting } from "@modules/settings/domain/entities/Setting";
-import type { SettingUpsertPayload } from "@modules/settings/repositories/SettingRepository";
+import type { SettingUpsertPayload } from "@modules/settings/types";
 
 import { SettingRepository } from "@modules/settings/repositories/SettingRepository";
 import { SettingService } from "@modules/settings/services/SettingService";

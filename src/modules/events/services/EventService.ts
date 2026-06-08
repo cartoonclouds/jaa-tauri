@@ -3,7 +3,7 @@ import {
   type EventCreatePayload,
   type EventUpdatePayload,
   type IEventRepository,
-} from "@modules/events/repositories/EventRepository";
+} from "@modules/events/types";
 import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**

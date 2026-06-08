@@ -1,5 +1,5 @@
 import type { IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
-import type { ICompanyRepository } from "@modules/companies/repositories/CompanyRepository";
+import type { ICompanyRepository } from "@modules/companies/types";
 import type { IContactRepository } from "@modules/contacts/repositories/ContactRepository";
 
 import { vi } from "vitest";

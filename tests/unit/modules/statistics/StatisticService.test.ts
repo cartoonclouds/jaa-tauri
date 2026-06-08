@@ -1,7 +1,7 @@
 import type { IMetric } from "@/modules/statistics/domain/types/metric";
 import type { StatisticCardMetricDefinition } from "@/modules/statistics/domain/types/statistic";
 import type { StatisticMetricId } from "@/modules/statistics/domain/types/statistic";
-import type { IStatisticRepository } from "@modules/statistics/repositories/StatisticRepository";
+import type { IStatisticRepository } from "@modules/statistics/types";
 
 // eslint-disable-next-line no-restricted-imports
 import { StatisticService } from "@modules/statistics/services/StatisticService";
