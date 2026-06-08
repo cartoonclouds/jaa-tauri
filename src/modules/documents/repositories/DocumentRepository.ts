@@ -4,6 +4,7 @@ import type {
   DatatablePageQuery,
   DatatablePageResult,
   EntityCreatePayload,
+  IPaginatedRepository,
   IRepository,
   PartialUpdatePayload,
 } from "@shared/types";
@@ -44,12 +45,10 @@ export interface ApplicationLinkedDocument {
 /**
  * Defines idocument repository.
  */
-export interface IDocumentRepository extends IRepository<
-  Document,
-  DocumentCreatePayload,
-  DocumentUpdatePayload
-> {
-  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Document>>;
+export interface IDocumentRepository
+  extends
+    IRepository<Document, DocumentCreatePayload, DocumentUpdatePayload>,
+    IPaginatedRepository<Document> {
   listByApplicationId(
     applicationId: string,
   ): Promise<ApplicationLinkedDocument[]>;

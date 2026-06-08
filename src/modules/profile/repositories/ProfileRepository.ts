@@ -3,6 +3,7 @@ import type { Profile } from "@modules/profile/domain/entities/Profile";
 import type {
   DatatablePageQuery,
   DatatablePageResult,
+  IPaginatedRepository,
   IRepository,
   PartialUpdatePayload,
 } from "@shared/types";
@@ -35,13 +36,11 @@ export type ProfileUpdatePayload = PartialUpdatePayload<ProfileCreatePayload>;
 /**
  * Defines iprofile repository.
  */
-export interface IProfileRepository extends IRepository<
-  Profile,
-  ProfileCreatePayload,
-  ProfileUpdatePayload
-> {
+export interface IProfileRepository
+  extends
+    IRepository<Profile, ProfileCreatePayload, ProfileUpdatePayload>,
+    IPaginatedRepository<Profile> {
   get(id: string): Promise<Profile | null>;
-  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Profile>>;
 }
 
 /**

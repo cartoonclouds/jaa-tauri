@@ -4,6 +4,7 @@ import type { TagModelType as TagModelTypeValue } from "@modules/tags/domain/enu
 import type {
   DatatablePageQuery,
   DatatablePageResult,
+  IPaginatedRepository,
   IRepository,
   PartialUpdatePayload,
 } from "@shared/types";
@@ -34,12 +35,10 @@ export type TagUpdatePayload = PartialUpdatePayload<TagCreatePayload>;
 /**
  * Defines itag repository.
  */
-export interface ITagRepository extends IRepository<
-  Tag,
-  TagCreatePayload,
-  TagUpdatePayload
-> {
-  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Tag>>;
+export interface ITagRepository
+  extends
+    IRepository<Tag, TagCreatePayload, TagUpdatePayload>,
+    IPaginatedRepository<Tag> {
   /** List tags scoped to a specific model type, including general-purpose tags. */
   listByModelType(modelType: TagModelTypeValue): Promise<Tag[]>;
 }

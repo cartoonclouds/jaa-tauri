@@ -12,6 +12,7 @@ export type {
 } from "./pagination";
 export type {
   EntityCreatePayload,
+  IPaginatedRepository,
   IRepository,
   PartialUpdatePayload,
   WithId,

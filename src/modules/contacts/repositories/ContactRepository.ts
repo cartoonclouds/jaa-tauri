@@ -4,6 +4,7 @@ import type {
   DatatablePageQuery,
   DatatablePageResult,
   EntityCreatePayload,
+  IPaginatedRepository,
   IRepository,
   PartialUpdatePayload,
 } from "@shared/types";
@@ -54,12 +55,10 @@ export type ContactUpdatePayload = PartialUpdatePayload<ContactCreatePayload>;
 /**
  * Defines icontact repository.
  */
-export interface IContactRepository extends IRepository<
-  Contact,
-  ContactCreatePayload,
-  ContactUpdatePayload
-> {
-  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Contact>>;
+export interface IContactRepository
+  extends
+    IRepository<Contact, ContactCreatePayload, ContactUpdatePayload>,
+    IPaginatedRepository<Contact> {
   listByApplicationId(
     applicationId: string,
   ): Promise<ApplicationLinkedContact[]>;

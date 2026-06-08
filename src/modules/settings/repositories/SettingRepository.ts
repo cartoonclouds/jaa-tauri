@@ -3,6 +3,7 @@ import type { Setting } from "@modules/settings/domain/entities/Setting";
 import type {
   DatatablePageQuery,
   DatatablePageResult,
+  IPaginatedRepository,
   IRepository,
 } from "@shared/types";
 
@@ -101,14 +102,12 @@ export type SettingUpdatePayload = SettingUpsertPayload & { id: string };
 /**
  * Repository contract for persisted settings and editable constant rows.
  */
-export interface ISettingRepository extends IRepository<
-  Setting,
-  SettingCreatePayload,
-  SettingUpdatePayload
-> {
+export interface ISettingRepository
+  extends
+    IRepository<Setting, SettingCreatePayload, SettingUpdatePayload>,
+    IPaginatedRepository<Setting> {
   get(id?: string): Promise<Setting | null>;
   upsert(payload: SettingUpsertPayload): Promise<string>;
-  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Setting>>;
   getConstantRow(
     type: PersistedConstantSourceType,
     value: string,

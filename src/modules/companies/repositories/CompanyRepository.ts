@@ -3,6 +3,7 @@ import type { Company } from "@modules/companies/domain/entities/Company";
 import type {
   DatatablePageQuery,
   DatatablePageResult,
+  IPaginatedRepository,
   IRepository,
   LocationFieldsInput,
 } from "@shared/types";
@@ -74,12 +75,10 @@ export interface CompanyAssociatedApplication {
 /**
  * Defines icompany repository.
  */
-export interface ICompanyRepository extends IRepository<
-  Company,
-  CompanyCreatePayload,
-  CompanyUpdatePayload
-> {
-  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<Company>>;
+export interface ICompanyRepository
+  extends
+    IRepository<Company, CompanyCreatePayload, CompanyUpdatePayload>,
+    IPaginatedRepository<Company> {
   listAssociatedContacts(
     companyId: string,
   ): Promise<CompanyAssociatedContact[]>;

@@ -1,3 +1,5 @@
+import type { DatatablePageQuery, DatatablePageResult } from "./pagination";
+
 /**
  * Identifier-bearing payload shape.
  */
@@ -41,4 +43,12 @@ export interface IRepository<
   update(payload: TUpdatePayload): Promise<void>;
   /** Delete an entity by identifier. */
   delete(id: TId): Promise<void>;
+}
+
+/**
+ * Repository contract for paginated entity listing.
+ */
+export interface IPaginatedRepository<TEntity> {
+  /** List entities for a requested datatable page. */
+  listPage(query: DatatablePageQuery): Promise<DatatablePageResult<TEntity>>;
 }

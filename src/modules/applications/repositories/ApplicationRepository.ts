@@ -6,7 +6,7 @@ import type {
 } from "@modules/applications/types/payloads";
 import type {
   DatatablePageQuery,
-  DatatablePageResult,
+  IPaginatedRepository,
   IRepository,
 } from "@shared/types";
 
@@ -37,15 +37,14 @@ import {
 /**
  * Defines iapplication repository.
  */
-export interface IApplicationRepository extends IRepository<
-  Application,
-  ApplicationCreatePayload,
-  ApplicationUpdatePayload
-> {
-  listPage(
-    query: DatatablePageQuery,
-  ): Promise<DatatablePageResult<Application>>;
-}
+export interface IApplicationRepository
+  extends
+    IRepository<
+      Application,
+      ApplicationCreatePayload,
+      ApplicationUpdatePayload
+    >,
+    IPaginatedRepository<Application> {}
 
 /**
  * Implements application repository.
