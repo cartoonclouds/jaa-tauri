@@ -67,7 +67,7 @@ Window size and position are managed by `@tauri-apps/plugin-window-state` initia
 
 To add a new setting:
 
-1. Add to `AppSettings` interface in `settings/types.d.ts`
+1. Add to `AppSettings` interface in `settings/types/index.d.ts`
 2. Add default value in `settings/settings.repository.ts`
 3. Add getter/setter methods in repository if specialized access needed
 4. Expose via `settings.service.ts`
