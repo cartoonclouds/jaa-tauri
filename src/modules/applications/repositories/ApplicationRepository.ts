@@ -6,6 +6,7 @@ import type {
 } from "@modules/applications/types/payloads";
 import type {
   DatatablePageQuery,
+  DatatablePageResult,
   IPaginatedRepository,
   IRepository,
 } from "@shared/types";

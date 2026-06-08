@@ -72,7 +72,7 @@ function resolveSettingsLabel(type: PersistedConstantSourceType): string {
   const fallbackKey =
     typeSegments.length > 0 ? typeSegments[typeSegments.length - 1] : type;
 
-  let key: string = fallbackKey ?? type;
+  let key: string = fallbackKey;
 
   for (const source of CONSTANT_MODULE_SOURCES) {
     for (const exportName of Object.keys(source.module)) {
@@ -149,11 +149,11 @@ export class SettingRepository implements ISettingRepository {
       [id],
     );
 
-    const row = rows[0];
-    if (!row) {
+    if (rows.length === 0) {
       return null;
     }
 
+    const row = rows[0];
     return mapSettingRowToEntity(row);
   }
 
@@ -268,11 +268,11 @@ export class SettingRepository implements ISettingRepository {
       [type, normalizedLookupValue],
     );
 
-    const row = rows[0];
-    if (!row) {
+    if (rows.length === 0) {
       return null;
     }
 
+    const row = rows[0];
     return this.toConstantEntryRow(row);
   }
 
