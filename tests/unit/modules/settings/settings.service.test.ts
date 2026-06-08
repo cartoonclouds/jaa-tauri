@@ -20,6 +20,8 @@ import {
 } from "@modules/settings/persistence/settings.service";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { buildSettingsDto } from "../../../fixtures/factories/testPayloadFactories";
+
 // Mock the settings repository
 vi.mock("@modules/settings/persistence/settings.repository", () => ({
   addRecentSearch: vi.fn(),
@@ -56,15 +58,7 @@ describe("SettingsService", () => {
   });
 
   it("should fetch settings from repository", async () => {
-    const mockSettings = {
-      theme: "light" as const,
-      notificationsEnabled: true,
-      developerMode: false,
-      recentSearches: [],
-      tableColumnVisibility: {},
-      statsVisibility: {},
-      onboardingCompleted: false,
-    };
+    const mockSettings = buildSettingsDto();
 
     mockedGetSettings.mockResolvedValue(mockSettings);
     const service = new SettingsService();

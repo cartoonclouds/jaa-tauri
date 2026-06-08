@@ -1,8 +1,13 @@
-import type { ICompanyRepository } from "@modules/companies/repositories/CompanyRepository";
-
+// eslint-disable-next-line no-restricted-imports
 import { CompanyService } from "@modules/companies/services/CompanyService";
 import { resolveLocationFields } from "@shared/utils/geocoding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  buildCompanyCreatePayload,
+  buildCompanyUpdatePayload,
+} from "../../../fixtures/factories/testPayloadFactories";
+import { createCompanyRepositoryMock } from "../../../fixtures/factories/testRepositoryFactories";
 
 vi.mock("@shared/utils/geocoding", () => ({
   resolveLocationFields: vi.fn(),
@@ -10,16 +15,7 @@ vi.mock("@shared/utils/geocoding", () => ({
 
 describe("CompanyService location geocoding", () => {
   const mockedResolveLocationFields = vi.mocked(resolveLocationFields);
-
-  const repository = {
-    list: vi.fn(),
-    listPage: vi.fn(),
-    listAssociatedContacts: vi.fn(),
-    listAssociatedApplications: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-  } as unknown as ICompanyRepository;
+  const { repository, createMock, updateMock } = createCompanyRepositoryMock();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -33,19 +29,21 @@ describe("CompanyService location geocoding", () => {
   it("resolves coordinates before create", async () => {
     const service = new CompanyService(repository);
 
-    await service.create({
-      name: "ACME",
-      locationText: "Tokyo",
-      locationLat: null,
-      locationLng: null,
-    });
+    await service.create(
+      buildCompanyCreatePayload({
+        name: "ACME",
+        locationText: "Tokyo",
+        locationLat: null,
+        locationLng: null,
+      }),
+    );
 
     expect(mockedResolveLocationFields).toHaveBeenCalledWith({
       locationText: "Tokyo",
       currentLatitude: null,
       currentLongitude: null,
     });
-    expect(repository.create).toHaveBeenCalledWith(
+    expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({
         locationText: "Tokyo",
         locationLat: 35.6762,
@@ -57,16 +55,17 @@ describe("CompanyService location geocoding", () => {
   it("resolves coordinates before update when locationText is provided", async () => {
     const service = new CompanyService(repository);
 
-    await service.update({
-      id: "company-1",
-      name: "ACME",
-      locationText: "Tokyo",
-      locationLat: null,
-      locationLng: null,
-    });
+    await service.update(
+      buildCompanyUpdatePayload({
+        name: "ACME",
+        locationText: "Tokyo",
+        locationLat: null,
+        locationLng: null,
+      }),
+    );
 
     expect(mockedResolveLocationFields).toHaveBeenCalled();
-    expect(repository.update).toHaveBeenCalledWith(
+    expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         locationText: "Tokyo",
         locationLat: 35.6762,

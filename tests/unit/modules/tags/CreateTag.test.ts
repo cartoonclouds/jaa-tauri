@@ -1,36 +1,9 @@
-import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
-
-import { TagModelType } from "@modules/tags";
 import { TagRepository } from "@modules/tags";
-import { describe, expect, it, vi } from "vitest";
-type LocalSelectRows = Record<string, unknown>[];
+import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+import { describe, expect, it } from "vitest";
 
-function createMockDb(rows: LocalSelectRows = []): {
-  db: DatabaseDriver;
-  selectMock: ReturnType<typeof vi.fn>;
-  executeMock: ReturnType<typeof vi.fn>;
-  transactionMock: ReturnType<typeof vi.fn>;
-} {
-  const selectMock = vi.fn(() => Promise.resolve(rows));
-  const executeMock = vi.fn(() => Promise.resolve({ rowsAffected: 0 }));
-  const transactionMock = vi.fn(
-    <T>(callback: (tx: DatabaseDriver) => Promise<T>) => callback(db),
-  );
-
-  const db = {
-    name: "mock",
-    select: selectMock,
-    execute: executeMock,
-    transaction: transactionMock,
-  } as unknown as DatabaseDriver;
-
-  return {
-    db,
-    selectMock,
-    executeMock,
-    transactionMock,
-  };
-}
+import { buildTagCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
+import { createMockDb } from "../../shared/utils/dbTestUtils";
 
 describe("TagRepository.create", () => {
   it("rejects empty tag name", async () => {
@@ -38,7 +11,7 @@ describe("TagRepository.create", () => {
     const repository = new TagRepository(db);
 
     await expect(
-      repository.create({ name: "  ", color: null }),
+      repository.create(buildTagCreatePayload({ name: "  " })),
     ).rejects.toThrow("Tag name is required");
   });
 
@@ -46,7 +19,7 @@ describe("TagRepository.create", () => {
     const { db, executeMock } = createMockDb();
     const repository = new TagRepository(db);
 
-    await repository.create({ name: "urgent", color: null });
+    await repository.create(buildTagCreatePayload());
 
     expect(executeMock).toHaveBeenCalledOnce();
     const [sql, params] = executeMock.mock.calls[0] as [string, unknown[]];
@@ -58,11 +31,12 @@ describe("TagRepository.create", () => {
     const { db, executeMock } = createMockDb();
     const repository = new TagRepository(db);
 
-    await repository.create({
-      name: "referral",
-      color: null,
-      modelType: TagModelType.Application,
-    });
+    await repository.create(
+      buildTagCreatePayload({
+        name: "referral",
+        modelType: TagModelType.Application,
+      }),
+    );
 
     const [, params] = executeMock.mock.calls[0] as [string, unknown[]];
     expect(params).toContain("application");

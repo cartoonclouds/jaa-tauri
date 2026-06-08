@@ -3,7 +3,7 @@ import {
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
 import { describe, expect, it } from "vitest";
 
 describe("application enums", () => {

@@ -1,56 +1,30 @@
-import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
-
 import { SettingRepository } from "@modules/settings";
-import { describe, expect, it, vi } from "vitest";
-type LocalSelectRows = Record<string, unknown>[];
+import { describe, expect, it } from "vitest";
 
-function createMockDb(rows: LocalSelectRows = []): {
-  db: DatabaseDriver;
-  selectMock: ReturnType<typeof vi.fn>;
-  executeMock: ReturnType<typeof vi.fn>;
-  transactionMock: ReturnType<typeof vi.fn>;
-} {
-  const selectMock = vi.fn(() => Promise.resolve(rows));
-  const executeMock = vi.fn(() => Promise.resolve({ rowsAffected: 0 }));
-  const transactionMock = vi.fn(
-    <T>(callback: (tx: DatabaseDriver) => Promise<T>) => callback(db),
-  );
-
-  const db = {
-    name: "mock",
-    select: selectMock,
-    execute: executeMock,
-    transaction: transactionMock,
-  } as unknown as DatabaseDriver;
-
-  return {
-    db,
-    selectMock,
-    executeMock,
-    transactionMock,
-  };
-}
-
+import { buildSettingUpsertPayload } from "../../../fixtures/factories/testPayloadFactories";
+import { createMockDb } from "../../shared/utils/dbTestUtils";
 
 describe("SettingRepository.upsert", () => {
   it("writes defaults when payload is empty", async () => {
-    const { db } = createMockDb();
+    const { db, executeMock } = createMockDb();
     const repository = new SettingRepository(db);
 
-    await repository.upsert({});
+    await repository.upsert(buildSettingUpsertPayload());
 
-    expect(db.execute).toHaveBeenCalledOnce();
+    expect(executeMock).toHaveBeenCalledOnce();
   });
 
   it("writes provided setting values", async () => {
-    const { db } = createMockDb();
+    const { db, executeMock } = createMockDb();
     const repository = new SettingRepository(db);
 
-    await repository.upsert({
-      theme: "dark",
-      notificationsEnabled: false,
-    });
+    await repository.upsert(
+      buildSettingUpsertPayload({
+        theme: "dark",
+        notificationsEnabled: false,
+      }),
+    );
 
-    expect(db.execute).toHaveBeenCalledOnce();
+    expect(executeMock).toHaveBeenCalledOnce();
   });
 });

@@ -1,8 +1,4 @@
 /**
- * Generic repository contract for CRUD-style persistence layers.
- */
-
-/**
  * Identifier-bearing payload shape.
  */
 export interface WithId<TId = string> {
@@ -27,6 +23,9 @@ export type PartialUpdatePayload<
   TId = string,
 > = Partial<TCreatePayload> & WithId<TId>;
 
+/**
+ * Generic repository contract for CRUD-style persistence layers.
+ */
 export interface IRepository<
   TEntity,
   TCreatePayload,

@@ -11,6 +11,8 @@ import {
 } from "@modules/settings/persistence";
 import { describe, expect, it } from "vitest";
 
+import { buildSettingsRow } from "../../../fixtures/factories/testPayloadFactories";
+
 type SettingsRow = Record<string, unknown>;
 
 /**
@@ -37,7 +39,7 @@ class MockSettingsDatabaseDriver implements DatabaseDriver {
 
   execute(sql: string, bindings: QueryBindings = []): Promise<QueryResult> {
     if (sql.includes("INSERT INTO settings")) {
-      this.settingsRow = {
+      this.settingsRow = buildSettingsRow({
         id: String(bindings[0] ?? "app-settings"),
         theme: String(bindings[1] ?? "auto"),
         locale: String(bindings[2] ?? "en-GB"),
@@ -48,7 +50,7 @@ class MockSettingsDatabaseDriver implements DatabaseDriver {
         stats_visibility: String(bindings[7] ?? "{}"),
         onboarding_completed: Number(bindings[8] ?? 0),
         profile_id: null,
-      };
+      });
     }
 
     return Promise.resolve({

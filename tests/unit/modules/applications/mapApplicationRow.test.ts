@@ -4,38 +4,14 @@ import {
   ApplicationEmploymentType,
   ApplicationEventFlowStatus,
   ApplicationStatus,
-} from "@modules/applications/types/enums";
+} from "@modules/applications/domain/enums/ApplicationEnums";
 import { describe, expect, it } from "vitest";
+
+import { buildApplicationRow } from "../../../fixtures/factories/testPayloadFactories";
 
 describe("mapApplicationRowToEntity", () => {
   it("returns instantiated enum values for attendance and employment types", () => {
-    const now = new Date().toISOString();
-
-    const entity = mapApplicationRowToEntity({
-      id: "app-1",
-      company_id: null,
-      title: "Frontend Engineer",
-      status: "applied",
-      event_flow_status: "offer",
-      source_url: null,
-      applied_at: now,
-      location_text: null,
-      location_lat: null,
-      location_lng: null,
-      attendance_type: "remote",
-      employment_type: "full-time",
-      salary_min: null,
-      salary_max: null,
-      currency: null,
-      description: null,
-      interview_process: null,
-      benefits: null,
-      priority: 3,
-      is_archived: 0,
-      deleted_at: null,
-      created_at: now,
-      updated_at: now,
-    });
+    const entity = mapApplicationRowToEntity(buildApplicationRow());
 
     expect(entity.attendanceType).toBe(ApplicationAttendanceType.Remote);
     expect(entity.employmentType).toBe(ApplicationEmploymentType.FullTime);
@@ -44,33 +20,16 @@ describe("mapApplicationRowToEntity", () => {
   });
 
   it("returns null for unsupported optional enums and defaults invalid status", () => {
-    const now = new Date().toISOString();
-
-    const entity = mapApplicationRowToEntity({
-      id: "app-2",
-      company_id: null,
-      title: "Backend Engineer",
-      status: "invalid-status",
-      event_flow_status: "invalid-flow",
-      source_url: null,
-      applied_at: now,
-      location_text: null,
-      location_lat: null,
-      location_lng: null,
-      attendance_type: "invalid-attendance",
-      employment_type: "invalid-employment",
-      salary_min: null,
-      salary_max: null,
-      currency: null,
-      description: null,
-      interview_process: null,
-      benefits: null,
-      priority: 3,
-      is_archived: 0,
-      deleted_at: null,
-      created_at: now,
-      updated_at: now,
-    });
+    const entity = mapApplicationRowToEntity(
+      buildApplicationRow({
+        id: "app-2",
+        title: "Backend Engineer",
+        status: "invalid-status",
+        event_flow_status: "invalid-flow",
+        attendance_type: "invalid-attendance",
+        employment_type: "invalid-employment",
+      }),
+    );
 
     expect(entity.attendanceType).toBeNull();
     expect(entity.employmentType).toBeNull();
