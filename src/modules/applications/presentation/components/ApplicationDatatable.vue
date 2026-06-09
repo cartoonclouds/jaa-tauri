@@ -15,6 +15,7 @@
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
 
   import ServerDatatable from "@/components/ui/ServerDatatable.vue";
+  import { formatRelativeDate } from "@/shared/utils/toDate";
 
   /**
    * Defines props.
@@ -183,6 +184,16 @@
       header-class="text-center"
       body-class="text-center"
     />
+    <Column
+      field="updated_at"
+      header="Updated"
+      sortable
+      header-class="text-center"
+      body-class="text-center"
+    >
+      <template #body="slotProps">
+        {{ formatRelativeDate((slotProps.data as Application).updatedAt) }}
+      </template>
+    </Column>
   </ServerDatatable>
 </template>
-

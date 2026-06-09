@@ -1,9 +1,12 @@
 <script setup lang="ts">
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
+  import { useProfile } from "@modules/profile";
   import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
   import { ref } from "vue";
 
   import EntityLocationsMapBrowser from "@/components/ui/EntityLocationsMapBrowser.vue";
+  import { formatProfileName } from "@/shared/utils/strings";
+  import { getTimeOfDay } from "@/shared/utils/toDate";
 
   /**
    * Type alias for top section view.
@@ -17,6 +20,10 @@
     value: TopSectionView;
   }
 
+  const { service: profileService } = useProfile();
+
+  const profile = await profileService.getProfile();
+
   const topView = ref<TopSectionView>("overview");
 
   const topViewOptions: TopSectionOption[] = [
@@ -26,18 +33,20 @@
 </script>
 
 <template>
-  <main class="min-h-screen bg-slate-950 p-6 text-slate-100">
-    <div class="mx-auto mb-6 flex justify-end">
-      <div class="grow">
+  <main
+    :class="[
+      'flex flex-col bg-slate-950 p-6 text-slate-100 ',
+      topView === 'map' ? 'h-dvh' : 'min-h-screen',
+    ]"
+  >
+    <div class="mx-auto mb-6 flex justify-between w-full">
+      <div>
         <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
           <Icon name="heroicons:briefcase" class="text-emerald-400" />
-          Apply-Flow
+          {{ getTimeOfDay() }}, {{ formatProfileName(profile.fullName) }}
         </h1>
 
-        <p class="text-slate-300">
-          Feature modules are wired with repository, service, query composable,
-          and CRUD pages.
-        </p>
+        <p class="text-slate-300 mt-2">Here's your application overview.</p>
       </div>
 
       <SelectButton
@@ -52,7 +61,7 @@
     <div v-if="topView === 'overview'" class="mx-auto space-y-6">
       <ClientOnly>
         <section class="mx-auto mb-8">
-          <StatisticsSection title="Job Hunt Snapshot" />
+          <StatisticsSection title="Job Hunt Overview" />
         </section>
       </ClientOnly>
 
@@ -61,9 +70,9 @@
       </ClientOnly>
     </div>
 
-    <div v-else class="mx-auto mb-6">
+    <div v-else class="mx-auto flex min-h-0 flex-1 w-full">
       <ClientOnly>
-        <EntityLocationsMapBrowser />
+        <EntityLocationsMapBrowser class="h-full w-full" />
       </ClientOnly>
     </div>
   </main>

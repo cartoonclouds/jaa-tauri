@@ -235,7 +235,9 @@ export class ApplicationRepository implements IApplicationRepository {
         ? `${this.effectiveEventFlowStatusSearchExpression} ${query.sortOrder === "asc" ? "ASC" : "DESC"}, applications.created_at DESC`
         : query.sortField === "status"
           ? `${this.effectiveApplicationStatusSearchExpression} ${query.sortOrder === "asc" ? "ASC" : "DESC"}, applications.created_at DESC`
-          : orderByClause;
+          : query.sortField === "updatedAt"
+            ? `applications.updated_at ${query.sortOrder === "asc" ? "ASC" : "DESC"}, applications.created_at DESC`
+            : orderByClause;
 
     const totalRows = hasSearch
       ? await this.db.select<{ total: number }>(

@@ -16,6 +16,10 @@ const ProfileNameSchema = ProfileSchema.pick({ fullName: true });
 export class ProfileService {
   constructor(private readonly repository: IProfileRepository) {}
 
+  async getProfile() {
+    return (await this.repository.list())[0];
+  }
+
   list() {
     return this.repository.list();
   }

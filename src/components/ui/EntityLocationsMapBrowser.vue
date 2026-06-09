@@ -15,6 +15,8 @@
     watch,
   } from "vue";
 
+  import { ucfirst } from "@/shared/utils/strings";
+
   /**
    * Supported source groups shown in the map browser.
    */
@@ -58,7 +60,7 @@
         locationText: contact.locationText,
         locationLat: contact.locationLat,
         locationLng: contact.locationLng,
-        subtitle: contact.type,
+        subtitle: ucfirst(contact.type),
       })),
   );
 
@@ -134,6 +136,7 @@
         contactService.list(),
         applicationService.list(),
       ]);
+
       contacts.value = contactsResult;
       applications.value = applicationsResult;
     } catch {
@@ -211,7 +214,7 @@
 
 <template>
   <section
-    class="space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4 sm:p-6"
+    class="flex h-full min-h-0 flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4 sm:p-6"
   >
     <div
       class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
@@ -272,11 +275,10 @@
       Loading map data...
     </div>
 
-    <div
-      v-else-if="filteredEntities.length"
-      class="grid grid-cols-1 gap-4 md:grid-cols-2"
-    >
-      <div class="max-h-120 space-y-2 overflow-y-auto pr-1">
+    <div v-else-if="filteredEntities.length" class="min-h-0 gap-4 flex h-full">
+      <div
+        class="min-h-0 space-y-2 overflow-y-auto pr-1 w-min min-w-1/4 h-full"
+      >
         <Button
           v-for="entity in filteredEntities"
           :key="entity.id"
@@ -288,22 +290,22 @@
           <div class="w-full truncate text-left">
             <div class="truncate font-medium">{{ entity.name }}</div>
             <div class="truncate text-xs text-slate-400">
-              {{ entity.subtitle }}
+              {{ ucfirst(entity.subtitle) }}
             </div>
             <div class="truncate text-xs text-slate-500">
-              {{ entity.locationText || "No location label" }}
+              {{ ucfirst(entity.locationText || "No location label") }}
             </div>
           </div>
         </Button>
       </div>
 
-      <div class="space-y-2">
+      <div class="flex min-h-0 flex-col space-y-2 grow">
         <h3 class="text-base font-medium text-slate-200">
           {{ selectedEntity?.name }}
         </h3>
         <div
           ref="mapContainer"
-          class="h-120 w-full rounded-lg border border-slate-700"
+          class="h-80 w-full flex-1 rounded-lg border border-slate-700"
         />
       </div>
     </div>

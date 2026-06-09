@@ -217,7 +217,7 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between gap-3">
-      <h2 class="text-2xl font-semibold">Job Hunt Snapshot</h2>
+      <h2 class="text-2xl font-semibold">Job Hunt Overview</h2>
       <div class="flex items-center gap-2">
         <Button
           v-if="isEditMode"
@@ -251,8 +251,7 @@
         :key="metric.id"
         class="relative"
         :class="{
-          'cursor-grab active:cursor-grabbing': isEditMode,
-          'stat-card-jiggle': isEditMode,
+          'stat-card-jiggle cursor-grab active:cursor-grabbing': isEditMode,
         }"
       >
         <div

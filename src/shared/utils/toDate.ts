@@ -120,3 +120,77 @@ export function parseDateTimeLocalValue(value: string): Date | null {
   const parsed = new Date(year, month - 1, day, hour, minute);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
+
+/**
+ * Format a Date as a relative time string (e.g. "just now", "5 minutes ago", "in 2 hours").
+ *
+ * Falls back to a display date format for dates more than a month in the past or future.
+ *
+ * @param {Date} value - The date to format.
+ * @param {Date} [now=new Date()] - The reference date for calculating the relative time.
+ * @returns {string} A relative time string or a formatted date.
+ */
+export function formatRelativeDate(
+  value: Date,
+  now: Date = new Date(),
+): string {
+  const diffMs = value.getTime() - now.getTime();
+  const diffSeconds = Math.round(diffMs / 1000);
+  const diffMinutes = Math.round(diffSeconds / 60);
+  const diffHours = Math.round(diffMinutes / 60);
+  const diffDays = Math.round(diffHours / 24);
+  const diffWeeks = Math.round(diffDays / 7);
+  const diffMonths = Math.round(diffDays / 30);
+
+  if (diffSeconds >= -30 && diffSeconds <= 30) {
+    return "just now";
+  }
+
+  if (diffMinutes >= -1 && diffMinutes <= 1) {
+    return `${String(Math.abs(diffMinutes))} minute${Math.abs(diffMinutes) !== 1 ? "s" : ""} ${
+      diffMinutes < 0 ? "ago" : "from now"
+    }`;
+  }
+
+  if (diffHours >= -1 && diffHours <= 1) {
+    return `${String(Math.abs(diffHours))} hour${Math.abs(diffHours) !== 1 ? "s" : ""} ${
+      diffHours < 0 ? "ago" : "from now"
+    }`;
+  }
+
+  if (diffDays >= -1 && diffDays <= 1) {
+    return `${String(Math.abs(diffDays))} day${Math.abs(diffDays) !== 1 ? "s" : ""} ${
+      diffDays < 0 ? "ago" : "from now"
+    }`;
+  }
+
+  if (diffWeeks >= -1 && diffWeeks <= 1) {
+    return `${String(Math.abs(diffWeeks))} week${Math.abs(diffWeeks) !== 1 ? "s" : ""} ${
+      diffWeeks < 0 ? "ago" : "from now"
+    }`;
+  }
+
+  if (diffMonths >= -1 && diffMonths <= 1) {
+    return `${String(Math.abs(diffMonths))} month${Math.abs(diffMonths) !== 1 ? "s" : ""} ${
+      diffMonths < 0 ? "ago" : "from now"
+    }`;
+  }
+
+  return formatDisplayDate(value);
+}
+
+/**
+ * Get a time-of-day appropriate greeting message.
+ *
+ * @returns {string} A greeting message based on the current time of day.
+ */
+export function getTimeOfDay(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) {
+    return "Good morning";
+  } else if (hour < 18) {
+    return "Good afternoon";
+  } else {
+    return "Good evening";
+  }
+}
