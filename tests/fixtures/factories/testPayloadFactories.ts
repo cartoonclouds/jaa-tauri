@@ -16,6 +16,7 @@ import type {
   EventUpdatePayload,
 } from "@modules/events/types";
 import type { NotificationCreatePayload } from "@modules/notifications/types";
+import type { UserProfile } from "@modules/profile/domain/entities/UserProfile";
 import type { ProfileCreatePayload } from "@modules/profile/types";
 import type { SettingUpsertPayload } from "@modules/settings/types";
 import type { TagCreatePayload } from "@modules/tags/types";
@@ -165,6 +166,29 @@ export function buildCompanyUpdatePayload(
   };
 }
 
+/** Build a mock company row for mapper tests with optional overrides. */
+export function buildCompanyRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "company-1",
+    name: "Acme Ltd",
+    website_url: "https://acme.example",
+    linkedin_url: "https://linkedin.com/company/acme",
+    industry: "Software",
+    size: "51-200",
+    location_text: "London",
+    location_lat: 51.5072,
+    location_lng: -0.1276,
+    notes: "Important client",
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  };
+}
+
 /** Build a default contact create payload with optional overrides. */
 export function buildContactCreatePayload(
   overrides: Partial<ContactCreatePayload> = {},
@@ -197,6 +221,30 @@ export function buildContactUpdatePayload(
   };
 }
 
+/** Build a mock contact row for mapper tests with optional overrides. */
+export function buildContactRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "contact-1",
+    company_id: "company-1",
+    full_name: "Jane Recruiter",
+    email: "jane@example.com",
+    phone: "+44 20 7946 0958",
+    linkedin_url: "https://linkedin.com/in/jane",
+    location_text: "London",
+    location_lat: 51.5,
+    location_lng: -0.12,
+    type: "recruiter",
+    notes: "Friendly contact",
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  };
+}
+
 /** Build a default document create payload with optional overrides. */
 export function buildDocumentCreatePayload(
   overrides: Partial<DocumentCreatePayload> = {},
@@ -205,9 +253,29 @@ export function buildDocumentCreatePayload(
     title: "CV",
     kind: "cv",
     filePath: "/docs/cv.pdf",
-    mimeType: null,
+    mimeType: "application/pdf",
     sizeBytes: null,
     checksum: null,
+    ...overrides,
+  };
+}
+
+/** Build a mock document row for mapper tests with optional overrides. */
+export function buildDocumentRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "550e8400-e29b-41d4-a716-446655440010",
+    title: "CV",
+    kind: "cv",
+    file_path: "/docs/cv.pdf",
+    mime_type: "application/pdf",
+    size_bytes: 1024,
+    checksum: "abc123",
+    created_at: now,
+    updated_at: now,
     ...overrides,
   };
 }
@@ -235,6 +303,27 @@ export function buildEventUpdatePayload(
   };
 }
 
+/** Build a mock event row for mapper tests with optional overrides. */
+export function buildEventRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "event-1",
+    application_id: "550e8400-e29b-41d4-a716-446655440111",
+    sort_order: 2,
+    type: "Interview/Technical Interview",
+    title: "Tech interview",
+    description: "Pair programming round",
+    notes: "Bring portfolio",
+    event_at: now,
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  };
+}
+
 /** Build a default notification create payload with optional overrides. */
 export function buildNotificationCreatePayload(
   overrides: Partial<NotificationCreatePayload> = {},
@@ -252,6 +341,28 @@ export function buildNotificationCreatePayload(
   };
 }
 
+/** Build a mock notification row for mapper tests with optional overrides. */
+export function buildNotificationRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "550e8400-e29b-41d4-a716-446655440020",
+    application_id: null,
+    event_id: null,
+    severity: "info",
+    title: "Reminder",
+    body: "Follow up tomorrow",
+    is_read: 0,
+    scheduled_for: now,
+    sent_at: null,
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  };
+}
+
 /** Build a default profile create payload with optional overrides. */
 export function buildProfileCreatePayload(
   overrides: Partial<ProfileCreatePayload> = {},
@@ -262,11 +373,51 @@ export function buildProfileCreatePayload(
   };
 }
 
+/** Build a default onboarding user profile with optional overrides. */
+export function buildUserProfile(
+  overrides: Partial<UserProfile> = {},
+): UserProfile {
+  return {
+    fullName: "Jane Doe",
+    email: "jane@example.com",
+    targetRole: "Frontend Engineer",
+    desiredSalary: 120000,
+    salaryCurrency: "USD",
+    preferredLocations: ["Berlin"],
+    remotePreference: "flexible",
+    skills: ["Vue", "TypeScript"],
+    linkedInUrl: "https://linkedin.com/in/jane-doe",
+    githubUrl: "https://github.com/jane-doe",
+    workEligibility: "EU",
+    noticePeriodDays: 30,
+    interviewAvailability: "Weekdays",
+    ...overrides,
+  };
+}
+
 /** Build a default setting upsert payload with optional overrides. */
 export function buildSettingUpsertPayload(
   overrides: Partial<SettingUpsertPayload> = {},
 ): SettingUpsertPayload {
   return {
+    ...overrides,
+  };
+}
+
+/** Build a mock statistic row for mapper tests with optional overrides. */
+export function buildStatisticRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "550e8400-e29b-41d4-a716-446655440030",
+    name: "Applications submitted",
+    value: 12,
+    scope: "global",
+    recorded_at: now,
+    created_at: now,
+    updated_at: now,
     ...overrides,
   };
 }
@@ -307,6 +458,8 @@ export function buildSettingsDto(
 export function buildSettingsRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
+  const now = new Date().toISOString();
+
   return {
     id: "app-settings",
     theme: "auto",
@@ -318,6 +471,25 @@ export function buildSettingsRow(
     stats_visibility: "{}",
     onboarding_completed: 0,
     profile_id: null,
+    created_at: now,
+    updated_at: now,
+    ...overrides,
+  };
+}
+
+/** Build a mock tag row for mapper tests with optional overrides. */
+export function buildTagRow(
+  overrides: Partial<Record<string, unknown>> = {},
+): Record<string, unknown> {
+  const now = new Date().toISOString();
+
+  return {
+    id: "550e8400-e29b-41d4-a716-446655440040",
+    name: "urgent",
+    color: "#ef4444",
+    model_type: "general",
+    created_at: now,
+    updated_at: now,
     ...overrides,
   };
 }

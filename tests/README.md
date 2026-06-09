@@ -14,6 +14,7 @@ For a high-level overview of the app's layers and flows, see the [system archite
 - component: Component-level rendering and behavior tests.
 - integration: Cross-layer tests.
 - fixtures: Reusable test data.
+- fixtures/factories: Reusable factories to generate objects.
 - mocks: Test doubles.
 - setup.ts: Shared test setup.
 
