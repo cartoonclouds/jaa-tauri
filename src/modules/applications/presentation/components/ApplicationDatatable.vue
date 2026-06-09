@@ -50,6 +50,14 @@
     ];
   }>();
 
+  function getHoverText(column: string, value?: unknown): string {
+    if (column === "updated_at" && value instanceof Date) {
+      return value.toLocaleString();
+    }
+
+    return "";
+  }
+
   /**
    * Handles on row click.
    */
@@ -192,7 +200,17 @@
       body-class="text-center"
     >
       <template #body="slotProps">
-        {{ formatRelativeDate((slotProps.data as Application).updatedAt) }}
+        <span
+          v-tooltip.bottom="{
+            value: getHoverText(
+              'updated_at',
+              (slotProps.data as Application).updatedAt,
+            ),
+          }"
+          class="h-full"
+        >
+          {{ formatRelativeDate((slotProps.data as Application).updatedAt) }}
+        </span>
       </template>
     </Column>
   </ServerDatatable>

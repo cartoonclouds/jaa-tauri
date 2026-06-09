@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import type { Application as ApplicationEntity } from "@modules/applications/domain/entities/Application";
-  import type { ApplicationService } from "@modules/applications/services/ApplicationService";
   import type {
     ApplicationDrawerMode,
     ApplicationFormSubmitPayload,
@@ -11,17 +10,14 @@
     CompanyCreatePayload,
     CompanyUpdatePayload,
   } from "@modules/companies";
-  import type { CompanyService } from "@modules/companies/services/CompanyService";
   import type { ContactType } from "@modules/contacts/domain/entities/Contact";
   import type { ContactEditorSubmitPayload } from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import type {
     ContactCreatePayload,
     ContactUpdatePayload,
   } from "@modules/contacts/repositories/ContactRepository";
-  import type { ContactService } from "@modules/contacts/services/ContactService";
   import type { EditableContact } from "@modules/contacts/types/presentation";
   import type { Event } from "@modules/events/domain/entities/Event";
-  import type { EventService } from "@modules/events/services/EventService";
   import type { TagService } from "@modules/tags/services/TagService";
   import type { Ref } from "vue";
 
@@ -42,11 +38,19 @@
   import { toErrorMessage } from "@shared/utils/error";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
   import { useToast } from "primevue/usetoast";
-  import { ref } from "vue";
+  import { ref, watch } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
   import { useUnsavedChangesGuard } from "@/composables/useUnsavedChangesGuard";
+
+  interface Props {
+    initialApplicationId?: string | null;
+  }
+
+  const props = withDefaults(defineProps<Props>(), {
+    initialApplicationId: null,
+  });
 
   interface ApplicationContactCreatePayload {
     fullName: string;
@@ -63,18 +67,18 @@
     | { type: "cancel-edit" };
 
   const applicationComposable = useApplication();
-  const service = applicationComposable.service as ApplicationService;
+  const service = applicationComposable.service;
 
   const companyComposable = useCompany();
-  const companyService = companyComposable.service as CompanyService;
+  const companyService = companyComposable.service;
   const companyItems = companyComposable.items as Ref<Company[]>;
   const refreshCompanies = companyComposable.refresh;
 
   const contactComposable = useContact();
-  const contactService = contactComposable.service as ContactService;
+  const contactService = contactComposable.service;
 
   const eventComposable = useEvent();
-  const eventService = eventComposable.service as EventService;
+  const eventService = eventComposable.service;
 
   const tagComposable = useTag();
   const tagService: TagService = tagComposable.service;
@@ -450,6 +454,21 @@
   }
 
   /**
+   * Opens a specific application in view mode by id.
+   */
+  async function openApplicationById(applicationId: string): Promise<void> {
+    const applications = await service.list();
+    const application = applications.find(
+      (entry) => entry.id === applicationId,
+    );
+    if (!application) {
+      return;
+    }
+
+    openViewDrawer(application);
+  }
+
+  /**
    * Handles open company editor for a specific id.
    */
   function openCompanyEditor(companyId: string): void {
@@ -649,6 +668,18 @@
       isSavingContact.value = false;
     }
   }
+
+  watch(
+    () => props.initialApplicationId,
+    async (initialApplicationId) => {
+      if (typeof initialApplicationId !== "string") {
+        return;
+      }
+
+      await openApplicationById(initialApplicationId);
+    },
+    { immediate: true },
+  );
 </script>
 
 <template>

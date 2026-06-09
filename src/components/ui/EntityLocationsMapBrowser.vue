@@ -61,6 +61,8 @@
         locationLat: contact.locationLat,
         locationLng: contact.locationLng,
         subtitle: ucfirst(contact.type),
+        openHref: `/contacts?contactId=${encodeURIComponent(contact.id)}`,
+        openLabel: "Open contact",
       })),
   );
 
@@ -78,6 +80,8 @@
         locationLat: application.locationLat,
         locationLng: application.locationLng,
         subtitle: application.status.toLabel(),
+        openHref: `/applications?applicationId=${encodeURIComponent(application.id)}`,
+        openLabel: "Open application",
       })),
   );
 
@@ -357,5 +361,57 @@
 
   :deep(.app-map-cluster-icon > span) {
     line-height: 1;
+  }
+
+  :deep(.leaflet-popup-content-wrapper) {
+    background: rgb(15 23 42 / 0.96);
+    border: 1px solid rgb(51 65 85 / 0.8);
+    color: #e2e8f0;
+  }
+
+  :deep(.leaflet-popup-tip) {
+    background: rgb(15 23 42 / 0.96);
+  }
+
+  :deep(.app-map-popup) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+  }
+
+  :deep(.app-map-popup-title) {
+    color: #f8fafc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+  }
+
+  :deep(.app-map-popup-subtitle) {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.05rem;
+  }
+
+  :deep(.app-map-popup-location) {
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    line-height: 1.05rem;
+  }
+
+  :deep(.app-map-popup-link) {
+    color: #34d399;
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.35rem;
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  :deep(.app-map-popup-link:hover),
+  :deep(.app-map-popup-link:focus-visible) {
+    color: #6ee7b7;
+    text-decoration: underline;
   }
 </style>

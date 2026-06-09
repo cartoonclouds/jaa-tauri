@@ -1,15 +1,19 @@
 <script setup lang="ts">
   import { onMounted } from "vue";
 
-  import { useRouter } from "#imports";
+  import { useRoute, useRouter } from "#imports";
   import { useContactsDialog } from "@/composables/useContactsDialog";
 
+  const route = useRoute();
   const router = useRouter();
 
   const { openContactsDialog } = useContactsDialog();
 
   onMounted(() => {
-    openContactsDialog();
+    const contactId =
+      typeof route.query.contactId === "string" ? route.query.contactId : null;
+
+    openContactsDialog(contactId);
 
     void router.replace("/");
   });

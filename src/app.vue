@@ -9,7 +9,7 @@
   } from "@modules/settings";
   import SettingsDialog from "@modules/settings/presentation/components/dialogs/SettingsDialog.vue";
   import { invoke, isTauri } from "@tauri-apps/api/core";
-  import { onMounted } from "vue";
+  import { onMounted, ref, watch } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
   import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
@@ -19,9 +19,24 @@
 
   const { openOnboarding } = useOnboardingNavigation();
   const { isCompaniesDialogVisible } = useCompaniesDialog();
-  const { isContactsDialogVisible } = useContactsDialog();
+  const { isContactsDialogVisible, consumePendingContactId } =
+    useContactsDialog();
   const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
+  const initialContactId = ref<string | null>(null);
+
+  watch(
+    isContactsDialogVisible,
+    (visible) => {
+      if (!visible) {
+        initialContactId.value = null;
+        return;
+      }
+
+      initialContactId.value = consumePendingContactId();
+    },
+    { immediate: true },
+  );
 
   onMounted(async () => {
     if (import.meta.client && isTauri()) {
@@ -64,7 +79,10 @@
     <NuxtLayout>
       <NuxtPage />
       <CompaniesDialog v-model:visible="isCompaniesDialogVisible" />
-      <ContactsDialog v-model:visible="isContactsDialogVisible" />
+      <ContactsDialog
+        v-model:visible="isContactsDialogVisible"
+        :initial-contact-id="initialContactId"
+      />
       <SettingsDialog v-model:visible="isSettingsDialogVisible" />
       <Toast />
     </NuxtLayout>

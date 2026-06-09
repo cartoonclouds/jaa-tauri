@@ -12,16 +12,19 @@
   import ContactEditorDialog from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import ContactLocationMapDialog from "@modules/contacts/presentation/components/dialogs/ContactLocationMapDialog.vue";
   import { useToast } from "primevue/usetoast";
-  import { computed, ref } from "vue";
+  import { computed, ref, watch } from "vue";
 
   import LocationMapPreview from "@/components/ui/LocationMapPreview.vue";
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   interface Props {
     visible: boolean;
+    initialContactId?: string | null;
   }
 
-  const props = defineProps<Props>();
+  const props = withDefaults(defineProps<Props>(), {
+    initialContactId: null,
+  });
 
   const emit = defineEmits<{
     "update:visible": [value: boolean];
@@ -93,6 +96,19 @@
   }
 
   /**
+   * Opens the contact editor by contact id when available.
+   */
+  async function openEditContactDialogById(contactId: string): Promise<void> {
+    const contacts = await service.list();
+    const contact = contacts.find((entry) => entry.id === contactId);
+    if (!contact) {
+      return;
+    }
+
+    openEditContactDialog(contact);
+  }
+
+  /**
    * Handles contact editor submit.
    */
   async function onContactEditorSubmit(
@@ -147,6 +163,18 @@
     mapDialogVisible.value = false;
     selectedMapContact.value = null;
   }
+
+  watch(
+    () => [dialogVisible.value, props.initialContactId] as const,
+    async ([visible, initialContactId]) => {
+      if (!visible || typeof initialContactId !== "string") {
+        return;
+      }
+
+      await openEditContactDialogById(initialContactId);
+    },
+    { immediate: true },
+  );
 </script>
 
 <template>

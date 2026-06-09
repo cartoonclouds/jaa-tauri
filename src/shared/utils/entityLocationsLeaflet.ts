@@ -14,6 +14,8 @@ export interface MappableEntity {
   locationLat: number | null;
   locationLng: number | null;
   subtitle: string;
+  openHref: string;
+  openLabel: string;
 }
 
 /**
@@ -46,18 +48,26 @@ export interface LeafletMapManager {
  */
 function buildPopupContent(entity: MappableEntity): HTMLDivElement {
   const root = document.createElement("div");
+  root.className = "app-map-popup";
+
   const title = document.createElement("strong");
+  title.className = "app-map-popup-title";
   title.textContent = entity.name;
 
   const subtitle = document.createElement("div");
+  subtitle.className = "app-map-popup-subtitle";
   subtitle.textContent = entity.subtitle;
-  subtitle.style.fontSize = "0.75rem";
 
   const location = document.createElement("div");
+  location.className = "app-map-popup-location";
   location.textContent = entity.locationText ?? "No location label";
-  location.style.fontSize = "0.75rem";
 
-  root.append(title, subtitle, location);
+  const action = document.createElement("a");
+  action.className = "app-map-popup-link";
+  action.href = entity.openHref;
+  action.textContent = entity.openLabel;
+
+  root.append(title, subtitle, location, action);
   return root;
 }
 
@@ -258,11 +268,3 @@ export function createEntityLocationsLeafletManager(
     },
   };
 }
-
-
-
-
-
-
-
-
