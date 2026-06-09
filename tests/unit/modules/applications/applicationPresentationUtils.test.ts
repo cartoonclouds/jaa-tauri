@@ -21,10 +21,12 @@ import { describe, expect, it } from "vitest";
 
 describe("application presentation utilities", () => {
   it("formats application visual tokens across known and fallback branches", () => {
-    expect(getApplicationStatusClass(ApplicationStatus.Applied)).toContain("blue");
-    expect(getApplicationStatusClass(ApplicationStatus.PhoneScreening)).toContain(
-      "cyan",
+    expect(getApplicationStatusClass(ApplicationStatus.Applied)).toContain(
+      "blue",
     );
+    expect(
+      getApplicationStatusClass(ApplicationStatus.PhoneScreening),
+    ).toContain("cyan");
     expect(getApplicationStatusClass(ApplicationStatus.Technical)).toContain(
       "violet",
     );
@@ -66,36 +68,36 @@ describe("application presentation utilities", () => {
     expect(getApplicationArchivedClass(true)).toContain("zinc");
     expect(getApplicationArchivedClass(false)).toContain("emerald");
 
-    expect(getApplicationAttendanceTypeClass(ApplicationAttendanceType.Remote)).toContain(
-      "sky",
-    );
-    expect(getApplicationAttendanceTypeClass(ApplicationAttendanceType.Hybrid)).toContain(
-      "violet",
-    );
-    expect(getApplicationAttendanceTypeClass(ApplicationAttendanceType.OnSite)).toContain(
-      "amber",
-    );
+    expect(
+      getApplicationAttendanceTypeClass(ApplicationAttendanceType.Remote),
+    ).toContain("sky");
+    expect(
+      getApplicationAttendanceTypeClass(ApplicationAttendanceType.Hybrid),
+    ).toContain("violet");
+    expect(
+      getApplicationAttendanceTypeClass(ApplicationAttendanceType.OnSite),
+    ).toContain("amber");
     expect(getApplicationAttendanceTypeClass(null)).toContain("slate");
     expect(
       formatApplicationAttendanceTypeLabel(ApplicationAttendanceType.Remote),
     ).toBe("Remote");
     expect(formatApplicationAttendanceTypeLabel(undefined)).toBe("-");
 
-    expect(getApplicationEmploymentTypeClass(ApplicationEmploymentType.FullTime)).toContain(
-      "emerald",
-    );
-    expect(getApplicationEmploymentTypeClass(ApplicationEmploymentType.PartTime)).toContain(
-      "indigo",
-    );
-    expect(getApplicationEmploymentTypeClass(ApplicationEmploymentType.Contract)).toContain(
-      "orange",
-    );
-    expect(getApplicationEmploymentTypeClass(ApplicationEmploymentType.Internship)).toContain(
-      "cyan",
-    );
-    expect(getApplicationEmploymentTypeClass(ApplicationEmploymentType.Volunteer)).toContain(
-      "lime",
-    );
+    expect(
+      getApplicationEmploymentTypeClass(ApplicationEmploymentType.FullTime),
+    ).toContain("emerald");
+    expect(
+      getApplicationEmploymentTypeClass(ApplicationEmploymentType.PartTime),
+    ).toContain("indigo");
+    expect(
+      getApplicationEmploymentTypeClass(ApplicationEmploymentType.Contract),
+    ).toContain("orange");
+    expect(
+      getApplicationEmploymentTypeClass(ApplicationEmploymentType.Internship),
+    ).toContain("cyan");
+    expect(
+      getApplicationEmploymentTypeClass(ApplicationEmploymentType.Volunteer),
+    ).toContain("lime");
     expect(getApplicationEmploymentTypeClass(null)).toContain("slate");
     expect(
       formatApplicationEmploymentTypeLabel(ApplicationEmploymentType.Contract),

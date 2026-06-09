@@ -7,9 +7,7 @@ import {
 } from "@modules/applications/domain/enums/ApplicationEnums";
 import { describe, expect, it } from "vitest";
 
-import {
-  buildApplicationRow,
-} from "../../../fixtures/factories/testPayloadFactories";
+import { buildApplicationRow } from "../../../fixtures/factories/testPayloadFactories";
 
 describe("application mapper", () => {
   it("maps raw application rows and falls back on invalid persistence values", () => {

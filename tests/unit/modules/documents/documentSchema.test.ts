@@ -22,9 +22,9 @@ describe("document schema", () => {
         updatedAt: new Date().toISOString(),
       }).success,
     ).toBe(true);
-    expect(CreateDocumentSchema.safeParse(buildDocumentCreatePayload()).success).toBe(
-      true,
-    );
+    expect(
+      CreateDocumentSchema.safeParse(buildDocumentCreatePayload()).success,
+    ).toBe(true);
     expect(
       DocumentRepositoryCreateSchema.safeParse({
         title: "Resume",
@@ -36,9 +36,8 @@ describe("document schema", () => {
 
   it("rejects blank required fields on document inputs", () => {
     expect(
-      CreateDocumentSchema.safeParse(
-        buildDocumentCreatePayload({ title: "" }),
-      ).success,
+      CreateDocumentSchema.safeParse(buildDocumentCreatePayload({ title: "" }))
+        .success,
     ).toBe(false);
     expect(
       DocumentRepositoryCreateSchema.safeParse({

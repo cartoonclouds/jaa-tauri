@@ -29,15 +29,18 @@ describe("event schema", () => {
         notes: null,
       }).success,
     ).toBe(true);
-    expect(EventRepositoryCreateSchema.safeParse(buildEventCreatePayload()).success).toBe(
-      true,
-    );
+    expect(
+      EventRepositoryCreateSchema.safeParse(buildEventCreatePayload()).success,
+    ).toBe(true);
   });
 
   it("rejects unknown stages and blank titles", () => {
     expect(
       CreateEventSchema.safeParse(
-        buildEventCreatePayload({ title: "", type: "Interview/Technical Interview" }),
+        buildEventCreatePayload({
+          title: "",
+          type: "Interview/Technical Interview",
+        }),
       ).success,
     ).toBe(false);
     expect(

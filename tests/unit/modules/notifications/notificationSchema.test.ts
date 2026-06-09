@@ -27,7 +27,8 @@ describe("notification schema", () => {
       }).success,
     ).toBe(true);
     expect(
-      CreateNotificationSchema.safeParse(buildNotificationCreatePayload()).success,
+      CreateNotificationSchema.safeParse(buildNotificationCreatePayload())
+        .success,
     ).toBe(true);
     expect(
       NotificationRepositoryCreateSchema.safeParse(

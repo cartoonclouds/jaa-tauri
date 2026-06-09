@@ -26,16 +26,18 @@ describe("tag schema", () => {
         updatedAt: new Date().toISOString(),
       }).success,
     ).toBe(true);
-    expect(CreateTagSchema.safeParse(buildTagCreatePayload()).success).toBe(true);
-    expect(TagRepositoryCreateSchema.safeParse(buildTagCreatePayload()).success).toBe(
+    expect(CreateTagSchema.safeParse(buildTagCreatePayload()).success).toBe(
       true,
     );
+    expect(
+      TagRepositoryCreateSchema.safeParse(buildTagCreatePayload()).success,
+    ).toBe(true);
   });
 
   it("rejects blank names and raw model type strings in enum instance fields", () => {
-    expect(CreateTagSchema.safeParse(buildTagCreatePayload({ name: "" })).success).toBe(
-      false,
-    );
+    expect(
+      CreateTagSchema.safeParse(buildTagCreatePayload({ name: "" })).success,
+    ).toBe(false);
     expect(TagModelTypeSchema.safeParse("application").success).toBe(false);
   });
 });
