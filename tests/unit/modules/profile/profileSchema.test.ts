@@ -4,6 +4,7 @@ import {
   ProfileRepositoryUpdateSchema,
   ProfileSchema,
 } from "@modules/profile/domain/zod/profile.schema";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 describe("profile schema", () => {
@@ -32,8 +33,8 @@ describe("profile schema", () => {
       ProfileSchema.safeParse({
         id: "550e8400-e29b-41d4-a716-446655440006",
         ...validProfile,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
     expect(CreateProfileSchema.safeParse(validProfile).success).toBe(true);

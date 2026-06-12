@@ -5,6 +5,7 @@
 
 import { logError, logWarn } from "@infra/logging/tauriLog.client";
 import { toErrorMessage } from "@shared/utils/error";
+import { temporalNowEpochMilliseconds } from "@shared/utils/temporal";
 import {
   isPermissionGranted,
   requestPermission,
@@ -69,8 +70,12 @@ export function isWindowsDevToastLimited(): boolean {
  * Warn once when development limitations can suppress Windows toast popups.
  */
 function warnWindowsDevToastLimitOnce(): void {
-  if (hasWarnedWindowsDevToastLimit) {return;}
-  if (!isWindowsDevToastLimited()) {return;}
+  if (hasWarnedWindowsDevToastLimit) {
+    return;
+  }
+  if (!isWindowsDevToastLimited()) {
+    return;
+  }
 
   hasWarnedWindowsDevToastLimit = true;
   logWarn(
@@ -102,7 +107,7 @@ export async function sendTauriNotification(
       sound: request.sound,
     });
 
-    return { success: true, id: String(Date.now()) };
+    return { success: true, id: String(temporalNowEpochMilliseconds()) };
   } catch (error) {
     const message = toErrorMessage(error);
     logError("[Notifications] Tauri notification failed:", message);
@@ -114,7 +119,9 @@ export async function sendTauriNotification(
  * Check if notifications are supported in the current environment.
  */
 export async function isNotificationSupported(): Promise<boolean> {
-  if (typeof window === "undefined") {return false;}
+  if (typeof window === "undefined") {
+    return false;
+  }
 
   try {
     return await ensureNotificationPermission();

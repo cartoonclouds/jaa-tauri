@@ -4,6 +4,7 @@ import {
   NotificationSchema,
   SeveritySchema,
 } from "@modules/notifications/domain/zod/notification.schema";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildNotificationCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
@@ -22,8 +23,8 @@ describe("notification schema", () => {
         isRead: false,
         scheduledFor: null,
         sentAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
     expect(

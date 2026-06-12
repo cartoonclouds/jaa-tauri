@@ -1,4 +1,5 @@
 import type { InteractionStage } from "@modules/events/constants";
+import type { TemporalDateTime } from "@shared/utils/temporal";
 
 /**
  * All mutable data fields shared across event read and write models,
@@ -18,7 +19,7 @@ export interface EventBase {
   /** Markdown notes scoped to this application stage event. */
   notes: string | null;
   /** Completion timestamp; null means this stage is still pending. */
-  eventAt: Date | null;
+  eventAt: TemporalDateTime | null;
 }
 
 /**
@@ -29,9 +30,9 @@ export interface Event extends EventBase {
   /** Unique application-event link identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

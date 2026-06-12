@@ -1,4 +1,5 @@
 import type { LocationFields, LocationFieldsInput } from "@shared/types";
+import type { TemporalDateTime } from "@shared/utils/temporal";
 
 /**
  * Supported contact categories.
@@ -36,9 +37,9 @@ export interface Contact extends ContactBase {
   /** Unique contact identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

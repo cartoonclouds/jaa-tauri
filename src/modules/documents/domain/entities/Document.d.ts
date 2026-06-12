@@ -1,3 +1,5 @@
+import type { TemporalDateTime } from "@shared/utils/temporal";
+
 /**
 /**
  * All mutable data fields shared across document read and write models,
@@ -26,9 +28,9 @@ export interface Document extends DocumentBase {
   /** Unique document identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

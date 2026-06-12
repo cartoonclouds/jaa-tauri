@@ -4,7 +4,9 @@
   import { useProfile } from "@modules/profile/composables/useProfile";
   import { useProfileDatatable } from "@modules/profile/composables/useProfileDatatable";
   import { profileSearchPlaceholder } from "@modules/profile/constants";
-  import { reactive, ref } from "vue";
+  import { computed, reactive, ref } from "vue";
+
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   const { create, update, remove } = useProfile();
   const {
@@ -22,6 +24,19 @@
   } = useProfileDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ fullName: "", email: "", headline: "" });
+  const isEditMode = computed(() => Boolean(editingId.value));
+
+  function triggerSaveHotkey(): void {
+    const formElement = document.getElementById("profile-editor-form");
+    if (formElement instanceof HTMLFormElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  useSaveHotkey({
+    isEnabled: isEditMode,
+    onTrigger: triggerSaveHotkey,
+  });
 
   /**
    * Handles edit.
@@ -82,7 +97,11 @@
 <template>
   <div class="space-y-6 p-6">
     <h1 class="text-2xl font-semibold">Profile</h1>
-    <form class="grid gap-3 md:grid-cols-3" @submit.prevent="submit">
+    <form
+      id="profile-editor-form"
+      class="grid gap-3 md:grid-cols-3"
+      @submit.prevent="submit"
+    >
       <InputText v-model="form.fullName" placeholder="Full name" />
       <InputText v-model="form.email" placeholder="Email" />
       <InputText v-model="form.headline" placeholder="Headline" />

@@ -13,6 +13,11 @@
     isInteractionStage,
   } from "@modules/events/constants";
   import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
+  import {
+    temporalCloneDate,
+    type TemporalDateTime,
+    temporalToIsoString,
+  } from "@shared/utils/temporal";
   import { formatDisplayDateTime } from "@shared/utils/toDate";
   import { computed, reactive, ref } from "vue";
 
@@ -52,7 +57,7 @@
   const editForm = reactive<{
     id: string;
     type: InteractionStage;
-    eventAt: Date | null;
+    eventAt: TemporalDateTime | null;
     notes: string;
   }>({
     id: "",
@@ -148,7 +153,7 @@
 
     return summaryFlowStages.value.map((stage) => {
       const event = stageEventByType.get(stage) ?? null;
-      const eventAt: Date | null = event?.eventAt ?? null;
+      const eventAt: TemporalDateTime | null = event?.eventAt ?? null;
       return {
         eventId: event?.id ?? null,
         stage,
@@ -215,7 +220,9 @@
     if (event) {
       editForm.id = event.id;
       editForm.type = event.type;
-      editForm.eventAt = event.eventAt ? new Date(event.eventAt) : null;
+      editForm.eventAt = event.eventAt
+        ? temporalCloneDate(event.eventAt)
+        : null;
       editForm.notes = event.notes ?? "";
     } else {
       editForm.id = "";
@@ -231,7 +238,9 @@
    * Handles save stage edit.
    */
   async function saveStageEdit(): Promise<void> {
-    const eventAtIso = editForm.eventAt ? editForm.eventAt.toISOString() : null;
+    const eventAtIso = editForm.eventAt
+      ? temporalToIsoString(editForm.eventAt)
+      : null;
 
     if (editForm.id) {
       await update({

@@ -142,7 +142,7 @@
     class="h-auto! min-h-0! w-full"
   >
     <StepList
-      class="h-auto! min-h-0! max-h-none! items-start! overflow-x-auto overflow-y-hidden pb-1"
+      class="h-auto! min-h-0! max-h-none! items-start! overflow-x-auto overflow-y-hidden pb-4!"
     >
       <Step
         v-for="(stage, index) in displayedStages"

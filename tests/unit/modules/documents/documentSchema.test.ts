@@ -3,6 +3,7 @@ import {
   DocumentRepositoryCreateSchema,
   DocumentSchema,
 } from "@modules/documents/domain/zod/document.schema";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildDocumentCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
@@ -18,8 +19,8 @@ describe("document schema", () => {
         mimeType: "application/pdf",
         sizeBytes: 1024,
         checksum: "abc123",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
     expect(

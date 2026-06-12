@@ -25,6 +25,7 @@
   import { computed, ref, watch } from "vue";
 
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   /**
    * Defines props.
@@ -56,6 +57,20 @@
   const descriptionMarkdown = ref("");
   const isDirty = ref(false);
   const isEditMode = computed(() => props.mode === "edit");
+  const applicationEditorFormId = "application-editor-form";
+  const isSaveHotkeyEnabled = computed(() => isEditMode.value && !props.busy);
+
+  function triggerSaveHotkey(): void {
+    const formElement = document.getElementById(applicationEditorFormId);
+    if (formElement instanceof HTMLFormElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  useSaveHotkey({
+    isEnabled: isSaveHotkeyEnabled,
+    onTrigger: triggerSaveHotkey,
+  });
 
   function setDirty(value: boolean): void {
     if (isDirty.value === value) {
@@ -227,6 +242,7 @@
 
 <template>
   <Form
+    :id="applicationEditorFormId"
     v-slot="$form"
     :initial-values="formValues"
     :resolver="zodResolver(ApplicationFormSchema)"

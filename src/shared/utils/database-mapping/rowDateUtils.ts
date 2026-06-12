@@ -1,3 +1,5 @@
+import type { TemporalDateTime } from "@shared/utils/temporal";
+
 import { toDate, toNullableDate } from "@shared/utils/toDate";
 
 /**
@@ -11,14 +13,14 @@ export interface AuditTimestampRow {
 /**
  * Maps a persisted date-like field into a required Date value.
  */
-export function mapRequiredRowDate(value: unknown): Date {
+export function mapRequiredRowDate(value: unknown): TemporalDateTime {
   return toDate(value);
 }
 
 /**
  * Maps a persisted date-like field into an optional Date value.
  */
-export function mapOptionalRowDate(value: unknown): Date | null {
+export function mapOptionalRowDate(value: unknown): TemporalDateTime | null {
   return toNullableDate(value);
 }
 
@@ -26,8 +28,8 @@ export function mapOptionalRowDate(value: unknown): Date | null {
  * Maps common audit timestamp columns to entity-friendly field names.
  */
 export function mapAuditTimestamps(row: AuditTimestampRow): {
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: TemporalDateTime;
+  updatedAt: TemporalDateTime;
 } {
   return {
     createdAt: mapRequiredRowDate(row.created_at),

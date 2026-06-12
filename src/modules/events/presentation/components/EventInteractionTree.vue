@@ -11,6 +11,7 @@
   } from "@modules/events/constants";
   import EventInteractionEditDialog from "@modules/events/presentation/components/dialogs/EventInteractionEditDialog.vue";
   import { toErrorMessage } from "@shared/utils/error";
+  import { temporalToEpochMilliseconds } from "@shared/utils/temporal";
   import {
     formatDisplayDate,
     formatDisplayDateTime,
@@ -93,8 +94,8 @@
 
   function buildTreeNodes(events: Event[]): TreeNode[] {
     const sorted = [...events].sort((a, b) => {
-      const left = a.createdAt.getTime();
-      const right = b.createdAt.getTime();
+      const left = temporalToEpochMilliseconds(a.createdAt);
+      const right = temporalToEpochMilliseconds(b.createdAt);
       return left - right;
     });
 

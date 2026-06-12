@@ -1,5 +1,6 @@
 import type { HeroIcon } from "@/shared/types";
 import type { STATISTIC_METRIC_IDS } from "@modules/statistics/domain/constants/statisticMetricIds";
+import type { TemporalDateTime } from "@shared/utils/temporal";
 
 export type StatisticMetricId = (typeof STATISTIC_METRIC_IDS)[number];
 
@@ -44,11 +45,11 @@ export interface Statistic {
   /** Scope where this metric applies. */
   scope: StatisticScope;
   /** Optional timestamp when the metric was captured. */
-  recordedAt: Date | null;
+  recordedAt: TemporalDateTime | null;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**
@@ -62,7 +63,7 @@ export interface CreateStatisticInput {
   /** Scope where this metric applies. */
   scope?: StatisticScope;
   /** Optional timestamp when the metric was captured. */
-  recordedAt?: Date | null;
+  recordedAt?: TemporalDateTime | null;
 }
 
 /**

@@ -3,6 +3,7 @@ import {
   CompanySchema,
   CreateCompanySchema,
 } from "@modules/companies/domain/zod/company.schema";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildCompanyCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
@@ -22,16 +23,17 @@ describe("company schema", () => {
         locationLng: -0.1276,
         notes: null,
         tagIds: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
 
-    expect(CreateCompanySchema.safeParse(buildCompanyCreatePayload()).success).toBe(
-      true,
-    );
     expect(
-      CompanyRepositoryCreateSchema.safeParse(buildCompanyCreatePayload()).success,
+      CreateCompanySchema.safeParse(buildCompanyCreatePayload()).success,
+    ).toBe(true);
+    expect(
+      CompanyRepositoryCreateSchema.safeParse(buildCompanyCreatePayload())
+        .success,
     ).toBe(true);
   });
 
@@ -50,8 +52,8 @@ describe("company schema", () => {
         locationLng: -0.1276,
         notes: null,
         tagIds: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(false);
   });

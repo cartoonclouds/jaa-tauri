@@ -11,6 +11,7 @@
   import { z } from "zod";
 
   import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   /**
    * Props accepted by the settings dialog.
@@ -126,7 +127,23 @@
   const rootTab = ref("general");
   const activeConstantTab = ref("");
   const generalFormVersion = ref(0);
+  const generalSettingsFormId = "settings-general-form";
   const constantRowsByType = reactive<Record<string, ConstantEditorRow[]>>({});
+  const isGeneralSaveHotkeyEnabled = computed(
+    () => dialogVisible.value && rootTab.value === "general" && !isBusy.value,
+  );
+
+  function triggerGeneralSaveHotkey(): void {
+    const formElement = document.getElementById(generalSettingsFormId);
+    if (formElement instanceof HTMLFormElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  useSaveHotkey({
+    isEnabled: isGeneralSaveHotkeyEnabled,
+    onTrigger: triggerGeneralSaveHotkey,
+  });
 
   const themeOptions: {
     label: string;
@@ -374,6 +391,7 @@
         <TabPanels>
           <TabPanel value="general">
             <Form
+              :id="generalSettingsFormId"
               :key="generalFormVersion"
               v-slot="$form"
               :initial-values="initialGeneralValues"

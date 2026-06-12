@@ -18,6 +18,7 @@ import {
   normalizeDatatablePageQuery,
   resolveSearchFields,
 } from "@shared/utils/datatableQuery";
+import { temporalToIsoString } from "@shared/utils/temporal";
 
 /**
  * Implements notification repository.
@@ -109,8 +110,8 @@ export class NotificationRepository implements INotificationRepository {
         title,
         body,
         payload.isRead ? 1 : 0,
-        payload.scheduledFor ? payload.scheduledFor.toISOString() : null,
-        payload.sentAt ? payload.sentAt.toISOString() : null,
+        payload.scheduledFor ? temporalToIsoString(payload.scheduledFor) : null,
+        payload.sentAt ? temporalToIsoString(payload.sentAt) : null,
       ],
     );
     return id;
@@ -132,8 +133,8 @@ export class NotificationRepository implements INotificationRepository {
         payload.title ?? null,
         payload.body ?? null,
         payload.isRead === undefined ? null : payload.isRead ? 1 : 0,
-        payload.scheduledFor ? payload.scheduledFor.toISOString() : null,
-        payload.sentAt ? payload.sentAt.toISOString() : null,
+        payload.scheduledFor ? temporalToIsoString(payload.scheduledFor) : null,
+        payload.sentAt ? temporalToIsoString(payload.sentAt) : null,
         payload.id,
       ],
     );

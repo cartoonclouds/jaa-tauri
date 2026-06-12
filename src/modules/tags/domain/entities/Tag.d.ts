@@ -1,4 +1,5 @@
 import type { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+import type { TemporalDateTime } from "@shared/utils/temporal";
 
 export type { TagModelType };
 
@@ -23,9 +24,9 @@ export interface Tag extends TagBase {
   /** Unique tag identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

@@ -1,3 +1,4 @@
+import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
 import {
   CreateTagSchema,
   TagModelTypeSchema,
@@ -5,7 +6,7 @@ import {
   TagRepositoryCreateSchema,
   TagSchema,
 } from "@modules/tags/domain/zod/tag.schema";
-import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildTagCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
@@ -22,8 +23,8 @@ describe("tag schema", () => {
         name: "urgent",
         color: "#ef4444",
         modelType: TagModelType.General,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
     expect(CreateTagSchema.safeParse(buildTagCreatePayload()).success).toBe(

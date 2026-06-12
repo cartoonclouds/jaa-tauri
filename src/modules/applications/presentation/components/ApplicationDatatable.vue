@@ -15,7 +15,10 @@
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
 
   import ServerDatatable from "@/components/ui/ServerDatatable.vue";
-  import { formatRelativeDate } from "@/shared/utils/toDate";
+  import {
+    formatDisplayDateTime,
+    formatRelativeDate,
+  } from "@/shared/utils/toDate";
 
   /**
    * Defines props.
@@ -52,7 +55,7 @@
 
   function getHoverText(column: string, value?: unknown): string {
     if (column === "updated_at" && value instanceof Date) {
-      return value.toLocaleString();
+      return formatDisplayDateTime(value);
     }
 
     return "";

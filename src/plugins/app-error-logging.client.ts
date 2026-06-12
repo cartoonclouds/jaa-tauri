@@ -1,4 +1,5 @@
 import { logError } from "@infra/logging/appLogger";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin } from "nuxt/app";
 
@@ -21,7 +22,7 @@ function buildMetadata(): string {
   const visibility = document.visibilityState;
   const online = navigator.onLine ? "online" : "offline";
   const runtime = isTauri() ? "tauri" : "web";
-  const timestamp = new Date().toISOString();
+  const timestamp = temporalNowIsoString();
 
   return `meta={path:${path},visibility:${visibility},network:${online},runtime:${runtime},ts:${timestamp}}`;
 }

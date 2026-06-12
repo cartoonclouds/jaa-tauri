@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import { computed } from "vue";
 
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
+
   /**
    * Reusable shell for create/edit dialogs.
    *
@@ -60,6 +62,10 @@
     props.mode === "create" ? props.createSaveLabel : props.editSaveLabel,
   );
 
+  const shouldBindSaveHotkey = computed(
+    () => props.visible && props.mode === "edit" && !props.isSaving,
+  );
+
   function onSaveClick(): void {
     if (props.saveFormId) {
       return;
@@ -67,6 +73,23 @@
 
     emit("save");
   }
+
+  function triggerSave(): void {
+    if (props.saveFormId) {
+      const form = document.getElementById(props.saveFormId);
+      if (form instanceof HTMLFormElement) {
+        form.requestSubmit();
+      }
+      return;
+    }
+
+    emit("save");
+  }
+
+  useSaveHotkey({
+    isEnabled: shouldBindSaveHotkey,
+    onTrigger: triggerSave,
+  });
 </script>
 
 <template>

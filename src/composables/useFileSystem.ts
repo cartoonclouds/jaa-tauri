@@ -2,6 +2,7 @@ import type * as TauriFs from "@tauri-apps/plugin-fs";
 
 import { RuntimeEnvironmentError } from "@shared/domain/errors";
 import { toErrorMessage } from "@shared/utils/error";
+import { temporalNowEpochMilliseconds } from "@shared/utils/temporal";
 import { isTauri } from "@tauri-apps/api/core";
 import { ref } from "vue";
 
@@ -289,7 +290,8 @@ export function useFileSystem(options: UseFileSystemOptions = {}) {
     },
   ): Promise<string[]> {
     const savedPaths: string[] = [];
-    const fileNamePrefix = options?.fileNamePrefix ?? String(Date.now());
+    const fileNamePrefix =
+      options?.fileNamePrefix ?? String(temporalNowEpochMilliseconds());
 
     await ensureDirectory(directory, { recursive: true });
 

@@ -3,6 +3,7 @@ import {
   EventRepositoryCreateSchema,
   EventSchema,
 } from "@modules/events/domain/zod/event.schema";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildEventCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
@@ -18,9 +19,9 @@ describe("event schema", () => {
         title: "Technical interview",
         description: null,
         notes: null,
-        eventAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        eventAt: temporalNowIsoString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
     expect(
@@ -53,8 +54,8 @@ describe("event schema", () => {
         description: null,
         notes: null,
         eventAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(false);
   });

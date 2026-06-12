@@ -1,3 +1,5 @@
+import type { TemporalDateTime } from "@shared/utils/temporal";
+
 /**
 /** Theme preference values for the application UI. */
 export type SettingTheme = "system" | "light" | "dark";
@@ -25,9 +27,9 @@ export interface Setting extends SettingBase {
   /** Unique setting identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

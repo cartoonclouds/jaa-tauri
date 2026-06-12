@@ -1,6 +1,7 @@
 import * as applicationFormOptions from "../../modules/applications/constants";
 import * as interactionStageConstants from "../../modules/events/constants";
 import * as onboardingDefaultSkillOptions from "../../modules/onboarding/constants";
+import { isJsDate, temporalToIsoString } from "../utils/temporal";
 
 /**
  * Normalized row payload persisted into the constants table.
@@ -79,8 +80,8 @@ function isPersistableExport(value: unknown): boolean {
  */
 function toSerializableValue(value: unknown): unknown {
   if (value && typeof value === "object") {
-    if (value instanceof Date) {
-      return value.toISOString();
+    if (isJsDate(value)) {
+      return temporalToIsoString(value);
     }
 
     if (value instanceof Set) {

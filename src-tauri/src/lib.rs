@@ -55,7 +55,27 @@ fn resolve_dev_mode() -> bool {
 }
 
 fn resolve_log_file_name() -> String {
+    if let Ok(value) = std::env::var("APP_LOG_FILE_NAME") {
+        let trimmed = value.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+
     format!("{}.log", Local::now().format("%Y-%m-%d"))
+}
+
+fn resolve_log_level() -> log::LevelFilter {
+    let value = std::env::var("APP_LOG_LEVEL").unwrap_or_else(|_| "info".to_string());
+
+    match value.trim().to_ascii_lowercase().as_str() {
+        "off" => log::LevelFilter::Off,
+        "error" => log::LevelFilter::Error,
+        "warn" | "warning" => log::LevelFilter::Warn,
+        "debug" => log::LevelFilter::Debug,
+        "trace" => log::LevelFilter::Trace,
+        _ => log::LevelFilter::Info,
+    }
 }
 
 /// Closes the splashscreen window and shows the main window.
@@ -99,6 +119,8 @@ pub fn run() {
     // 1) Discover embedded SQL migrations and pass them to the SQL plugin.
     let migrations = discover_migrations();
     let database_url = resolve_database_url();
+    let log_level = resolve_log_level();
+    let log_file_name = resolve_log_file_name();
 
     // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
@@ -114,11 +136,11 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(
             tauri_plugin_log::Builder::new()
-                .level(log::LevelFilter::Info)
+                .level(log_level)
                 .clear_targets()
                 .target(tauri_plugin_log::Target::new(
                     tauri_plugin_log::TargetKind::LogDir {
-                        file_name: Some(resolve_log_file_name()),
+                        file_name: Some(log_file_name),
                     },
                 ))
                 .target(tauri_plugin_log::Target::new(

@@ -5,7 +5,9 @@
   import { useDocumentDatatable } from "@modules/documents/composables/useDocumentDatatable";
   import { documentsSearchPlaceholder } from "@modules/documents/constants";
   import { getDocumentMimeTypeFromFilePath } from "@modules/documents/utils/documentUtils";
-  import { reactive, ref } from "vue";
+  import { computed, reactive, ref } from "vue";
+
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   const { service } = useDocument();
   const {
@@ -23,6 +25,19 @@
   } = useDocumentDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", kind: "resume", filePath: "" });
+  const isEditMode = computed(() => Boolean(editingId.value));
+
+  function triggerSaveHotkey(): void {
+    const formElement = document.getElementById("document-editor-form");
+    if (formElement instanceof HTMLFormElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  useSaveHotkey({
+    isEnabled: isEditMode,
+    onTrigger: triggerSaveHotkey,
+  });
 
   /**
    * Handles edit.
@@ -81,7 +96,11 @@
 <template>
   <div class="space-y-6 p-6">
     <h1 class="text-2xl font-semibold">Documents</h1>
-    <form class="grid gap-3 md:grid-cols-3" @submit.prevent="submit">
+    <form
+      id="document-editor-form"
+      class="grid gap-3 md:grid-cols-3"
+      @submit.prevent="submit"
+    >
       <InputText v-model="form.title" placeholder="Title" />
       <InputText v-model="form.kind" placeholder="Kind" />
       <InputText v-model="form.filePath" placeholder="Path" />

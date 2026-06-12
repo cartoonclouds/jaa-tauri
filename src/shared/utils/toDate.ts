@@ -1,4 +1,14 @@
 import { ValidationError } from "@shared/domain/errors";
+import {
+  temporalCloneDate,
+  temporalDateFromLocalParts,
+  temporalDateFromUnknown,
+  type TemporalDateTime,
+  temporalNowHour,
+  temporalNowIsoString,
+  temporalToEpochMilliseconds,
+  temporalToLocalParts,
+} from "@shared/utils/temporal";
 
 /**
  * Convert an unknown value into a valid Date instance.
@@ -6,17 +16,16 @@ import { ValidationError } from "@shared/domain/errors";
  * Accepts either an existing Date or a parseable date-like value.
  * Throws when the value cannot be parsed.
  */
-export function toDate(value: unknown): Date {
+export function toDate(value: unknown): TemporalDateTime {
   if (value instanceof Date) {
-    return value;
+    return temporalCloneDate(value);
   }
 
-  const parsed = new Date(String(value));
-  if (Number.isNaN(parsed.getTime())) {
+  try {
+    return temporalDateFromUnknown(value);
+  } catch {
     throw new ValidationError(`Invalid date value: ${String(value)}`);
   }
-
-  return parsed;
 }
 
 /**
@@ -24,7 +33,7 @@ export function toDate(value: unknown): Date {
  *
  * Treats empty values as missing and defers parsing to {@link toDate}.
  */
-export function toNullableDate(value: unknown): Date | null {
+export function toNullableDate(value: unknown): TemporalDateTime | null {
   if (value === null || value === undefined || value === "") {
     return null;
   }
@@ -49,30 +58,33 @@ const DISPLAY_DATE_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
 /**
  * Format a Date for date-only display in the UI.
  */
-export function formatDisplayDate(value: Date): string {
-  return DISPLAY_DATE_FORMATTER.format(value);
+export function formatDisplayDate(value: TemporalDateTime): string {
+  return DISPLAY_DATE_FORMATTER.format(temporalToEpochMilliseconds(value));
 }
 
 /**
  * Format a Date for date-time display in the UI.
  */
-export function formatDisplayDateTime(value: Date): string {
-  return DISPLAY_DATE_TIME_FORMATTER.format(value);
+export function formatDisplayDateTime(value: TemporalDateTime): string {
+  return DISPLAY_DATE_TIME_FORMATTER.format(temporalToEpochMilliseconds(value));
 }
 
 /**
  * Format a Date for use with an HTML datetime-local input.
  */
-export function formatDateTimeLocalValue(value: Date | null): string {
+export function formatDateTimeLocalValue(
+  value: TemporalDateTime | null,
+): string {
   if (!value) {
     return "";
   }
 
-  const year = String(value.getFullYear());
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  const hour = String(value.getHours()).padStart(2, "0");
-  const minute = String(value.getMinutes()).padStart(2, "0");
+  const parts = temporalToLocalParts(value);
+  const year = String(parts.year);
+  const month = String(parts.month).padStart(2, "0");
+  const day = String(parts.day).padStart(2, "0");
+  const hour = String(parts.hour).padStart(2, "0");
+  const minute = String(parts.minute).padStart(2, "0");
 
   return `${year}-${month}-${day}T${hour}:${minute}`;
 }
@@ -82,7 +94,9 @@ export function formatDateTimeLocalValue(value: Date | null): string {
  *
  * Returns null when the input is empty or not a valid local date-time string.
  */
-export function parseDateTimeLocalValue(value: string): Date | null {
+export function parseDateTimeLocalValue(
+  value: string,
+): TemporalDateTime | null {
   if (!value) {
     return null;
   }
@@ -117,8 +131,11 @@ export function parseDateTimeLocalValue(value: string): Date | null {
     return null;
   }
 
-  const parsed = new Date(year, month - 1, day, hour, minute);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  try {
+    return temporalDateFromLocalParts({ year, month, day, hour, minute });
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -127,14 +144,15 @@ export function parseDateTimeLocalValue(value: string): Date | null {
  * Falls back to a display date format for dates more than a month in the past or future.
  *
  * @param {Date} value - The date to format.
- * @param {Date} [now=new Date()] - The reference date for calculating the relative time.
+ * @param {Date} [now=current instant] - The reference date for calculating the relative time.
  * @returns {string} A relative time string or a formatted date.
  */
 export function formatRelativeDate(
-  value: Date,
-  now: Date = new Date(),
+  value: TemporalDateTime,
+  now: TemporalDateTime = toDate(temporalNowIsoString()),
 ): string {
-  const diffMs = value.getTime() - now.getTime();
+  const diffMs =
+    temporalToEpochMilliseconds(value) - temporalToEpochMilliseconds(now);
   const diffSeconds = Math.round(diffMs / 1000);
   const diffMinutes = Math.round(diffSeconds / 60);
   const diffHours = Math.round(diffMinutes / 60);
@@ -185,7 +203,7 @@ export function formatRelativeDate(
  * @returns {string} A greeting message based on the current time of day.
  */
 export function getTimeOfDay(): string {
-  const hour = new Date().getHours();
+  const hour = temporalNowHour();
   if (hour < 12) {
     return "Good morning";
   } else if (hour < 18) {

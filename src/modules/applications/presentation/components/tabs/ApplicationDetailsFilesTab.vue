@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
+  import type { TemporalDateTime } from "@shared/utils/temporal";
 
   import {
     getApplicationFileIcon,
@@ -7,6 +8,7 @@
   } from "@modules/applications/presentation/utils/applicationFileUtils";
   import { useDocument } from "@modules/documents";
   import { getDocumentMimeTypeFromFilePath } from "@modules/documents/utils/documentUtils";
+  import { temporalNowEpochMilliseconds } from "@shared/utils/temporal";
   import { appLocalDataDir, join } from "@tauri-apps/api/path";
   import { openPath, revealItemInDir } from "@tauri-apps/plugin-opener";
   import { computed, ref, watch } from "vue";
@@ -22,7 +24,7 @@
     filePath: string;
     mimeType: string | null;
     relationType: string;
-    createdAt: Date;
+    createdAt: TemporalDateTime;
   }
 
   /**
@@ -36,7 +38,7 @@
           title: string;
           filePath: string;
           mimeType: string | null;
-          createdAt: Date;
+          createdAt: TemporalDateTime;
         };
         relationType: string;
       }[]
@@ -121,7 +123,9 @@
     );
     const destinationPath = await join(
       uploadsDirectory,
-      String(Date.now()) + "-" + sanitizeFileName(file.name || "upload.bin"),
+      String(temporalNowEpochMilliseconds()) +
+        "-" +
+        sanitizeFileName(file.name || "upload.bin"),
     );
 
     await writeBrowserFile(file, destinationPath, {

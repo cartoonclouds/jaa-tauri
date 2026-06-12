@@ -1,4 +1,5 @@
 import type { LocationFields, LocationFieldsInput } from "@shared/types";
+import type { TemporalDateTime } from "@shared/utils/temporal";
 
 /**
  * All mutable data fields shared across company read and write models,
@@ -29,9 +30,9 @@ export interface Company extends CompanyBase {
   /** Unique company identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

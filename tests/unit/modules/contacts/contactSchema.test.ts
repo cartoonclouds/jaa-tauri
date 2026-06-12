@@ -4,6 +4,7 @@ import {
   ContactTypeSchema,
   CreateContactSchema,
 } from "@modules/contacts/domain/zod/contact.schema";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildContactCreatePayload } from "../../../fixtures/factories/testPayloadFactories";
@@ -25,15 +26,16 @@ describe("contact schema", () => {
         type: "recruiter",
         notes: null,
         tagIds: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: temporalNowIsoString(),
+        updatedAt: temporalNowIsoString(),
       }).success,
     ).toBe(true);
-    expect(CreateContactSchema.safeParse(buildContactCreatePayload()).success).toBe(
-      true,
-    );
     expect(
-      ContactRepositoryCreateSchema.safeParse(buildContactCreatePayload()).success,
+      CreateContactSchema.safeParse(buildContactCreatePayload()).success,
+    ).toBe(true);
+    expect(
+      ContactRepositoryCreateSchema.safeParse(buildContactCreatePayload())
+        .success,
     ).toBe(true);
   });
 

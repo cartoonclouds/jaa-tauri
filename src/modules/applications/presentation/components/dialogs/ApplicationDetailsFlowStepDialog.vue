@@ -3,6 +3,11 @@
     INTERACTION_STAGES,
     type InteractionStage,
   } from "@modules/events/constants";
+  import {
+    isJsDate,
+    type TemporalDateTime,
+    temporalToEpochMilliseconds,
+  } from "@shared/utils/temporal";
   import { computed } from "vue";
 
   import CreateEditDialog from "@/components/ui/CreateEditDialog.vue";
@@ -13,7 +18,7 @@
     visible: boolean;
     mode?: "create" | "edit";
     stageType: InteractionStage;
-    eventAt?: Date | null;
+    eventAt?: TemporalDateTime | null;
     notes?: string;
     showDetails?: boolean;
     selectedStageEventId?: string | null;
@@ -31,7 +36,7 @@
   const emit = defineEmits<{
     "update:visible": [value: boolean];
     "update:stageType": [value: InteractionStage];
-    "update:eventAt": [value: Date | null];
+    "update:eventAt": [value: TemporalDateTime | null];
     "update:notes": [value: string];
     save: [];
     "request-delete": [];
@@ -53,7 +58,7 @@
 
   const eventAtModel = computed({
     get: () => props.eventAt,
-    set: (value: Date | null) => {
+    set: (value: TemporalDateTime | null) => {
       emit("update:eventAt", value);
     },
   });
@@ -72,6 +77,40 @@
   const dialogMode = computed<"create" | "edit">(() =>
     isDetailedMode.value ? "edit" : baseDialogMode.value,
   );
+
+  type DatePickerModelValue = Date | (Date | null)[] | null | undefined;
+
+  /**
+   * Normalizes Temporal/Date values to the DatePicker single-date model.
+   */
+  function toDatePickerValue(value: TemporalDateTime | null): Date | null {
+    if (value === null) {
+      return null;
+    }
+
+    if (isJsDate(value)) {
+      return value;
+    }
+
+    return new Date(temporalToEpochMilliseconds(value));
+  }
+
+  /**
+   * Coerces PrimeVue DatePicker updates into the dialog's temporal model.
+   */
+  function onEventAtUpdate(value: DatePickerModelValue): void {
+    if (value === null || value === undefined) {
+      eventAtModel.value = null;
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      eventAtModel.value = value[0] ?? null;
+      return;
+    }
+
+    eventAtModel.value = value;
+  }
 </script>
 
 <template>
@@ -106,12 +145,13 @@
             >Event Date/Time</label
           >
           <DatePicker
-            v-model="eventAtModel"
+            :model-value="toDatePickerValue(eventAtModel)"
             show-time
             hour-format="24"
             show-icon
             show-clear
             fluid
+            @update:model-value="onEventAtUpdate"
           />
         </div>
 

@@ -4,7 +4,9 @@
   import { useNotification } from "@modules/notifications/composables/useNotification";
   import { useNotificationDatatable } from "@modules/notifications/composables/useNotificationDatatable";
   import { notificationsSearchPlaceholder } from "@modules/notifications/constants";
-  import { reactive, ref } from "vue";
+  import { computed, reactive, ref } from "vue";
+
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   const { create, update, remove } = useNotification();
   const {
@@ -22,6 +24,19 @@
   } = useNotificationDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ title: "", body: "", severity: "info" });
+  const isEditMode = computed(() => Boolean(editingId.value));
+
+  function triggerSaveHotkey(): void {
+    const formElement = document.getElementById("notification-editor-form");
+    if (formElement instanceof HTMLFormElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  useSaveHotkey({
+    isEnabled: isEditMode,
+    onTrigger: triggerSaveHotkey,
+  });
 
   /**
    * Handles edit.
@@ -82,7 +97,11 @@
 <template>
   <div class="space-y-6 p-6">
     <h1 class="text-2xl font-semibold">Notifications</h1>
-    <form class="grid gap-3 md:grid-cols-3" @submit.prevent="submit">
+    <form
+      id="notification-editor-form"
+      class="grid gap-3 md:grid-cols-3"
+      @submit.prevent="submit"
+    >
       <InputText v-model="form.title" placeholder="Title" />
       <InputText v-model="form.body" placeholder="Body" />
       <InputText v-model="form.severity" placeholder="Severity" />

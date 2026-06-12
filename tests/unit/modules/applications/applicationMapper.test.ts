@@ -5,6 +5,7 @@ import {
   ApplicationEventFlowStatus,
   ApplicationStatus,
 } from "@modules/applications/domain/enums/ApplicationEnums";
+import { temporalNowIsoString } from "@shared/utils/temporal";
 import { describe, expect, it } from "vitest";
 
 import { buildApplicationRow } from "../../../fixtures/factories/testPayloadFactories";
@@ -29,7 +30,7 @@ describe("application mapper", () => {
         employment_type: {},
         priority: "not-a-number",
         is_archived: 1,
-        deleted_at: new Date().toISOString(),
+        deleted_at: temporalNowIsoString(),
       }),
     );
 

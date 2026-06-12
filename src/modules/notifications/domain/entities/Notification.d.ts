@@ -1,3 +1,5 @@
+import type { TemporalDateTime } from "@shared/utils/temporal";
+
 /**
 /** Severity level used for notification display and filtering. */
 export type NotificationSeverity = "info" | "warning" | "success" | "error";
@@ -20,9 +22,9 @@ export interface NotificationBase {
   /** Whether the notification has been read. */
   isRead: boolean;
   /** Scheduled delivery time, if any. */
-  scheduledFor: Date | null;
+  scheduledFor: TemporalDateTime | null;
   /** Timestamp when the notification was sent. */
-  sentAt: Date | null;
+  sentAt: TemporalDateTime | null;
 }
 
 /**
@@ -33,9 +35,9 @@ export interface Notification extends NotificationBase {
   /** Unique notification identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

@@ -5,6 +5,7 @@ import type {
   ApplicationStatus,
 } from "../../types/enums";
 import type { LocationFields, LocationFieldsInput } from "@shared/types";
+import type { TemporalDateTime } from "@shared/utils/temporal";
 
 /**
  * All mutable data fields shared across application read and write models,
@@ -18,7 +19,7 @@ export interface ApplicationBase extends LocationFields {
   /** Source URL where the application was discovered, when available. */
   sourceUrl: string | null;
   /** Application submission date, when available. */
-  appliedAt: Date | null;
+  appliedAt: TemporalDateTime | null;
   /** Preferred attendance mode, when known. */
   attendanceType: ApplicationAttendanceType | null;
   /** Employment type, when known. */
@@ -57,9 +58,9 @@ export interface Application extends ApplicationBase {
   /** Whether the application has been soft-deleted. */
   isDeleted: boolean;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

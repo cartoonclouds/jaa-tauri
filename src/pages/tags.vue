@@ -4,7 +4,9 @@
   import { useTag } from "@modules/tags/composables/useTag";
   import { useTagDatatable } from "@modules/tags/composables/useTagDatatable";
   import { tagsSearchPlaceholder } from "@modules/tags/constants";
-  import { reactive, ref } from "vue";
+  import { computed, reactive, ref } from "vue";
+
+  import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   const { create, update, remove } = useTag();
   const {
@@ -22,6 +24,19 @@
   } = useTagDatatable();
   const editingId = ref<string | null>(null);
   const form = reactive({ name: "", color: "" });
+  const isEditMode = computed(() => Boolean(editingId.value));
+
+  function triggerSaveHotkey(): void {
+    const formElement = document.getElementById("tag-editor-form");
+    if (formElement instanceof HTMLFormElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  useSaveHotkey({
+    isEnabled: isEditMode,
+    onTrigger: triggerSaveHotkey,
+  });
 
   /**
    * Handles edit.
@@ -70,7 +85,11 @@
 <template>
   <div class="space-y-6 p-6">
     <h1 class="text-2xl font-semibold">Tags</h1>
-    <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submit">
+    <form
+      id="tag-editor-form"
+      class="grid gap-3 md:grid-cols-2"
+      @submit.prevent="submit"
+    >
       <InputText v-model="form.name" placeholder="Name" />
       <InputText v-model="form.color" placeholder="Color" />
       <div class="flex gap-2 md:col-span-2">

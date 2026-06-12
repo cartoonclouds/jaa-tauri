@@ -23,6 +23,10 @@ import type { TagCreatePayload } from "@modules/tags/types";
 
 import { ApplicationStatus } from "@modules/applications/domain/enums/ApplicationEnums";
 import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
+import {
+  temporalDateFromUnknown,
+  temporalNowIsoString,
+} from "@shared/utils/temporal";
 
 /** Build a default application create payload with optional overrides. */
 export function buildApplicationCreatePayload(
@@ -67,7 +71,7 @@ export function buildApplicationUpdatePayload(
 export function buildApplicationRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "app-1",
@@ -120,8 +124,8 @@ export function buildProfileRow(
     work_eligibility: "EU",
     notice_period_days: 30,
     interview_availability: "Weekdays",
-    created_at: new Date("2026-05-20T10:15:30.000Z"),
-    updated_at: new Date("2026-05-20T10:20:30.000Z"),
+    created_at: temporalDateFromUnknown("2026-05-20T10:15:30.000Z"),
+    updated_at: temporalDateFromUnknown("2026-05-20T10:20:30.000Z"),
     ...overrides,
   };
 }
@@ -170,7 +174,7 @@ export function buildCompanyUpdatePayload(
 export function buildCompanyRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "company-1",
@@ -225,7 +229,7 @@ export function buildContactUpdatePayload(
 export function buildContactRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "contact-1",
@@ -264,7 +268,7 @@ export function buildDocumentCreatePayload(
 export function buildDocumentRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "550e8400-e29b-41d4-a716-446655440010",
@@ -307,7 +311,7 @@ export function buildEventUpdatePayload(
 export function buildEventRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "event-1",
@@ -345,7 +349,7 @@ export function buildNotificationCreatePayload(
 export function buildNotificationRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "550e8400-e29b-41d4-a716-446655440020",
@@ -408,7 +412,7 @@ export function buildSettingUpsertPayload(
 export function buildStatisticRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "550e8400-e29b-41d4-a716-446655440030",
@@ -458,7 +462,7 @@ export function buildSettingsDto(
 export function buildSettingsRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "app-settings",
@@ -481,7 +485,7 @@ export function buildSettingsRow(
 export function buildTagRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
-  const now = new Date().toISOString();
+  const now = temporalNowIsoString();
 
   return {
     id: "550e8400-e29b-41d4-a716-446655440040",

@@ -1,3 +1,5 @@
+import type { TemporalDateTime } from "@shared/utils/temporal";
+
 /**
 /** Remote work preference options for a profile. */
 export type ProfileRemotePreference =
@@ -55,9 +57,9 @@ export interface Profile extends ProfileBase {
   /** Unique profile identifier. */
   id: string;
   /** Creation timestamp. */
-  createdAt: Date;
+  createdAt: TemporalDateTime;
   /** Last update timestamp. */
-  updatedAt: Date;
+  updatedAt: TemporalDateTime;
 }
 
 /**

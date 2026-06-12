@@ -1,3 +1,5 @@
+import { isJsDate, temporalToIsoString } from "@shared/utils/temporal";
+
 /**
  * Converts unknown input to a required string representation.
  */
@@ -14,8 +16,8 @@ export function toRequiredString(value: unknown): string {
     return value.toString();
   }
 
-  if (value instanceof Date) {
-    return value.toISOString();
+  if (isJsDate(value)) {
+    return temporalToIsoString(value);
   }
 
   if (value && typeof value === "object") {

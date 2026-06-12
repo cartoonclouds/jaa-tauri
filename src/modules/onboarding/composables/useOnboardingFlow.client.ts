@@ -10,6 +10,7 @@ import {
 } from "@modules/onboarding/utils/onboardingUtils";
 import { useProfile } from "@modules/profile";
 import { toErrorMessage } from "@shared/utils/error";
+import { temporalNowEpochMilliseconds } from "@shared/utils/temporal";
 import { invoke } from "@tauri-apps/api/core";
 import { appLocalDataDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -206,7 +207,7 @@ function createOnboardingFlowComposable() {
   async function saveResumeFileToLocalData(file: File): Promise<string> {
     const baseDir = await appLocalDataDir();
     const safeName = sanitizeFileName(file.name || "resume.pdf");
-    const timestamp = Date.now().toString();
+    const timestamp = temporalNowEpochMilliseconds().toString();
     const destinationPath = await join(
       baseDir,
       "onboarding",
