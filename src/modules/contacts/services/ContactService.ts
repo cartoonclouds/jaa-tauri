@@ -8,7 +8,7 @@ import {
   type ContactUpdatePayload,
   type IContactRepository,
 } from "@modules/contacts/repositories/ContactRepository";
-import { resolveLocationFields } from "@shared/utils/geocoding";
+import { mergeResolvedLocation } from "@shared/utils/geocoding";
 import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
@@ -60,18 +60,7 @@ export class ContactService {
       payload,
     );
 
-    const resolvedLocation = await resolveLocationFields({
-      locationText: payload.locationText,
-      currentLatitude: payload.locationLat,
-      currentLongitude: payload.locationLng,
-    });
-
-    return this.repository.create({
-      ...payload,
-      locationText: resolvedLocation.locationText,
-      locationLat: resolvedLocation.locationLat,
-      locationLng: resolvedLocation.locationLng,
-    });
+    return this.repository.create(await mergeResolvedLocation(payload));
   }
 
   async update(payload: ContactUpdatePayload) {
@@ -105,18 +94,7 @@ export class ContactService {
       return this.repository.update(payload);
     }
 
-    const resolvedLocation = await resolveLocationFields({
-      locationText: payload.locationText,
-      currentLatitude: payload.locationLat,
-      currentLongitude: payload.locationLng,
-    });
-
-    return this.repository.update({
-      ...payload,
-      locationText: resolvedLocation.locationText,
-      locationLat: resolvedLocation.locationLat,
-      locationLng: resolvedLocation.locationLng,
-    });
+    return this.repository.update(await mergeResolvedLocation(payload));
   }
 
   delete(id: string) {

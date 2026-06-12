@@ -8,7 +8,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
 import { ensureMigrationsAppliedOnFirstRun } from "@/services/database/ensureMigrationsApplied.client";
-import { resolveDatabaseUrl } from "@/services/database/resolveDatabaseUrl";
+import { resolveDatabaseRuntimeConfig } from "@/services/database/resolveDatabaseRuntimeConfig";
 import { seedConstantsOnFirstRun } from "@/services/database/seedConstants.client";
 import { TauriSqliteDriver } from "@/services/database/TauriSqliteDriver.client";
 
@@ -37,20 +37,11 @@ function createBrowserNoopDatabaseDriver(): DatabaseDriver {
 }
 
 export default defineNuxtPlugin(async () => {
-  const config = useRuntimeConfig() as {
-    public: {
-      appDatabaseDriver?: string;
-      appDatabaseName?: string;
-      appDatabaseUrl?: string;
-    };
-  };
+  const databaseConfig = resolveDatabaseRuntimeConfig(
+    useRuntimeConfig().public,
+  );
 
-  const driver = config.public.appDatabaseDriver ?? "sqlite";
-  const name = config.public.appDatabaseName ?? "applyflow.db";
-  const explicitUrl = config.public.appDatabaseUrl ?? undefined;
-  const configuredUrl = resolveDatabaseUrl(driver, name, explicitUrl);
-
-  const isSqliteUrl = configuredUrl.startsWith("sqlite:");
+  const isSqliteUrl = databaseConfig.configuredUrl.startsWith("sqlite:");
 
   if (!isTauri()) {
     if (!import.meta.dev) {
@@ -72,11 +63,13 @@ export default defineNuxtPlugin(async () => {
 
   if (!isSqliteUrl) {
     throw new ConfigurationError(
-      `Invalid database URL "${configuredUrl}". This desktop app requires a sqlite:* URL.`,
+      `Invalid database URL "${databaseConfig.configuredUrl}". This desktop app requires a sqlite:* URL.`,
     );
   }
 
-  const database = await TauriSqliteDriver.connect(configuredUrl);
+  const database = await TauriSqliteDriver.connect(
+    databaseConfig.configuredUrl,
+  );
   await ensureMigrationsAppliedOnFirstRun(database);
   await seedConstantsOnFirstRun(database);
 

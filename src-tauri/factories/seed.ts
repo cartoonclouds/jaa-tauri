@@ -12,8 +12,14 @@ import { createCompanyTagRows } from "./company_tags.factory";
 import { createConstantRows } from "./constants.factory";
 import { createContactTagRows } from "./contact_tags.factory";
 import { createContactRows } from "./contacts.factory";
+import {
+  type AppSeedEnv,
+  resolveDatabaseUrlFromEnv,
+  resolveSqliteFile,
+  type SqliteDatabaseLike,
+  type SqlValue,
+} from "./db-utils";
 import { createDocumentRows } from "./documents.factory";
-import { FactoryConfigurationError } from "./errors";
 import { createEventRows } from "./events.factory";
 import { createNotificationRows } from "./notifications.factory";
 import { createProductionConstantRows } from "./production/constants.factory";
@@ -22,8 +28,6 @@ import { createProductionTagRows } from "./production/tags.factory";
 import { createProfileRow } from "./profiles.factory";
 import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
-
-type SqlValue = string | number | bigint | Uint8Array | null;
 
 type SeedMode = "development" | "production";
 
@@ -64,23 +68,7 @@ interface ExistingSettingRow {
   id: string;
 }
 
-interface SqliteStatement {
-  run(...params: SqlValue[]): unknown;
-  all(...params: SqlValue[]): unknown[];
-  get(...params: SqlValue[]): unknown;
-}
-
-interface SqliteDatabaseLike {
-  exec(sql: string): unknown;
-  prepare(sql: string): SqliteStatement;
-  pragma(sql: string): unknown;
-  transaction<T>(callback: () => T): () => T;
-  close(): void;
-}
-
 const DatabaseCtor = Database;
-
-type AppSeedEnv = Record<string, string>;
 
 function readNumber(
   env: AppSeedEnv,
@@ -88,7 +76,7 @@ function readNumber(
   defaultValue: number,
   min = 0,
 ): number {
-  const value = env[key];
+  const value = env[key] as string | undefined;
   if (value === undefined || value.trim().length === 0) {
     return defaultValue;
   }
@@ -99,22 +87,6 @@ function readNumber(
   }
 
   return Math.max(min, Math.floor(parsed));
-}
-
-function resolveDatabaseUrlFromEnv(env: AppSeedEnv): string {
-  const explicitUrl = env.APP_DATABASE_URL;
-  if (explicitUrl && explicitUrl.trim().length > 0) {
-    return explicitUrl;
-  }
-
-  const driver = env.APP_DATABASE_DRIVER ?? "sqlite";
-  const name = env.APP_DATABASE_NAME ?? "applyflow.db";
-
-  if (driver === "memory" || driver === "in-memory") {
-    return ":memory:";
-  }
-
-  return `${driver}:${name}`;
 }
 
 function resolveSeedMode(rawMode: string | undefined): SeedMode {
@@ -132,7 +104,7 @@ function readSeedMode(env: AppSeedEnv, args: string[]): SeedMode {
     return resolveSeedMode(value);
   }
 
-  const envMode = env.APP_SEED_MODE;
+  const envMode = env.APP_SEED_MODE as string | undefined;
   return resolveSeedMode(envMode?.trim());
 }
 
@@ -184,27 +156,6 @@ function readSeedConfig(env: AppSeedEnv): SeedConfig {
       1,
     ),
   };
-}
-
-function resolveSqliteFile(databaseUrl: string): string {
-  if (databaseUrl === ":memory:") {
-    return databaseUrl;
-  }
-
-  if (databaseUrl.startsWith("sqlite:")) {
-    const file = databaseUrl.slice("sqlite:".length);
-    if (!file) {
-      throw new FactoryConfigurationError(
-        "Invalid sqlite URL. Example: sqlite:applyflow.db",
-      );
-    }
-
-    return path.isAbsolute(file) ? file : path.resolve(process.cwd(), file);
-  }
-
-  return path.isAbsolute(databaseUrl)
-    ? databaseUrl
-    : path.resolve(process.cwd(), databaseUrl);
 }
 
 function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {

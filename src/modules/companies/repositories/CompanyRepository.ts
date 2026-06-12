@@ -14,11 +14,9 @@ import { COMPANY_SEARCH_FIELDS } from "@modules/companies/constants";
 import { CompanyRepositoryCreateSchema } from "@modules/companies/domain/zod/company.schema";
 import { ValidationError } from "@shared/domain/errors";
 import {
-  buildSearchWhereClause,
   buildSelectAllOrderedQuery,
   DEFAULT_CREATED_AT_ORDER_BY,
-  normalizeDatatablePageQuery,
-  resolveSearchFields,
+  fetchDatatablePage,
 } from "@shared/utils/datatableQuery";
 import {
   listTagIdsForEntity,
@@ -54,50 +52,14 @@ export class CompanyRepository implements ICompanyRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Company>> {
-    const { hasSearch, page, rows, search } =
-      normalizeDatatablePageQuery(query);
-    const activeSearchFields = resolveSearchFields(
-      COMPANY_SEARCH_FIELDS,
-      query.searchFields,
-    );
-    const searchWhereClause = buildSearchWhereClause(activeSearchFields);
-
-    const totalRows = hasSearch
-      ? await this.db.select<{ total: number }>(
-          `SELECT COUNT(*) AS total
-           FROM companies
-           WHERE ${searchWhereClause}`,
-          [`%${search}%`],
-        )
-      : await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM companies",
-        );
-
-    const listRows = hasSearch
-      ? await this.db.select<Record<string, unknown>>(
-          `SELECT *
-           FROM companies
-           WHERE ${searchWhereClause}
-           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
-           LIMIT $2
-           OFFSET $3`,
-          [`%${search}%`, rows, page * rows],
-        )
-      : await this.db.select<Record<string, unknown>>(
-          `SELECT *
-           FROM companies
-           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
-           LIMIT $1
-           OFFSET $2`,
-          [rows, page * rows],
-        );
-
-    return {
-      items: await Promise.all(
-        listRows.map(async (row) => this.withTags(mapCompanyRowToEntity(row))),
-      ),
-      total: totalRows[0]?.total ?? 0,
-    };
+    return fetchDatatablePage(this.db, {
+      tableName: "companies",
+      orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      query,
+      searchFields: COMPANY_SEARCH_FIELDS,
+      mapRow: async (row: Record<string, unknown>) =>
+        this.withTags(mapCompanyRowToEntity(row)),
+    });
   }
 
   async create(payload: CompanyCreatePayload): Promise<string> {

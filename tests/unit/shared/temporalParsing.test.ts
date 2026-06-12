@@ -15,6 +15,8 @@ function expectLocalDateTime(value: string): void {
   expect(localParts.minute).toBe(14);
 }
 
+const localDateTimeInputs = ["2025-12-28T20:14", "2025-12-28 20:14"] as const;
+
 describe("temporal date parsing", () => {
   it("parses sqlite UTC datetime values with a space separator", () => {
     const parsed = temporalDateFromUnknown("2026-06-09 09:28:08");
@@ -26,11 +28,10 @@ describe("temporal date parsing", () => {
     expect(temporalToIsoString(parsed)).toBe("2026-06-09T09:28:08.123Z");
   });
 
-  it("parses local ISO datetime values without timezone", () => {
-    expectLocalDateTime("2025-12-28T20:14");
-  });
-
-  it("parses sqlite-style local datetime values without seconds", () => {
-    expectLocalDateTime("2025-12-28 20:14");
-  });
+  it.each(localDateTimeInputs)(
+    "parses local datetime values without timezone from %s",
+    (value) => {
+      expectLocalDateTime(value);
+    },
+  );
 });

@@ -75,6 +75,13 @@ Follow strong software engineering conventions:
 - Do not place business rules directly inside components unless trivial.
 - For date or date-time picking in forms, use PrimeVue `DatePicker` instead of raw text inputs or `InputText type="datetime-local"`.
 
+## Datatable helpers
+
+- When creating or editing a datatable-backed list, reuse the shared helpers and types from `src/shared/utils/datatableQuery.ts` instead of duplicating pagination, search, or ordering logic.
+- For repository/service list pages, prefer `normalizeDatatablePageQuery`, `resolveSearchFields`, `buildSearchWhereClause`, `buildSelectAllOrderedQuery`, and `fetchDatatablePage` rather than hand-rolling count/query branches.
+- For new shared datatable helpers, extend the existing `DatatableSelectDriver`, `BuildSelectAllOrderedQueryOptions`, `NormalizedDatatablePageQuery`, `ResolveOrderByClauseOptions`, and `FetchDatatablePageOptions` types before introducing a new pattern.
+- For datatable UI styling, prefer the shared `DEFAULT_DATATABLE_TABLE_STYLE` and `DEFAULT_DATATABLE_PAGINATOR_TEMPLATE` constants when building PrimeVue DataTable views.
+
 ## Form management with PrimeVue Forms
 
 Use the PrimeVue Forms library (`@primevue/forms`) for all form implementations. This provides centralized form state management, validation, and error handling integrated seamlessly with PrimeVue components.

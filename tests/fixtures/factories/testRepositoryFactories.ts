@@ -1,4 +1,3 @@
-import type { DatabaseDriver } from "@/services/database/DatabaseDriver";
 import type { IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
 import type { ICompanyRepository } from "@modules/companies/types";
 import type { IContactRepository } from "@modules/contacts/repositories/ContactRepository";
@@ -11,6 +10,8 @@ import type { IStatisticRepository } from "@modules/statistics/types";
 import type { ITagRepository } from "@modules/tags/types";
 
 import { vi } from "vitest";
+
+export { createDatabaseDriverMock } from "./testDatabaseFactories";
 
 interface CrudRepositoryMockBase {
   list: ReturnType<typeof vi.fn>;
@@ -28,32 +29,6 @@ function createCrudRepositoryMockBase(): CrudRepositoryMockBase {
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-  };
-}
-
-/** Build a mocked database driver for statistics executable tests. */
-export function createDatabaseDriverMock(): {
-  driver: DatabaseDriver;
-  selectMock: ReturnType<typeof vi.fn>;
-  executeMock: ReturnType<typeof vi.fn>;
-  transactionMock: ReturnType<typeof vi.fn>;
-} {
-  const selectMock = vi.fn();
-  const executeMock = vi.fn();
-  const transactionMock = vi.fn();
-
-  const driver: DatabaseDriver = {
-    name: "mock-db",
-    select: selectMock,
-    execute: executeMock,
-    transaction: transactionMock,
-  };
-
-  return {
-    driver,
-    selectMock,
-    executeMock,
-    transactionMock,
   };
 }
 

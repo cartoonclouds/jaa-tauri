@@ -306,6 +306,25 @@
   function onSubmit(payload: ApplicationFormSubmitPayload): void {
     emit("submit", payload);
   }
+
+  /**
+   * Triggers form submission from header button.
+   */
+  function triggerFormSubmit(): void {
+    const formElement = document.getElementById(
+      "application-editor-form",
+    ) as HTMLFormElement | null;
+    if (formElement) {
+      formElement.requestSubmit();
+    }
+  }
+
+  /**
+   * Triggers form cancellation from header button.
+   */
+  function triggerFormCancel(): void {
+    emit("cancel-edit");
+  }
 </script>
 
 <template>
@@ -326,10 +345,33 @@
     />
 
     <template #header>
-      <div class="flex w-full items-center justify-between gap-3 pr-2">
+      <div
+        class="sticky top-0 z-20 flex w-full items-center justify-between gap-3 pr-2 bg-surface-0"
+      >
         <span>{{ drawerHeader }}</span>
+        <div
+          v-if="props.mode === 'create' || props.mode === 'edit'"
+          class="flex gap-2"
+        >
+          <Button
+            type="button"
+            size="small"
+            :label="props.mode === 'edit' ? 'Update' : 'Create'"
+            :loading="busy"
+            @click="triggerFormSubmit"
+          />
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            label="Cancel"
+            :disabled="busy"
+            @click="triggerFormCancel"
+          />
+        </div>
         <Button
-          v-if="props.mode === 'view' && props.application"
+          v-else-if="props.mode === 'view' && props.application"
           type="button"
           size="small"
           @click="emit('request-edit')"

@@ -4,6 +4,7 @@
   interface MetricOption {
     label: string;
     value: string;
+    description?: string;
   }
 
   /**
@@ -47,7 +48,7 @@
     :block-scroll="true"
     :draggable="true"
     dismissable-mask
-    header="Add Hidden Stat"
+    header="Add Stat"
     :style="{ width: 'min(34rem, 92vw)' }"
   >
     <div class="space-y-3">
@@ -65,7 +66,16 @@
         placeholder="Select stats to show"
         display="chip"
         class="hidden-stats-multiselect w-full"
-      />
+      >
+        <template #option="{ option }: { option: MetricOption }">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-sm font-medium">{{ option.label }}</span>
+            <span v-if="option.description" class="text-xs text-surface-500">{{
+              option.description
+            }}</span>
+          </div>
+        </template>
+      </MultiSelect>
     </div>
 
     <template #footer>

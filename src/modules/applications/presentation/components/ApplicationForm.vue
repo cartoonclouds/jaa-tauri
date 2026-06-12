@@ -231,13 +231,6 @@
       isArchived: values.isArchived as boolean,
     });
   }
-
-  /**
-   * Handles on cancel.
-   */
-  function onCancel(): void {
-    emit("cancel");
-  }
 </script>
 
 <template>
@@ -627,25 +620,6 @@
           <ToggleSwitch name="isArchived" />
         </div>
       </section>
-
-      <div class="flex gap-2 border-t border-surface-200 pt-4 md:col-span-2">
-        <Button
-          type="submit"
-          :label="mode === 'edit' ? 'Update application' : 'Create application'"
-          :loading="busy"
-          class="px-5"
-        />
-        <Button
-          v-if="showCancel"
-          type="button"
-          severity="secondary"
-          outlined
-          label="Cancel"
-          :disabled="busy"
-          class="px-5"
-          @click="onCancel"
-        />
-      </div>
     </div>
   </Form>
 </template>

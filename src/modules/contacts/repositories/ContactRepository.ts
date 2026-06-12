@@ -17,11 +17,9 @@ import {
 } from "@modules/contacts/domain/zod/contact.schema";
 import { ValidationError } from "@shared/domain/errors";
 import {
-  buildSearchWhereClause,
   buildSelectAllOrderedQuery,
   DEFAULT_CREATED_AT_ORDER_BY,
-  normalizeDatatablePageQuery,
-  resolveSearchFields,
+  fetchDatatablePage,
 } from "@shared/utils/datatableQuery";
 import {
   listTagIdsForEntity,
@@ -119,50 +117,13 @@ export class ContactRepository implements IContactRepository {
   async listPage(
     query: DatatablePageQuery,
   ): Promise<DatatablePageResult<Contact>> {
-    const { hasSearch, page, rows, search } =
-      normalizeDatatablePageQuery(query);
-    const activeSearchFields = resolveSearchFields(
-      CONTACT_SEARCH_FIELDS,
-      query.searchFields,
-    );
-    const searchWhereClause = buildSearchWhereClause(activeSearchFields);
-
-    const totalRows = hasSearch
-      ? await this.db.select<{ total: number }>(
-          `SELECT COUNT(*) AS total
-           FROM contacts
-           WHERE ${searchWhereClause}`,
-          [`%${search}%`],
-        )
-      : await this.db.select<{ total: number }>(
-          "SELECT COUNT(*) AS total FROM contacts",
-        );
-
-    const listRows = hasSearch
-      ? await this.db.select<Record<string, unknown>>(
-          `SELECT *
-           FROM contacts
-           WHERE ${searchWhereClause}
-           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
-           LIMIT $2
-           OFFSET $3`,
-          [`%${search}%`, rows, page * rows],
-        )
-      : await this.db.select<Record<string, unknown>>(
-          `SELECT *
-           FROM contacts
-           ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}
-           LIMIT $1
-           OFFSET $2`,
-          [rows, page * rows],
-        );
-
-    return {
-      items: await Promise.all(
-        listRows.map(async (row) => this.withTags(mapContactRowToEntity(row))),
-      ),
-      total: totalRows[0]?.total ?? 0,
-    };
+    return fetchDatatablePage(this.db, {
+      tableName: "contacts",
+      orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
+      query,
+      searchFields: CONTACT_SEARCH_FIELDS,
+      mapRow: async (row) => this.withTags(mapContactRowToEntity(row)),
+    });
   }
 
   async listByApplicationId(

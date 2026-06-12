@@ -18,6 +18,7 @@
     watch,
   } from "vue";
 
+  import { useKeyBinding } from "@/composables/useKeyBinding";
   import { usePubSub } from "@/composables/usePubSub";
 
   import StatisticAddHiddenStatDialog from "./StatisticAddHiddenStatDialog.vue";
@@ -70,8 +71,11 @@
   const selectedMetricIds = ref<string[]>([]);
 
   const metricOptions = computed(() => {
-    const labelById = new Map<string, string>(
-      metricViews.value.map((metric) => [metric.id, metric.title]),
+    const metaById = new Map<string, { title: string; description: string }>(
+      metricViews.value.map((metric) => [
+        metric.id,
+        { title: metric.title, description: metric.description },
+      ]),
     );
 
     const ids = new Set<string>([
@@ -80,7 +84,8 @@
     ]);
 
     return Array.from(ids).map((id) => ({
-      label: labelById.get(id) ?? id,
+      label: metaById.get(id)?.title ?? id,
+      description: metaById.get(id)?.description,
       value: id,
     }));
   });
@@ -212,6 +217,11 @@
 
     isAddHiddenStatDialogVisible.value = false;
   }
+
+  useKeyBinding({
+    bindings: [{ key: "Escape", onTrigger: toggleEditMode }],
+    isEnabled: isEditMode,
+  });
 
   onMounted(async () => {
     await loadStatsVisibility();

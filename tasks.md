@@ -39,9 +39,6 @@ Note on stages
 
 Timeline tab
 
-Stats visible settings
-
 Fix stages
 
 Add advanced search so that when opening the search modal it's display a search builder across Applications, Contacts, Companies and Locations.
-

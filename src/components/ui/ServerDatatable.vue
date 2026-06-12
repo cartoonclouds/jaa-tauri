@@ -75,7 +75,6 @@
       .filter(
         (token) =>
           token.length > 0 &&
-          token !== "RowsPerPageDropdown" &&
           token !== "JumpToPageDropdown",
       )
       .join(" "),

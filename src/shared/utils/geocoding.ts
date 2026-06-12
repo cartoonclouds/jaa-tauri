@@ -108,3 +108,23 @@ export async function resolveLocationFields(
     locationLng: geocoded.longitude,
   };
 }
+
+/**
+ * Merges resolved location fields into a payload object, replacing locationText,
+ * locationLat, and locationLng with geocoded values.
+ */
+export async function mergeResolvedLocation<
+  T extends {
+    locationText?: string | null;
+    locationLat?: number | null;
+    locationLng?: number | null;
+  },
+>(payload: T): Promise<T & ResolvedLocationFields> {
+  const resolved = await resolveLocationFields({
+    locationText: payload.locationText,
+    currentLatitude: payload.locationLat,
+    currentLongitude: payload.locationLng,
+  });
+
+  return { ...payload, ...resolved };
+}

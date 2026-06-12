@@ -8,7 +8,7 @@ import {
   type CompanyUpdatePayload,
   type ICompanyRepository,
 } from "@modules/companies/types";
-import { resolveLocationFields } from "@shared/utils/geocoding";
+import { mergeResolvedLocation } from "@shared/utils/geocoding";
 import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
@@ -40,18 +40,7 @@ export class CompanyService {
   async create(payload: CompanyCreatePayload) {
     parseWithSchema(CompanySchema.pick({ name: true }), payload);
 
-    const resolvedLocation = await resolveLocationFields({
-      locationText: payload.locationText,
-      currentLatitude: payload.locationLat,
-      currentLongitude: payload.locationLng,
-    });
-
-    return this.repository.create({
-      ...payload,
-      locationText: resolvedLocation.locationText,
-      locationLat: resolvedLocation.locationLat,
-      locationLng: resolvedLocation.locationLng,
-    });
+    return this.repository.create(await mergeResolvedLocation(payload));
   }
 
   async update(payload: CompanyUpdatePayload) {
@@ -65,18 +54,7 @@ export class CompanyService {
       return this.repository.update(payload);
     }
 
-    const resolvedLocation = await resolveLocationFields({
-      locationText: payload.locationText,
-      currentLatitude: payload.locationLat,
-      currentLongitude: payload.locationLng,
-    });
-
-    return this.repository.update({
-      ...payload,
-      locationText: resolvedLocation.locationText,
-      locationLat: resolvedLocation.locationLat,
-      locationLng: resolvedLocation.locationLng,
-    });
+    return this.repository.update(await mergeResolvedLocation(payload));
   }
 
   delete(id: string) {

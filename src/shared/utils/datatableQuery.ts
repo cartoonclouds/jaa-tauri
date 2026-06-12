@@ -1,4 +1,9 @@
-import type { DatatablePageQuery, DatatableSortOrder } from "@shared/types";
+import type { QueryBindings } from "@/services/database/QueryBindings";
+import type {
+  DatatablePageQuery,
+  DatatablePageResult,
+  DatatableSortOrder,
+} from "@shared/types";
 
 /** Default ORDER BY clause used by datatable-backed list queries. */
 export const DEFAULT_CREATED_AT_ORDER_BY = "created_at DESC" as const;
@@ -37,6 +42,24 @@ export interface ResolveOrderByClauseOptions {
   sortOrder?: DatatableSortOrder;
   sortableColumns?: Readonly<Record<string, string>>;
   fallbackClause: string;
+}
+
+/**
+ * Defines the minimal database surface required by datatable helpers.
+ */
+export interface DatatableSelectDriver {
+  select<T = unknown>(sql: string, bindings?: QueryBindings): Promise<T[]>;
+}
+
+/**
+ * Defines shared datatable page fetch options.
+ */
+export interface FetchDatatablePageOptions<TItem> {
+  tableName: string;
+  orderByClause: string;
+  query: DatatablePageQuery;
+  searchFields: readonly string[];
+  mapRow: (row: Record<string, unknown>) => TItem | Promise<TItem>;
 }
 
 /**
@@ -117,4 +140,60 @@ export function buildSelectAllOrderedQuery({
 }: BuildSelectAllOrderedQueryOptions): string {
   const whereSegment = whereClause ? ` WHERE ${whereClause}` : "";
   return `SELECT * FROM ${tableName}${whereSegment} ORDER BY ${orderByClause}`;
+}
+
+/**
+ * Fetch a paginated datatable result set using a shared search/count/query flow.
+ */
+export async function fetchDatatablePage<TItem>(
+  db: DatatableSelectDriver,
+  {
+    tableName,
+    orderByClause,
+    query,
+    searchFields,
+    mapRow,
+  }: FetchDatatablePageOptions<TItem>,
+): Promise<DatatablePageResult<TItem>> {
+  const { hasSearch, page, rows, search } = normalizeDatatablePageQuery(query);
+  const activeSearchFields = resolveSearchFields(
+    searchFields,
+    query.searchFields,
+  );
+  const searchWhereClause = buildSearchWhereClause(activeSearchFields);
+  const searchBindings = [`%${search}%`] satisfies QueryBindings;
+
+  const totalRows = hasSearch
+    ? await db.select<{ total: number }>(
+        `SELECT COUNT(*) AS total
+         FROM ${tableName}
+         WHERE ${searchWhereClause}`,
+        searchBindings,
+      )
+    : await db.select<{ total: number }>(
+        `SELECT COUNT(*) AS total FROM ${tableName}`,
+      );
+
+  const listRows = hasSearch
+    ? await db.select<Record<string, unknown>>(
+        `${buildSelectAllOrderedQuery({
+          tableName,
+          orderByClause,
+          whereClause: searchWhereClause,
+        })}
+         LIMIT $2
+         OFFSET $3`,
+        [searchBindings[0], rows, page * rows],
+      )
+    : await db.select<Record<string, unknown>>(
+        `${buildSelectAllOrderedQuery({ tableName, orderByClause })}
+         LIMIT $1
+         OFFSET $2`,
+        [rows, page * rows],
+      );
+
+  return {
+    items: await Promise.all(listRows.map((row) => mapRow(row))),
+    total: totalRows[0]?.total ?? 0,
+  };
 }

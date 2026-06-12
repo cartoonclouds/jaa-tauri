@@ -6,7 +6,7 @@ import type { DatatablePageQuery } from "@shared/types";
 
 import { ApplicationSchema } from "@modules/applications/domain/zod/application.schema";
 import { type IApplicationRepository } from "@modules/applications/repositories/ApplicationRepository";
-import { resolveLocationFields } from "@shared/utils/geocoding";
+import { mergeResolvedLocation } from "@shared/utils/geocoding";
 import { parseWithSchema } from "@shared/utils/zodValidation";
 
 /**
@@ -26,18 +26,7 @@ export class ApplicationService {
   async create(payload: ApplicationCreatePayload) {
     parseWithSchema(ApplicationSchema.pick({ title: true }), payload);
 
-    const resolvedLocation = await resolveLocationFields({
-      locationText: payload.locationText,
-      currentLatitude: payload.locationLat,
-      currentLongitude: payload.locationLng,
-    });
-
-    return this.repository.create({
-      ...payload,
-      locationText: resolvedLocation.locationText,
-      locationLat: resolvedLocation.locationLat,
-      locationLng: resolvedLocation.locationLng,
-    });
+    return this.repository.create(await mergeResolvedLocation(payload));
   }
 
   async update(payload: ApplicationUpdatePayload) {
@@ -45,22 +34,7 @@ export class ApplicationService {
       title: payload.title,
     });
 
-    if (payload.locationText === undefined) {
-      return this.repository.update(payload);
-    }
-
-    const resolvedLocation = await resolveLocationFields({
-      locationText: payload.locationText,
-      currentLatitude: payload.locationLat,
-      currentLongitude: payload.locationLng,
-    });
-
-    return this.repository.update({
-      ...payload,
-      locationText: resolvedLocation.locationText,
-      locationLat: resolvedLocation.locationLat,
-      locationLng: resolvedLocation.locationLng,
-    });
+    return this.repository.update(await mergeResolvedLocation(payload));
   }
 
   delete(id: string) {
