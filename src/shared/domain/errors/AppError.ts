@@ -9,7 +9,7 @@ export interface AppErrorOptions {
 /**
  * Base application error with optional cause and stable code metadata.
  */
-export class AppError extends Error {
+class AppError extends Error {
   readonly code?: string;
 
   constructor(message: string, options: AppErrorOptions = {}) {

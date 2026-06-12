@@ -96,7 +96,7 @@ export function createEventRows(seed = 1500): EventRow[] {
   });
 }
 
-export function createApplicationEventRows(
+function createApplicationEventRows(
   applications: EventApplicationInput[],
   events: EventRow[],
   _eventsPerApplication = 2,

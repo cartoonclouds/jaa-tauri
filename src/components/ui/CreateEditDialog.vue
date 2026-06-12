@@ -36,7 +36,7 @@
     showDelete: false,
     isSaving: false,
     saveFormId: "",
-    widthClass: "w-full! max-w-lg",
+    widthClass: "max-w-lg",
     dialogStyle: () => ({}),
     breakpoints: () => ({}),
   });
@@ -61,6 +61,8 @@
   const saveLabel = computed(() =>
     props.mode === "create" ? props.createSaveLabel : props.editSaveLabel,
   );
+
+  const dialogWidthClass = computed(() => props.widthClass.replace(/!/g, ""));
 
   const shouldBindSaveHotkey = computed(
     () => props.visible && props.mode === "edit" && !props.isSaving,
@@ -96,8 +98,10 @@
   <Dialog
     v-model:visible="visibleModel"
     modal
+    :block-scroll="true"
+    :draggable="true"
     :header="dialogHeader"
-    :class="widthClass"
+    :class="dialogWidthClass"
     :style="dialogStyle"
     :breakpoints="breakpoints"
   >

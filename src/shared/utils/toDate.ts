@@ -94,7 +94,7 @@ export function formatDateTimeLocalValue(
  *
  * Returns null when the input is empty or not a valid local date-time string.
  */
-export function parseDateTimeLocalValue(
+function parseDateTimeLocalValue(
   value: string,
 ): TemporalDateTime | null {
   if (!value) {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
   import { useProfile } from "@modules/profile";
+  import { getSetting } from "@modules/settings";
   import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
   import { ref } from "vue";
 
@@ -23,6 +24,7 @@
   const { service: profileService } = useProfile();
 
   const profile = await profileService.getProfile();
+  const showOverview = await getSetting("showOverview");
 
   const topView = ref<TopSectionView>("overview");
 
@@ -60,7 +62,7 @@
 
     <div v-if="topView === 'overview'" class="mx-auto space-y-6">
       <ClientOnly>
-        <section class="mx-auto mb-8">
+        <section v-if="showOverview" class="mx-auto mb-8">
           <StatisticsSection title="Job Hunt Overview" />
         </section>
       </ClientOnly>

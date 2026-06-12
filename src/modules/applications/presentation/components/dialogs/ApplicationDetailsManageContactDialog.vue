@@ -3,8 +3,6 @@
 
   import { ref, watch } from "vue";
 
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
-
   interface ContactCreateFormState {
     fullName: string;
     type: ContactType;
@@ -110,16 +108,16 @@
         option.label.toLowerCase().includes(query),
     );
   }
-
-  useBodyScrollLock(visible);
 </script>
 
 <template>
   <Dialog
     v-model:visible="visible"
     modal
+    :block-scroll="true"
+    :draggable="true"
     header="Add Contact"
-    class="w-full! max-w-lg"
+    class="w-full max-w-lg"
   >
     <div class="space-y-3">
       <Message v-if="availableContactsError" severity="warn" size="small">

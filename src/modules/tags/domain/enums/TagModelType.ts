@@ -32,21 +32,25 @@ class TagModelTypeEnum extends EnumValue {
 /** Public enum facade for tag model type values. */
 export const TagModelType = TagModelTypeEnum;
 
+/** Canonical raw string values for tag model type persistence and factories. */
+export const TAG_MODEL_TYPES = {
+  application: TagModelType.Application.value,
+  company: TagModelType.Company.value,
+  contact: TagModelType.Contact.value,
+  general: TagModelType.General.value,
+} as const;
+
 /**
  * Type alias for tag model type.
  */
-export type TagModelType =
-  | typeof TagModelTypeEnum.Application
-  | typeof TagModelTypeEnum.Company
-  | typeof TagModelTypeEnum.Contact
-  | typeof TagModelTypeEnum.General;
+export type TagModelType = typeof TagModelTypeEnum.Application;
 
 /**
  * Raw string values for tag model type persistence and validation.
  */
 export const TAG_MODEL_TYPE_VALUES = [
-  TagModelType.Application.value,
-  TagModelType.Company.value,
-  TagModelType.Contact.value,
-  TagModelType.General.value,
+  TAG_MODEL_TYPES.application,
+  TAG_MODEL_TYPES.company,
+  TAG_MODEL_TYPES.contact,
+  TAG_MODEL_TYPES.general,
 ] as const;

@@ -18,6 +18,23 @@ export class BetterSqliteDriver implements DatabaseDriver {
 
   constructor(private readonly db: BetterSqliteDatabase) {}
 
+  /**
+   * Converts a positional bindings array to a named-parameter object.
+   * The SQL queries in this project use `$1, $2, $3, …` (SQLite named numeric
+   * parameters). better-sqlite3 requires named params to be passed as an object
+   * whose keys are the parameter names without the leading sigil, so `$1` maps
+   * to key `"1"`.
+   */
+  private static namedBindings(
+    bindings: QueryBindings,
+  ): Record<string, unknown> {
+    const obj: Record<string, unknown> = {};
+    for (let i = 0; i < bindings.length; i++) {
+      obj[String(i + 1)] = bindings[i];
+    }
+    return obj;
+  }
+
   static connect(databaseUrl = "sqlite:applyflow.db"): BetterSqliteDriver {
     if (databaseUrl === ":memory:") {
       return new BetterSqliteDriver(new Database(":memory:"));
@@ -51,7 +68,12 @@ export class BetterSqliteDriver implements DatabaseDriver {
     sql: string,
     bindings: QueryBindings = [],
   ): Promise<T[]> {
-    const result = this.db.prepare(sql).all(...bindings) as T[];
+    const stmt = this.db.prepare(sql);
+    const result = (
+      bindings.length > 0
+        ? stmt.all(BetterSqliteDriver.namedBindings(bindings))
+        : stmt.all()
+    ) as T[];
 
     return Promise.resolve(result);
   }
@@ -60,7 +82,12 @@ export class BetterSqliteDriver implements DatabaseDriver {
     sql: string,
     bindings: QueryBindings = [],
   ): Promise<QueryResult> {
-    const result = this.db.prepare(sql).run(...bindings) as {
+    const stmt = this.db.prepare(sql);
+    const result = (
+      bindings.length > 0
+        ? stmt.run(BetterSqliteDriver.namedBindings(bindings))
+        : stmt.run()
+    ) as {
       changes: number;
       lastInsertRowid?: number | bigint;
     };

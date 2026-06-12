@@ -18,8 +18,6 @@
   } from "@shared/utils/toDate";
   import { computed, reactive, ref, watch } from "vue";
 
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
-
   interface EventTreeNodeData {
     kind: "application" | "stage" | "event";
     event?: Event;
@@ -47,8 +45,6 @@
 
   const isInteractionDialogVisible = ref(false);
   const isSavingInteraction = ref(false);
-
-  useBodyScrollLock(isInteractionDialogVisible);
 
   const expandedKeys = ref<Record<string, boolean>>({});
 

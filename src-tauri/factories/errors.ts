@@ -1,7 +1,7 @@
 /**
  * Base error for seed/factory scripts.
  */
-export class FactoryError extends Error {
+class FactoryError extends Error {
   constructor(message: string) {
     super(message);
     this.name = new.target.name;

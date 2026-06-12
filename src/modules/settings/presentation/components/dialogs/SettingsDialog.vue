@@ -10,7 +10,6 @@
   import { computed, reactive, ref, watch } from "vue";
   import { z } from "zod";
 
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
   import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   /**
@@ -82,8 +81,6 @@
       emit("update:visible", value);
     },
   });
-
-  useBodyScrollLock(dialogVisible);
 
   const constantGroups = computed<ConstantGroup[]>(() => {
     const seen = new Set<string>();
@@ -371,9 +368,10 @@
   <Dialog
     v-model:visible="dialogVisible"
     modal
+    :block-scroll="true"
+    :draggable="true"
     dismissable-mask
     maximizable
-    :draggable="false"
     :style="{ width: 'min(90rem, 96vw)' }"
     header="Settings"
   >

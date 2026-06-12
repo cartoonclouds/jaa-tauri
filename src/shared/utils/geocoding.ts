@@ -26,7 +26,7 @@ export type ResolvedLocationFields = LocationFields;
 /**
  * Resolve location text into latitude/longitude using a public geocoding endpoint.
  */
-export async function geocodeLocation(
+async function geocodeLocation(
   locationText: string,
 ): Promise<GeocodingCoordinates | null> {
   const query = locationText.trim();

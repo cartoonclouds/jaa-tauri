@@ -10,9 +10,7 @@
   import { companiesSearchPlaceholder } from "@modules/companies/constants";
   import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
   import { useToast } from "primevue/usetoast";
-  import { computed, ref } from "vue";
-
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+  import { computed, ref, watch } from "vue";
 
   interface Props {
     visible: boolean;
@@ -50,7 +48,14 @@
     },
   });
 
-  useBodyScrollLock(dialogVisible);
+  watch(dialogVisible, (visible, previousVisible) => {
+    if (!visible || previousVisible) {
+      return;
+    }
+
+    isEditorDialogVisible.value = false;
+    selectedCompany.value = null;
+  });
 
   /**
    * Handles open create company dialog.
@@ -112,8 +117,10 @@
   <Dialog
     v-model:visible="dialogVisible"
     modal
+    :block-scroll="true"
+    :draggable="true"
     header="Companies"
-    class="w-[95vw]! max-w-6xl"
+    class="w-[95vw] max-w-6xl"
   >
     <div class="space-y-6 p-2 md:p-3">
       <div class="flex items-center justify-between gap-3">

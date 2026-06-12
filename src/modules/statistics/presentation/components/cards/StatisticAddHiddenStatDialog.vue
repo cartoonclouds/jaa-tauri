@@ -44,6 +44,8 @@
   <Dialog
     v-model:visible="visibleModel"
     modal
+    :block-scroll="true"
+    :draggable="true"
     dismissable-mask
     header="Add Hidden Stat"
     :style="{ width: 'min(34rem, 92vw)' }"

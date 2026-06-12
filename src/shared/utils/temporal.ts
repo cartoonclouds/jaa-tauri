@@ -78,7 +78,7 @@ export function isJsDate(value: unknown): value is Date {
 /**
  * Resolve native Temporal when available and fall back to the polyfill otherwise.
  */
-export function getTemporal(): TemporalNamespace {
+function getTemporal(): TemporalNamespace {
   const globalWithTemporal = globalThis as GlobalWithTemporal;
   return globalWithTemporal.Temporal ?? TemporalPolyfill;
 }

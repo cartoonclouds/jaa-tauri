@@ -135,7 +135,7 @@ export const ApplicationSchema = z.object({
 });
 
 /** Runtime schema for creating applications from external input. */
-export const CreateApplicationSchema = ApplicationSchema.pick({
+const CreateApplicationSchema = ApplicationSchema.pick({
   companyId: true,
   title: true,
   status: true,

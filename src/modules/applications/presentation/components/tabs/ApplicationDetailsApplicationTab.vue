@@ -36,8 +36,6 @@
     watch,
   } from "vue";
 
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
-
   /**
    * Defines props.
    */
@@ -95,8 +93,6 @@
   const editStageListEl = useTemplateRef<HTMLElement>("editStageList");
   const createStageListEl = useTemplateRef<HTMLElement>("createStageList");
   const editableStageSortedList = shallowRef<Event[]>([]);
-
-  useBodyScrollLock(isStageDialogVisible);
 
   const editableStageEvents = computed<Event[]>(() => {
     const applicationId = props.application?.id;

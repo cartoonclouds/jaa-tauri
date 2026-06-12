@@ -1,6 +1,4 @@
 <script setup lang="ts">
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
-
   interface Props {
     contactName: string;
   }
@@ -10,16 +8,16 @@
     confirm: [];
   }>();
   const visible = defineModel<boolean>("visible", { required: true });
-
-  useBodyScrollLock(visible);
 </script>
 
 <template>
   <Dialog
     v-model:visible="visible"
     modal
+    :block-scroll="true"
+    :draggable="true"
     header="Remove Contact"
-    class="w-full! max-w-md"
+    class="w-full max-w-md"
   >
     <p class="text-sm text-surface-700">
       Remove

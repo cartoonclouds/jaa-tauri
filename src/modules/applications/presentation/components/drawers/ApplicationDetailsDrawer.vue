@@ -15,7 +15,6 @@
   import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
   import { useUnsavedChangesGuard } from "@/composables/useUnsavedChangesGuard";
 
   const props = withDefaults(defineProps<Props>(), {
@@ -91,8 +90,6 @@
       emit("update:visible", value);
     },
   });
-
-  useBodyScrollLock(drawerVisible);
 
   const companyOptions = computed<ApplicationSelectOption[]>(() =>
     props.companies.map((company) => ({
@@ -314,6 +311,8 @@
 <template>
   <Drawer
     v-model:visible="drawerVisible"
+    :block-scroll="true"
+    :draggable="true"
     position="right"
     class="application-details-drawer relative"
     :style="drawerInlineStyle"

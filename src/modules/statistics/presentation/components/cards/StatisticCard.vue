@@ -73,7 +73,7 @@
 
 <template>
   <Card
-    class="h-full rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm"
+    class="h-full rounded-xl border border-surface-200 bg-surface-0 shadow-sm"
     :pt="{
       root: 'h-full',
       body: 'h-full flex flex-col',
@@ -83,13 +83,13 @@
     <template #content>
       <div class="flex h-full flex-col">
         <div class="flex items-start justify-between gap-3">
-          <p class="text-sm font-medium text-surface-500">{{ title }}</p>
+          <p class="text-lg font-medium text-surface-500">{{ title }}</p>
           <Avatar shape="circle" class="h-9 w-9 border" :class="toneClasses">
             <Icon :name="icon" class="h-5 w-5" />
           </Avatar>
         </div>
 
-        <p class="mt-3 text-3xl font-semibold leading-tight text-surface-900">
+        <p class="text-3xl font-semibold leading-tight text-surface-900">
           {{ value }}<span v-if="suffix">{{ suffix }}</span>
         </p>
 

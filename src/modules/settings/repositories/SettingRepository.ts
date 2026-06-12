@@ -48,6 +48,7 @@ const SettingsInputSchema = z.object({
   theme: z.enum(["light", "dark", "auto"]),
   notificationsEnabled: z.boolean(),
   developerMode: z.boolean(),
+  showOverview: z.boolean(),
   recentSearches: z.array(z.string()),
   tableColumnVisibility: z.record(z.boolean()),
   statsVisibility: z.record(
@@ -68,6 +69,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   theme: "auto",
   notificationsEnabled: true,
   developerMode: false,
+  showOverview: true,
   recentSearches: [],
   tableColumnVisibility: {},
   statsVisibility: {},
@@ -157,6 +159,10 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
       row.developer_mode,
       DEFAULT_SETTINGS.developerMode,
     ),
+    showOverview: fromDbBoolean(
+      row.show_overview,
+      DEFAULT_SETTINGS.showOverview,
+    ),
     recentSearches: parseStringArray(
       row.recent_searches,
       DEFAULT_SETTINGS.recentSearches,
@@ -196,6 +202,7 @@ async function upsertSettingsRow(
       locale,
       notifications_enabled,
       developer_mode,
+      show_overview,
       recent_searches,
       table_column_visibility,
       stats_visibility,
@@ -203,11 +210,12 @@ async function upsertSettingsRow(
       created_at,
       updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(id) DO UPDATE SET
       theme = excluded.theme,
       notifications_enabled = excluded.notifications_enabled,
       developer_mode = excluded.developer_mode,
+      show_overview = excluded.show_overview,
       recent_searches = excluded.recent_searches,
       table_column_visibility = excluded.table_column_visibility,
       stats_visibility = excluded.stats_visibility,
@@ -220,6 +228,7 @@ async function upsertSettingsRow(
       "en-GB",
       toDbBooleanInt(settings.notificationsEnabled),
       toDbBooleanInt(settings.developerMode),
+      toDbBooleanInt(settings.showOverview),
       JSON.stringify(settings.recentSearches),
       JSON.stringify(settings.tableColumnVisibility),
       JSON.stringify(settings.statsVisibility),

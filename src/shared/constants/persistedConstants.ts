@@ -214,7 +214,7 @@ function toConstantRows(
 /**
  * Create deterministic rows for constants persisted in the database.
  */
-export function createPersistedConstantRows(): PersistedConstantRow[] {
+function createPersistedConstantRows(): PersistedConstantRow[] {
   return createPersistedConstantRowsFromSources(CONSTANT_MODULE_SOURCES);
 }
 

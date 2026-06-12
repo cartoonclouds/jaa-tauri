@@ -100,6 +100,8 @@ export interface AppSettings {
   notificationsEnabled: boolean;
   /** Whether developer mode is enabled. */
   developerMode: boolean;
+  /** Whether the overview section is visible on the home page. */
+  showOverview: boolean;
   /** Recently used search terms. */
   recentSearches: string[];
   /** Column visibility map keyed by table or datatable identifier. */

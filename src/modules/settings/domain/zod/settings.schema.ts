@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 /** Runtime schema for app-level persisted settings. */
-export const SettingsSchema = z.object({
+const SettingsSchema = z.object({
   theme: z.enum(["light", "dark", "auto"]),
   notificationsEnabled: z.boolean(),
   developerMode: z.boolean(),
+  showOverview: z.boolean(),
   recentSearches: z.array(z.string()),
   tableColumnVisibility: z.record(z.boolean()),
   statsVisibility: z.record(

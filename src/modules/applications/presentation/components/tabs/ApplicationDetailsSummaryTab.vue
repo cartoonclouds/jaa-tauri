@@ -23,7 +23,6 @@
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
   import NotesMarkdownViewerClient from "@/components/ui/NotesMarkdownViewer.client.vue";
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   /**
    * Defines props.
@@ -65,8 +64,6 @@
     eventAt: null,
     notes: "",
   });
-
-  useBodyScrollLock(isEditDialogVisible);
 
   const applicationStageEvents = computed<Event[]>(() => {
     const application = props.application;

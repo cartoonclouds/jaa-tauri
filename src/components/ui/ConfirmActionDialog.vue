@@ -1,8 +1,6 @@
 <script setup lang="ts">
   import { computed } from "vue";
 
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
-
   interface Props {
     visible: boolean;
     title: string;
@@ -26,7 +24,7 @@
     cancelLabel: "Cancel",
     confirmSeverity: "danger",
     busy: false,
-    widthClass: "w-full! max-w-md",
+    widthClass: "w-full max-w-md",
   });
 
   const emit = defineEmits<{
@@ -35,7 +33,7 @@
     cancel: [];
   }>();
 
-  useBodyScrollLock(computed(() => props.visible));
+  const dialogWidthClass = computed(() => props.widthClass.replace(/!/g, ""));
 
   function onCancel(): void {
     emit("cancel");
@@ -51,8 +49,10 @@
   <Dialog
     :visible="visible"
     modal
+    :block-scroll="true"
+    :draggable="true"
     :header="title"
-    :class="widthClass"
+    :class="dialogWidthClass"
     @update:visible="emit('update:visible', $event)"
   >
     <p class="text-sm text-surface-700">

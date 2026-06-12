@@ -1,7 +1,7 @@
 /**
  * SQL expression resolving an application's effective stage type.
  */
-export const EFFECTIVE_STAGE_TYPE_SQL = `
+const EFFECTIVE_STAGE_TYPE_SQL = `
 COALESCE(
   (
     SELECT e.type

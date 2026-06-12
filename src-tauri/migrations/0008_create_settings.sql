@@ -12,6 +12,10 @@ CREATE TABLE IF NOT EXISTS settings (
     * and sort order information.
     */
   stats_visibility TEXT NOT NULL DEFAULT '{}',
+  /**
+    * Indicates whether the overview should be shown to the user.
+    */
+  show_overview INTEGER NOT NULL DEFAULT 1,
   onboarding_completed INTEGER NOT NULL DEFAULT 0,
   profile_id TEXT REFERENCES profiles(id) ON DELETE SET NULL ON UPDATE CASCADE,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

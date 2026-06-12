@@ -86,25 +86,17 @@ export default defineNuxtConfig({
     generateMetadata: true,
   },
 
-  modules: [
-    "@vueuse/nuxt",
-    "@nuxt/icon",
-    "@nuxt/hints",
-    "nuxt-security",
-    "@nuxtjs/device",
-    [
-      "@primevue/nuxt-module",
-      {
-        autoImport: true,
-        options: {
-          ripple: true,
-          inputVariant: "filled",
-          theme: applyFlowPrimeVueTheme,
-        },
+  modules: ["@vueuse/nuxt", "@nuxt/icon", "@nuxt/hints", "nuxt-security", "@nuxtjs/device", [
+    "@primevue/nuxt-module",
+    {
+      autoImport: true,
+      options: {
+        ripple: true,
+        inputVariant: "filled",
+        theme: applyFlowPrimeVueTheme,
       },
-    ],
-    "@vee-validate/nuxt",
-  ],
+    },
+  ], "@vee-validate/nuxt", "@primevue/nuxt-module"],
 
   // @ts-expect-error Nuxt Hints module options are applied at runtime; augmentation is not available in this static config type.
   hints: {

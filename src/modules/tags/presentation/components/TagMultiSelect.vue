@@ -39,6 +39,10 @@
     ),
   );
 
+  const scopedTagIdSet = computed(
+    () => new Set(scopedItems.value.map((tag) => tag.id)),
+  );
+
   const tagOptions = computed(() =>
     scopedItems.value.map((tag) => ({
       label: tag.name,
@@ -58,8 +62,33 @@
     ...pendingTagOptions.value,
   ]);
 
+  function normalizeSelectedTagIds(
+    selectedTagIds: readonly string[],
+  ): string[] {
+    return selectedTagIds.filter(
+      (tagId) => tagId.trim().length > 0 && scopedTagIdSet.value.has(tagId),
+    );
+  }
+
+  function syncNormalizedModelValue(): void {
+    const normalizedTagIds = normalizeSelectedTagIds(props.modelValue);
+
+    const hasSameLength = normalizedTagIds.length === props.modelValue.length;
+    const hasSameOrder = hasSameLength
+      ? normalizedTagIds.every(
+          (tagId, index) => tagId === props.modelValue[index],
+        )
+      : false;
+
+    if (hasSameOrder) {
+      return;
+    }
+
+    emit("update:modelValue", normalizedTagIds);
+  }
+
   const displayedModelValue = computed(() => [
-    ...props.modelValue,
+    ...normalizeSelectedTagIds(props.modelValue),
     ...pendingTagOptions.value.map((option) => option.value),
   ]);
 
@@ -75,7 +104,14 @@
   });
 
   onMounted(() => {
-    void refresh().catch(() => undefined);
+    void (async () => {
+      try {
+        await refresh();
+        syncNormalizedModelValue();
+      } catch {
+        // Keep the previous selection unchanged if tags fail to load.
+      }
+    })();
   });
 
   function updateModel(value: string[]): void {
@@ -83,6 +119,10 @@
     const nextPendingTagNames: string[] = [];
 
     for (const currentValue of value) {
+      if (!currentValue.trim()) {
+        continue;
+      }
+
       if (currentValue.startsWith(PENDING_TAG_PREFIX)) {
         const pendingName = decodeURIComponent(
           currentValue.slice(PENDING_TAG_PREFIX.length),
@@ -93,7 +133,9 @@
         continue;
       }
 
-      nextTagIds.push(currentValue);
+      if (scopedTagIdSet.value.has(currentValue)) {
+        nextTagIds.push(currentValue);
+      }
     }
 
     emit("update:modelValue", [...new Set(nextTagIds)]);

@@ -13,6 +13,7 @@ export interface SettingRow {
   stats_visibility: string;
   onboarding_completed: number;
   profile_id: string | null;
+  show_overview: number;
   created_at: string;
   updated_at: string;
 }
@@ -56,6 +57,7 @@ export function createSettingRow(
     stats_visibility: JSON.stringify(createDefaultStatsVisibility()),
     onboarding_completed: profileId ? 1 : 0,
     profile_id: profileId,
+    show_overview: 1,
     created_at: createdAt,
     updated_at: createdAt,
   };

@@ -35,8 +35,6 @@ Incorporate all constants module code into settings.
 
 When editing a flow state event, remove all options already associated with that application from the selectbox (except for that selected event)
 
-Add the Temporal polyfill and update all usages of Date to use either the native browser's Temporal implementation or the polyfill.
-
 Note on stages
 
 Timeline tab
@@ -44,9 +42,3 @@ Timeline tab
 Stats visible settings
 
 Fix stages
-
-Rename all references from metrics into use statistics
-
-
-
-

@@ -41,7 +41,6 @@
   import { ref, watch } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
   import { useUnsavedChangesGuard } from "@/composables/useUnsavedChangesGuard";
 
   interface Props {
@@ -133,8 +132,6 @@
 
     return "You have unsaved edits in the application form. Close the drawer and discard them?";
   });
-
-  useBodyScrollLock(isDrawerOpen);
 
   /**
    * Handles to form values.

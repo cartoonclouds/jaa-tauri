@@ -1,6 +1,9 @@
 import { logError } from "@infra/logging/tauriLog.client";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Menu, MenuItem, Submenu } from "@tauri-apps/api/menu";
+import { appLogDir, join } from "@tauri-apps/api/path";
+import { readDir, stat } from "@tauri-apps/plugin-fs";
+import { openPath, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { defineNuxtPlugin } from "nuxt/app";
 
 import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
@@ -21,6 +24,75 @@ export default defineNuxtPlugin((nuxtApp) => {
     const { openContactsDialog } = useContactsDialog();
     const { openOnboarding } = useOnboardingNavigation();
     const { openSettingsDialog } = useSettingsDialog();
+
+    async function resolveLatestLogFilePath(): Promise<string | null> {
+      const logDirectory = await appLogDir();
+      const entries = await readDir(logDirectory);
+      const logFiles = entries.filter(
+        (entry) => entry.isFile && entry.name.toLowerCase().endsWith(".log"),
+      );
+
+      if (logFiles.length === 0) {
+        return null;
+      }
+
+      const filesWithMetadata = await Promise.all(
+        logFiles.map(async (entry) => {
+          const filePath = await join(logDirectory, entry.name);
+          const fileInfo = await stat(filePath);
+
+          return {
+            filePath,
+            modifiedAt:
+              fileInfo.mtime?.getTime() ?? fileInfo.birthtime?.getTime() ?? 0,
+          };
+        }),
+      );
+
+      filesWithMetadata.sort(
+        (left, right) => right.modifiedAt - left.modifiedAt,
+      );
+
+      return filesWithMetadata[0]?.filePath ?? null;
+    }
+
+    async function openLatestLogFile(): Promise<void> {
+      try {
+        const logFilePath = await resolveLatestLogFilePath();
+        if (!logFilePath) {
+          logError("No log files were found in the Tauri log directory.");
+          return;
+        }
+
+        try {
+          await openPath(logFilePath);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          if (!message.includes("Not allowed to open path")) {
+            throw error;
+          }
+
+          await revealItemInDir(logFilePath);
+        }
+      } catch (error) {
+        logError("Failed to open latest log file:", error);
+      }
+    }
+
+    async function openLogDirectory(): Promise<void> {
+      try {
+        const logFilePath = await resolveLatestLogFilePath();
+        if (!logFilePath) {
+          logError("No log files were found in the Tauri log directory.");
+          return;
+        }
+
+        await revealItemInDir(logFilePath);
+      } catch (error) {
+        logError("Failed to open log directory:", error);
+      }
+    }
 
     try {
       const companiesItem = await MenuItem.new({
@@ -76,8 +148,35 @@ export default defineNuxtPlugin((nuxtApp) => {
         ],
       });
 
+      const menuItems = [appSubmenu];
+
+      if (import.meta.dev) {
+        const openLatestLogFileItem = await MenuItem.new({
+          id: "open-latest-log-file",
+          text: "Open Latest Log File",
+          action: () => {
+            void openLatestLogFile();
+          },
+        });
+
+        const openLogDirectoryItem = await MenuItem.new({
+          id: "open-log-directory",
+          text: "Open Log Directory",
+          action: () => {
+            void openLogDirectory();
+          },
+        });
+
+        const debugSubmenu = await Submenu.new({
+          text: "Debug",
+          items: [openLatestLogFileItem, openLogDirectoryItem],
+        });
+
+        menuItems.push(debugSubmenu);
+      }
+
       const appMenu = await Menu.new({
-        items: [appSubmenu],
+        items: menuItems,
       });
 
       await appMenu.setAsAppMenu();

@@ -38,6 +38,7 @@ export function createProductionSettingRow(
     stats_visibility: JSON.stringify(createDefaultStatsVisibility()),
     onboarding_completed: 0,
     profile_id: null,
+    show_overview: 1,
     created_at: timestamp,
     updated_at: timestamp,
   };

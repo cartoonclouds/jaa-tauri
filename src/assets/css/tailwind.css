@@ -188,6 +188,20 @@
     @apply text-flow-muted;
   }
 
+  .p-dialog {
+    resize: both;
+    overflow: auto;
+    min-width: 16rem;
+  }
+
+  .p-dialog:not([style*="width"]) {
+    width: auto !important;
+  }
+
+  .p-dialog:not([style*="max-width"]) {
+    max-width: none !important;
+  }
+
   /*
    |--------------------------------------------------------------------------
    | Buttons

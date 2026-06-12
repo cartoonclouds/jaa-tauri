@@ -16,7 +16,6 @@
   import SelectFormField from "@/components/ui/forms/SelectFormField.vue";
   import TextFormField from "@/components/ui/forms/TextFormField.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
   import { useCreateEditMode } from "@/composables/useCreateEditMode";
 
   import ContactAssociatedCompaniesSection from "./ContactAssociatedCompaniesSection.vue";
@@ -88,8 +87,6 @@
       emit("update:visible", value);
     },
   });
-
-  useBodyScrollLock(dialogVisible);
 
   const initialValues = computed(() => ({
     fullName: props.contact?.fullName ?? "",
@@ -244,7 +241,7 @@
     cancel-label="Cancel"
     :is-saving="busy"
     save-form-id="contact-editor-form"
-    class="w-full! max-w-2xl"
+    width-class="max-w-2xl"
   >
     <Form
       id="contact-editor-form"

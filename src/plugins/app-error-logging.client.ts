@@ -1,6 +1,6 @@
 import { logError } from "@infra/logging/appLogger";
 import { temporalNowIsoString } from "@shared/utils/temporal";
-import { isTauri } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import { defineNuxtPlugin } from "nuxt/app";
 
 type GlobalErrorLoggingState = typeof globalThis & {
@@ -12,6 +12,8 @@ type VueErrorHandler = (
   instance: unknown,
   info: string,
 ) => void;
+
+let didRequestSplashscreenClose = false;
 
 /**
  * Build a compact metadata suffix to enrich app-wide error logs.
@@ -25,6 +27,23 @@ function buildMetadata(): string {
   const timestamp = temporalNowIsoString();
 
   return `meta={path:${path},visibility:${visibility},network:${online},runtime:${runtime},ts:${timestamp}}`;
+}
+
+/**
+ * Reveal the main window when startup fails so the splashscreen does not remain stuck.
+ */
+async function closeSplashscreenOnStartupError(): Promise<void> {
+  if (!import.meta.client || didRequestSplashscreenClose || !isTauri()) {
+    return;
+  }
+
+  didRequestSplashscreenClose = true;
+
+  try {
+    await invoke("close_splashscreen");
+  } catch {
+    didRequestSplashscreenClose = false;
+  }
 }
 
 /**
@@ -49,6 +68,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     const hasInstance = instance !== null;
     const metadata = buildMetadata();
 
+    void closeSplashscreenOnStartupError();
+
     logError(
       `[AppError] [vue] info=${info} instance=${hasInstance ? "present" : "none"} ${metadata}`,
       error,
@@ -60,10 +81,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   };
 
   nuxtApp.hook("app:error", (error) => {
+    void closeSplashscreenOnStartupError();
     logError(`[AppError] [nuxt-app] app:error ${buildMetadata()}`, error);
   });
 
   window.addEventListener("error", (event) => {
+    void closeSplashscreenOnStartupError();
+
     const location =
       event.filename.length > 0
         ? `${event.filename}:${String(event.lineno)}:${String(event.colno)}`
@@ -86,6 +110,8 @@ export default defineNuxtPlugin((nuxtApp) => {
   });
 
   window.addEventListener("unhandledrejection", (event) => {
+    void closeSplashscreenOnStartupError();
+
     logError(
       `[AppError] [window:unhandledrejection] Unhandled promise rejection ${buildMetadata()}`,
       event.reason,

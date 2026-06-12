@@ -20,7 +20,13 @@
     "sql:allow-execute",
     "sql:allow-select",
     "sql:allow-close",
-    "opener:allow-open-path",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
+    },
     "opener:allow-reveal-item-in-dir",
     "fs:default",
     {
@@ -32,6 +38,20 @@
     },
     {
       "identifier": "fs:allow-read",
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-stat",
       "allow": [
         { "path": "$APPDATA/**" },
         { "path": "$APPLOCALDATA/**" }

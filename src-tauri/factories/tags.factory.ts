@@ -1,9 +1,8 @@
+import type { TagModelTypeValue } from "../../src/modules/tags/types";
+
 import { faker } from "@faker-js/faker";
 
-import {
-  TAG_MODEL_TYPES,
-  type TagModelTypeValue,
-} from "../../src/modules/tags/types";
+import { TAG_MODEL_TYPES } from "../../src/modules/tags/domain/enums/TagModelType";
 
 export interface TagRow {
   id: string;

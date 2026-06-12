@@ -15,7 +15,6 @@
   import { computed, ref, watch } from "vue";
 
   import LocationMapPreview from "@/components/ui/LocationMapPreview.vue";
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
   interface Props {
     visible: boolean;
@@ -58,8 +57,16 @@
     },
   });
 
-  useBodyScrollLock(dialogVisible);
-  useBodyScrollLock(mapDialogVisible);
+  watch(dialogVisible, (visible, previousVisible) => {
+    if (!visible || previousVisible) {
+      return;
+    }
+
+    isEditorDialogVisible.value = false;
+    selectedContact.value = null;
+    mapDialogVisible.value = false;
+    selectedMapContact.value = null;
+  });
 
   /**
    * Maps a persisted contact entity to an editable snapshot.
@@ -166,8 +173,19 @@
 
   watch(
     () => [dialogVisible.value, props.initialContactId] as const,
-    async ([visible, initialContactId]) => {
-      if (!visible || typeof initialContactId !== "string") {
+    async ([visible, initialContactId], previousValue) => {
+      const previousVisible = previousValue?.[0] ?? false;
+
+      if (!visible) {
+        return;
+      }
+
+      // Opening the contacts dialog must always start with nested edit dialogs closed.
+      if (!previousVisible) {
+        return;
+      }
+
+      if (typeof initialContactId !== "string") {
         return;
       }
 
@@ -181,8 +199,10 @@
   <Dialog
     v-model:visible="dialogVisible"
     modal
+    :block-scroll="true"
+    :draggable="true"
     header="Contacts"
-    class="w-[95vw]! max-w-6xl"
+    class="w-[95vw] max-w-6xl"
   >
     <div class="space-y-6 p-2 md:p-3">
       <div class="flex items-center justify-between gap-3">

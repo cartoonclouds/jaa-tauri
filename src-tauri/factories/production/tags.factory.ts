@@ -1,7 +1,6 @@
-import {
-  TAG_MODEL_TYPES,
-  type TagModelTypeValue,
-} from "../../../src/modules/tags/types";
+import type { TagModelTypeValue } from "../../../src/modules/tags/types";
+
+import { TAG_MODEL_TYPES } from "../../../src/modules/tags/domain/enums/TagModelType";
 
 /**
  * Deterministic production tag definition.

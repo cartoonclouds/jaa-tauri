@@ -39,6 +39,8 @@
   <Dialog
     v-model:visible="visibleModel"
     modal
+    :block-scroll="true"
+    :draggable="true"
     :style="{ width: 'min(64rem, 92vw)' }"
     :header="mapHeader"
     @hide="emit('hide')"

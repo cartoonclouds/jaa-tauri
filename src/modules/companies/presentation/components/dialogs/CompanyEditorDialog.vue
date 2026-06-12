@@ -22,7 +22,6 @@
   import ReadonlyField from "@/components/ui/forms/ReadonlyField.vue";
   import TextFormField from "@/components/ui/forms/TextFormField.vue";
   import NotesMarkdownEditor from "@/components/ui/NotesMarkdownEditor.client.vue";
-  import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
   import { useCreateEditMode } from "@/composables/useCreateEditMode";
 
   import CompanyAssociatedContactsSection from "./CompanyAssociatedContactsSection.vue";
@@ -83,8 +82,6 @@
     },
   });
 
-  useBodyScrollLock(dialogVisible);
-
   const { isEditMode, dialogMode } = useCreateEditMode(() => props.company);
 
   const initialValues = computed(() => ({
@@ -135,7 +132,9 @@
   watch(
     () => props.company,
     (company) => {
-      selectedTagIds.value = [...(company?.tagIds ?? [])];
+      selectedTagIds.value = (company?.tagIds ?? []).filter(
+        (tagId) => typeof tagId === "string" && tagId.trim().length > 0,
+      );
       pendingTagNames.value = [];
       notesMarkdown.value = company?.notes ?? "";
     },
@@ -290,7 +289,7 @@
     cancel-label="Cancel"
     :is-saving="busy || isResolvingTags"
     save-form-id="company-editor-form"
-    class="w-full! max-w-2xl"
+    width-class="max-w-2xl"
   >
     <Form
       id="company-editor-form"

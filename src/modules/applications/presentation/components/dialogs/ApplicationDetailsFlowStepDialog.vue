@@ -125,7 +125,7 @@
     delete-label="Delete"
     :show-delete="isDetailedMode && Boolean(selectedStageEventId)"
     :is-saving="isMutatingEvent"
-    class="w-full! max-w-lg"
+    class="w-full!"
     @save="emit('save')"
     @delete="emit('request-delete')"
   >
