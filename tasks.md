@@ -44,3 +44,5 @@ Stats visible settings
 Fix stages
 
 Add advanced search so that when opening the search modal it's display a search builder across Applications, Contacts, Companies and Locations.
+
+Add a tab to the Application drawer view to show all of that Application's event stages vertically, showing all details including notes.
