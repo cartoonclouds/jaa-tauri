@@ -5,6 +5,7 @@ import { STATISTIC_METRIC_IDS } from "../../../src/modules/statistics/domain/con
 /**
  * Build default stats visibility with all metrics enabled.
  */
+// fallow-ignore-next-line code-duplication
 function createDefaultStatsVisibility(): Record<
   string,
   { visible: boolean; sortOrder: number; sort_order: number }

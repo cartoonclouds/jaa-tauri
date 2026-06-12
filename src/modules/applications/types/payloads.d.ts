@@ -1,3 +1,4 @@
+import type { ApplicationBase } from "../domain/entities/Application";
 import type { LocationFieldsInput, WithId } from "@shared/types";
 
 import {
@@ -9,13 +10,7 @@ import {
 /**
  * Shared field set used by application payloads and form values.
  */
-export interface ApplicationBasePayload extends LocationFieldsInput {
-  /** Selected company identifier, or null when the application is uncoupled. */
-  companyId: string | null;
-  /** Application title. */
-  title: string;
-  /** Current application status. */
-  status: ApplicationStatus;
+interface ApplicationPayloadOptionalFields {
   /** Optional source URL where the application was found. */
   sourceUrl?: string | null;
   /** Optional date the application was submitted. */
@@ -36,26 +31,31 @@ export interface ApplicationBasePayload extends LocationFieldsInput {
   interviewProcess?: string | null;
   /** Additional benefits or compensation notes. */
   benefits?: string | null;
-  /** Associated tag identifiers. */
-  tagIds: string[];
-  /** Priority score used for sorting and emphasis. */
-  priority: number;
-  /** Whether the application is archived. */
-  isArchived: boolean;
 }
+
+export type ApplicationBasePayload = Omit<
+  ApplicationBase,
+  | "sourceUrl"
+  | "appliedAt"
+  | "attendanceType"
+  | "employmentType"
+  | "salaryMin"
+  | "salaryMax"
+  | "currency"
+  | "description"
+  | "interviewProcess"
+  | "benefits"
+> &
+  LocationFieldsInput &
+  ApplicationPayloadOptionalFields & {
+    /** Current application status. */
+    status: ApplicationStatus;
+  };
 
 /**
  * Alias for application mutation payloads.
  */
 export type ApplicationMutationPayload = ApplicationBasePayload;
-/**
- * Alias for application form values.
- */
-export type ApplicationFormValues = ApplicationBasePayload;
-/**
- * Payload shape emitted from application form submission.
- */
-export type ApplicationFormSubmitPayload = Omit<ApplicationUpdatePayload, "id">;
 
 /**
  * Payload required to update an application.

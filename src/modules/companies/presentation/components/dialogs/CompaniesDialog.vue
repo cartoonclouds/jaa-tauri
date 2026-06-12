@@ -9,6 +9,7 @@
   import { useCompanyDatatable } from "@modules/companies/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/constants";
   import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
+  import { showEntitySavedToast } from "@shared/utils/toast";
   import { useToast } from "primevue/usetoast";
   import { computed, ref, watch } from "vue";
 
@@ -48,6 +49,7 @@
     },
   });
 
+  // fallow-ignore-next-line code-duplication
   watch(dialogVisible, (visible, previousVisible) => {
     if (!visible || previousVisible) {
       return;
@@ -80,9 +82,10 @@
     payload: CompanyCreatePayload | CompanyUpdatePayload,
   ): Promise<void> {
     isSavingCompany.value = true;
-    const isEditMode = "id" in payload;
 
     try {
+      const isEditMode = "id" in payload;
+
       if (isEditMode) {
         await service.update(payload);
       } else {
@@ -91,14 +94,7 @@
 
       await refresh();
       isEditorDialogVisible.value = false;
-      toast.add({
-        severity: "success",
-        summary: "Company saved",
-        detail: isEditMode
-          ? "Company updated successfully."
-          : "Company created successfully.",
-        life: 3000,
-      });
+      showEntitySavedToast(toast, "Company", isEditMode);
     } finally {
       isSavingCompany.value = false;
     }

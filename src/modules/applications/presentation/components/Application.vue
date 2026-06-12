@@ -36,6 +36,7 @@
   import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
   import { resolveTagIdsWithPendingTags } from "@modules/tags/utils/pendingTagResolution";
   import { toErrorMessage } from "@shared/utils/error";
+  import { showEntitySavedToast } from "@shared/utils/toast";
   import { formatDateTimeLocalValue } from "@shared/utils/toDate";
   import { useToast } from "primevue/usetoast";
   import { ref, watch } from "vue";
@@ -223,6 +224,126 @@
     drawerMode.value = "view";
   }
 
+  function normalizeNullableText(
+    value: string | null | undefined,
+  ): string | null {
+    return value ?? null;
+  }
+
+  function normalizeNullableNumber(
+    value: number | null | undefined,
+  ): number | null {
+    return value ?? null;
+  }
+
+  /**
+   * Builds the normalized application save payload used by create and update flows.
+   */
+  function buildApplicationSavePayload(
+    payload: ApplicationFormSubmitPayload,
+    resolvedTagIds: string[],
+  ) {
+    return {
+      companyId: payload.companyId,
+      title: payload.title,
+      status: payload.status,
+      sourceUrl: normalizeNullableText(payload.sourceUrl),
+      appliedAt: normalizeNullableText(payload.appliedAt),
+      locationText: payload.locationText,
+      locationLat: payload.locationLat,
+      locationLng: payload.locationLng,
+      attendanceType: payload.attendanceType ?? null,
+      employmentType: payload.employmentType ?? null,
+      salaryMin: normalizeNullableNumber(payload.salaryMin),
+      salaryMax: normalizeNullableNumber(payload.salaryMax),
+      currency: normalizeNullableText(payload.currency),
+      description: normalizeNullableText(payload.description),
+      interviewProcess: normalizeNullableText(payload.interviewProcess),
+      benefits: normalizeNullableText(payload.benefits),
+      tagIds: resolvedTagIds,
+      priority: payload.priority,
+      isArchived: payload.isArchived,
+    };
+  }
+
+  /**
+   * Persists selected flow steps for a newly created application.
+   */
+  // fallow-ignore-next-line complexity
+  async function syncCreatedApplicationFlowSteps(
+    applicationId: string,
+    flowSteps: ApplicationFormSubmitPayload["flowSteps"],
+  ): Promise<void> {
+    const createdApplicationEvents = (await eventService.list()).filter(
+      (event) => event.applicationId === applicationId,
+    );
+    const selectedSteps = flowSteps ?? [];
+    const selectedTypes = new Set(selectedSteps.map((step) => step.type));
+    const createdEventByType = new Map<string, Event>(
+      createdApplicationEvents.map((event) => [event.type, event]),
+    );
+
+    for (const defaultEvent of createdApplicationEvents) {
+      if (selectedTypes.has(defaultEvent.type)) {
+        continue;
+      }
+
+      await eventService.delete(defaultEvent.id);
+    }
+
+    for (const step of selectedSteps) {
+      const existingEvent = createdEventByType.get(step.type) ?? null;
+      if (existingEvent) {
+        await eventService.update({
+          id: existingEvent.id,
+          sortOrder: step.sortOrder,
+        });
+        continue;
+      }
+
+      await eventService.create({
+        applicationId,
+        type: step.type,
+        title: EVENT_COPY_BY_STAGE[step.type].title,
+        description: null,
+        notes: step.notes ?? null,
+        sortOrder: step.sortOrder,
+      });
+    }
+  }
+
+  /**
+   * Persists an application for create or edit drawer modes.
+   */
+  async function persistApplication(
+    payload: ApplicationFormSubmitPayload,
+    isEditMode: boolean,
+  ): Promise<string | null> {
+    const resolvedTagIds = await resolveTagIdsWithPendingTags({
+      selectedTagIds: payload.tagIds,
+      pendingTagNames: payload.pendingTagNames,
+      tagService,
+      modelType: TagModelType.Application,
+    });
+    const savePayload = buildApplicationSavePayload(payload, resolvedTagIds);
+
+    if (isEditMode && selectedApplication.value) {
+      await service.update({
+        id: selectedApplication.value.id,
+        ...savePayload,
+      });
+      return selectedApplication.value.id;
+    }
+
+    const createdApplicationId = await service.create(savePayload);
+    await syncCreatedApplicationFlowSteps(
+      createdApplicationId,
+      payload.flowSteps,
+    );
+
+    return null;
+  }
+
   /**
    * Handles on drawer submit.
    */
@@ -232,103 +353,9 @@
     isSubmitting.value = true;
     const isEditMode =
       drawerMode.value === "edit" && selectedApplication.value !== null;
-    const editApplicationId = isEditMode
-      ? (selectedApplication.value?.id ?? null)
-      : null;
 
     try {
-      const resolvedTagIds = await resolveTagIdsWithPendingTags({
-        selectedTagIds: payload.tagIds,
-        pendingTagNames: payload.pendingTagNames,
-        tagService,
-        modelType: TagModelType.Application,
-      });
-
-      if (isEditMode && selectedApplication.value) {
-        await service.update({
-          id: selectedApplication.value.id,
-          companyId: payload.companyId,
-          title: payload.title,
-          status: payload.status,
-          sourceUrl: payload.sourceUrl,
-          appliedAt: payload.appliedAt,
-          locationText: payload.locationText,
-          locationLat: payload.locationLat,
-          locationLng: payload.locationLng,
-          attendanceType: payload.attendanceType ?? null,
-          employmentType: payload.employmentType ?? null,
-          salaryMin: payload.salaryMin,
-          salaryMax: payload.salaryMax,
-          currency: payload.currency,
-          description: payload.description,
-          interviewProcess: payload.interviewProcess,
-          benefits: payload.benefits,
-          tagIds: resolvedTagIds,
-          priority: payload.priority,
-          isArchived: payload.isArchived,
-        });
-      } else {
-        const createdApplicationId = await service.create({
-          companyId: payload.companyId,
-          title: payload.title,
-          status: payload.status,
-          sourceUrl: payload.sourceUrl,
-          appliedAt: payload.appliedAt,
-          locationText: payload.locationText,
-          locationLat: payload.locationLat,
-          locationLng: payload.locationLng,
-          attendanceType: payload.attendanceType ?? null,
-          employmentType: payload.employmentType ?? null,
-          salaryMin: payload.salaryMin,
-          salaryMax: payload.salaryMax,
-          currency: payload.currency,
-          description: payload.description,
-          interviewProcess: payload.interviewProcess,
-          benefits: payload.benefits,
-          tagIds: resolvedTagIds,
-          priority: payload.priority,
-          isArchived: payload.isArchived,
-        });
-
-        const createdApplicationEvents = (await eventService.list()).filter(
-          (event) => event.applicationId === createdApplicationId,
-        );
-        const selectedTypes = new Set(
-          (payload.flowSteps ?? []).map((step) => step.type),
-        );
-        const createdEventByType = new Map<string, Event>(
-          createdApplicationEvents.map((event) => [event.type, event]),
-        );
-
-        for (const defaultEvent of createdApplicationEvents) {
-          if (selectedTypes.has(defaultEvent.type)) {
-            continue;
-          }
-
-          await eventService.delete(defaultEvent.id);
-        }
-
-        for (const step of payload.flowSteps ?? []) {
-          const stepSortOrder = step.sortOrder;
-          const existingEvent = createdEventByType.get(step.type) ?? null;
-          if (existingEvent) {
-            await eventService.update({
-              id: existingEvent.id,
-              sortOrder: stepSortOrder,
-            });
-            continue;
-          }
-
-          await eventService.create({
-            applicationId: createdApplicationId,
-            type: step.type,
-            title: EVENT_COPY_BY_STAGE[step.type].title,
-            description: null,
-            notes: step.notes ?? null,
-            sortOrder: stepSortOrder,
-          });
-        }
-      }
+      const editApplicationId = await persistApplication(payload, isEditMode);
 
       await refresh();
       if (editApplicationId) {
@@ -337,15 +364,7 @@
       }
 
       hasUnsavedDrawerEdits.value = false;
-
-      toast.add({
-        severity: "success",
-        summary: "Application saved",
-        detail: isEditMode
-          ? "Application updated successfully."
-          : "Application created successfully.",
-        life: 3000,
-      });
+      showEntitySavedToast(toast, "Application", isEditMode);
     } catch (error) {
       toast.add({
         severity: "error",

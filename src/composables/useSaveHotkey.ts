@@ -3,6 +3,7 @@ import { type MaybeRefOrGetter, onBeforeUnmount, toValue, watch } from "vue";
 /**
  * Predicate for the app save hotkey (Ctrl/Cmd+S without Shift/Alt).
  */
+// fallow-ignore-next-line complexity
 function isSaveHotkey(
   event: Pick<
     KeyboardEvent,

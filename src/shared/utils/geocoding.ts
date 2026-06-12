@@ -7,7 +7,7 @@ import type {
 /**
  * Geographic coordinates resolved from a location query.
  */
-export type GeocodingCoordinates = LocationCoordinates;
+type GeocodingCoordinates = LocationCoordinates;
 
 /**
  * Input used when resolving location coordinates before persistence.

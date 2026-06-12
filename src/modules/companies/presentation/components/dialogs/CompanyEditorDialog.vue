@@ -48,9 +48,7 @@
   /**
    * Payload emitted when a company form is submitted.
    */
-  export type CompanyEditorSubmitPayload =
-    | CompanyCreatePayload
-    | CompanyUpdatePayload;
+  type CompanyEditorSubmitPayload = CompanyCreatePayload | CompanyUpdatePayload;
 
   /**
    * Defines props.

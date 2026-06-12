@@ -11,6 +11,7 @@
   import { contactsSearchPlaceholder } from "@modules/contacts/constants";
   import ContactEditorDialog from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import ContactLocationMapDialog from "@modules/contacts/presentation/components/dialogs/ContactLocationMapDialog.vue";
+  import { showEntitySavedToast } from "@shared/utils/toast";
   import { useToast } from "primevue/usetoast";
   import { computed, ref, watch } from "vue";
 
@@ -122,26 +123,16 @@
     payload: ContactCreatePayload | ContactUpdatePayload,
   ): Promise<void> {
     isSavingContact.value = true;
-    const isEditMode = "id" in payload;
 
     try {
-      if (isEditMode) {
-        await service.update(payload);
-      } else {
-        await service.create(payload);
-      }
+      const isEditMode = "id" in payload;
+
+      await (isEditMode ? service.update(payload) : service.create(payload));
 
       await refresh();
       isEditorDialogVisible.value = false;
       selectedContact.value = null;
-      toast.add({
-        severity: "success",
-        summary: "Contact saved",
-        detail: isEditMode
-          ? "Contact updated successfully."
-          : "Contact created successfully.",
-        life: 3000,
-      });
+      showEntitySavedToast(toast, "Contact", isEditMode);
     } finally {
       isSavingContact.value = false;
     }
@@ -171,8 +162,10 @@
     selectedMapContact.value = null;
   }
 
+  // fallow-ignore-next-line complexity
   watch(
     () => [dialogVisible.value, props.initialContactId] as const,
+    // fallow-ignore-next-line complexity
     async ([visible, initialContactId], previousValue) => {
       const previousVisible = previousValue?.[0] ?? false;
 

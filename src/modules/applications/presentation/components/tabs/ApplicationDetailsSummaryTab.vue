@@ -10,9 +10,10 @@
     EVENT_COPY_BY_STAGE,
     INTERACTION_STAGES,
     type InteractionStage,
-    isInteractionStage,
   } from "@modules/events/constants";
+  import { isInteractionStage } from "@modules/events/constants";
   import EventFlowStepper from "@modules/events/presentation/components/EventFlowStepper.vue";
+  import { selectInteractionStageEvents } from "@modules/events/utils/selectInteractionStageEvents";
   import {
     temporalCloneDate,
     type TemporalDateTime,
@@ -66,24 +67,10 @@
   });
 
   const applicationStageEvents = computed<Event[]>(() => {
-    const application = props.application;
-    if (!application) {
-      return [];
-    }
-
-    return eventItems.value
-      .filter(
-        (event) =>
-          event.applicationId === application.id &&
-          isInteractionStage(event.type),
-      )
-      .sort((left, right) => {
-        if (left.sortOrder !== right.sortOrder) {
-          return left.sortOrder - right.sortOrder;
-        }
-
-        return left.id.localeCompare(right.id);
-      });
+    return selectInteractionStageEvents(
+      eventItems.value,
+      props.application?.id,
+    );
   });
 
   const summaryFlowStages = computed<InteractionStage[]>(() => {

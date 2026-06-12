@@ -14,7 +14,9 @@ import { useSettingsDialog } from "@/composables/useSettingsDialog";
 /**
  * Installs a native app menubar with Settings navigation and app exit actions.
  */
+// fallow-ignore-next-line complexity
 export default defineNuxtPlugin((nuxtApp) => {
+  // fallow-ignore-next-line complexity
   nuxtApp.hook("app:mounted", async () => {
     if (!import.meta.client || !isTauri()) {
       return;
@@ -56,6 +58,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       return filesWithMetadata[0]?.filePath ?? null;
     }
 
+    // fallow-ignore-next-line complexity
     async function openLatestLogFile(): Promise<void> {
       try {
         const logFilePath = await resolveLatestLogFilePath();

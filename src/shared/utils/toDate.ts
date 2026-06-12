@@ -1,7 +1,6 @@
 import { ValidationError } from "@shared/domain/errors";
 import {
   temporalCloneDate,
-  temporalDateFromLocalParts,
   temporalDateFromUnknown,
   type TemporalDateTime,
   temporalNowHour,
@@ -90,55 +89,6 @@ export function formatDateTimeLocalValue(
 }
 
 /**
- * Parse a datetime-local input value into a Date.
- *
- * Returns null when the input is empty or not a valid local date-time string.
- */
-function parseDateTimeLocalValue(
-  value: string,
-): TemporalDateTime | null {
-  if (!value) {
-    return null;
-  }
-
-  const [datePart, timePart] = value.split("T");
-  if (!datePart || !timePart) {
-    return null;
-  }
-
-  const dateParts = datePart.split("-");
-  const timeParts = timePart.split(":");
-  if (dateParts.length !== 3 || timeParts.length < 2) {
-    return null;
-  }
-
-  const [yearPart = "", monthPart = "", dayPart = ""] = dateParts;
-  const [hourPart = "", minutePart = ""] = timeParts;
-
-  const year = Number(yearPart);
-  const month = Number(monthPart);
-  const day = Number(dayPart);
-  const hour = Number(hourPart);
-  const minute = Number(minutePart);
-
-  if (
-    !Number.isFinite(year) ||
-    !Number.isFinite(month) ||
-    !Number.isFinite(day) ||
-    !Number.isFinite(hour) ||
-    !Number.isFinite(minute)
-  ) {
-    return null;
-  }
-
-  try {
-    return temporalDateFromLocalParts({ year, month, day, hour, minute });
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Format a Date as a relative time string (e.g. "just now", "5 minutes ago", "in 2 hours").
  *
  * Falls back to a display date format for dates more than a month in the past or future.
@@ -147,6 +97,7 @@ function parseDateTimeLocalValue(
  * @param {Date} [now=current instant] - The reference date for calculating the relative time.
  * @returns {string} A relative time string or a formatted date.
  */
+// fallow-ignore-next-line complexity
 export function formatRelativeDate(
   value: TemporalDateTime,
   now: TemporalDateTime = toDate(temporalNowIsoString()),

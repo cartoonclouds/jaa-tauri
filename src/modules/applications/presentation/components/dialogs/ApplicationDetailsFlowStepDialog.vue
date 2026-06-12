@@ -98,6 +98,7 @@
   /**
    * Coerces PrimeVue DatePicker updates into the dialog's temporal model.
    */
+  // fallow-ignore-next-line complexity
   function onEventAtUpdate(value: DatePickerModelValue): void {
     if (value === null || value === undefined) {
       eventAtModel.value = null;

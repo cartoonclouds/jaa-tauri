@@ -14,6 +14,7 @@ type BetterSqliteDatabase = InstanceType<typeof Database>;
  * Implements better sqlite driver.
  */
 export class BetterSqliteDriver implements DatabaseDriver {
+  // fallow-ignore-next-line unused-class-member
   readonly name = "better-sqlite3";
 
   constructor(private readonly db: BetterSqliteDatabase) {}

@@ -4,8 +4,6 @@ import { z } from "zod";
 export const UuidSchema = z.string().uuid();
 /** Nullable UUID string schema. */
 export const NullableUuidSchema = UuidSchema.nullable();
-/** Optional nullable UUID string schema. */
-const OptionalNullableUuidSchema = NullableUuidSchema.optional();
 
 /** ISO-8601 datetime string schema. */
 export const DateTimeSchema = z.string().datetime();
@@ -23,8 +21,6 @@ export const NullableStringSchema = z.string().nullable();
 export const NullableNumberSchema = z.number().nullable();
 /** Nullable integer schema. */
 export const NullableIntSchema = z.number().int().nullable();
-/** Optional nullable number schema. */
-const OptionalNullableNumberSchema = NullableNumberSchema.optional();
 /** Optional nullable integer schema. */
 export const OptionalNullableIntSchema = NullableIntSchema.optional();
 
@@ -44,9 +40,3 @@ const LongitudeSchema = z
 export const NullableLatitudeSchema = LatitudeSchema.nullable();
 /** Nullable longitude schema. */
 export const NullableLongitudeSchema = LongitudeSchema.nullable();
-
-/** Optional nullable latitude schema. */
-const OptionalNullableLatitudeSchema = NullableLatitudeSchema.optional();
-/** Optional nullable longitude schema. */
-const OptionalNullableLongitudeSchema =
-  NullableLongitudeSchema.optional();

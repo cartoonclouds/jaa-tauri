@@ -170,21 +170,6 @@ export function temporalDateFromUnknown(value: unknown): TemporalDateTime {
 }
 
 /**
- * Builds a Date from local date-time parts using Temporal local time zone handling.
- */
-export function temporalDateFromLocalParts(
-  parts: LocalDateTimeParts,
-): TemporalDateTime {
-  const temporal = getTemporal();
-  const plainDateTime = temporal.PlainDateTime.from(parts);
-  const zonedDateTime = plainDateTime.toZonedDateTime(
-    temporal.Now.timeZoneId(),
-  );
-
-  return new Date(zonedDateTime.toInstant().epochMilliseconds);
-}
-
-/**
  * Extracts local date-time parts from Date using Temporal and the local time zone.
  */
 export function temporalToLocalParts(

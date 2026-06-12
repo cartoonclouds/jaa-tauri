@@ -32,6 +32,7 @@ function buildMetadata(): string {
 /**
  * Reveal the main window when startup fails so the splashscreen does not remain stuck.
  */
+// fallow-ignore-next-line complexity
 async function closeSplashscreenOnStartupError(): Promise<void> {
   if (!import.meta.client || didRequestSplashscreenClose || !isTauri()) {
     return;

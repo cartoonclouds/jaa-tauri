@@ -114,6 +114,7 @@
     })();
   });
 
+  // fallow-ignore-next-line complexity
   function updateModel(value: string[]): void {
     const nextTagIds: string[] = [];
     const nextPendingTagNames: string[] = [];

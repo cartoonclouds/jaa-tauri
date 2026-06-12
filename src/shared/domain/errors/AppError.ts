@@ -1,7 +1,7 @@
 /**
  * Optional metadata used by custom application errors.
  */
-export interface AppErrorOptions {
+interface AppErrorOptions {
   cause?: unknown;
   code?: string;
 }

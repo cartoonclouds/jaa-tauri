@@ -208,12 +208,3 @@ export const ApplicationFormSchema = z
       path: ["salaryMax"],
     },
   );
-
-/**
- * Inferred domain entity shape for persisted applications.
- */
-export type Application = z.infer<typeof ApplicationSchema>;
-/**
- * Inferred input shape for creating a new application.
- */
-export type CreateApplicationInput = z.infer<typeof CreateApplicationSchema>;

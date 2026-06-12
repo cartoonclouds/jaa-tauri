@@ -19,8 +19,8 @@
     EVENT_FLOW_STAGE_SET,
     INTERACTION_STAGES,
     type InteractionStage,
-    isInteractionStage,
   } from "@modules/events/constants";
+  import { selectInteractionStageEvents } from "@modules/events/utils/selectInteractionStageEvents";
   import { formatDisplayDateTime } from "@shared/utils/toDate";
   import {
     moveArrayElement,
@@ -95,24 +95,10 @@
   const editableStageSortedList = shallowRef<Event[]>([]);
 
   const editableStageEvents = computed<Event[]>(() => {
-    const applicationId = props.application?.id;
-    if (!applicationId) {
-      return [];
-    }
-
-    return eventItems.value
-      .filter(
-        (event) =>
-          event.applicationId === applicationId &&
-          isInteractionStage(event.type),
-      )
-      .sort((left, right) => {
-        if (left.sortOrder !== right.sortOrder) {
-          return left.sortOrder - right.sortOrder;
-        }
-
-        return left.id.localeCompare(right.id);
-      });
+    return selectInteractionStageEvents(
+      eventItems.value,
+      props.application?.id,
+    );
   });
 
   watch(
