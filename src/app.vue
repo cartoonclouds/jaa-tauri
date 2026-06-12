@@ -9,7 +9,7 @@
   } from "@modules/settings";
   import SettingsDialog from "@modules/settings/presentation/components/dialogs/SettingsDialog.vue";
   import { invoke, isTauri } from "@tauri-apps/api/core";
-  import { onMounted, ref, watch } from "vue";
+  import { nextTick, onMounted, ref, watch } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
   import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
@@ -24,6 +24,7 @@
   const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
   const initialContactId = ref<string | null>(null);
+  const isAppReady = ref(false);
 
   watch(
     isContactsDialogVisible,
@@ -39,11 +40,13 @@
   );
 
   onMounted(async () => {
-    if (import.meta.client && isTauri()) {
+    const shouldManageSplashscreen = import.meta.client && isTauri();
+
+    if (shouldManageSplashscreen) {
       try {
-        await invoke("close_splashscreen");
+        await invoke("hide_main_window");
       } catch (error) {
-        logError("Failed to close splashscreen:", error);
+        logError("Failed to hide main window during startup:", error);
       }
     }
 
@@ -70,20 +73,35 @@
       await openOnboarding();
     } catch (error) {
       logError("Failed to load onboarding state:", error);
+    } finally {
+      isAppReady.value = true;
+      await nextTick();
+
+      if (shouldManageSplashscreen) {
+        try {
+          await invoke("close_splashscreen");
+        } catch (error) {
+          logError("Failed to close splashscreen:", error);
+        }
+      }
     }
   });
 </script>
 
 <template>
-  <div class="app-dark min-h-screen">
+  <div v-show="isAppReady" class="app-dark min-h-screen">
     <NuxtLayout>
       <NuxtPage />
+
       <CompaniesDialog v-model:visible="isCompaniesDialogVisible" />
+
       <ContactsDialog
         v-model:visible="isContactsDialogVisible"
         :initial-contact-id="initialContactId"
       />
+
       <SettingsDialog v-model:visible="isSettingsDialogVisible" />
+
       <Toast />
     </NuxtLayout>
   </div>
