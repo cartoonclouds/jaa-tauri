@@ -343,6 +343,7 @@
     <Tabs :value="activeTab" @update:value="onTabChange">
       <TabList>
         <Tab value="summary">Summary</Tab>
+        <Tab value="flow">Flow</Tab>
         <Tab value="application">Application</Tab>
         <Tab value="contact">Contacts</Tab>
         <Tab value="map">Map</Tab>
@@ -356,6 +357,10 @@
             :company-name="companyName"
             :applied-at-label="appliedAtLabel"
           />
+        </TabPanel>
+
+        <TabPanel value="flow">
+          <LazyApplicationDetailsStagesTab :application="props.application" />
         </TabPanel>
 
         <TabPanel value="application">

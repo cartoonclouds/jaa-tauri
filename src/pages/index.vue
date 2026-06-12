@@ -3,9 +3,11 @@
   import { useProfile } from "@modules/profile";
   import { getSetting } from "@modules/settings";
   import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
+  import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
   import { ref } from "vue";
 
   import EntityLocationsMapBrowser from "@/components/ui/EntityLocationsMapBrowser.vue";
+  import { usePubSub } from "@/composables/usePubSub";
   import { formatProfileName } from "@/shared/utils/strings";
   import { getTimeOfDay } from "@/shared/utils/toDate";
 
@@ -22,9 +24,10 @@
   }
 
   const { service: profileService } = useProfile();
+  const { subscribe } = usePubSub();
 
   const profile = await profileService.getProfile();
-  const showOverview = await getSetting("showOverview");
+  const showOverview = ref(await getSetting("showOverview"));
 
   const topView = ref<TopSectionView>("overview");
 
@@ -32,6 +35,10 @@
     { label: "Overview", value: "overview" },
     { label: "Map", value: "map" },
   ];
+
+  subscribe(SETTINGS_REFRESHED_TOPIC, async () => {
+    showOverview.value = await getSetting("showOverview");
+  });
 </script>
 
 <template>
@@ -60,9 +67,9 @@
       />
     </div>
 
-    <div v-if="topView === 'overview'" class="mx-auto space-y-6">
+    <div v-if="topView === 'overview'" class="mx-auto space-y-6 w-full">
       <ClientOnly>
-        <section v-if="showOverview" class="mx-auto mb-8">
+        <section v-if="showOverview" class="mx-auto mb-8 w-full">
           <StatisticsSection title="Job Hunt Overview" />
         </section>
       </ClientOnly>

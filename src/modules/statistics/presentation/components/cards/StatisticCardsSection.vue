@@ -4,6 +4,7 @@
   import type { SortableEvent } from "sortablejs";
 
   import { useStatisticCardVisibility } from "@modules/statistics/composables/useStatisticCardVisibility";
+  import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
   import {
     moveArrayElement,
     useSortable,
@@ -17,6 +18,8 @@
     watch,
   } from "vue";
 
+  import { usePubSub } from "@/composables/usePubSub";
+
   import StatisticAddHiddenStatDialog from "./StatisticAddHiddenStatDialog.vue";
   import StatisticCard from "./StatisticCard.vue";
 
@@ -28,6 +31,7 @@
   }
 
   const props = defineProps<StatisticCardsSectionProps>();
+  const { subscribe } = usePubSub();
   const {
     isEditMode,
     isPersistingVisibility,
@@ -212,6 +216,10 @@
   onMounted(async () => {
     await loadStatsVisibility();
   });
+
+  subscribe(SETTINGS_REFRESHED_TOPIC, async () => {
+    await loadStatsVisibility();
+  });
 </script>
 
 <template>
@@ -232,7 +240,7 @@
         <Button
           type="button"
           size="small"
-          :label="isEditMode ? 'Done' : 'Edit Snapshot'"
+          :label="isEditMode ? 'Done' : 'Edit Snapshots'"
           :disabled="isPersistingVisibility"
           @click="toggleEditMode"
         />

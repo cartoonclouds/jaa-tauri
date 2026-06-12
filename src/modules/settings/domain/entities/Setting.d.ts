@@ -15,6 +15,8 @@ export interface SettingBase {
   locale: string;
   /** Whether notifications are enabled. */
   notificationsEnabled: boolean;
+  /** Whether the overview section is shown on the home page. */
+  showOverview: boolean;
   /** Whether developer mode is enabled. */
   developerMode: boolean;
 }

@@ -23,6 +23,7 @@ export function mapSettingRowToEntity(row: Record<string, unknown>): Setting {
     theme: normalizeLiteralValue(row.theme, SETTING_THEME_VALUES, "system"),
     locale: toRequiredString(row.locale),
     notificationsEnabled: fromDbBoolean(row.notifications_enabled, true),
+    showOverview: fromDbBoolean(row.show_overview, true),
     developerMode: fromDbBoolean(row.developer_mode, false),
     ...timestamps,
   };

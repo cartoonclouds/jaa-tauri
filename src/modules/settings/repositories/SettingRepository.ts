@@ -554,12 +554,13 @@ export class SettingRepository implements ISettingRepository {
     const id = validated.id ?? "app";
 
     await this.db.execute(
-      `INSERT INTO settings (id, theme, locale, notifications_enabled, developer_mode, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `INSERT INTO settings (id, theme, locale, notifications_enabled, show_overview, developer_mode, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
        ON CONFLICT(id) DO UPDATE SET
          theme = excluded.theme,
          locale = excluded.locale,
          notifications_enabled = excluded.notifications_enabled,
+         show_overview = excluded.show_overview,
          developer_mode = excluded.developer_mode,
          updated_at = CURRENT_TIMESTAMP`,
       [
@@ -567,6 +568,7 @@ export class SettingRepository implements ISettingRepository {
         validated.theme ?? "system",
         validated.locale ?? "en-GB",
         validated.notificationsEnabled === false ? 0 : 1,
+        validated.showOverview === false ? 0 : 1,
         validated.developerMode === true ? 1 : 0,
       ],
     );

@@ -7,9 +7,11 @@
   import { Form } from "@primevue/forms";
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { CONSTANT_MODULE_SOURCES } from "@shared/constants/persistedConstants";
+  import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
   import { computed, reactive, ref, watch } from "vue";
   import { z } from "zod";
 
+  import { usePubSub } from "@/composables/usePubSub";
   import { useSaveHotkey } from "@/composables/useSaveHotkey";
 
   /**
@@ -26,6 +28,7 @@
     theme: "dark" | "light" | "system";
     locale: string;
     notificationsEnabled: boolean;
+    showOverview: boolean;
     developerMode: boolean;
   }
 
@@ -56,6 +59,7 @@
   }>();
 
   const { service: settingService } = useSettingsService();
+  const { publish } = usePubSub();
 
   /**
    * Returns whether an exported constant value can be persisted.
@@ -117,6 +121,7 @@
     theme: "system",
     locale: "en-GB",
     notificationsEnabled: true,
+    showOverview: true,
     developerMode: false,
   });
   const currentSettingId = ref<string | null>(null);
@@ -156,6 +161,7 @@
       developerMode: z.boolean(),
       locale: z.string().min(2, "Locale is required"),
       notificationsEnabled: z.boolean(),
+      showOverview: z.boolean(),
       theme: z.enum(["system", "light", "dark"]),
     }),
   );
@@ -214,7 +220,7 @@
     isBusy.value = true;
 
     try {
-      const [settings, constantRowsByGroup] = await Promise.all([
+      const [loadedSettings, constantRowsByGroup] = await Promise.all([
         settingService.list(),
         Promise.all(
           constantGroups.value.map(async (group) => ({
@@ -225,14 +231,43 @@
           })),
         ),
       ]);
+      const settings = loadedSettings as unknown as Record<string, unknown>[];
 
-      const current = settings[0];
-      currentSettingId.value = current.id;
+      const currentRecord = settings[0] ?? {};
+      const normalizedTheme =
+        currentRecord.theme === "light" ||
+        currentRecord.theme === "dark" ||
+        currentRecord.theme === "system"
+          ? currentRecord.theme
+          : "system";
+      const normalizedLocale =
+        typeof currentRecord.locale === "string" &&
+        currentRecord.locale.length > 0
+          ? currentRecord.locale
+          : "en-GB";
+      const normalizedNotificationsEnabled =
+        typeof currentRecord.notificationsEnabled === "boolean"
+          ? currentRecord.notificationsEnabled
+          : true;
+      const currentShowOverview =
+        typeof currentRecord.showOverview === "boolean"
+          ? currentRecord.showOverview
+          : true;
+      const normalizedDeveloperMode =
+        typeof currentRecord.developerMode === "boolean"
+          ? currentRecord.developerMode
+          : false;
+
+      currentSettingId.value =
+        typeof currentRecord.id === "string" && currentRecord.id.length > 0
+          ? currentRecord.id
+          : null;
       initialGeneralValues.value = {
-        developerMode: current.developerMode,
-        locale: current.locale,
-        notificationsEnabled: current.notificationsEnabled,
-        theme: current.theme,
+        developerMode: normalizedDeveloperMode,
+        locale: normalizedLocale,
+        notificationsEnabled: normalizedNotificationsEnabled,
+        showOverview: currentShowOverview,
+        theme: normalizedTheme,
       };
       generalFormVersion.value += 1;
 
@@ -270,14 +305,20 @@
 
     isBusy.value = true;
     try {
-      const id = await settingService.upsert({
+      const payload: Parameters<typeof settingService.upsert>[0] = {
         developerMode: values.developerMode,
         id: currentSettingId.value ?? undefined,
         locale: values.locale,
         notificationsEnabled: values.notificationsEnabled,
         theme: values.theme,
-      });
+      };
+
+      (payload as Record<string, unknown>).showOverview = values.showOverview;
+
+      const id = await settingService.upsert(payload);
       currentSettingId.value = id;
+      publish(SETTINGS_REFRESHED_TOPIC);
+      emit("update:visible", false);
     } catch (error) {
       logError("Failed to save general settings:", error);
     } finally {
@@ -311,6 +352,7 @@
       row.isNew = false;
       row.originalValue = nextValue;
       row.value = nextValue;
+      publish(SETTINGS_REFRESHED_TOPIC);
     } catch (error) {
       logError("Failed to save constant row:", error);
     } finally {
@@ -344,6 +386,7 @@
       if (index >= 0) {
         rows.splice(index, 1);
       }
+      publish(SETTINGS_REFRESHED_TOPIC);
     } catch (error) {
       logError("Failed to delete constant row:", error);
     } finally {
@@ -375,7 +418,7 @@
     :style="{ width: 'min(90rem, 96vw)' }"
     header="Settings"
   >
-    <div class="min-h-128">
+    <div>
       <div v-if="isBusy" class="mb-4 text-sm text-flow-muted">
         Saving or loading data...
       </div>
@@ -429,14 +472,21 @@
                 </Message>
               </div>
 
-              <div class="space-y-2">
+              <div class="space-y-2 items-center flex gap-3">
                 <label class="text-sm text-flow-muted"
                   >Notifications Enabled</label
                 >
                 <ToggleSwitch name="notificationsEnabled" />
               </div>
 
-              <div class="space-y-2">
+              <div class="space-y-2 items-center flex gap-3">
+                <label class="text-sm text-flow-muted"
+                  >Statistics Overview Enabled</label
+                >
+                <ToggleSwitch name="showOverview" />
+              </div>
+
+              <div class="space-y-2 items-center flex gap-3">
                 <label class="text-sm text-flow-muted">Developer Mode</label>
                 <ToggleSwitch name="developerMode" />
               </div>

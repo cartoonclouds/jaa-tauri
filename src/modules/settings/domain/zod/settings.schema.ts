@@ -6,5 +6,6 @@ export const SettingRepositoryUpsertSchema = z.object({
   theme: z.enum(["system", "light", "dark"]).optional(),
   locale: z.string().min(1).optional(),
   notificationsEnabled: z.boolean().optional(),
+  showOverview: z.boolean().optional(),
   developerMode: z.boolean().optional(),
 });

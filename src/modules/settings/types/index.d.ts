@@ -10,6 +10,7 @@ export interface SettingUpsertPayload {
   theme?: Setting["theme"];
   locale?: string;
   notificationsEnabled?: boolean;
+  showOverview?: Setting["showOverview"];
   developerMode?: boolean;
 }
 

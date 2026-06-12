@@ -699,7 +699,7 @@
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 w-full">
     <div class="flex items-center justify-between gap-3">
       <h2 class="text-2xl font-semibold">Applications</h2>
       <Button type="button" @click="openCreateDrawer">
