@@ -6,6 +6,11 @@ interface AppErrorOptions {
   code?: string;
 }
 
+declare const validationErrorBrand: unique symbol;
+declare const configurationErrorBrand: unique symbol;
+declare const runtimeEnvironmentErrorBrand: unique symbol;
+declare const databaseErrorBrand: unique symbol;
+
 /**
  * Base application error with optional cause and stable code metadata.
  */
@@ -26,19 +31,27 @@ class AppError extends Error {
 /**
  * Raised when user input or schema validation fails.
  */
-export class ValidationError extends AppError {}
+export class ValidationError extends AppError {
+  readonly [validationErrorBrand] = "ValidationError";
+}
 
 /**
  * Raised when runtime configuration is missing or invalid.
  */
-export class ConfigurationError extends AppError {}
+export class ConfigurationError extends AppError {
+  readonly [configurationErrorBrand] = "ConfigurationError";
+}
 
 /**
  * Raised when code runs in an unsupported runtime environment.
  */
-export class RuntimeEnvironmentError extends AppError {}
+export class RuntimeEnvironmentError extends AppError {
+  readonly [runtimeEnvironmentErrorBrand] = "RuntimeEnvironmentError";
+}
 
 /**
  * Raised for database connectivity, migration, or persistence failures.
  */
-export class DatabaseError extends AppError {}
+export class DatabaseError extends AppError {
+  readonly [databaseErrorBrand] = "DatabaseError";
+}
