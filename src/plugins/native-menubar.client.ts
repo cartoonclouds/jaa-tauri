@@ -1,4 +1,5 @@
 import { logError } from "@infra/logging/tauriLog.client";
+import { useGlobalSearchDialog } from "@modules/search";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Menu, MenuItem, Submenu } from "@tauri-apps/api/menu";
 import { appLogDir, join } from "@tauri-apps/api/path";
@@ -26,6 +27,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     const { openContactsDialog } = useContactsDialog();
     const { openOnboarding } = useOnboardingNavigation();
     const { openSettingsDialog } = useSettingsDialog();
+    const { openGlobalSearchDialog } = useGlobalSearchDialog();
 
     async function resolveLatestLogFilePath(): Promise<string | null> {
       const logDirectory = await appLogDir();
@@ -123,6 +125,15 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
       });
 
+      const searchItem = await MenuItem.new({
+        id: "open-search",
+        text: "Search",
+        accelerator: "CmdOrCtrl+F",
+        action: () => {
+          openGlobalSearchDialog();
+        },
+      });
+
       const onboardingItem = await MenuItem.new({
         id: "open-onboarding",
         text: "Onboarding",
@@ -145,6 +156,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         items: [
           companiesItem,
           contactsItem,
+          searchItem,
           settingsItem,
           onboardingItem,
           exitItem,

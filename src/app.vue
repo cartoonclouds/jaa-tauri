@@ -3,6 +3,8 @@
   import CompaniesDialog from "@modules/companies/presentation/components/dialogs/CompaniesDialog.vue";
   import ContactsDialog from "@modules/contacts/presentation/components/dialogs/ContactsDialog.vue";
   import { useProfile } from "@modules/profile";
+  import { useGlobalSearchDialog } from "@modules/search";
+  import GlobalSearchDialog from "@modules/search/presentation/components/dialogs/GlobalSearchDialog.vue";
   import {
     getOnboardingCompleted,
     setOnboardingCompleted,
@@ -21,6 +23,7 @@
   const { isCompaniesDialogVisible } = useCompaniesDialog();
   const { isContactsDialogVisible, consumePendingContactId } =
     useContactsDialog();
+  const { isGlobalSearchDialogVisible } = useGlobalSearchDialog();
   const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
   const initialContactId = ref<string | null>(null);
@@ -101,6 +104,8 @@
       />
 
       <SettingsDialog v-model:visible="isSettingsDialogVisible" />
+
+      <GlobalSearchDialog v-model:visible="isGlobalSearchDialogVisible" />
 
       <Toast />
     </NuxtLayout>
