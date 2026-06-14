@@ -25,6 +25,21 @@ const appLogLevel = process.env.APP_LOG_LEVEL ?? "info";
 const appDatabaseDriver = process.env.APP_DATABASE_DRIVER ?? "sqlite";
 const appDatabaseName = process.env.APP_DATABASE_NAME ?? "applyflow.db";
 const configuredDatabaseUrl = process.env.APP_DATABASE_URL?.trim();
+const appSemanticEmbeddingProvider =
+  process.env.APP_SEMANTIC_EMBEDDING_PROVIDER ?? "ollama";
+const appSemanticEmbeddingModel =
+  process.env.APP_SEMANTIC_EMBEDDING_MODEL ?? "bge-small-en";
+const appSemanticEmbeddingDimensions = Number(
+  process.env.APP_SEMANTIC_EMBEDDING_DIMENSIONS ?? "384",
+);
+const appSemanticEmbeddingBaseUrl =
+  process.env.APP_SEMANTIC_EMBEDDING_BASE_URL ?? "http://127.0.0.1:11434";
+const appSemanticEmbeddingApiKey =
+  process.env.APP_SEMANTIC_EMBEDDING_API_KEY ?? "";
+const appSemanticEnableSqliteVec = readBoolean(
+  process.env.APP_SEMANTIC_ENABLE_SQLITE_VEC,
+  true,
+);
 const isInMemoryDriver = ["memory", "in-memory"].includes(
   appDatabaseDriver.toLowerCase(),
 );
@@ -86,17 +101,26 @@ export default defineNuxtConfig({
     generateMetadata: true,
   },
 
-  modules: ["@vueuse/nuxt", "@nuxt/icon", "@nuxt/hints", "nuxt-security", "@nuxtjs/device", [
-    "@primevue/nuxt-module",
-    {
-      autoImport: true,
-      options: {
-        ripple: true,
-        inputVariant: "filled",
-        theme: applyFlowPrimeVueTheme,
+  modules: [
+    "@vueuse/nuxt",
+    "@nuxt/icon",
+    "@nuxt/hints",
+    "nuxt-security",
+    "@nuxtjs/device",
+    [
+      "@primevue/nuxt-module",
+      {
+        autoImport: true,
+        options: {
+          ripple: true,
+          inputVariant: "filled",
+          theme: applyFlowPrimeVueTheme,
+        },
       },
-    },
-  ], "@vee-validate/nuxt", "@primevue/nuxt-module"],
+    ],
+    "@vee-validate/nuxt",
+    "@primevue/nuxt-module",
+  ],
 
   // @ts-expect-error Nuxt Hints module options are applied at runtime; augmentation is not available in this static config type.
   hints: {
@@ -134,6 +158,12 @@ export default defineNuxtConfig({
       appDatabaseDriver,
       appDatabaseName,
       appDatabaseUrl,
+      appSemanticEmbeddingProvider,
+      appSemanticEmbeddingModel,
+      appSemanticEmbeddingDimensions,
+      appSemanticEmbeddingBaseUrl,
+      appSemanticEmbeddingApiKey,
+      appSemanticEnableSqliteVec,
     },
   },
 

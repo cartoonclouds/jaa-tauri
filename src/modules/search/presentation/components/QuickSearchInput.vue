@@ -68,6 +68,20 @@
         value: query,
       },
       {
+        id: "quick-applications-location",
+        scope: "applications",
+        field: "locationText",
+        operator: "contains",
+        value: query,
+      },
+      {
+        id: "quick-applications-description",
+        scope: "applications",
+        field: "description",
+        operator: "contains",
+        value: query,
+      },
+      {
         id: "quick-contacts",
         scope: "contacts",
         field: "fullName",
@@ -75,9 +89,37 @@
         value: query,
       },
       {
+        id: "quick-contacts-email",
+        scope: "contacts",
+        field: "email",
+        operator: "contains",
+        value: query,
+      },
+      {
+        id: "quick-contacts-location",
+        scope: "contacts",
+        field: "locationText",
+        operator: "contains",
+        value: query,
+      },
+      {
         id: "quick-companies",
         scope: "companies",
         field: "name",
+        operator: "contains",
+        value: query,
+      },
+      {
+        id: "quick-companies-industry",
+        scope: "companies",
+        field: "industry",
+        operator: "contains",
+        value: query,
+      },
+      {
+        id: "quick-companies-location",
+        scope: "companies",
+        field: "locationText",
         operator: "contains",
         value: query,
       },
@@ -106,7 +148,7 @@
     try {
       await ensureQuickSearchDatasetLoaded();
 
-      const sections = globalSearchService.buildResultSections({
+      const sections = await globalSearchService.buildResultSections({
         dataset: quickSearchDataset.value,
         conditions: buildQuickSearchConditions(query),
         joinMode: "any",
@@ -116,6 +158,7 @@
         ...sections.applications,
         ...sections.contacts,
         ...sections.companies,
+        ...sections.locations,
       ].slice(0, 8);
 
       showQuickSearchDropdown.value = true;
@@ -151,8 +194,15 @@
         @keydown.enter.prevent="onQuickSearchSubmit"
       />
       <Icon
-        name="heroicons:magnifying-glass"
-        class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+        :name="
+          isQuickSearchLoading
+            ? 'heroicons:arrow-path'
+            : 'heroicons:magnifying-glass'
+        "
+        :class="[
+          'pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400',
+          isQuickSearchLoading && 'animate-spin',
+        ]"
       />
     </div>
 

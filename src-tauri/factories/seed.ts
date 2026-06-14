@@ -26,6 +26,11 @@ import { createProductionConstantRows } from "./production/constants.factory";
 import { createProductionSettingRow } from "./production/settings.factory";
 import { createProductionTagRows } from "./production/tags.factory";
 import { createProfileRow } from "./profiles.factory";
+import {
+  createSemanticRowsForSeedData,
+  type SemanticDocumentRow,
+  type SemanticEmbeddingRow,
+} from "./semantic.factory";
 import { createSettingRow } from "./settings.factory";
 import { createTagRows } from "./tags.factory";
 
@@ -41,6 +46,8 @@ interface ProductionSeedResult {
   tags: UpsertStats;
   constants: UpsertStats;
   settings: UpsertStats;
+  semanticDocuments: UpsertStats;
+  semanticEmbeddings: UpsertStats;
 }
 
 interface DevelopmentSeedResult {
@@ -66,6 +73,79 @@ interface ExistingConstantRow {
 
 interface ExistingSettingRow {
   id: string;
+}
+
+interface ExistingApplicationSeedRow {
+  id: string;
+  company_id: string;
+  title: string;
+  location_text: string | null;
+  description: string | null;
+  interview_process: string | null;
+  benefits: string | null;
+}
+
+interface ExistingContactSeedRow {
+  id: string;
+  company_id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
+  location_text: string | null;
+  type: string;
+  notes: string | null;
+}
+
+interface ExistingDocumentSeedRow {
+  id: string;
+  title: string;
+  kind: string;
+  file_path: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+}
+
+interface ExistingTagSeedRow {
+  id: string;
+  name: string;
+  color: string;
+  model_type: string;
+}
+
+interface ExistingEventSeedRow {
+  id: string;
+  type: string;
+  title: string;
+  description: string | null;
+}
+
+interface ExistingNotificationSeedRow {
+  id: string;
+  application_id: string | null;
+  event_id: string | null;
+  severity: string;
+  title: string;
+  body: string;
+}
+
+interface ExistingCompanySeedRow {
+  id: string;
+  name: string;
+}
+
+interface ExistingSemanticDocumentRow {
+  id: string;
+}
+
+interface ExistingSemanticEmbeddingRow {
+  document_id: string;
+}
+
+interface SemanticSettingsSnapshot {
+  provider: string;
+  model: string;
+  dimensions: number;
 }
 
 const DatabaseCtor = Database;
@@ -217,6 +297,49 @@ function runMigrations(db: SqliteDatabaseLike, migrationsDir: string): void {
   }
 }
 
+function ensureSettingsSemanticColumns(db: SqliteDatabaseLike): void {
+  const tableInfoRows = db.prepare("PRAGMA table_info(settings)").all() as {
+    name: string;
+  }[];
+  const columnNames = new Set(tableInfoRows.map((row) => row.name));
+
+  if (!columnNames.has("semantic_embedding_provider")) {
+    db.prepare(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_provider TEXT NOT NULL DEFAULT 'ollama'",
+    ).run();
+  }
+
+  if (!columnNames.has("semantic_embedding_model")) {
+    db.prepare(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_model TEXT NOT NULL DEFAULT 'bge-small-en'",
+    ).run();
+  }
+
+  if (!columnNames.has("semantic_embedding_dimensions")) {
+    db.prepare(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_dimensions INTEGER NOT NULL DEFAULT 384",
+    ).run();
+  }
+
+  if (!columnNames.has("semantic_embedding_base_url")) {
+    db.prepare(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_base_url TEXT NOT NULL DEFAULT 'http://127.0.0.1:11434'",
+    ).run();
+  }
+
+  if (!columnNames.has("semantic_embedding_api_key")) {
+    db.prepare(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_api_key TEXT",
+    ).run();
+  }
+
+  if (!columnNames.has("semantic_enable_sqlite_vec")) {
+    db.prepare(
+      "ALTER TABLE settings ADD COLUMN semantic_enable_sqlite_vec INTEGER NOT NULL DEFAULT 1",
+    ).run();
+  }
+}
+
 function insertMany(
   db: SqliteDatabaseLike,
   table: string,
@@ -244,6 +367,8 @@ function insertMany(
 
 function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
   const tables = [
+    "semantic_embeddings",
+    "semantic_documents",
     "constants",
     "application_documents",
     "application_contacts",
@@ -265,6 +390,193 @@ function deleteAllInFkSafeOrder(db: SqliteDatabaseLike): void {
   for (const table of tables) {
     db.prepare(`DELETE FROM ${table}`).run();
   }
+}
+
+function readSemanticSettingsSnapshot(
+  db: SqliteDatabaseLike,
+): SemanticSettingsSnapshot {
+  const row = db
+    .prepare(
+      `SELECT
+         semantic_embedding_provider,
+         semantic_embedding_model,
+         semantic_embedding_dimensions
+       FROM settings
+       WHERE id = ?
+       LIMIT 1`,
+    )
+    .get("app-settings") as
+    | {
+        semantic_embedding_provider?: unknown;
+        semantic_embedding_model?: unknown;
+        semantic_embedding_dimensions?: unknown;
+      }
+    | undefined;
+
+  const provider =
+    typeof row?.semantic_embedding_provider === "string" &&
+    row.semantic_embedding_provider.trim().length > 0
+      ? row.semantic_embedding_provider
+      : "deterministic";
+
+  const model =
+    typeof row?.semantic_embedding_model === "string" &&
+    row.semantic_embedding_model.trim().length > 0
+      ? row.semantic_embedding_model
+      : provider === "deterministic"
+        ? "deterministic-token-v1"
+        : "bge-small-en";
+
+  const rawDimensions = Number(row?.semantic_embedding_dimensions);
+  const dimensions =
+    Number.isFinite(rawDimensions) && rawDimensions > 0
+      ? Math.floor(rawDimensions)
+      : 384;
+
+  return {
+    provider,
+    model,
+    dimensions,
+  };
+}
+
+function upsertSemanticDocuments(
+  db: SqliteDatabaseLike,
+  rows: SemanticDocumentRow[],
+): UpsertStats {
+  const selectExisting = db.prepare(
+    "SELECT id FROM semantic_documents WHERE id = ?",
+  );
+  const insertDocument = db.prepare(
+    `INSERT INTO semantic_documents (
+       id,
+       module_key,
+       entity_type,
+       entity_id,
+       title,
+       content,
+       metadata_json,
+       created_at,
+       updated_at
+     )
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const updateDocument = db.prepare(
+    `UPDATE semantic_documents
+     SET
+       module_key = ?,
+       entity_type = ?,
+       entity_id = ?,
+       title = ?,
+       content = ?,
+       metadata_json = ?,
+       updated_at = ?
+     WHERE id = ?`,
+  );
+
+  let inserted = 0;
+  let updated = 0;
+
+  for (const row of rows) {
+    const existing = selectExisting.get(row.id) as
+      | ExistingSemanticDocumentRow
+      | undefined;
+    if (!existing) {
+      insertDocument.run(
+        row.id,
+        row.module_key,
+        row.entity_type,
+        row.entity_id,
+        row.title,
+        row.content,
+        row.metadata_json,
+        row.created_at,
+        row.updated_at,
+      );
+      inserted += 1;
+      continue;
+    }
+
+    const result = updateDocument.run(
+      row.module_key,
+      row.entity_type,
+      row.entity_id,
+      row.title,
+      row.content,
+      row.metadata_json,
+      row.updated_at,
+      row.id,
+    ) as SqliteRunResult;
+
+    if (result.changes > 0) {
+      updated += 1;
+    }
+  }
+
+  return { inserted, updated };
+}
+
+function upsertSemanticEmbeddings(
+  db: SqliteDatabaseLike,
+  rows: SemanticEmbeddingRow[],
+): UpsertStats {
+  const selectExisting = db.prepare(
+    "SELECT document_id FROM semantic_embeddings WHERE document_id = ?",
+  );
+  const insertEmbedding = db.prepare(
+    `INSERT INTO semantic_embeddings (
+       document_id,
+       embedding_model,
+       embedding_dimensions,
+       embedding_json,
+       embedded_at
+     )
+     VALUES (?, ?, ?, ?, ?)`,
+  );
+  const updateEmbedding = db.prepare(
+    `UPDATE semantic_embeddings
+     SET
+       embedding_model = ?,
+       embedding_dimensions = ?,
+       embedding_json = ?,
+       embedded_at = ?
+     WHERE document_id = ?`,
+  );
+
+  let inserted = 0;
+  let updated = 0;
+
+  for (const row of rows) {
+    const existing = selectExisting.get(row.document_id) as
+      | ExistingSemanticEmbeddingRow
+      | undefined;
+
+    if (!existing) {
+      insertEmbedding.run(
+        row.document_id,
+        row.embedding_model,
+        row.embedding_dimensions,
+        row.embedding_json,
+        row.embedded_at,
+      );
+      inserted += 1;
+      continue;
+    }
+
+    const result = updateEmbedding.run(
+      row.embedding_model,
+      row.embedding_dimensions,
+      row.embedding_json,
+      row.embedded_at,
+      row.document_id,
+    ) as SqliteRunResult;
+
+    if (result.changes > 0) {
+      updated += 1;
+    }
+  }
+
+  return { inserted, updated };
 }
 
 function upsertTags(
@@ -377,6 +689,12 @@ function upsertSettings(
          locale,
          notifications_enabled,
          developer_mode,
+        semantic_embedding_provider,
+        semantic_embedding_model,
+        semantic_embedding_dimensions,
+        semantic_embedding_base_url,
+        semantic_embedding_api_key,
+        semantic_enable_sqlite_vec,
          recent_searches,
          table_column_visibility,
          stats_visibility,
@@ -385,13 +703,19 @@ function upsertSettings(
          created_at,
          updated_at
        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       row.id,
       row.theme,
       row.locale,
       row.notifications_enabled,
       row.developer_mode,
+      row.semantic_embedding_provider,
+      row.semantic_embedding_model,
+      row.semantic_embedding_dimensions,
+      row.semantic_embedding_base_url,
+      row.semantic_embedding_api_key,
+      row.semantic_enable_sqlite_vec,
       row.recent_searches,
       row.table_column_visibility,
       row.stats_visibility,
@@ -412,6 +736,12 @@ function upsertSettings(
          locale = ?,
          notifications_enabled = ?,
          developer_mode = ?,
+         semantic_embedding_provider = ?,
+         semantic_embedding_model = ?,
+         semantic_embedding_dimensions = ?,
+         semantic_embedding_base_url = ?,
+         semantic_embedding_api_key = ?,
+         semantic_enable_sqlite_vec = ?,
          recent_searches = ?,
          table_column_visibility = ?,
          stats_visibility = ?,
@@ -425,6 +755,12 @@ function upsertSettings(
       row.locale,
       row.notifications_enabled,
       row.developer_mode,
+      row.semantic_embedding_provider,
+      row.semantic_embedding_model,
+      row.semantic_embedding_dimensions,
+      row.semantic_embedding_base_url,
+      row.semantic_embedding_api_key,
+      row.semantic_enable_sqlite_vec,
       row.recent_searches,
       row.table_column_visibility,
       row.stats_visibility,
@@ -452,6 +788,7 @@ function main(): void {
 
   const migrationsDir = path.resolve(process.cwd(), "src-tauri", "migrations");
   runMigrations(db, migrationsDir);
+  ensureSettingsSemanticColumns(db);
 
   const seedTx = db.transaction((): SeedResult => {
     if (seedMode === "production") {
@@ -463,11 +800,73 @@ function main(): void {
         createProductionSettingRow(timestamp),
       );
 
+      const applications = db
+        .prepare(
+          `SELECT id, company_id, title, location_text, description, interview_process, benefits
+         FROM applications
+         WHERE deleted_at IS NULL`,
+        )
+        .all() as ExistingApplicationSeedRow[];
+      const contacts = db
+        .prepare(
+          `SELECT id, company_id, full_name, email, phone, linkedin_url, location_text, type, notes
+           FROM contacts`,
+        )
+        .all() as ExistingContactSeedRow[];
+      const documents = db
+        .prepare(
+          `SELECT id, title, kind, file_path, mime_type, size_bytes
+           FROM documents`,
+        )
+        .all() as ExistingDocumentSeedRow[];
+      const tagsForSemantic = db
+        .prepare("SELECT id, name, color, model_type FROM tags")
+        .all() as ExistingTagSeedRow[];
+      const eventsForSemantic = db
+        .prepare("SELECT id, type, title, description FROM events")
+        .all() as ExistingEventSeedRow[];
+      const notificationsForSemantic = db
+        .prepare(
+          "SELECT id, application_id, event_id, severity, title, body FROM notifications",
+        )
+        .all() as ExistingNotificationSeedRow[];
+      const companies = db
+        .prepare("SELECT id, name FROM companies")
+        .all() as ExistingCompanySeedRow[];
+      const semanticSettings = readSemanticSettingsSnapshot(db);
+      const semanticRows = createSemanticRowsForSeedData({
+        applications,
+        companies,
+        contacts,
+        documents,
+        tags: tagsForSemantic,
+        events: eventsForSemantic,
+        notifications: notificationsForSemantic,
+        profile: null,
+        settings: null,
+        semantic: {
+          provider: semanticSettings.provider,
+          model: semanticSettings.model,
+          dimensions: semanticSettings.dimensions,
+          timestamp,
+        },
+      });
+      const semanticDocuments = upsertSemanticDocuments(
+        db,
+        semanticRows.documents,
+      );
+      const semanticEmbeddings = upsertSemanticEmbeddings(
+        db,
+        semanticRows.embeddings,
+      );
+
       return {
         mode: "production",
         tags,
         constants,
         settings,
+        semanticDocuments,
+        semanticEmbeddings,
       };
     }
 
@@ -576,6 +975,24 @@ function main(): void {
       seed + 130,
     );
 
+    const semanticRowsWithEvents = createSemanticRowsForSeedData({
+      applications,
+      companies,
+      contacts,
+      documents,
+      tags,
+      events,
+      notifications,
+      profile,
+      settings,
+      semantic: {
+        provider: settings.semantic_embedding_provider,
+        model: settings.semantic_embedding_model,
+        dimensions: settings.semantic_embedding_dimensions,
+        timestamp: settings.updated_at,
+      },
+    });
+
     const applicationDocuments = createApplicationDocumentRows(
       applications.map((a) => a.id),
       documents.map((document) => ({ id: document.id, kind: document.kind })),
@@ -628,6 +1045,16 @@ function main(): void {
         db,
         "application_contacts",
         applicationContacts,
+      ),
+      semantic_documents: insertMany(
+        db,
+        "semantic_documents",
+        semanticRowsWithEvents.documents,
+      ),
+      semantic_embeddings: insertMany(
+        db,
+        "semantic_embeddings",
+        semanticRowsWithEvents.embeddings,
       ),
     };
 

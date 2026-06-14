@@ -8,6 +8,12 @@ export interface SettingRow {
   locale: string;
   notifications_enabled: number;
   developer_mode: number;
+  semantic_embedding_provider: string;
+  semantic_embedding_model: string;
+  semantic_embedding_dimensions: number;
+  semantic_embedding_base_url: string;
+  semantic_embedding_api_key: string | null;
+  semantic_enable_sqlite_vec: number;
   recent_searches: string;
   table_column_visibility: string;
   stats_visibility: string;
@@ -48,6 +54,12 @@ export function createSettingRow(
     locale: faker.helpers.arrayElement(["en-GB", "en-US"]),
     notifications_enabled: 1,
     developer_mode: 0,
+    semantic_embedding_provider: "deterministic",
+    semantic_embedding_model: "deterministic-token-v1",
+    semantic_embedding_dimensions: 384,
+    semantic_embedding_base_url: "http://127.0.0.1:11434",
+    semantic_embedding_api_key: null,
+    semantic_enable_sqlite_vec: 0,
     recent_searches: JSON.stringify(["frontend engineer", "tauri jobs"]),
     table_column_visibility: JSON.stringify({
       applications_status: true,

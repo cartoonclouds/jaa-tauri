@@ -1,7 +1,9 @@
 <script setup lang="ts">
   import type { Application } from "@modules/applications/domain/entities/Application";
+  import type { ApplicationSemanticSearchResult } from "@modules/applications/services/ApplicationSemanticSearchService";
   import type { Event } from "@modules/events/domain/entities/Event";
 
+  import { useApplicationSemanticSearch } from "@modules/applications/composables/useApplicationSemanticSearch";
   import ApplicationBadge from "@modules/applications/presentation/components/badges/ApplicationBadge.vue";
   import ApplicationDetailsCard from "@modules/applications/presentation/components/cards/ApplicationDetailsCard.vue";
   import ApplicationDetailsFlowStepDialog from "@modules/applications/presentation/components/dialogs/ApplicationDetailsFlowStepDialog.vue";
@@ -20,8 +22,9 @@
     temporalToIsoString,
   } from "@shared/utils/temporal";
   import { formatDisplayDateTime } from "@shared/utils/toDate";
-  import { computed, reactive, ref } from "vue";
+  import { computed, reactive, ref, watch } from "vue";
 
+  import { useRouter } from "#imports";
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
   import NotesMarkdownViewerClient from "@/components/ui/NotesMarkdownViewer.client.vue";
 
@@ -45,6 +48,8 @@
   }
 
   const props = defineProps<Props>();
+  const router = useRouter();
+  const applicationSemanticSearchService = useApplicationSemanticSearch();
   const {
     items: eventItems,
     create,
@@ -54,6 +59,8 @@
   } = useEvent();
   const isEditDialogVisible = ref(false);
   const isDeleteConfirmVisible = ref(false);
+  const isLoadingSimilarApplications = ref(false);
+  const similarApplications = ref<ApplicationSemanticSearchResult[]>([]);
   const editForm = reactive<{
     id: string;
     type: InteractionStage;
@@ -277,6 +284,50 @@
 
     isDeleteConfirmVisible.value = true;
   }
+
+  /**
+   * Loads semantic matches for the currently selected application.
+   */
+  async function refreshSimilarApplications(): Promise<void> {
+    const applicationId = props.application?.id;
+    if (!applicationId) {
+      similarApplications.value = [];
+      return;
+    }
+
+    isLoadingSimilarApplications.value = true;
+    try {
+      similarApplications.value =
+        await applicationSemanticSearchService.searchSimilarToApplication(
+          applicationId,
+          {
+            limit: 5,
+          },
+        );
+    } catch {
+      similarApplications.value = [];
+    } finally {
+      isLoadingSimilarApplications.value = false;
+    }
+  }
+
+  /**
+   * Opens a selected semantic match in the applications page.
+   */
+  async function openSimilarApplication(applicationId: string): Promise<void> {
+    await router.push({
+      path: "/applications",
+      query: { applicationId },
+    });
+  }
+
+  watch(
+    () => props.application?.id,
+    () => {
+      void refreshSimilarApplications();
+    },
+    { immediate: true },
+  );
 </script>
 
 <template>
@@ -354,6 +405,56 @@
           No application notes yet.
         </p>
         <NotesMarkdownViewerClient v-else :markdown="application.description" />
+      </div>
+    </ApplicationDetailsCard>
+
+    <ApplicationDetailsCard title="Similar Applications (Semantic)">
+      <div class="space-y-3">
+        <div class="flex justify-end">
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            :loading="isLoadingSimilarApplications"
+            label="Refresh"
+            @click="refreshSimilarApplications"
+          />
+        </div>
+
+        <p
+          v-if="
+            !isLoadingSimilarApplications && similarApplications.length === 0
+          "
+          class="text-sm text-surface-500"
+        >
+          No similar applications found yet.
+        </p>
+
+        <ul v-else class="space-y-2">
+          <li
+            v-for="entry in similarApplications"
+            :key="entry.applicationId"
+            class="rounded border border-surface-200 px-3 py-2"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <button
+                type="button"
+                class="text-left text-sm font-semibold text-primary hover:underline"
+                @click="openSimilarApplication(entry.applicationId)"
+              >
+                {{ entry.title }}
+              </button>
+              <span class="text-xs text-surface-500">
+                {{ Math.round(entry.similarity * 100) }}% match
+              </span>
+            </div>
+
+            <p v-if="entry.companyName" class="text-xs text-surface-500">
+              {{ entry.companyName }}
+            </p>
+          </li>
+        </ul>
       </div>
     </ApplicationDetailsCard>
   </div>

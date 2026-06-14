@@ -14,6 +14,26 @@ export type SearchScope =
   | "locations";
 
 /**
+ * Canonical ordered list of supported search scopes.
+ */
+export const SEARCH_SCOPES: SearchScope[] = [
+  "applications",
+  "contacts",
+  "companies",
+  "locations",
+];
+
+/**
+ * Generic map keyed by search scope.
+ */
+export type SearchScopeMap<TValue> = Record<SearchScope, TValue>;
+
+/**
+ * Scope-keyed map of free-text query strings.
+ */
+export type SearchScopeQueryMap = SearchScopeMap<string>;
+
+/**
  * Operators supported by search conditions.
  */
 export type SearchOperator = "contains" | "equals" | "startsWith";
@@ -95,7 +115,7 @@ export interface GlobalSearchServiceContract {
     dataset: GlobalSearchDataset;
     conditions: SearchCondition[];
     joinMode: SearchJoinMode;
-  }): GlobalSearchResultSections;
+  }): Promise<GlobalSearchResultSections>;
 }
 
 /**

@@ -4,6 +4,12 @@ CREATE TABLE IF NOT EXISTS settings (
   locale TEXT NOT NULL DEFAULT 'en-GB',
   notifications_enabled INTEGER NOT NULL DEFAULT 1,
   developer_mode INTEGER NOT NULL DEFAULT 0,
+  semantic_embedding_provider TEXT NOT NULL DEFAULT 'ollama',
+  semantic_embedding_model TEXT NOT NULL DEFAULT 'bge-small-en',
+  semantic_embedding_dimensions INTEGER NOT NULL DEFAULT 384,
+  semantic_embedding_base_url TEXT NOT NULL DEFAULT 'http://127.0.0.1:11434',
+  semantic_embedding_api_key TEXT,
+  semantic_enable_sqlite_vec INTEGER NOT NULL DEFAULT 1,
   recent_searches TEXT NOT NULL DEFAULT '[]',
   table_column_visibility TEXT NOT NULL DEFAULT '{}',
   /**

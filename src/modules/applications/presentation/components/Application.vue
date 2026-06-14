@@ -23,6 +23,7 @@
 
   import { useApplication } from "@modules/applications";
   import { useApplicationDatatable } from "@modules/applications/composables/useApplicationDatatable";
+  import { useApplicationSemanticSearch } from "@modules/applications/composables/useApplicationSemanticSearch";
   import ApplicationDatatable from "@modules/applications/presentation/components/ApplicationDatatable.vue";
   import ApplicationDetailsDrawer from "@modules/applications/presentation/components/drawers/ApplicationDetailsDrawer.vue";
   import { createEmptyApplicationFormValues } from "@modules/applications/presentation/utils/createEmptyApplicationFormValues";
@@ -74,6 +75,7 @@
 
   const applicationComposable = useApplication();
   const service = applicationComposable.service;
+  const applicationSemanticSearchService = useApplicationSemanticSearch();
 
   const companyComposable = useCompany();
   const companyService = companyComposable.service;
@@ -364,6 +366,7 @@
       const editApplicationId = await persistApplication(payload, isEditMode);
 
       await refresh();
+      await rebuildSemanticIndexSafely();
       if (editApplicationId) {
         await refetchSelectedApplication(editApplicationId);
         drawerMode.value = "view";
@@ -391,12 +394,30 @@
 
     try {
       await service.delete(id);
+      await applicationSemanticSearchService.removeFromIndex(id);
+      await rebuildSemanticIndexSafely();
       isDrawerOpen.value = false;
       drawerMode.value = "view";
       selectedApplication.value = null;
       await refresh();
     } finally {
       isDeleting.value = false;
+    }
+  }
+
+  /**
+   * Rebuilds semantic index without blocking CRUD flows on indexing failures.
+   */
+  async function rebuildSemanticIndexSafely(): Promise<void> {
+    try {
+      await applicationSemanticSearchService.rebuildIndex();
+    } catch (error) {
+      toast.add({
+        severity: "warn",
+        summary: "Semantic index update failed",
+        detail: toErrorMessage(error),
+        life: 4000,
+      });
     }
   }
 

@@ -32,6 +32,8 @@ const REQUIRED_MIGRATION_TABLES = [
   "application_documents",
   "application_contacts",
   "constants",
+  "semantic_documents",
+  "semantic_embeddings",
 ] as const;
 
 /**
@@ -92,6 +94,50 @@ export async function ensureMigrationsAppliedOnFirstRun(
   if (!hasModelTypeColumn) {
     await database.execute(
       "ALTER TABLE tags ADD COLUMN model_type TEXT NOT NULL DEFAULT 'general'",
+    );
+  }
+
+  const settingsColumns = await database.select<SqliteColumnInfoRow>(
+    "PRAGMA table_info(settings)",
+  );
+
+  const settingsColumnNames = new Set(
+    settingsColumns.map((column) => column.name),
+  );
+
+  if (!settingsColumnNames.has("semantic_embedding_provider")) {
+    await database.execute(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_provider TEXT NOT NULL DEFAULT 'ollama'",
+    );
+  }
+
+  if (!settingsColumnNames.has("semantic_embedding_model")) {
+    await database.execute(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_model TEXT NOT NULL DEFAULT 'bge-small-en'",
+    );
+  }
+
+  if (!settingsColumnNames.has("semantic_embedding_dimensions")) {
+    await database.execute(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_dimensions INTEGER NOT NULL DEFAULT 384",
+    );
+  }
+
+  if (!settingsColumnNames.has("semantic_embedding_base_url")) {
+    await database.execute(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_base_url TEXT NOT NULL DEFAULT 'http://127.0.0.1:11434'",
+    );
+  }
+
+  if (!settingsColumnNames.has("semantic_embedding_api_key")) {
+    await database.execute(
+      "ALTER TABLE settings ADD COLUMN semantic_embedding_api_key TEXT",
+    );
+  }
+
+  if (!settingsColumnNames.has("semantic_enable_sqlite_vec")) {
+    await database.execute(
+      "ALTER TABLE settings ADD COLUMN semantic_enable_sqlite_vec INTEGER NOT NULL DEFAULT 1",
     );
   }
 }

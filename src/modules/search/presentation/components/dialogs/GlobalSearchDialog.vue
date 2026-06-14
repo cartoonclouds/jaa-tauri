@@ -13,7 +13,7 @@
     SEARCH_OPERATOR_OPTIONS,
     SEARCH_SCOPE_OPTIONS,
   } from "@modules/search/utils/searchUtils";
-  import { computed, ref, watch } from "vue";
+  import { computed, ref, watch, watchEffect } from "vue";
 
   interface Props {
     visible: boolean;
@@ -67,19 +67,26 @@
     }
   }
 
-  const resultSections = computed(() =>
-    globalSearchService.buildResultSections({
+  const applicationResults = ref<SearchResult[]>([]);
+  const contactResults = ref<SearchResult[]>([]);
+  const companyResults = ref<SearchResult[]>([]);
+  const locationResults = ref<SearchResult[]>([]);
+  const totalResultCount = ref(0);
+
+  watchEffect(async () => {
+    const sections = await globalSearchService.buildResultSections({
       dataset: dataset.value,
       conditions: searchBuilder.conditions.value,
       joinMode: searchBuilder.joinMode.value,
-    }),
-  );
+    });
 
-  const applicationResults = computed(() => resultSections.value.applications);
-  const contactResults = computed(() => resultSections.value.contacts);
-  const companyResults = computed(() => resultSections.value.companies);
-  const locationResults = computed(() => resultSections.value.locations);
-  const totalResultCount = computed(() => resultSections.value.totalCount);
+    applicationResults.value = sections.applications;
+    contactResults.value = sections.contacts;
+    companyResults.value = sections.companies;
+    locationResults.value = sections.locations;
+    totalResultCount.value = sections.totalCount;
+  });
+
   const { joinMode, conditions, hasActiveQuery } = searchBuilder;
   const { getFieldOptions, onScopeChange, addCondition, removeCondition } =
     searchBuilder;
