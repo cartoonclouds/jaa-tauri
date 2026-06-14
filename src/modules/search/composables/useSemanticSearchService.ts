@@ -3,8 +3,11 @@ import type { SemanticSearchServiceContract } from "@modules/search/types.semant
 import { SemanticSearchRepository } from "@modules/search/repositories/SemanticSearchRepository";
 import { DeterministicEmbeddingProvider } from "@modules/search/services/DeterministicEmbeddingProvider";
 import { RemoteEmbeddingProvider } from "@modules/search/services/RemoteEmbeddingProvider";
-import { SemanticSearchService } from "@modules/search/services/SemanticSearchService";
+import { toFiniteNumber } from "@shared/utils/database-mapping/numberValueUtils";
+import { fromDbBoolean } from "@shared/utils/database-mapping/persistenceValueUtils";
+import { toRequiredString } from "@shared/utils/database-mapping/stringValueUtils";
 import { getNuxtDatabase } from "@shared/utils/getNuxtDatabase";
+
 import { useRuntimeConfig } from "#imports";
 
 let semanticSearchServiceInstance: SemanticSearchServiceContract | null = null;
@@ -18,31 +21,15 @@ interface SemanticRuntimeConfig {
   enableSqliteVec: boolean;
 }
 
-function readBoolean(value: unknown, fallback: boolean): boolean {
-  if (typeof value === "boolean") {
-    return value;
-  }
-
-  if (typeof value !== "string") {
-    return fallback;
-  }
-
-  const normalized = value.trim().toLowerCase();
-  if (["1", "true", "yes", "on"].includes(normalized)) {
-    return true;
-  }
-  if (["0", "false", "no", "off"].includes(normalized)) {
-    return false;
-  }
-
-  return fallback;
-}
-
 function readRuntimeConfig(): SemanticRuntimeConfig {
   const config = useRuntimeConfig().public;
-  const rawProvider = String(config.appSemanticEmbeddingProvider ?? "ollama")
-    .trim()
-    .toLowerCase();
+  const rawProvider =
+    config.appSemanticEmbeddingProvider === null ||
+    config.appSemanticEmbeddingProvider === undefined
+      ? "ollama"
+      : toRequiredString(config.appSemanticEmbeddingProvider)
+          .trim()
+          .toLowerCase();
   const provider: SemanticRuntimeConfig["provider"] =
     rawProvider === "deterministic" ||
     rawProvider === "openai-compatible" ||
@@ -58,29 +45,43 @@ function readRuntimeConfig(): SemanticRuntimeConfig {
         : "deterministic-token-v1";
 
   const defaultDimensions =
-    provider === "openai-compatible"
-      ? 1536
-      : provider === "ollama"
-        ? 384
-        : 384;
+    provider === "openai-compatible" ? 1536 : provider === "ollama" ? 384 : 384;
 
-  const model = String(config.appSemanticEmbeddingModel ?? defaultModel).trim();
-  const dimensions = Number(config.appSemanticEmbeddingDimensions ?? defaultDimensions);
-  const baseUrl = String(
-    config.appSemanticEmbeddingBaseUrl ??
-      (provider === "openai-compatible"
-        ? "https://api.openai.com/v1"
-        : "http://127.0.0.1:11434"),
+  const model = (
+    config.appSemanticEmbeddingModel === null ||
+    config.appSemanticEmbeddingModel === undefined
+      ? defaultModel
+      : toRequiredString(config.appSemanticEmbeddingModel)
   ).trim();
-  const apiKeyRaw = String(config.appSemanticEmbeddingApiKey ?? "").trim();
+  const dimensions = toFiniteNumber(
+    config.appSemanticEmbeddingDimensions,
+    defaultDimensions,
+  );
+  const baseUrl = (
+    config.appSemanticEmbeddingBaseUrl === null ||
+    config.appSemanticEmbeddingBaseUrl === undefined
+      ? provider === "openai-compatible"
+        ? "https://api.openai.com/v1"
+        : "http://127.0.0.1:11434"
+      : toRequiredString(config.appSemanticEmbeddingBaseUrl)
+  ).trim();
+  const apiKeyRaw = (
+    config.appSemanticEmbeddingApiKey === null ||
+    config.appSemanticEmbeddingApiKey === undefined
+      ? ""
+      : toRequiredString(config.appSemanticEmbeddingApiKey)
+  ).trim();
 
   return {
     provider,
     model,
-    dimensions: Number.isFinite(dimensions) && dimensions > 0 ? dimensions : defaultDimensions,
+    dimensions:
+      Number.isFinite(dimensions) && dimensions > 0
+        ? dimensions
+        : defaultDimensions,
     baseUrl,
     apiKey: apiKeyRaw.length > 0 ? apiKeyRaw : undefined,
-    enableSqliteVec: readBoolean(config.appSemanticEnableSqliteVec, true),
+    enableSqliteVec: fromDbBoolean(config.appSemanticEnableSqliteVec, true),
   };
 }
 
@@ -112,10 +113,52 @@ export function useSemanticSearchService(): SemanticSearchServiceContract {
           apiKey: runtimeConfig.apiKey,
         });
 
-  semanticSearchServiceInstance = new SemanticSearchService(
-    repository,
-    embeddingProvider,
-  );
+  semanticSearchServiceInstance = {
+    async upsertDocuments(documents) {
+      for (const document of documents) {
+        const content = document.content.trim();
+        if (!content) {
+          await repository.deleteByEntity({
+            moduleKey: document.moduleKey,
+            entityType: document.entityType,
+            entityId: document.entityId,
+          });
+          continue;
+        }
+
+        const embedding = await embeddingProvider.embed(content);
+        await repository.upsertDocumentWithEmbedding({
+          document: {
+            ...document,
+            content,
+          },
+          model: embeddingProvider.model,
+          dimensions: embeddingProvider.dimensions,
+          embedding,
+        });
+      }
+    },
+    removeDocumentByEntity(options) {
+      return repository.deleteByEntity(options);
+    },
+    async search(query) {
+      const trimmedQuery = query.query.trim();
+      if (!trimmedQuery) {
+        return [];
+      }
+
+      const queryEmbedding = await embeddingProvider.embed(trimmedQuery);
+
+      return repository.search({
+        moduleKey: query.moduleKey,
+        model: embeddingProvider.model,
+        dimensions: embeddingProvider.dimensions,
+        queryEmbedding,
+        limit: query.limit ?? 10,
+        entityTypes: query.entityTypes,
+      });
+    },
+  };
 
   return semanticSearchServiceInstance;
 }
