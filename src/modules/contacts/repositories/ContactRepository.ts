@@ -63,6 +63,10 @@ export interface IContactRepository
   listAssociatedCompanies(
     contactId: string,
   ): Promise<ContactAssociatedCompany[]>;
+  listAssociatedApplications(
+    contactId: string,
+  ): Promise<ContactAssociatedApplication[]>;
+  countLinkedApplications(contactId: string): Promise<number>;
   linkToApplication(applicationId: string, contactId: string): Promise<void>;
   unlinkFromApplication(
     applicationId: string,
@@ -87,6 +91,17 @@ export interface ContactAssociatedCompany {
   industry: string | null;
   websiteUrl: string | null;
   locationText: string | null;
+}
+
+/**
+ * Lightweight application row associated with a contact.
+ */
+export interface ContactAssociatedApplication {
+  id: string;
+  title: string;
+  status: string | null;
+  eventFlowStatus: string | null;
+  appliedAt: string | null;
 }
 
 /**
@@ -171,6 +186,86 @@ export class ContactRepository implements IContactRepository {
       websiteUrl: (row.website_url as string | null) ?? null,
       locationText: (row.location_text as string | null) ?? null,
     }));
+  }
+
+  async listAssociatedApplications(
+    contactId: string,
+  ): Promise<ContactAssociatedApplication[]> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT
+         a.id,
+         a.title,
+         CASE
+           WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
+           WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
+           WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
+           WHEN latest_event.type = 'Interview/Technical Interview' THEN 'technical'
+           WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
+           WHEN latest_event.type = 'Screening/Phone Screen' THEN 'phone-screening'
+           WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
+           WHEN latest_event.type = 'Application/Saved' THEN 'saved'
+           WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
+           ELSE 'saved'
+         END AS status,
+         CASE
+           WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
+           WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
+           WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
+           WHEN latest_event.type = 'Application/Saved' THEN 'saved'
+           WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
+           ELSE 'applied'
+         END AS event_flow_status,
+         a.applied_at
+       FROM application_contacts ac
+       INNER JOIN applications a ON a.id = ac.application_id
+       LEFT JOIN (
+         SELECT
+           ae.application_id,
+           e.type,
+           ROW_NUMBER() OVER (
+             PARTITION BY ae.application_id
+             ORDER BY ae.sort_order DESC
+           ) AS rn
+         FROM application_events ae
+         INNER JOIN events e ON e.id = ae.event_id
+         WHERE ae.event_at IS NOT NULL
+       ) latest_event
+         ON latest_event.application_id = a.id
+        AND latest_event.rn = 1
+       WHERE ac.contact_id = $1
+       ORDER BY a.updated_at DESC`,
+      [contactId],
+    );
+
+    return rows.map((row) => ({
+      id: String(row.id),
+      title: typeof row.title === "string" ? row.title : "",
+      status: (row.status as string | null) ?? null,
+      eventFlowStatus: (row.event_flow_status as string | null) ?? null,
+      appliedAt: (row.applied_at as string | null) ?? null,
+    }));
+  }
+
+  async countLinkedApplications(contactId: string): Promise<number> {
+    const rows = await this.db.select<Record<string, unknown>>(
+      `SELECT COUNT(*) AS total
+       FROM application_contacts
+       WHERE contact_id = $1`,
+      [contactId],
+    );
+
+    const firstRow = rows.length > 0 ? rows[0] : null;
+    const total = firstRow ? firstRow.total : undefined;
+
+    return typeof total === "number" ? total : Number(total ?? 0);
   }
 
   async linkToApplication(

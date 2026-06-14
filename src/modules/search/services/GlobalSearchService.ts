@@ -1,9 +1,7 @@
-import type { ApplicationService } from "@modules/applications/services/ApplicationService";
-import type { CompanyService } from "@modules/companies/services/CompanyService";
-import type { ContactService } from "@modules/contacts/services/ContactService";
 import type {
   GlobalSearchDataset,
   GlobalSearchResultSections,
+  GlobalSearchServiceContract,
   SearchCondition,
   SearchJoinMode,
 } from "@modules/search/types";
@@ -15,16 +13,24 @@ import {
   toSearchText,
 } from "@modules/search/utils/searchUtils";
 
+import { ucwords } from "@/shared/utils/strings";
+
 interface GlobalSearchServiceDependencies {
-  applicationService: ApplicationService;
-  contactService: ContactService;
-  companyService: CompanyService;
+  applicationService: {
+    list(): Promise<GlobalSearchDataset["applications"]>;
+  };
+  contactService: {
+    list(): Promise<GlobalSearchDataset["contacts"]>;
+  };
+  companyService: {
+    list(): Promise<GlobalSearchDataset["companies"]>;
+  };
 }
 
 /**
  * Orchestrates data loading and result shaping for global search.
  */
-export class GlobalSearchService {
+export class GlobalSearchService implements GlobalSearchServiceContract {
   constructor(private readonly dependencies: GlobalSearchServiceDependencies) {}
 
   /**
@@ -70,7 +76,7 @@ export class GlobalSearchService {
       id: `application:${entry.id}`,
       entityType: "applications" as const,
       title: toSearchText(entry.title),
-      subtitle: `Status: ${toSearchText(entry.status)} | Event Flow: ${toSearchText(entry.eventFlowStatus)}`,
+      subtitle: `Status: ${ucwords(toSearchText(entry.status))} | Event Flow: ${ucwords(toSearchText(entry.eventFlowStatus))}`,
       detail: toSearchText(entry.locationText) || null,
       targetId: entry.id,
       locationText: toSearchText(entry.locationText) || null,
@@ -85,7 +91,7 @@ export class GlobalSearchService {
       id: `contact:${entry.id}`,
       entityType: "contacts" as const,
       title: toSearchText(entry.fullName),
-      subtitle: `Type: ${toSearchText(entry.type)} | Email: ${toSearchText(entry.email) || "-"}`,
+      subtitle: `Type: ${ucwords(toSearchText(entry.type))} | Email: ${toSearchText(entry.email) || "-"}`,
       detail: toSearchText(entry.locationText) || null,
       targetId: entry.id,
       locationText: toSearchText(entry.locationText) || null,
@@ -100,7 +106,7 @@ export class GlobalSearchService {
       id: `company:${entry.id}`,
       entityType: "companies" as const,
       title: toSearchText(entry.name),
-      subtitle: `Industry: ${toSearchText(entry.industry) || "-"} | Size: ${toSearchText(entry.size) || "-"}`,
+      subtitle: `Industry: ${ucwords(toSearchText(entry.industry)) || "-"} | Size: ${ucwords(toSearchText(entry.size)) || "-"}`,
       detail: toSearchText(entry.locationText) || null,
       targetId: entry.id,
       locationText: toSearchText(entry.locationText) || null,
@@ -114,7 +120,7 @@ export class GlobalSearchService {
     ).map((entry) => ({
       id: entry.id,
       entityType: "locations" as const,
-      title: entry.locationText,
+      title: entry.locationText ?? "",
       subtitle: `Applications: ${entry.applicationCount.toString()} | Contacts: ${entry.contactCount.toString()} | Companies: ${entry.companyCount.toString()}`,
       detail: "Filter applications by this location",
       targetId: null,

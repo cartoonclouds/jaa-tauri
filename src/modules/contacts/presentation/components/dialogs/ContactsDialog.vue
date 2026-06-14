@@ -11,11 +11,14 @@
   import { contactsSearchPlaceholder } from "@modules/contacts/constants";
   import ContactEditorDialog from "@modules/contacts/presentation/components/dialogs/ContactEditorDialog.vue";
   import ContactLocationMapDialog from "@modules/contacts/presentation/components/dialogs/ContactLocationMapDialog.vue";
+  import ContactViewDialog from "@modules/contacts/presentation/components/dialogs/ContactViewDialog.vue";
   import { showEntitySavedToast } from "@shared/utils/toast";
   import { useToast } from "primevue/usetoast";
   import { computed, ref, watch } from "vue";
 
   import LocationMapPreview from "@/components/ui/LocationMapPreview.vue";
+  import { useApplicationsDrawer } from "@/composables/useApplicationsDrawer";
+  import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
 
   interface Props {
     visible: boolean;
@@ -31,6 +34,8 @@
   }>();
 
   const { service } = useContact();
+  const { openApplicationDrawer } = useApplicationsDrawer();
+  const { openCompaniesDialog } = useCompaniesDialog();
   const toast = useToast();
   const {
     currentPageReportTemplate,
@@ -45,7 +50,9 @@
     rowsPerPageOptions,
     totalRecords,
   } = useContactDatatable();
+  const selectedViewContact = ref<Contact | null>(null);
   const selectedContact = ref<EditableContact | null>(null);
+  const isViewDialogVisible = ref(false);
   const isEditorDialogVisible = ref(false);
   const isSavingContact = ref(false);
   const mapDialogVisible = ref(false);
@@ -58,11 +65,29 @@
     },
   });
 
+  const isDirectViewMode = computed(() => {
+    return (
+      typeof props.initialContactId === "string" &&
+      props.initialContactId.trim().length > 0
+    );
+  });
+
+  const listDialogVisible = computed({
+    get: () => dialogVisible.value && !isDirectViewMode.value,
+    set: (value: boolean) => {
+      if (!value) {
+        dialogVisible.value = false;
+      }
+    },
+  });
+
   watch(dialogVisible, (visible, previousVisible) => {
     if (!visible || previousVisible) {
       return;
     }
 
+    isViewDialogVisible.value = false;
+    selectedViewContact.value = null;
     isEditorDialogVisible.value = false;
     selectedContact.value = null;
     mapDialogVisible.value = false;
@@ -88,6 +113,41 @@
   }
 
   /**
+   * Handles opening the view contact dialog.
+   */
+  function openViewContactDialog(contact: Contact): void {
+    selectedViewContact.value = contact;
+    isViewDialogVisible.value = true;
+  }
+
+  /**
+   * Opens the contact view by contact id when available.
+   */
+  async function openViewContactDialogById(contactId: string): Promise<void> {
+    const normalizedContactId = contactId.trim();
+    if (normalizedContactId.length === 0) {
+      return;
+    }
+
+    const contactFromCurrentPage = items.value.find(
+      (entry) => entry.id === normalizedContactId,
+    );
+
+    if (contactFromCurrentPage) {
+      openViewContactDialog(contactFromCurrentPage);
+      return;
+    }
+
+    const contacts = await service.list();
+    const contact = contacts.find((entry) => entry.id === normalizedContactId);
+    if (!contact) {
+      return;
+    }
+
+    openViewContactDialog(contact);
+  }
+
+  /**
    * Handles opening the create contact dialog.
    */
   function openCreateContactDialog(): void {
@@ -101,19 +161,6 @@
   function openEditContactDialog(contact: Contact): void {
     selectedContact.value = toEditableContact(contact);
     isEditorDialogVisible.value = true;
-  }
-
-  /**
-   * Opens the contact editor by contact id when available.
-   */
-  async function openEditContactDialogById(contactId: string): Promise<void> {
-    const contacts = await service.list();
-    const contact = contacts.find((entry) => entry.id === contactId);
-    if (!contact) {
-      return;
-    }
-
-    openEditContactDialog(contact);
   }
 
   /**
@@ -143,6 +190,8 @@
    */
   async function removeContact(id: string): Promise<void> {
     await service.delete(id);
+    isViewDialogVisible.value = false;
+    selectedViewContact.value = null;
     await refresh();
   }
 
@@ -162,35 +211,56 @@
     selectedMapContact.value = null;
   }
 
-  // fallow-ignore-next-line complexity
   watch(
     () => [dialogVisible.value, props.initialContactId] as const,
-    // fallow-ignore-next-line complexity
-    async ([visible, initialContactId], previousValue) => {
-      const previousVisible = previousValue?.[0] ?? false;
+    async ([visible, initialContactId]) => {
+      if (typeof initialContactId !== "string") {
+        return;
+      }
 
       if (!visible) {
         return;
       }
 
-      // Opening the contacts dialog must always start with nested edit dialogs closed.
-      if (!previousVisible) {
-        return;
-      }
-
-      if (typeof initialContactId !== "string") {
-        return;
-      }
-
-      await openEditContactDialogById(initialContactId);
+      await openViewContactDialogById(initialContactId);
     },
     { immediate: true },
   );
+
+  watch(
+    () => [isViewDialogVisible.value, isEditorDialogVisible.value] as const,
+    ([isViewVisible, isEditorVisible]) => {
+      if (!isDirectViewMode.value) {
+        return;
+      }
+
+      if (!isViewVisible && !isEditorVisible && dialogVisible.value) {
+        dialogVisible.value = false;
+      }
+    },
+  );
+
+  function onRequestEditFromViewDialog(contact: Contact): void {
+    isViewDialogVisible.value = false;
+    openEditContactDialog(contact);
+  }
+
+  function onRequestOpenCompanyFromViewDialog(companyId: string): void {
+    isViewDialogVisible.value = false;
+    dialogVisible.value = false;
+    openCompaniesDialog(companyId);
+  }
+
+  function onRequestOpenApplicationFromViewDialog(applicationId: string): void {
+    isViewDialogVisible.value = false;
+    dialogVisible.value = false;
+    openApplicationDrawer(applicationId);
+  }
 </script>
 
 <template>
   <Dialog
-    v-model:visible="dialogVisible"
+    v-model:visible="listDialogVisible"
     modal
     :block-scroll="true"
     :draggable="true"
@@ -261,35 +331,38 @@
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
-            <div class="flex gap-2">
-              <Button
-                size="small"
-                label="Edit"
-                @click="openEditContactDialog(slotProps.data as Contact)"
-              />
-              <Button
-                size="small"
-                severity="danger"
-                label="Delete"
-                @click="removeContact((slotProps.data as Contact).id)"
-              />
-            </div>
+            <Button
+              size="small"
+              severity="secondary"
+              label="View"
+              @click="openViewContactDialog(slotProps.data as Contact)"
+            />
           </template>
         </Column>
       </DataTable>
-
-      <ContactLocationMapDialog
-        v-model:visible="mapDialogVisible"
-        :contact="selectedMapContact"
-        @hide="closeMapDialog"
-      />
-
-      <ContactEditorDialog
-        v-model:visible="isEditorDialogVisible"
-        :contact="selectedContact"
-        :busy="isSavingContact"
-        @submit="onContactEditorSubmit"
-      />
     </div>
   </Dialog>
+
+  <ContactViewDialog
+    v-model:visible="isViewDialogVisible"
+    :contact="selectedViewContact"
+    :busy="isSavingContact"
+    @request-edit="onRequestEditFromViewDialog"
+    @request-delete="removeContact"
+    @request-open-company="onRequestOpenCompanyFromViewDialog"
+    @request-open-application="onRequestOpenApplicationFromViewDialog"
+  />
+
+  <ContactLocationMapDialog
+    v-model:visible="mapDialogVisible"
+    :contact="selectedMapContact"
+    @hide="closeMapDialog"
+  />
+
+  <ContactEditorDialog
+    v-model:visible="isEditorDialogVisible"
+    :contact="selectedContact"
+    :busy="isSavingContact"
+    @submit="onContactEditorSubmit"
+  />
 </template>

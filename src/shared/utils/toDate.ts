@@ -69,6 +69,23 @@ export function formatDisplayDateTime(value: TemporalDateTime): string {
 }
 
 /**
+ * Format an unknown nullable value for date-time display.
+ *
+ * Returns the provided fallback when the value is empty or invalid.
+ */
+export function formatNullableDisplayDateTime(
+  value: unknown,
+  fallback = "-",
+): string {
+  try {
+    const nextDate = toNullableDate(value);
+    return nextDate ? formatDisplayDateTime(nextDate) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
  * Format a Date for use with an HTML datetime-local input.
  */
 export function formatDateTimeLocalValue(

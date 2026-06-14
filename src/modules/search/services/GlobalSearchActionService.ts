@@ -1,16 +1,21 @@
-import type { SearchResult } from "@modules/search/types";
+import type {
+  GlobalSearchActionServiceContract,
+  SearchResult,
+} from "@modules/search/types";
 import type { Router } from "vue-router";
+
+import { openSearchResult } from "@modules/search/utils/openSearchResult";
 
 interface GlobalSearchActionServiceDependencies {
   router: Router;
   openContactsDialog: (contactId?: string | null) => void;
-  openCompaniesDialog: () => void;
+  openCompaniesDialog: (companyId?: string | null) => void;
 }
 
 /**
  * Handles side effects for selected global search results.
  */
-export class GlobalSearchActionService {
+export class GlobalSearchActionService implements GlobalSearchActionServiceContract {
   constructor(
     private readonly dependencies: GlobalSearchActionServiceDependencies,
   ) {}
@@ -19,29 +24,27 @@ export class GlobalSearchActionService {
    * Routes or opens dialogs based on the selected result type.
    */
   async handleResultSelection(result: SearchResult): Promise<void> {
-    if (result.entityType === "applications" && result.targetId) {
-      await this.dependencies.router.push({
-        path: "/applications",
-        query: { applicationId: result.targetId },
-      });
-      return;
-    }
+    const router = this.dependencies.router;
 
-    if (result.entityType === "contacts" && result.targetId) {
-      this.dependencies.openContactsDialog(result.targetId);
-      return;
-    }
-
-    if (result.entityType === "companies" && result.targetId) {
-      this.dependencies.openCompaniesDialog();
-      return;
-    }
-
-    if (result.entityType === "locations" && result.locationText) {
-      await this.dependencies.router.push({
-        path: "/applications",
-        query: { search: result.locationText },
-      });
-    }
+    await openSearchResult(result, {
+      async applications(applicationId: string): Promise<void> {
+        await router.push({
+          path: "/applications",
+          query: { applicationId },
+        });
+      },
+      contacts: (contactId: string): void => {
+        this.dependencies.openContactsDialog(contactId);
+      },
+      companies: (companyId: string): void => {
+        this.dependencies.openCompaniesDialog(companyId);
+      },
+      async locations(locationText: string): Promise<void> {
+        await router.push({
+          path: "/applications",
+          query: { search: locationText },
+        });
+      },
+    });
   }
 }

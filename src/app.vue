@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { logError, logInfo } from "@infra/logging/tauriLog.client";
+  import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
   import CompaniesDialog from "@modules/companies/presentation/components/dialogs/CompaniesDialog.vue";
   import ContactsDialog from "@modules/contacts/presentation/components/dialogs/ContactsDialog.vue";
   import { useProfile } from "@modules/profile";
@@ -14,20 +15,55 @@
   import { nextTick, onMounted, ref, watch } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
+  import { useApplicationsDrawer } from "@/composables/useApplicationsDrawer";
   import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
   import { useContactsDialog } from "@/composables/useContactsDialog";
   import { useOnboardingNavigation } from "@/composables/useOnboardingNavigation.client";
   import { useSettingsDialog } from "@/composables/useSettingsDialog";
 
   const { openOnboarding } = useOnboardingNavigation();
-  const { isCompaniesDialogVisible } = useCompaniesDialog();
+  const {
+    isApplicationDrawerVisible,
+    closeApplicationDrawer,
+    consumePendingApplicationId,
+  } = useApplicationsDrawer();
+  const { isCompaniesDialogVisible, consumePendingCompanyId } =
+    useCompaniesDialog();
   const { isContactsDialogVisible, consumePendingContactId } =
     useContactsDialog();
   const { isGlobalSearchDialogVisible } = useGlobalSearchDialog();
   const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
+  const initialApplicationId = ref<string | null>(null);
+  const initialCompanyId = ref<string | null>(null);
   const initialContactId = ref<string | null>(null);
   const isAppReady = ref(false);
+
+  watch(
+    isApplicationDrawerVisible,
+    (visible) => {
+      if (!visible) {
+        initialApplicationId.value = null;
+        return;
+      }
+
+      initialApplicationId.value = consumePendingApplicationId();
+    },
+    { immediate: true },
+  );
+
+  watch(
+    isCompaniesDialogVisible,
+    (visible) => {
+      if (!visible) {
+        initialCompanyId.value = null;
+        return;
+      }
+
+      initialCompanyId.value = consumePendingCompanyId();
+    },
+    { immediate: true },
+  );
 
   watch(
     isContactsDialogVisible,
@@ -96,7 +132,17 @@
     <NuxtLayout>
       <NuxtPage />
 
-      <CompaniesDialog v-model:visible="isCompaniesDialogVisible" />
+      <ApplicationComponent
+        v-if="isApplicationDrawerVisible"
+        :initial-application-id="initialApplicationId"
+        :drawer-only="true"
+        @request-close="closeApplicationDrawer"
+      />
+
+      <CompaniesDialog
+        v-model:visible="isCompaniesDialogVisible"
+        :initial-company-id="initialCompanyId"
+      />
 
       <ContactsDialog
         v-model:visible="isContactsDialogVisible"

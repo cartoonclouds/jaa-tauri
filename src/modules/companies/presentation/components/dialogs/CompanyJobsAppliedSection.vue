@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import type { CompanyAssociatedApplication } from "@modules/companies/types";
 
+  import { formatNullableDisplayDateTime } from "@shared/utils/toDate";
+
   /**
    * Defines jobs applied section props.
    */
@@ -60,7 +62,9 @@
           >
             <td class="px-3 py-2">{{ application.title }}</td>
             <td class="px-3 py-2 capitalize">{{ application.status }}</td>
-            <td class="px-3 py-2">{{ application.appliedAt || "-" }}</td>
+            <td class="px-3 py-2">
+              {{ formatNullableDisplayDateTime(application.appliedAt) }}
+            </td>
           </tr>
         </tbody>
       </table>

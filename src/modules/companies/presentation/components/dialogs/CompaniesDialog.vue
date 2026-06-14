@@ -9,21 +9,30 @@
   import { useCompanyDatatable } from "@modules/companies/composables/useCompanyDatatable";
   import { companiesSearchPlaceholder } from "@modules/companies/constants";
   import CompanyEditorDialog from "@modules/companies/presentation/components/dialogs/CompanyEditorDialog.vue";
+  import CompanyViewDialog from "@modules/companies/presentation/components/dialogs/CompanyViewDialog.vue";
   import { showEntitySavedToast } from "@shared/utils/toast";
   import { useToast } from "primevue/usetoast";
   import { computed, ref, watch } from "vue";
 
+  import { useApplicationsDrawer } from "@/composables/useApplicationsDrawer";
+  import { useContactsDialog } from "@/composables/useContactsDialog";
+
   interface Props {
     visible: boolean;
+    initialCompanyId?: string | null;
   }
 
-  const props = defineProps<Props>();
+  const props = withDefaults(defineProps<Props>(), {
+    initialCompanyId: null,
+  });
 
   const emit = defineEmits<{
     "update:visible": [value: boolean];
   }>();
 
   const { service } = useCompany();
+  const { openApplicationDrawer } = useApplicationsDrawer();
+  const { openContactsDialog } = useContactsDialog();
   const toast = useToast();
   const {
     currentPageReportTemplate,
@@ -38,6 +47,8 @@
     rowsPerPageOptions,
     totalRecords,
   } = useCompanyDatatable();
+  const selectedViewCompany = ref<Company | null>(null);
+  const isViewDialogVisible = ref(false);
   const selectedCompany = ref<Company | null>(null);
   const isEditorDialogVisible = ref(false);
   const isSavingCompany = ref(false);
@@ -49,15 +60,89 @@
     },
   });
 
+  const isDirectViewMode = computed(() => {
+    return (
+      typeof props.initialCompanyId === "string" &&
+      props.initialCompanyId.trim().length > 0
+    );
+  });
+
+  const listDialogVisible = computed({
+    get: () => dialogVisible.value && !isDirectViewMode.value,
+    set: (value: boolean) => {
+      if (!value) {
+        dialogVisible.value = false;
+      }
+    },
+  });
+
   // fallow-ignore-next-line code-duplication
   watch(dialogVisible, (visible, previousVisible) => {
     if (!visible || previousVisible) {
       return;
     }
 
+    isViewDialogVisible.value = false;
+    selectedViewCompany.value = null;
     isEditorDialogVisible.value = false;
     selectedCompany.value = null;
+
+    if (typeof props.initialCompanyId !== "string") {
+      return;
+    }
+
+    void openCompanyViewById(props.initialCompanyId);
   });
+
+  watch(
+    () => [isViewDialogVisible.value, isEditorDialogVisible.value] as const,
+    ([isViewVisible, isEditorVisible]) => {
+      if (!isDirectViewMode.value) {
+        return;
+      }
+
+      if (!isViewVisible && !isEditorVisible && dialogVisible.value) {
+        dialogVisible.value = false;
+      }
+    },
+  );
+
+  /**
+   * Handles opening the view company dialog.
+   */
+  function openViewCompanyDialog(company: Company): void {
+    selectedViewCompany.value = company;
+    isViewDialogVisible.value = true;
+  }
+
+  /**
+   * Opens a company in view mode by id.
+   */
+  async function openCompanyViewById(companyId: string): Promise<void> {
+    const normalizedCompanyId = companyId.trim();
+    if (normalizedCompanyId.length === 0) {
+      return;
+    }
+
+    const companyFromCurrentPage = items.value.find(
+      (entry) => entry.id === normalizedCompanyId,
+    );
+
+    if (companyFromCurrentPage) {
+      openViewCompanyDialog(companyFromCurrentPage);
+      return;
+    }
+
+    const allCompanies = await service.list();
+    const company = allCompanies.find(
+      (entry) => entry.id === normalizedCompanyId,
+    );
+    if (!company) {
+      return;
+    }
+
+    openViewCompanyDialog(company);
+  }
 
   /**
    * Handles open create company dialog.
@@ -105,13 +190,32 @@
    */
   async function removeCompany(id: string): Promise<void> {
     await service.delete(id);
+    isViewDialogVisible.value = false;
+    selectedViewCompany.value = null;
     await refresh();
+  }
+
+  function onRequestEditFromViewDialog(company: Company): void {
+    isViewDialogVisible.value = false;
+    openEditCompanyDialog(company);
+  }
+
+  function onRequestOpenContactFromViewDialog(contactId: string): void {
+    isViewDialogVisible.value = false;
+    dialogVisible.value = false;
+    openContactsDialog(contactId);
+  }
+
+  function onRequestOpenApplicationFromViewDialog(applicationId: string): void {
+    isViewDialogVisible.value = false;
+    dialogVisible.value = false;
+    openApplicationDrawer(applicationId);
   }
 </script>
 
 <template>
   <Dialog
-    v-model:visible="dialogVisible"
+    v-model:visible="listDialogVisible"
     modal
     :block-scroll="true"
     :draggable="true"
@@ -163,29 +267,32 @@
         <Column field="locationText" header="Location" />
         <Column header="Actions">
           <template #body="slotProps">
-            <div class="flex gap-2">
-              <Button
-                size="small"
-                label="Edit"
-                @click="openEditCompanyDialog(slotProps.data as Company)"
-              />
-              <Button
-                size="small"
-                severity="danger"
-                label="Delete"
-                @click="removeCompany((slotProps.data as Company).id)"
-              />
-            </div>
+            <Button
+              size="small"
+              severity="secondary"
+              label="View"
+              @click="openViewCompanyDialog(slotProps.data as Company)"
+            />
           </template>
         </Column>
       </DataTable>
-
-      <CompanyEditorDialog
-        v-model:visible="isEditorDialogVisible"
-        :company="selectedCompany"
-        :busy="isSavingCompany"
-        @submit="onCompanyEditorSubmit"
-      />
     </div>
   </Dialog>
+
+  <CompanyViewDialog
+    v-model:visible="isViewDialogVisible"
+    :company="selectedViewCompany"
+    :busy="isSavingCompany"
+    @request-edit="onRequestEditFromViewDialog"
+    @request-delete="removeCompany"
+    @request-open-contact="onRequestOpenContactFromViewDialog"
+    @request-open-application="onRequestOpenApplicationFromViewDialog"
+  />
+
+  <CompanyEditorDialog
+    v-model:visible="isEditorDialogVisible"
+    :company="selectedCompany"
+    :busy="isSavingCompany"
+    @submit="onCompanyEditorSubmit"
+  />
 </template>

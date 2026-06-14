@@ -1,12 +1,18 @@
 <script setup lang="ts">
+  import type { SearchResult } from "@modules/search/types";
+
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
   import { useProfile } from "@modules/profile";
+  import QuickSearchInput from "@modules/search/presentation/components/QuickSearchInput.vue";
+  import { openSearchResult } from "@modules/search/utils/openSearchResult";
   import { getSetting } from "@modules/settings";
   import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
   import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
-  import { ref } from "vue";
+  import { nextTick, ref } from "vue";
 
   import EntityLocationsMapBrowser from "@/components/ui/EntityLocationsMapBrowser.vue";
+  import { useCompaniesDialog } from "@/composables/useCompaniesDialog";
+  import { useContactsDialog } from "@/composables/useContactsDialog";
   import { usePubSub } from "@/composables/usePubSub";
   import { formatProfileName } from "@/shared/utils/strings";
   import { getTimeOfDay } from "@/shared/utils/toDate";
@@ -24,12 +30,16 @@
   }
 
   const { service: profileService } = useProfile();
+  const { openContactsDialog } = useContactsDialog();
+  const { openCompaniesDialog } = useCompaniesDialog();
   const { subscribe } = usePubSub();
 
   const profile = await profileService.getProfile();
   const showOverview = ref(await getSetting("showOverview"));
 
   const topView = ref<TopSectionView>("overview");
+
+  const selectedApplicationId = ref<string | null>(null);
 
   const topViewOptions: TopSectionOption[] = [
     { label: "Overview", value: "overview" },
@@ -39,6 +49,25 @@
   subscribe(SETTINGS_REFRESHED_TOPIC, async () => {
     showOverview.value = await getSetting("showOverview");
   });
+
+  async function onQuickSearchSelect(result: SearchResult): Promise<void> {
+    await openSearchResult(result, {
+      async applications(applicationId: string): Promise<void> {
+        topView.value = "overview";
+        selectedApplicationId.value = null;
+        await nextTick();
+        selectedApplicationId.value = applicationId;
+      },
+      contacts(contactId: string): void {
+        topView.value = "overview";
+        openContactsDialog(contactId);
+      },
+      companies(companyId: string): void {
+        topView.value = "overview";
+        openCompaniesDialog(companyId);
+      },
+    });
+  }
 </script>
 
 <template>
@@ -68,6 +97,8 @@
     </div>
 
     <div v-if="topView === 'overview'" class="mx-auto space-y-6 w-full">
+      <QuickSearchInput @select="onQuickSearchSelect" />
+
       <ClientOnly>
         <section v-if="showOverview" class="mx-auto mb-8 w-full">
           <StatisticsSection title="Job Hunt Overview" />
@@ -75,7 +106,7 @@
       </ClientOnly>
 
       <ClientOnly>
-        <ApplicationComponent />
+        <ApplicationComponent :initial-application-id="selectedApplicationId" />
       </ClientOnly>
     </div>
 

@@ -26,3 +26,20 @@ export function ucfirst(value: string): string {
 
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
+
+/**
+ * Capitalizes the first letter of each word in a string.
+ *
+ * @param {string} value - The string to capitalize.
+ * @returns {string} - The string with each word capitalized.
+ */
+export function ucwords(value: string): string {
+  if (value.length === 0) {
+    return value;
+  }
+
+  return value
+    .split(" ")
+    .map((word) => ucfirst(word))
+    .join(" ");
+}

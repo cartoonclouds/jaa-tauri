@@ -105,7 +105,7 @@ export function toSearchText(value: unknown): string {
     return value.toString();
   }
 
-  return "";
+  return String(value ?? "").trim();
 }
 
 /**

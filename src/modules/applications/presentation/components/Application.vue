@@ -46,11 +46,17 @@
 
   interface Props {
     initialApplicationId?: string | null;
+    drawerOnly?: boolean;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     initialApplicationId: null,
+    drawerOnly: false,
   });
+
+  const emit = defineEmits<{
+    "request-close": [];
+  }>();
 
   interface ApplicationContactCreatePayload {
     fullName: string;
@@ -407,6 +413,10 @@
     hasUnsavedDrawerEdits.value = false;
     drawerMode.value = "view";
     selectedApplication.value = null;
+
+    if (props.drawerOnly) {
+      emit("request-close");
+    }
   }
 
   /**
@@ -700,33 +710,35 @@
 
 <template>
   <div class="space-y-6 w-full">
-    <div class="flex items-center justify-between gap-3">
-      <h2 class="text-2xl font-semibold">Applications</h2>
-      <Button type="button" @click="openCreateDrawer">
-        <Icon name="heroicons:plus" class="h-4 w-4" />
-        <span>New Application</span>
-      </Button>
-    </div>
+    <template v-if="!props.drawerOnly">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-2xl font-semibold">Applications</h2>
+        <Button type="button" @click="openCreateDrawer">
+          <Icon name="heroicons:plus" class="h-4 w-4" />
+          <span>New Application</span>
+        </Button>
+      </div>
 
-    <ApplicationDatatable
-      :items="items"
-      :is-loading="isLoading"
-      :global-filter="globalFilter"
-      :search-fields="searchFields"
-      :search-field-options="searchFieldOptions"
-      :rows="rows"
-      :rows-per-page-options="rowsPerPageOptions"
-      :paginator-template="paginatorTemplate"
-      :current-page-report-template="currentPageReportTemplate"
-      :total-records="totalRecords"
-      :sort-field="sortField"
-      :sort-order="sortOrder"
-      @update:global-filter="onGlobalFilterInput"
-      @update:search-fields="onSearchFieldsChange"
-      @page="onPage"
-      @sort="onSort"
-      @row-click="onRowClick"
-    />
+      <ApplicationDatatable
+        :items="items"
+        :is-loading="isLoading"
+        :global-filter="globalFilter"
+        :search-fields="searchFields"
+        :search-field-options="searchFieldOptions"
+        :rows="rows"
+        :rows-per-page-options="rowsPerPageOptions"
+        :paginator-template="paginatorTemplate"
+        :current-page-report-template="currentPageReportTemplate"
+        :total-records="totalRecords"
+        :sort-field="sortField"
+        :sort-order="sortOrder"
+        @update:global-filter="onGlobalFilterInput"
+        @update:search-fields="onSearchFieldsChange"
+        @page="onPage"
+        @sort="onSort"
+        @row-click="onRowClick"
+      />
+    </template>
 
     <ApplicationDetailsDrawer
       v-model:visible="isDrawerOpen"

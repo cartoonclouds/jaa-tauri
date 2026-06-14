@@ -3,6 +3,7 @@ import type { DatatablePageQuery } from "@shared/types";
 import { ContactSchema } from "@modules/contacts/domain/zod/contact.schema";
 import {
   type ApplicationLinkedContact,
+  type ContactAssociatedApplication,
   type ContactAssociatedCompany,
   type ContactCreatePayload,
   type ContactUpdatePayload,
@@ -35,6 +36,16 @@ export class ContactService {
     contactId: string,
   ): Promise<ContactAssociatedCompany[]> {
     return this.repository.listAssociatedCompanies(contactId);
+  }
+
+  listAssociatedApplications(
+    contactId: string,
+  ): Promise<ContactAssociatedApplication[]> {
+    return this.repository.listAssociatedApplications(contactId);
+  }
+
+  countLinkedApplications(contactId: string): Promise<number> {
+    return this.repository.countLinkedApplications(contactId);
   }
 
   linkToApplication(applicationId: string, contactId: string): Promise<void> {

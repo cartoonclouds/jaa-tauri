@@ -87,6 +87,25 @@ export interface GlobalSearchResultSections {
 }
 
 /**
+ * Contract for global search dataset/result orchestration.
+ */
+export interface GlobalSearchServiceContract {
+  loadDataset(): Promise<GlobalSearchDataset>;
+  buildResultSections(options: {
+    dataset: GlobalSearchDataset;
+    conditions: SearchCondition[];
+    joinMode: SearchJoinMode;
+  }): GlobalSearchResultSections;
+}
+
+/**
+ * Contract for side effects triggered by selected search results.
+ */
+export interface GlobalSearchActionServiceContract {
+  handleResultSelection(result: SearchResult): Promise<void>;
+}
+
+/**
  * Per-scope field metadata used by the search builder.
  */
 export type SearchFieldsByScope = Readonly<
