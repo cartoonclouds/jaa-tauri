@@ -25,7 +25,7 @@ export async function setupNativeContextMenu(): Promise<
         id: "about-app",
         text: "About This App",
         action: () => {
-          void message("Apply-Flow\nNuxt + Tauri desktop app", {
+          void message("ApplyFlow\nNuxt + Tauri desktop app", {
             title: "About",
             kind: "info",
           });

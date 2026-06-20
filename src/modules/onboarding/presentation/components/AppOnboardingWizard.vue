@@ -158,7 +158,7 @@
   <Card class="w-full shadow-2xl">
     <template #title>
       <div class="flex items-center justify-between gap-3">
-        <span>Welcome to Apply-Flow</span>
+        <span>Welcome to ApplyFlow</span>
         <Button
           v-if="props.showCloseButton"
           severity="secondary"

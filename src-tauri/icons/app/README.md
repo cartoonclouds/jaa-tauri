@@ -1,4 +1,4 @@
-# Apply-Flow Tauri Iconset — Dark
+# ApplyFlow Tauri Iconset — Dark
 
 Ready to copy into `src-tauri/icons/`.
 

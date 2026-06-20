@@ -1,4 +1,4 @@
-# Apply-Flow
+# ApplyFlow
 
 Desktop-first job application tracking built with Nuxt 4 + Vue 3 + TypeScript inside a Tauri 2 runtime.
 

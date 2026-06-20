@@ -1,6 +1,6 @@
 # Tauri Desktop Runtime
 
-This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the Apply-Flow desktop application.
+This directory contains the Rust-based Tauri 2 desktop runtime and configuration for the ApplyFlow desktop application.
 
 Updated: 2026-05-23.
 

@@ -1,6 +1,6 @@
-# Apply-Flow Tauri v2 Icon Set - Light Variant
+# ApplyFlow Tauri v2 Icon Set - Light Variant
 
-This package was generated from the supplied **Icon Set 2 – Light** Apply-Flow concept image.
+This package was generated from the supplied **Icon Set 2 – Light** ApplyFlow concept image.
 
 For the current app interaction and runtime flow, see the root README diagram.
 
@@ -20,7 +20,7 @@ For the current app interaction and runtime flow, see the root README diagram.
 
 ## Install
 
-Copy the `src-tauri/` folder contents into your Apply-Flow project, or merge the nested folders manually.
+Copy the `src-tauri/` folder contents into your ApplyFlow project, or merge the nested folders manually.
 
 Your Tauri desktop bundle icon list should include:
 
