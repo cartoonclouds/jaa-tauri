@@ -103,6 +103,8 @@ export function createContactRepositoryMock(): {
   listPageMock: ReturnType<typeof vi.fn>;
   listByApplicationIdMock: ReturnType<typeof vi.fn>;
   listAssociatedCompaniesMock: ReturnType<typeof vi.fn>;
+  listAssociatedApplicationsMock: ReturnType<typeof vi.fn>;
+  countLinkedApplicationsMock: ReturnType<typeof vi.fn>;
   linkToApplicationMock: ReturnType<typeof vi.fn>;
   unlinkFromApplicationMock: ReturnType<typeof vi.fn>;
   createMock: ReturnType<typeof vi.fn>;
@@ -112,6 +114,8 @@ export function createContactRepositoryMock(): {
   const base = createCrudRepositoryMockBase();
   const listByApplicationIdMock = vi.fn();
   const listAssociatedCompaniesMock = vi.fn();
+  const listAssociatedApplicationsMock = vi.fn();
+  const countLinkedApplicationsMock = vi.fn();
   const linkToApplicationMock = vi.fn();
   const unlinkFromApplicationMock = vi.fn();
   const repository: IContactRepository = {
@@ -119,6 +123,8 @@ export function createContactRepositoryMock(): {
     listPage: base.listPage as unknown as IContactRepository["listPage"],
     listByApplicationId: listByApplicationIdMock,
     listAssociatedCompanies: listAssociatedCompaniesMock,
+    listAssociatedApplications: listAssociatedApplicationsMock,
+    countLinkedApplications: countLinkedApplicationsMock,
     linkToApplication: linkToApplicationMock,
     unlinkFromApplication: unlinkFromApplicationMock,
     create: base.create as unknown as IContactRepository["create"],
@@ -132,6 +138,8 @@ export function createContactRepositoryMock(): {
     listPageMock: base.listPage,
     listByApplicationIdMock,
     listAssociatedCompaniesMock,
+    listAssociatedApplicationsMock,
+    countLinkedApplicationsMock,
     linkToApplicationMock,
     unlinkFromApplicationMock,
     createMock: base.create,

@@ -94,10 +94,7 @@ export function createEntityLocationsLeafletManager(
     }
 
     const leafletModule = await import("leaflet");
-    const leafletRuntime =
-      "default" in leafletModule && leafletModule.default
-        ? leafletModule.default
-        : { ...leafletModule };
+    const leafletRuntime = leafletModule.default;
 
     const leafletGlobal = globalThis as typeof globalThis & {
       L?: typeof LeafletNamespace;

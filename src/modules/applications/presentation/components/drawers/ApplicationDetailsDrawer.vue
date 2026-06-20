@@ -177,6 +177,21 @@
     maxWidth: "100vw",
   }));
 
+  const CREATE_MODE_LOCKED_TAB_TOOLTIP =
+    "Finish creating the application first. These tabs become available after the application is saved.";
+
+  function isCreateModeLockedTab(tabValue: string): boolean {
+    return props.mode === "create" && tabValue !== "application";
+  }
+
+  function tabTooltip(tabValue: string): string | undefined {
+    if (!isCreateModeLockedTab(tabValue)) {
+      return undefined;
+    }
+
+    return CREATE_MODE_LOCKED_TAB_TOOLTIP;
+  }
+
   function getClientX(event: MouseEvent | PointerEvent): number {
     return event.clientX;
   }
@@ -384,12 +399,42 @@
 
     <Tabs :value="activeTab" @update:value="onTabChange">
       <TabList>
-        <Tab value="summary">Summary</Tab>
-        <Tab value="flow">Flow</Tab>
+        <Tab
+          v-tooltip.bottom="tabTooltip('summary')"
+          value="summary"
+          :disabled="isCreateModeLockedTab('summary')"
+        >
+          Summary
+        </Tab>
+        <Tab
+          v-tooltip.bottom="tabTooltip('flow')"
+          value="flow"
+          :disabled="isCreateModeLockedTab('flow')"
+        >
+          Flow
+        </Tab>
         <Tab value="application">Application</Tab>
-        <Tab value="contact">Contacts</Tab>
-        <Tab value="map">Map</Tab>
-        <Tab value="files">Files</Tab>
+        <Tab
+          v-tooltip.bottom="tabTooltip('contact')"
+          value="contact"
+          :disabled="isCreateModeLockedTab('contact')"
+        >
+          Contacts
+        </Tab>
+        <Tab
+          v-tooltip.bottom="tabTooltip('map')"
+          value="map"
+          :disabled="isCreateModeLockedTab('map')"
+        >
+          Map
+        </Tab>
+        <Tab
+          v-tooltip.bottom="tabTooltip('files')"
+          value="files"
+          :disabled="isCreateModeLockedTab('files')"
+        >
+          Files
+        </Tab>
       </TabList>
 
       <TabPanels>
