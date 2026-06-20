@@ -66,6 +66,7 @@ export default defineNuxtConfig({
 
   alias: {
     "@modules": resolve(rootDir, "./src/modules"),
+    "@modules/insights": resolve(rootDir, "./src/modules/insights"),
     "@shared": resolve(rootDir, "./src/shared"),
     "@infra": resolve(rootDir, "./src/infrastructure"),
     "@testUtils": resolve(rootDir, "./tests/unit/shared/utils"),
@@ -118,11 +119,28 @@ export default defineNuxtConfig({
         },
       },
     ],
-    "@vee-validate/nuxt",
-    "@primevue/nuxt-module",
+    [
+      "@vee-validate/nuxt",
+      {
+        componentNames: {
+          Form: "VeeForm",
+          Field: "VeeField",
+          FieldArray: "VeeFieldArray",
+          ErrorMessage: "VeeErrorMessage",
+        },
+      },
+    ],
   ],
 
-  // @ts-expect-error Nuxt Hints module options are applied at runtime; augmentation is not available in this static config type.
+  sourcemap: {
+    client: false,
+    server: false,
+  },
+
+  build: {
+    analyze: true,
+  },
+
   hints: {
     features: {
       lazyLoad: false,
@@ -170,8 +188,61 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-05-17",
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      // Suppress third-party plugin warnings that cannot be fixed upstream.
+      // Applied to both client and SSR server Vite builds.
+      {
+        name: "suppress-upstream-build-warnings",
+        configResolved(config) {
+          if (!config.logger?.warn) {
+            return;
+          }
+          const originalWarn = config.logger.warn.bind(config.logger);
+          config.logger.warn = (msg, options) => {
+            if (
+              typeof msg === "string" &&
+              msg.includes("Sourcemap is likely to be incorrect")
+            ) {
+              return;
+            }
+            originalWarn(msg, options);
+          };
+        },
+      },
+    ],
     clearScreen: false,
+    build: {
+      sourcemap: false,
+      chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // Suppress invalid #__PURE__ annotation warnings from @vueuse/core (upstream issue)
+          if (warning.code === "INVALID_ANNOTATION") {
+            return;
+          }
+          // Suppress sourcemap warnings from third-party Vite/Nuxt plugins that don't
+          // provide sourcemaps for their transformations (@tailwindcss/vite, nuxt:module-preload-polyfill)
+          if (
+            warning.code === "SOURCEMAP_ERROR" ||
+            (warning.message?.includes("Sourcemap is likely to be incorrect") &&
+              warning.plugin !== undefined)
+          ) {
+            return;
+          }
+          // Suppress the Rollup "dynamic import will not move module into another chunk"
+          // warning for Tauri modules – appLogger.ts uses dynamic imports for SSR safety,
+          // which is intentional even though the modules are statically imported elsewhere.
+          if (
+            warning.message?.includes("dynamically imported") &&
+            warning.message?.includes("@tauri-apps/")
+          ) {
+            return;
+          }
+          warn(warning);
+        },
+      },
+    },
     optimizeDeps: {
       include: [
         "quill",
@@ -191,6 +262,8 @@ export default defineNuxtConfig({
       },
     },
   },
+
+  logLevel: appLogLevel as "silent" | "info" | "verbose",
 
   typescript: {
     strict: true,

@@ -77,19 +77,22 @@ export interface ISettingRepository
 }
 
 /**
- * Per-stat persisted visibility metadata.
+ * Per-insight persisted visibility metadata.
  */
-export interface StatVisibilityState {
-  /** Whether the stat card is currently visible. */
+export interface InsightVisibilityState {
+  /** Whether the insight card is currently visible. */
   visible: boolean;
   /** Optional ordering hint for cards in edit/add workflows. */
   sortOrder?: number | null;
 }
 
 /**
- * Visibility map keyed by statistic id.
+ * Visibility map keyed by insight id.
  */
-export type StatsVisibilityMap = Record<string, boolean | StatVisibilityState>;
+export type InsightsVisibilityMap = Record<
+  string,
+  boolean | InsightVisibilityState
+>;
 
 /**
  * Persisted application settings stored by the preferences layer.
@@ -107,8 +110,8 @@ export interface AppSettings {
   recentSearches: string[];
   /** Column visibility map keyed by table or datatable identifier. */
   tableColumnVisibility: Record<string, boolean>;
-  /** Visibility map keyed by statistic id. */
-  statsVisibility: StatsVisibilityMap;
+  /** Visibility map keyed by insight id. */
+  insightsVisibility: InsightsVisibilityMap;
   /** Whether the onboarding flow has been completed. */
   onboardingCompleted: boolean;
 }
@@ -127,8 +130,8 @@ export interface ThemeSettings {
 export interface UiPreferences {
   /** Column visibility map keyed by table or datatable identifier. */
   tableColumnVisibility: Record<string, boolean>;
-  /** Visibility map keyed by statistic id. */
-  statsVisibility: StatsVisibilityMap;
+  /** Visibility map keyed by insight id. */
+  insightsVisibility: InsightsVisibilityMap;
 }
 
 /**

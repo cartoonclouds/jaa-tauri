@@ -481,7 +481,7 @@
 
               <div class="space-y-2 items-center flex gap-3">
                 <label class="text-sm text-flow-muted"
-                  >Statistics Overview Enabled</label
+                  >Insights Overview Enabled</label
                 >
                 <ToggleSwitch name="showOverview" />
               </div>

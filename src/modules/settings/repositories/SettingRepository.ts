@@ -51,7 +51,7 @@ const SettingsInputSchema = z.object({
   showOverview: z.boolean(),
   recentSearches: z.array(z.string()),
   tableColumnVisibility: z.record(z.boolean()),
-  statsVisibility: z.record(
+  insightsVisibility: z.record(
     z.union([
       z.boolean(),
       z.object({
@@ -72,7 +72,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   showOverview: true,
   recentSearches: [],
   tableColumnVisibility: {},
-  statsVisibility: {},
+  insightsVisibility: {},
   onboardingCompleted: false,
 };
 
@@ -87,7 +87,7 @@ function cloneSettings(settings: AppSettings): AppSettings {
     ...settings,
     recentSearches: [...settings.recentSearches],
     tableColumnVisibility: { ...settings.tableColumnVisibility },
-    statsVisibility: { ...settings.statsVisibility },
+    insightsVisibility: { ...settings.insightsVisibility },
   };
 }
 
@@ -100,21 +100,21 @@ function normalizeTheme(value: unknown): AppSettings["theme"] {
   );
 }
 
-function parseStatsVisibilityValue(
+function parseInsightsVisibilityValue(
   value: unknown,
-): AppSettings["statsVisibility"] {
+): AppSettings["insightsVisibility"] {
   if (typeof value !== "string") {
-    return { ...DEFAULT_SETTINGS.statsVisibility };
+    return { ...DEFAULT_SETTINGS.insightsVisibility };
   }
 
   try {
     const parsed = JSON.parse(value) as unknown;
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return { ...DEFAULT_SETTINGS.statsVisibility };
+      return { ...DEFAULT_SETTINGS.insightsVisibility };
     }
 
     return Object.entries(parsed as Record<string, unknown>).reduce<
-      AppSettings["statsVisibility"]
+      AppSettings["insightsVisibility"]
     >((accumulator, [metricId, rawEntry]) => {
       if (typeof rawEntry === "boolean") {
         accumulator[metricId] = rawEntry;
@@ -144,7 +144,7 @@ function parseStatsVisibilityValue(
       return accumulator;
     }, {});
   } catch {
-    return { ...DEFAULT_SETTINGS.statsVisibility };
+    return { ...DEFAULT_SETTINGS.insightsVisibility };
   }
 }
 
@@ -171,7 +171,7 @@ function mapRowToSettings(row: SettingsRow): AppSettings {
       row.table_column_visibility,
       DEFAULT_SETTINGS.tableColumnVisibility,
     ),
-    statsVisibility: parseStatsVisibilityValue(row.stats_visibility),
+    insightsVisibility: parseInsightsVisibilityValue(row.stats_visibility),
     onboardingCompleted: fromDbBoolean(
       row.onboarding_completed,
       DEFAULT_SETTINGS.onboardingCompleted,
@@ -231,7 +231,7 @@ async function upsertSettingsRow(
       toDbBooleanInt(settings.showOverview),
       JSON.stringify(settings.recentSearches),
       JSON.stringify(settings.tableColumnVisibility),
-      JSON.stringify(settings.statsVisibility),
+      JSON.stringify(settings.insightsVisibility),
       toDbBooleanInt(settings.onboardingCompleted),
     ],
   );
@@ -350,7 +350,7 @@ export async function getUiPreferences(): Promise<UiPreferences> {
   const settings = await getSettings();
   return {
     tableColumnVisibility: settings.tableColumnVisibility,
-    statsVisibility: settings.statsVisibility,
+    insightsVisibility: settings.insightsVisibility,
   };
 }
 

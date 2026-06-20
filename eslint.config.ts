@@ -20,7 +20,7 @@ const moduleNames = [
   "onboarding",
   "profile",
   "settings",
-  "statistics",
+  "insights",
   "tags",
 ] as const;
 

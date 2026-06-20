@@ -30,6 +30,9 @@
       "@modules/*": [
         "src/modules/*"
       ],
+      "@modules/insights/*": [
+        "src/modules/insights/*"
+      ],
       "@shared/*": [
         "src/shared/*"
       ],

@@ -488,14 +488,14 @@
     background: rgb(124 60 255 / 0.12);
   }
 
-  .hidden-stats-multiselect .p-multiselect-label-container {
+  .hidden-insights-multiselect .p-multiselect-label-container {
     align-items: flex-start;
     min-height: 7.25rem;
     padding-top: 0.4rem;
     padding-bottom: 0.4rem;
   }
 
-  .hidden-stats-multiselect .p-multiselect-label {
+  .hidden-insights-multiselect .p-multiselect-label {
     align-content: flex-start;
     display: flex;
     flex-wrap: wrap;
@@ -503,16 +503,16 @@
     min-height: 6.2rem;
   }
 
-  .hidden-stats-multiselect .p-multiselect-chip,
-  .hidden-stats-multiselect .p-chip {
+  .hidden-insights-multiselect .p-multiselect-chip,
+  .hidden-insights-multiselect .p-chip {
     background: rgb(15 23 42 / 0.9) !important;
     border: 1px solid rgb(51 65 85 / 0.9) !important;
     color: rgb(226 232 240) !important;
     font-weight: 500;
   }
 
-  .hidden-stats-multiselect .p-multiselect-chip .p-chip-remove-icon,
-  .hidden-stats-multiselect .p-chip .p-chip-remove-icon {
+  .hidden-insights-multiselect .p-multiselect-chip .p-chip-remove-icon,
+  .hidden-insights-multiselect .p-chip .p-chip-remove-icon {
     color: rgb(148 163 184) !important;
   }
 
@@ -575,3 +575,4 @@
     transform: translateY(-8px);
   }
 }
+

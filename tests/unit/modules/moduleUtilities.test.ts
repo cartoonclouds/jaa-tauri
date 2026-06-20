@@ -18,7 +18,7 @@ import {
   toTrendPercentLabel,
   toTrendPointLabel,
   toTrendTone,
-} from "@modules/statistics/presentation/utils/statisticMetricUtils";
+} from "@modules/insights/presentation/utils/insightMetricUtils";
 import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
 import {
   normalizeTagName,
@@ -133,7 +133,7 @@ describe("module utilities", () => {
     expect(list).toHaveBeenCalledOnce();
   });
 
-  it("formats statistic trend helpers", () => {
+  it("formats insight trend helpers", () => {
     expect(toTrendTone(5)).toBe("positive");
     expect(toTrendTone(-1)).toBe("negative");
     expect(toTrendTone(0)).toBe("neutral");
@@ -163,3 +163,4 @@ describe("module utilities", () => {
     expect(TagModelType.General.toString()).toBe("general");
   });
 });
+

@@ -72,7 +72,7 @@ pub fn infer_target_roles(text: &str) -> Vec<String> {
             "data scientist",
             "machine learning",
             "ml",
-            "statistics",
+            "data analysis",
             "modeling",
         ],
     ) {
@@ -154,3 +154,4 @@ pub fn infer_target_roles(text: &str) -> Vec<String> {
 
     roles.into_iter().map(str::to_string).collect()
 }
+

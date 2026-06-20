@@ -1,4 +1,4 @@
-import type { AppSettings, StatsVisibilityMap } from "../types";
+import type { AppSettings, InsightsVisibilityMap } from "../types";
 import type {
   ConstantEntryUpsertPayload,
   ISettingRepository,
@@ -104,13 +104,15 @@ export class SettingService {
     set: setUiPreferences,
     setTableColumnVisibility,
     getTableColumnVisibility,
-    async getStatsVisibility(): Promise<StatsVisibilityMap> {
-      const prefs: { statsVisibility: StatsVisibilityMap } =
+    async getInsightsVisibility(): Promise<InsightsVisibilityMap> {
+      const prefs: { insightsVisibility: InsightsVisibilityMap } =
         await getUiPreferences();
-      return prefs.statsVisibility;
+      return prefs.insightsVisibility;
     },
-    async setStatsVisibility(value: StatsVisibilityMap): Promise<void> {
-      await setSetting("statsVisibility", value);
+    async setInsightsVisibility(
+      value: InsightsVisibilityMap,
+    ): Promise<void> {
+      await setSetting("insightsVisibility", value);
     },
   };
 

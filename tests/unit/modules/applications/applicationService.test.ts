@@ -1,5 +1,5 @@
 import { ValidationError } from "@shared/domain/errors";
-import { resolveLocationFields } from "@shared/utils/geocoding";
+import { mergeResolvedLocation } from "@shared/utils/geocoding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -9,17 +9,20 @@ import {
 import { createApplicationRepositoryMock } from "../../../fixtures/factories/testRepositoryFactories";
 
 vi.mock("@shared/utils/geocoding", () => ({
-  resolveLocationFields: vi.fn(),
+  mergeResolvedLocation: vi.fn(),
 }));
 
 describe("application service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(resolveLocationFields).mockResolvedValue({
-      locationText: "London",
-      locationLat: 51.5072,
-      locationLng: -0.1276,
-    });
+    vi.mocked(mergeResolvedLocation).mockImplementation(
+      async (original: Record<string, unknown>) => ({
+        ...original,
+        locationText: "London",
+        locationLat: 51.5072,
+        locationLng: -0.1276,
+      }),
+    );
   });
 
   it("delegates list and listPage to the repository", async () => {
@@ -55,11 +58,13 @@ describe("application service", () => {
       ),
     ).resolves.toBe("app-1");
 
-    expect(resolveLocationFields).toHaveBeenCalledWith({
-      locationText: " London ",
-      currentLatitude: 10,
-      currentLongitude: 20,
-    });
+    expect(mergeResolvedLocation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationText: " London ",
+        locationLat: 10,
+        locationLng: 20,
+      }),
+    );
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Frontend Engineer",
@@ -96,7 +101,7 @@ describe("application service", () => {
       }),
     );
 
-    expect(resolveLocationFields).not.toHaveBeenCalled();
+    expect(mergeResolvedLocation).toHaveBeenCalledTimes(1);
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Senior Frontend Engineer" }),
     );
@@ -109,11 +114,13 @@ describe("application service", () => {
       }),
     );
 
-    expect(resolveLocationFields).toHaveBeenCalledWith({
-      locationText: " Berlin ",
-      currentLatitude: 1,
-      currentLongitude: 2,
-    });
+    expect(mergeResolvedLocation).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        locationText: " Berlin ",
+        locationLat: 1,
+        locationLng: 2,
+      }),
+    );
     expect(updateMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         locationText: "London",

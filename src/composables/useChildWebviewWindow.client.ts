@@ -43,6 +43,8 @@ export interface ChildWebviewWindowOptions {
   hideNativeMenuBar?: boolean;
 }
 
+const CHILD_WINDOW_CREATION_TIMEOUT_MS = 10000;
+
 /**
  * Create helpers for opening and reusing child webview windows.
  */
@@ -75,11 +77,21 @@ export function useChildWebviewWindow() {
     });
 
     await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(
+          new Error(
+            `Failed to create child window "${options.label}" within ${String(CHILD_WINDOW_CREATION_TIMEOUT_MS)}ms`,
+          ),
+        );
+      }, CHILD_WINDOW_CREATION_TIMEOUT_MS);
+
       void childWindow.once("tauri://created", () => {
+        clearTimeout(timeout);
         resolve();
       });
 
       void childWindow.once("tauri://error", (event) => {
+        clearTimeout(timeout);
         reject(
           new Error(`Failed to create child window: ${String(event.payload)}`),
         );

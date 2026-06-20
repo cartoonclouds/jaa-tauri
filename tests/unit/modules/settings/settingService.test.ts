@@ -97,14 +97,14 @@ describe("setting service", () => {
     const settings = buildSettingsDto({
       theme: "dark",
       developerMode: true,
-      statsVisibility: { total: true },
+      insightsVisibility: { total: true },
     });
 
     vi.mocked(getSettings).mockResolvedValue(settings);
     vi.mocked(getThemeSettings).mockResolvedValue({ theme: "light" });
     vi.mocked(getUiPreferences).mockResolvedValue({
       tableColumnVisibility: { company: true },
-      statsVisibility: { total: true },
+      insightsVisibility: { total: true },
     });
     vi.mocked(getTableColumnVisibility).mockResolvedValue({ company: true });
     vi.mocked(getNotificationSettings).mockResolvedValue({
@@ -122,11 +122,11 @@ describe("setting service", () => {
     await service.themeService.set({ theme: "dark" });
     await expect(service.uiService.get()).resolves.toEqual({
       tableColumnVisibility: { company: true },
-      statsVisibility: { total: true },
+      insightsVisibility: { total: true },
     });
     await service.uiService.set({
       tableColumnVisibility: { company: false },
-      statsVisibility: { total: false },
+      insightsVisibility: { total: false },
     });
     await service.uiService.setTableColumnVisibility("companies", {
       name: true,
@@ -134,10 +134,10 @@ describe("setting service", () => {
     await expect(
       service.uiService.getTableColumnVisibility("companies"),
     ).resolves.toEqual({ company: true });
-    await expect(service.uiService.getStatsVisibility()).resolves.toEqual({
+    await expect(service.uiService.getInsightsVisibility()).resolves.toEqual({
       total: true,
     });
-    await service.uiService.setStatsVisibility({ total: false });
+    await service.uiService.setInsightsVisibility({ total: false });
     await expect(service.notificationService.get()).resolves.toEqual({
       notificationsEnabled: true,
     });
@@ -156,12 +156,12 @@ describe("setting service", () => {
     expect(setThemeSettings).toHaveBeenCalledWith({ theme: "dark" });
     expect(setUiPreferences).toHaveBeenCalledWith({
       tableColumnVisibility: { company: false },
-      statsVisibility: { total: false },
+      insightsVisibility: { total: false },
     });
     expect(setTableColumnVisibility).toHaveBeenCalledWith("companies", {
       name: true,
     });
-    expect(setSetting).toHaveBeenCalledWith("statsVisibility", {
+    expect(setSetting).toHaveBeenCalledWith("insightsVisibility", {
       total: false,
     });
     expect(setNotificationSettings).toHaveBeenCalledWith({

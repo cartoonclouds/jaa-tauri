@@ -23,13 +23,13 @@ interface SemanticRuntimeConfig {
 
 function readRuntimeConfig(): SemanticRuntimeConfig {
   const config = useRuntimeConfig().public;
-  const rawProvider =
-    config.appSemanticEmbeddingProvider === null ||
-    config.appSemanticEmbeddingProvider === undefined
-      ? "ollama"
-      : toRequiredString(config.appSemanticEmbeddingProvider)
-          .trim()
-          .toLowerCase();
+
+  const rawProvider = !config.appSemanticEmbeddingProvider
+    ? "ollama"
+    : toRequiredString(config.appSemanticEmbeddingProvider)
+        .trim()
+        .toLowerCase();
+
   const provider: SemanticRuntimeConfig["provider"] =
     rawProvider === "deterministic" ||
     rawProvider === "openai-compatible" ||
@@ -48,26 +48,26 @@ function readRuntimeConfig(): SemanticRuntimeConfig {
     provider === "openai-compatible" ? 1536 : provider === "ollama" ? 384 : 384;
 
   const model = (
-    config.appSemanticEmbeddingModel === null ||
-    config.appSemanticEmbeddingModel === undefined
+    !config.appSemanticEmbeddingModel
       ? defaultModel
       : toRequiredString(config.appSemanticEmbeddingModel)
   ).trim();
+
   const dimensions = toFiniteNumber(
     config.appSemanticEmbeddingDimensions,
     defaultDimensions,
   );
+
   const baseUrl = (
-    config.appSemanticEmbeddingBaseUrl === null ||
-    config.appSemanticEmbeddingBaseUrl === undefined
+    !config.appSemanticEmbeddingBaseUrl
       ? provider === "openai-compatible"
         ? "https://api.openai.com/v1"
         : "http://127.0.0.1:11434"
       : toRequiredString(config.appSemanticEmbeddingBaseUrl)
   ).trim();
+
   const apiKeyRaw = (
-    config.appSemanticEmbeddingApiKey === null ||
-    config.appSemanticEmbeddingApiKey === undefined
+    !config.appSemanticEmbeddingApiKey
       ? ""
       : toRequiredString(config.appSemanticEmbeddingApiKey)
   ).trim();

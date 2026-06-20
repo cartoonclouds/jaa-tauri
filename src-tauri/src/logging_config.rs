@@ -22,6 +22,7 @@ pub fn resolve_log_level() -> log::LevelFilter {
         "warn" | "warning" => log::LevelFilter::Warn,
         "debug" => log::LevelFilter::Debug,
         "trace" => log::LevelFilter::Trace,
+        "verbose" => log::LevelFilter::Info,
         _ => log::LevelFilter::Info,
     }
 }

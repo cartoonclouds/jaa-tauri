@@ -13,7 +13,10 @@ pub fn show_main_window(app: &AppHandle, open_devtools: bool) {
         let _ = main.set_focus();
 
         if open_devtools {
-            main.open_devtools();
+            #[cfg(debug_assertions)]
+            {
+                main.open_devtools();
+            }
         }
     }
 }

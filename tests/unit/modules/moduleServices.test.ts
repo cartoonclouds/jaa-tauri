@@ -1,6 +1,6 @@
 import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
 import { ValidationError } from "@shared/domain/errors";
-import { resolveLocationFields } from "@shared/utils/geocoding";
+import { mergeResolvedLocation } from "@shared/utils/geocoding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -20,24 +20,27 @@ import {
   createContactRepositoryMock,
   createDocumentRepositoryMock,
   createEventRepositoryMock,
+  createInsightRepositoryMock,
   createNotificationRepositoryMock,
   createProfileRepositoryMock,
-  createStatisticRepositoryMock,
   createTagRepositoryMock,
 } from "../../fixtures/factories/testRepositoryFactories";
 
 vi.mock("@shared/utils/geocoding", () => ({
-  resolveLocationFields: vi.fn(),
+  mergeResolvedLocation: vi.fn(),
 }));
 
 describe("module services", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(resolveLocationFields).mockResolvedValue({
-      locationText: "Resolved City",
-      locationLat: 10,
-      locationLng: 20,
-    });
+    vi.mocked(mergeResolvedLocation).mockImplementation(
+      async (original: Record<string, unknown>) => ({
+        ...original,
+        locationText: "Resolved City",
+        locationLat: 10,
+        locationLng: 20,
+      }),
+    );
   });
 
   it("covers company service delegation, geocoding, and validation", async () => {
@@ -379,11 +382,11 @@ describe("module services", () => {
     ).toThrow(ValidationError);
   });
 
-  it("covers statistic service overview delegation", async () => {
-    const { StatisticService } =
-      await import("../../../src/modules/statistics/services/StatisticService");
-    const { repository, getOverviewMock } = createStatisticRepositoryMock();
-    const service = new StatisticService(repository);
+  it("covers insight service overview delegation", async () => {
+    const { InsightService } =
+      await import("../../../src/modules/insights/services/InsightService");
+    const { repository, getOverviewMock } = createInsightRepositoryMock();
+    const service = new InsightService(repository);
     const metrics = [{ id: "total", label: "Total", value: 1 }];
     getOverviewMock.mockResolvedValue(metrics);
 

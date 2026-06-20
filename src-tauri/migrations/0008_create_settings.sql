@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS settings (
   recent_searches TEXT NOT NULL DEFAULT '[]',
   table_column_visibility TEXT NOT NULL DEFAULT '{}',
   /**
-    * Visibility settings for statistics, stored as a JSON object where keys are statistic IDs 
-    * and values can be either a boolean indicating visibility or an object containing visibility 
+    * Visibility settings for insights, stored as a JSON object where keys are insight IDs
+    * and values can be either a boolean indicating visibility or an object containing visibility
     * and sort order information.
     */
   stats_visibility TEXT NOT NULL DEFAULT '{}',

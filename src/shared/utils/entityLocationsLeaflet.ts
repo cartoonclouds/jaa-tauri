@@ -93,14 +93,19 @@ export function createEntityLocationsLeafletManager(
       return;
     }
 
-    const leafletModule = (await import("leaflet")) as typeof LeafletNamespace;
+    const leafletModule = await import("leaflet");
+    const leafletRuntime =
+      "default" in leafletModule && leafletModule.default
+        ? leafletModule.default
+        : { ...leafletModule };
+
     const leafletGlobal = globalThis as typeof globalThis & {
       L?: typeof LeafletNamespace;
     };
-    leafletGlobal.L = leafletModule;
+    leafletGlobal.L = leafletRuntime;
     await import("leaflet.markercluster");
 
-    leaflet = leafletModule;
+    leaflet = leafletRuntime;
 
     const markerClusterFactory = (
       leaflet as typeof LeafletNamespace & {
@@ -138,7 +143,7 @@ export function createEntityLocationsLeafletManager(
       chunkedLoading: true,
       iconCreateFunction(cluster) {
         const count = cluster.getChildCount();
-        return leafletModule.divIcon({
+        return leafletRuntime.divIcon({
           className: "app-map-cluster-icon",
           html: `<span>${count.toString()}</span>`,
           iconSize: [40, 40],

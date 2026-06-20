@@ -39,6 +39,7 @@ import {
   isInteractionStage,
   toInteractionStage,
 } from "@modules/events/constants";
+import { INSIGHT_METRIC_IDS } from "@modules/insights/domain/constants/insightMetricIds";
 import {
   NOTIFICATION_SEARCH_FIELDS,
   notificationsGlobalFilterFields,
@@ -55,7 +56,6 @@ import {
   settingsGlobalFilterFields,
   settingsSearchPlaceholder,
 } from "@modules/settings/constants";
-import { STATISTIC_METRIC_IDS } from "@modules/statistics/domain/constants/statisticMetricIds";
 import {
   TAG_SEARCH_FIELDS,
   tagsGlobalFilterFields,
@@ -157,12 +157,12 @@ describe("module constants and helpers", () => {
     expect(tagsSearchPlaceholder).toBe("Search tags");
   });
 
-  it("defines onboarding defaults and statistics metric ids", () => {
+  it("defines onboarding defaults and insight metric ids", () => {
     expect(defaultSkillOptions).toContain("TypeScript");
     expect(defaultSkillOptions).toContain("Vue");
     expect(defaultSkillOptions).toHaveLength(15);
 
-    expect(STATISTIC_METRIC_IDS).toEqual([
+    expect(INSIGHT_METRIC_IDS).toEqual([
       "totalApplications",
       "totalAppliedApplications",
       "totalInterviewingApplications",

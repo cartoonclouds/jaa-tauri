@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 
-import { STATISTIC_METRIC_IDS } from "../../src/modules/statistics/domain/constants/statisticMetricIds";
+import { INSIGHT_METRIC_IDS } from "../../src/modules/insights/domain/constants/insightMetricIds";
 
 export interface SettingRow {
   id: string;
@@ -24,12 +24,12 @@ export interface SettingRow {
   updated_at: string;
 }
 
-function createDefaultStatsVisibility(): Record<
+function createDefaultInsightsVisibility(): Record<
   string,
   { visible: boolean; sortOrder: number; sort_order: number }
 > {
   return Object.fromEntries(
-    STATISTIC_METRIC_IDS.map((metricId, index) => [
+    INSIGHT_METRIC_IDS.map((metricId, index) => [
       metricId,
       {
         visible: true,
@@ -66,7 +66,7 @@ export function createSettingRow(
       applications_salary: true,
       documents_kind: true,
     }),
-    stats_visibility: JSON.stringify(createDefaultStatsVisibility()),
+    stats_visibility: JSON.stringify(createDefaultInsightsVisibility()),
     onboarding_completed: profileId ? 1 : 0,
     profile_id: profileId,
     show_overview: 1,

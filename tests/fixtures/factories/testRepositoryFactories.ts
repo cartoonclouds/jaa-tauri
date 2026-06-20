@@ -3,10 +3,10 @@ import type { ICompanyRepository } from "@modules/companies/types";
 import type { IContactRepository } from "@modules/contacts/repositories/ContactRepository";
 import type { IDocumentRepository } from "@modules/documents/types";
 import type { IEventRepository } from "@modules/events/types";
+import type { IInsightRepository } from "@modules/insights/types";
 import type { INotificationRepository } from "@modules/notifications/types";
 import type { IProfileRepository } from "@modules/profile/types";
 import type { ISettingRepository } from "@modules/settings/types";
-import type { IStatisticRepository } from "@modules/statistics/types";
 import type { ITagRepository } from "@modules/tags/types";
 
 import { vi } from "vitest";
@@ -280,19 +280,22 @@ export function createSettingRepositoryMock(): {
   return { repository };
 }
 
-/** Build a mocked statistic repository and expose key method spies. */
-export function createStatisticRepositoryMock(): {
-  repository: IStatisticRepository;
+/** Build a mocked insight repository and expose key method spies. */
+export function createInsightRepositoryMock(): {
+  repository: IInsightRepository;
+  listMock: ReturnType<typeof vi.fn>;
   getOverviewMock: ReturnType<typeof vi.fn>;
 } {
+  const listMock = vi.fn();
   const getOverviewMock = vi.fn();
-  const repository: IStatisticRepository = {
-    list: vi.fn(),
+  const repository: IInsightRepository = {
+    list: listMock,
     getOverview: getOverviewMock,
   };
 
   return {
     repository,
+    listMock,
     getOverviewMock,
   };
 }

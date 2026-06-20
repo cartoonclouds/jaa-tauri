@@ -1,17 +1,17 @@
 import type { SettingRow } from "../settings.factory";
 
-import { STATISTIC_METRIC_IDS } from "../../../src/modules/statistics/domain/constants/statisticMetricIds";
+import { INSIGHT_METRIC_IDS } from "../../../src/modules/insights/domain/constants/insightMetricIds";
 
 /**
- * Build default stats visibility with all metrics enabled.
+ * Build default insights visibility with all metrics enabled.
  */
 // fallow-ignore-next-line code-duplication
-function createDefaultStatsVisibility(): Record<
+function createDefaultInsightsVisibility(): Record<
   string,
   { visible: boolean; sortOrder: number; sort_order: number }
 > {
   return Object.fromEntries(
-    STATISTIC_METRIC_IDS.map((metricId, index) => [
+    INSIGHT_METRIC_IDS.map((metricId, index) => [
       metricId,
       {
         visible: true,
@@ -42,7 +42,7 @@ export function createProductionSettingRow(
     semantic_enable_sqlite_vec: 1,
     recent_searches: JSON.stringify([]),
     table_column_visibility: JSON.stringify({}),
-    stats_visibility: JSON.stringify(createDefaultStatsVisibility()),
+    stats_visibility: JSON.stringify(createDefaultInsightsVisibility()),
     onboarding_completed: 0,
     profile_id: null,
     show_overview: 1,

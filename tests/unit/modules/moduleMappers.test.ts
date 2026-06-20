@@ -5,7 +5,7 @@ import { mapEventRowToEntity } from "@modules/events/application/mappers/mapEven
 import { mapNotificationRowToEntity } from "@modules/notifications/application/mappers/mapNotificationRow";
 import { mapProfileRowToEntity } from "@modules/profile/application/mappers/mapProfileRow";
 import { mapSettingRowToEntity } from "@modules/settings/repositories/mappers/mapSettingRow";
-import { mapStatisticRowToEntity } from "@modules/statistics/application/mappers/mapStatisticRow";
+import { mapInsightRowToEntity } from "@modules/insights/application/mappers/mapInsightRow";
 import { mapTagRowToEntity } from "@modules/tags/application/mappers/mapTagRow";
 import { TagModelType } from "@modules/tags/domain/enums/TagModelType";
 import { describe, expect, it } from "vitest";
@@ -18,7 +18,7 @@ import {
   buildNotificationRow,
   buildProfileRow,
   buildSettingsRow,
-  buildStatisticRow,
+  buildInsightRow,
   buildTagRow,
 } from "../../fixtures/factories/testPayloadFactories";
 
@@ -115,14 +115,14 @@ describe("module row mappers", () => {
     expect(fallbackEntity.developerMode).toBe(true);
   });
 
-  it("maps statistic rows and throws on invalid numeric values", () => {
-    const entity = mapStatisticRowToEntity(buildStatisticRow());
+  it("maps insight rows and throws on invalid numeric values", () => {
+    const entity = mapInsightRowToEntity(buildInsightRow());
     expect(entity.value).toBe(12);
     expect(entity.scope).toBe("global");
 
     expect(() =>
-      mapStatisticRowToEntity(
-        buildStatisticRow({ value: "bad", scope: "weird" }),
+      mapInsightRowToEntity(
+        buildInsightRow({ value: "bad", scope: "weird" }),
       ),
     ).toThrow();
   });
@@ -135,3 +135,4 @@ describe("module row mappers", () => {
     expect(fallbackEntity.modelType).toBe(TagModelType.General);
   });
 });
+

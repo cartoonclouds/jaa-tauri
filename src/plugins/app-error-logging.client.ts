@@ -99,14 +99,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     if (event.error !== undefined) {
       logError(
-        `[AppError] [window:error] ${message} @ ${location} ${buildMetadata()}`,
+        `[AppError] [window.error] ${message} @ ${location} ${buildMetadata()}`,
         event.error,
       );
       return;
     }
 
     logError(
-      `[AppError] [window:error] ${message} @ ${location} ${buildMetadata()}`,
+      `[AppError] [window.error] ${message} @ ${location} ${buildMetadata()}`,
     );
   });
 
@@ -114,7 +114,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     void closeSplashscreenOnStartupError();
 
     logError(
-      `[AppError] [window:unhandledrejection] Unhandled promise rejection ${buildMetadata()}`,
+      `[AppError] [window.unhandledrejection] Unhandled promise rejection ${buildMetadata()}`,
       event.reason,
     );
   });

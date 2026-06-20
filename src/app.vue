@@ -11,6 +11,7 @@
     setOnboardingCompleted,
   } from "@modules/settings";
   import SettingsDialog from "@modules/settings/presentation/components/dialogs/SettingsDialog.vue";
+  import { withTimeout } from "@shared/utils/promiseUtils";
   import { invoke, isTauri } from "@tauri-apps/api/core";
   import { nextTick, onMounted, ref, watch } from "vue";
 
@@ -34,10 +35,38 @@
   const { isGlobalSearchDialogVisible } = useGlobalSearchDialog();
   const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
+  const STARTUP_TIMEOUT_MS = 15000;
   const initialApplicationId = ref<string | null>(null);
   const initialCompanyId = ref<string | null>(null);
   const initialContactId = ref<string | null>(null);
   const isAppReady = ref(false);
+
+  /** Log startup timing only in dev/debug mode. */
+  function logStartupTiming(message: string): void {
+    if (import.meta.dev) {
+      logInfo(`[startup] ${message}`);
+    }
+  }
+
+  async function timeStartupTask<T>(
+    label: string,
+    task: () => Promise<T>,
+  ): Promise<T> {
+    const start = performance.now();
+    logStartupTiming(`${label} started`);
+
+    try {
+      const result = await task();
+      const elapsed = Math.round(performance.now() - start);
+      logStartupTiming(`${label} completed in ${String(elapsed)}ms`);
+      return result;
+    } catch (error) {
+      const elapsed = Math.round(performance.now() - start);
+      logStartupTiming(`${label} failed after ${String(elapsed)}ms`);
+      logError(`Startup task failed: ${label}`, error);
+      throw error;
+    }
+  }
 
   watch(
     isApplicationDrawerVisible,
@@ -79,7 +108,9 @@
   );
 
   onMounted(async () => {
+    const startupStartedAt = performance.now();
     const shouldManageSplashscreen = import.meta.client && isTauri();
+    let shouldOpenOnboarding = false;
 
     if (shouldManageSplashscreen) {
       try {
@@ -90,13 +121,21 @@
     }
 
     try {
-      const [onboardingCompleted, profiles] = await Promise.all([
-        getOnboardingCompleted(),
-        profileService.list(),
-      ]);
+      const [onboardingCompleted, profiles] = await withTimeout(
+        Promise.all([
+          timeStartupTask("getOnboardingCompleted", () =>
+            getOnboardingCompleted(),
+          ),
+          timeStartupTask("profileService.list", () => profileService.list()),
+        ]),
+        {
+          label: "Startup initialization",
+          timeoutMs: STARTUP_TIMEOUT_MS,
+        },
+      );
       const profileExists = profiles.length > 0;
 
-      logInfo(
+      logStartupTiming(
         `Onboarding state loaded: completed=${String(onboardingCompleted)} profiles=${String(profiles.length)}`,
       );
 
@@ -104,15 +143,18 @@
         await setOnboardingCompleted(true);
       }
 
-      const shouldOpenOnboarding = !onboardingCompleted && !profileExists;
+      shouldOpenOnboarding = !onboardingCompleted && !profileExists;
       if (!shouldOpenOnboarding) {
         return;
       }
-
-      await openOnboarding();
     } catch (error) {
       logError("Failed to load onboarding state:", error);
     } finally {
+      const startupElapsed = Math.round(performance.now() - startupStartedAt);
+      logStartupTiming(
+        `total startup flow completed in ${String(startupElapsed)}ms`,
+      );
+
       isAppReady.value = true;
       await nextTick();
 
@@ -122,6 +164,10 @@
         } catch (error) {
           logError("Failed to close splashscreen:", error);
         }
+      }
+
+      if (shouldOpenOnboarding) {
+        await openOnboarding();
       }
     }
   });

@@ -408,8 +408,8 @@ export function buildSettingUpsertPayload(
   };
 }
 
-/** Build a mock statistic row for mapper tests with optional overrides. */
-export function buildStatisticRow(
+/** Build a mock insight row for mapper tests with optional overrides. */
+export function buildInsightRow(
   overrides: Partial<Record<string, unknown>> = {},
 ): Record<string, unknown> {
   const now = temporalNowIsoString();
@@ -434,7 +434,7 @@ export function buildSettingsDto(
     developerMode: boolean;
     recentSearches: string[];
     tableColumnVisibility: Record<string, boolean>;
-    statsVisibility: Record<string, boolean>;
+    insightsVisibility: Record<string, boolean>;
     onboardingCompleted: boolean;
   }> = {},
 ): {
@@ -443,7 +443,7 @@ export function buildSettingsDto(
   developerMode: boolean;
   recentSearches: string[];
   tableColumnVisibility: Record<string, boolean>;
-  statsVisibility: Record<string, boolean>;
+  insightsVisibility: Record<string, boolean>;
   onboardingCompleted: boolean;
 } {
   return {
@@ -452,7 +452,7 @@ export function buildSettingsDto(
     developerMode: false,
     recentSearches: [],
     tableColumnVisibility: {},
-    statsVisibility: {},
+    insightsVisibility: {},
     onboardingCompleted: false,
     ...overrides,
   };
@@ -509,3 +509,4 @@ export function buildTagCreatePayload(
     ...overrides,
   };
 }
+

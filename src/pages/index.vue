@@ -6,7 +6,7 @@
   import QuickSearchInput from "@modules/search/presentation/components/QuickSearchInput.vue";
   import { openSearchResult } from "@modules/search/utils/openSearchResult";
   import { getSetting } from "@modules/settings";
-  import StatisticsSection from "@modules/statistics/presentation/components/StatisticsSection.vue";
+  import InsightsSection from "@modules/insights/presentation/components/InsightsSection.vue";
   import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
   import { nextTick, ref } from "vue";
 
@@ -101,7 +101,7 @@
 
       <ClientOnly>
         <section v-if="showOverview" class="mx-auto mb-8 w-full">
-          <StatisticsSection title="Job Hunt Overview" />
+          <InsightsSection title="Job Hunt Overview" />
         </section>
       </ClientOnly>
 
