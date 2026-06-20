@@ -256,6 +256,26 @@
     dialogVisible.value = false;
     openApplicationDrawer(applicationId);
   }
+
+  function getContactMapPreviewTitle(contact?: Contact): string {
+    return `Preview for ${contact?.fullName ?? "contact"}`;
+  }
+
+  function onContactMapOpen(contact?: Contact): void {
+    if (!contact) {
+      return;
+    }
+
+    openMap(contact);
+  }
+
+  function onViewContact(contact?: Contact): void {
+    if (!contact) {
+      return;
+    }
+
+    openViewContactDialog(contact);
+  }
 </script>
 
 <template>
@@ -318,14 +338,16 @@
               :latitude="(slotProps.data as Contact).locationLat"
               :longitude="(slotProps.data as Contact).locationLng"
               :location-text="(slotProps.data as Contact).locationText"
-              :title="`Preview for ${(slotProps.data as Contact).fullName}`"
+              :title="
+                getContactMapPreviewTitle(slotProps.data as Contact | undefined)
+              "
             />
             <Button
               class="mt-2"
               size="small"
               severity="secondary"
               label="View full map"
-              @click="openMap(slotProps.data as Contact)"
+              @click="onContactMapOpen(slotProps.data as Contact | undefined)"
             />
           </template>
         </Column>
@@ -335,7 +357,7 @@
               size="small"
               severity="secondary"
               label="View"
-              @click="openViewContactDialog(slotProps.data as Contact)"
+              @click="onViewContact(slotProps.data as Contact | undefined)"
             />
           </template>
         </Column>

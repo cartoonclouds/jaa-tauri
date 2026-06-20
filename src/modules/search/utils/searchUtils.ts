@@ -97,15 +97,39 @@ export function getActiveConditions(
  * Converts unknown values into normalized searchable text.
  */
 export function toSearchText(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
   if (typeof value === "string") {
     return value;
   }
 
-  if (typeof value === "number" || typeof value === "boolean") {
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
     return value.toString();
   }
 
-  return String(value ?? "").trim();
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  return "";
+}
+
+/**
+ * Joins normalized search parts into a semantic content block.
+ */
+export function joinSearchContent(
+  parts: (string | null | undefined)[],
+): string {
+  return parts
+    .map((part) => toSearchText(part))
+    .filter((value) => value.trim().length > 0)
+    .join("\n");
 }
 
 /**
@@ -199,6 +223,23 @@ export function buildLocationRecords(options: {
       companyCount: value.companies.size,
     }))
     .sort((left, right) => left.locationText.localeCompare(right.locationText));
+}
+
+/**
+ * Build semantic summary lines for a location aggregate record.
+ */
+export function buildLocationSemanticSummary(location: {
+  locationText: string | null;
+  applicationCount: number;
+  contactCount: number;
+  companyCount: number;
+}): (string | null)[] {
+  return [
+    location.locationText,
+    `Applications ${location.applicationCount.toString()}`,
+    `Contacts ${location.contactCount.toString()}`,
+    `Companies ${location.companyCount.toString()}`,
+  ];
 }
 
 function createSearchConditionId(): string {

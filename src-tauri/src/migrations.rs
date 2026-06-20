@@ -7,6 +7,11 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 /// the exact migration set used by the binary.
 static MIGRATIONS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/migrations");
 
+/// Normalize SQL text to a stable LF format across platforms.
+fn normalize_sql(sql: &str) -> String {
+    sql.replace("\r\n", "\n").replace('\r', "\n")
+}
+
 /// Discovers and builds SQL migrations from embedded files.
 ///
 /// Expected filename format starts with a numeric version prefix, for example:
@@ -28,7 +33,9 @@ pub fn discover_migrations() -> Vec<Migration> {
             let version_str = file_name.split(['_', '.']).next()?;
             let version = version_str.parse::<i64>().ok()?;
 
-            Some((version, file_name, sql))
+            let normalized_sql = Box::leak(normalize_sql(sql).into_boxed_str());
+
+            Some((version, file_name, normalized_sql as &'static str))
         })
         .collect();
 

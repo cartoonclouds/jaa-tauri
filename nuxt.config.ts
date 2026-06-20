@@ -1,7 +1,10 @@
+import type { NuxtConfig } from "nuxt/schema";
+
+import primevue from "@primevue/nuxt-module";
 import tailwindcss from "@tailwindcss/vite";
+import veeValidate from "@vee-validate/nuxt";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineNuxtConfig } from "nuxt/config";
 
 import applyFlowPrimeVueTheme from "./src/themes/applyflow";
 
@@ -40,6 +43,7 @@ const appSemanticEnableSqliteVec = readBoolean(
   process.env.APP_SEMANTIC_ENABLE_SQLITE_VEC,
   true,
 );
+const isDevelopment = process.env.NODE_ENV !== "production";
 const isInMemoryDriver = ["memory", "in-memory"].includes(
   appDatabaseDriver.toLowerCase(),
 );
@@ -48,9 +52,9 @@ const appDatabaseUrl =
     ? configuredDatabaseUrl
     : isInMemoryDriver
       ? ":memory:"
-      : `${appDatabaseDriver}:${resolve(rootDir, appDatabaseName)}`;
+      : `${appDatabaseDriver}:${appDatabaseName}`;
 
-export default defineNuxtConfig({
+const config: NuxtConfig = {
   srcDir: "src/",
 
   app: {
@@ -105,11 +109,38 @@ export default defineNuxtConfig({
   modules: [
     "@vueuse/nuxt",
     "@nuxt/icon",
-    "@nuxt/hints",
-    "nuxt-security",
+    [
+      "@nuxt/hints",
+      {
+        features: {
+          lazyLoad: false,
+          hydration: true,
+        },
+      },
+    ],
+    [
+      "nuxt-security",
+      {
+        nonce: !isDevelopment,
+        headers: isDevelopment
+          ? false
+          : {
+              contentSecurityPolicy: {
+                "img-src": [
+                  "'self'",
+                  "data:",
+                  "https://tile.openstreetmap.org",
+                  "https://a.tile.openstreetmap.org",
+                  "https://b.tile.openstreetmap.org",
+                  "https://c.tile.openstreetmap.org",
+                ],
+              },
+            },
+      },
+    ],
     "@nuxtjs/device",
     [
-      "@primevue/nuxt-module",
+      primevue,
       {
         autoImport: true,
         options: {
@@ -120,7 +151,7 @@ export default defineNuxtConfig({
       },
     ],
     [
-      "@vee-validate/nuxt",
+      veeValidate,
       {
         componentNames: {
           Form: "VeeForm",
@@ -139,28 +170,6 @@ export default defineNuxtConfig({
 
   build: {
     analyze: true,
-  },
-
-  hints: {
-    features: {
-      lazyLoad: false,
-      hydration: true,
-    },
-  },
-
-  security: {
-    headers: {
-      contentSecurityPolicy: {
-        "img-src": [
-          "'self'",
-          "data:",
-          "https://tile.openstreetmap.org",
-          "https://a.tile.openstreetmap.org",
-          "https://b.tile.openstreetmap.org",
-          "https://c.tile.openstreetmap.org",
-        ],
-      },
-    },
   },
 
   devtools: {
@@ -195,9 +204,6 @@ export default defineNuxtConfig({
       {
         name: "suppress-upstream-build-warnings",
         configResolved(config) {
-          if (!config.logger?.warn) {
-            return;
-          }
           const originalWarn = config.logger.warn.bind(config.logger);
           config.logger.warn = (msg, options) => {
             if (
@@ -225,7 +231,7 @@ export default defineNuxtConfig({
           // provide sourcemaps for their transformations (@tailwindcss/vite, nuxt:module-preload-polyfill)
           if (
             warning.code === "SOURCEMAP_ERROR" ||
-            (warning.message?.includes("Sourcemap is likely to be incorrect") &&
+            (warning.message.includes("Sourcemap is likely to be incorrect") &&
               warning.plugin !== undefined)
           ) {
             return;
@@ -234,8 +240,8 @@ export default defineNuxtConfig({
           // warning for Tauri modules – appLogger.ts uses dynamic imports for SSR safety,
           // which is intentional even though the modules are statically imported elsewhere.
           if (
-            warning.message?.includes("dynamically imported") &&
-            warning.message?.includes("@tauri-apps/")
+            warning.message.includes("dynamically imported") &&
+            warning.message.includes("@tauri-apps/")
           ) {
             return;
           }
@@ -274,4 +280,6 @@ export default defineNuxtConfig({
     restoreState: true,
     viewTransition: true,
   },
-});
+};
+
+export default config;

@@ -9,14 +9,16 @@ import type {
 } from "@modules/search/types";
 import type { SemanticSearchMatch } from "@modules/search/types.semantic";
 
-import { useApplication } from "@modules/applications";
-import { useCompany } from "@modules/companies";
-import { useContact } from "@modules/contacts";
+import { useApplication } from "@modules/applications/composables/useApplication";
+import { useCompany } from "@modules/companies/composables/useCompany";
+import { useContact } from "@modules/contacts/composables/useContact";
 import { useSemanticSearchService } from "@modules/search/composables/useSemanticSearchService";
 import {
   buildLocationRecords,
+  buildLocationSemanticSummary,
   filterEntriesByScope,
   getActiveConditions,
+  joinSearchContent,
   toSearchText,
 } from "@modules/search/utils/searchUtils";
 
@@ -143,13 +145,6 @@ export function useGlobalSearchService(): GlobalSearchServiceContract {
     return primary.length > 0 ? primary : fallback;
   }
 
-  function joinSearchContent(parts: (string | null | undefined)[]): string {
-    return parts
-      .map((part) => toSearchText(part))
-      .filter((value) => value.trim().length > 0)
-      .join("\n");
-  }
-
   function buildApplicationDocument(
     application: GlobalSearchDataset["applications"][number],
   ) {
@@ -215,12 +210,7 @@ export function useGlobalSearchService(): GlobalSearchServiceContract {
       entityType: "location" as const,
       entityId: location.id,
       title: toSearchText(location.locationText),
-      content: joinSearchContent([
-        location.locationText,
-        `Applications ${location.applicationCount.toString()}`,
-        `Contacts ${location.contactCount.toString()}`,
-        `Companies ${location.companyCount.toString()}`,
-      ]),
+      content: joinSearchContent(buildLocationSemanticSummary(location)),
     };
   }
 

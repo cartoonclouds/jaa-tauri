@@ -36,9 +36,12 @@ pub fn run() {
 
     // 1) Discover embedded SQL migrations and pass them to the SQL plugin.
     let migrations = discover_migrations();
+    let migration_count = migrations.len();
     let database_url = resolve_database_url();
+    let setup_database_url = database_url.clone();
     let log_level = resolve_log_level();
     let log_file_name = resolve_log_file_name();
+    let dev_mode = resolve_dev_mode();
 
     // 2) Build and configure the Tauri application runtime.
     tauri::Builder::default()
@@ -88,7 +91,16 @@ pub fn run() {
         // Desktop notifications.
         .plugin(tauri_plugin_notification::init())
         // 3) Configure tray icon and tray menu actions.
-        .setup(|app| Ok(setup_tray(app, resolve_dev_mode())?))
+        .setup(move |app| {
+            log::info!(
+                "[bootstrap] SQL target URL: {} | embedded migrations: {} | dev_mode: {}",
+                setup_database_url,
+                migration_count,
+                dev_mode
+            );
+
+            Ok(setup_tray(app, dev_mode)?)
+        })
         // 4) Minimize-to-tray behavior: hide window only when minimized.
         .on_window_event(|window, event| {
             if let WindowEvent::Resized(_) = event {

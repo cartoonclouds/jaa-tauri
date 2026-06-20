@@ -2,8 +2,8 @@ import type { ApplicationSemanticSearchService } from "@modules/applications/ser
 
 import { useApplication } from "@modules/applications/composables/useApplication";
 import { ApplicationSemanticSearchService as ApplicationSemanticSearchServiceImpl } from "@modules/applications/services/ApplicationSemanticSearchService";
-import { useCompany } from "@modules/companies";
-import { useSemanticSearchService } from "@modules/search";
+import { useCompany } from "@modules/companies/composables/useCompany";
+import { useSemanticSearchService } from "@modules/search/composables/useSemanticSearchService";
 
 let applicationSemanticSearchServiceInstance: ApplicationSemanticSearchService | null =
   null;

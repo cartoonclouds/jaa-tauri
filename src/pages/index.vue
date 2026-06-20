@@ -2,11 +2,11 @@
   import type { SearchResult } from "@modules/search/types";
 
   import ApplicationComponent from "@modules/applications/presentation/components/Application.vue";
+  import InsightsSection from "@modules/insights/presentation/components/InsightsSection.vue";
   import { useProfile } from "@modules/profile";
   import QuickSearchInput from "@modules/search/presentation/components/QuickSearchInput.vue";
   import { openSearchResult } from "@modules/search/utils/openSearchResult";
   import { getSetting } from "@modules/settings";
-  import InsightsSection from "@modules/insights/presentation/components/InsightsSection.vue";
   import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
   import { nextTick, ref } from "vue";
 
@@ -21,6 +21,7 @@
    * Type alias for top section view.
    */
   type TopSectionView = "overview" | "map";
+  
   /**
    * Defines top section option.
    */
@@ -35,6 +36,9 @@
   const { subscribe } = usePubSub();
 
   const profile = await profileService.getProfile();
+  const profileName = profile.fullName
+    ? formatProfileName(profile.fullName)
+    : "there";
   const showOverview = ref(await getSetting("showOverview"));
 
   const topView = ref<TopSectionView>("overview");
@@ -81,7 +85,7 @@
       <div>
         <h1 class="flex items-center gap-3 text-3xl font-bold tracking-tight">
           <Icon name="heroicons:briefcase" class="text-emerald-400" />
-          {{ getTimeOfDay() }}, {{ formatProfileName(profile.fullName) }}
+          {{ getTimeOfDay() }}, {{ profileName }}
         </h1>
 
         <p class="text-slate-300 mt-2">Here's your application overview.</p>
