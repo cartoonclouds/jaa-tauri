@@ -6,7 +6,9 @@
   } from "@modules/contacts/repositories/ContactRepository";
 
   import { useContact } from "@modules/contacts";
+  import { showFailedPromiseToast } from "@shared/utils/toast";
   import { formatNullableDisplayDateTime } from "@shared/utils/toDate";
+  import { useToast } from "primevue/usetoast";
   import { computed, ref, watch } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
@@ -30,6 +32,7 @@
   }>();
 
   const { service: contactService } = useContact();
+  const toast = useToast();
   const associatedCompanies = ref<ContactAssociatedCompany[]>([]);
   const associatedApplications = ref<ContactAssociatedApplication[]>([]);
   const isLoadingAssociations = ref(false);
@@ -75,13 +78,41 @@
       associationsError.value = null;
 
       try {
-        const [companies, applications] = await Promise.all([
+        const [companiesResult, applicationsResult] = await Promise.allSettled([
           contactService.listAssociatedCompanies(contactId),
           contactService.listAssociatedApplications(contactId),
         ]);
 
-        associatedCompanies.value = companies;
-        associatedApplications.value = applications;
+        associatedCompanies.value =
+          companiesResult.status === "fulfilled" ? companiesResult.value : [];
+        associatedApplications.value =
+          applicationsResult.status === "fulfilled"
+            ? applicationsResult.value
+            : [];
+
+        if (companiesResult.status === "rejected") {
+          showFailedPromiseToast(
+            toast,
+            "Contact companies associations",
+            companiesResult.reason,
+          );
+        }
+
+        if (applicationsResult.status === "rejected") {
+          showFailedPromiseToast(
+            toast,
+            "Contact applications associations",
+            applicationsResult.reason,
+          );
+        }
+
+        if (
+          companiesResult.status === "rejected" &&
+          applicationsResult.status === "rejected"
+        ) {
+          associationsError.value =
+            "Unable to load contact associations right now.";
+        }
       } catch (error: unknown) {
         associatedCompanies.value = [];
         associatedApplications.value = [];

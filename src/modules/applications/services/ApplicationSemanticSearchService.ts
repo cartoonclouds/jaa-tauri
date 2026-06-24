@@ -37,10 +37,31 @@ export class ApplicationSemanticSearchService {
   ) {}
 
   async rebuildIndex(): Promise<void> {
-    const [applications, companies] = await Promise.all([
+    const [applicationsResult, companiesResult] = await Promise.allSettled([
       this.dependencies.loadApplications(),
       this.dependencies.loadCompanies(),
     ]);
+
+    const failures = [applicationsResult, companiesResult].filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed rebuilding application semantic index: ${failures
+          .map((failure) => String(failure.reason))
+          .join("; ")}`,
+      );
+    }
+
+    if (
+      applicationsResult.status !== "fulfilled" ||
+      companiesResult.status !== "fulfilled"
+    ) {
+      throw new Error("Failed rebuilding application semantic index");
+    }
+
+    const applications = applicationsResult.value;
+    const companies = companiesResult.value;
 
     const companyNameById = new Map(
       companies.map((company) => [company.id, company.name]),

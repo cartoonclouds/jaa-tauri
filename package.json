@@ -34,7 +34,7 @@
     "db:seed:production": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts --mode=production",
     "db:seed": "tsx --tsconfig tsconfig.seed.json src-tauri/factories/seed.ts",
     "dev:clear": "node scripts/dev-clear.mjs",
-    "dev:tauri": "nuxt dev --host 127.0.0.1 --port 3000 --strictPort",
+    "dev:tauri": "nuxt dev --host 127.0.0.1 --port 3000 --strict-port",
     "dev": "nuxt dev --host 127.0.0.1",
     "generate": "nuxt generate",
     "lint": "eslint --fix .",

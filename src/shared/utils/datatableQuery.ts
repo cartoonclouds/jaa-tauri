@@ -192,8 +192,30 @@ export async function fetchDatatablePage<TItem>(
         [rows, page * rows],
       );
 
+  const mappedItems = await Promise.allSettled(
+    listRows.map((row) => mapRow(row)),
+  );
+  const failures = mappedItems.filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  if (failures.length > 0) {
+    throw new Error(
+      `Failed mapping datatable rows for ${tableName}: ${failures
+        .map((failure) => String(failure.reason))
+        .join("; ")}`,
+    );
+  }
+
+  const items = mappedItems.map((result) => {
+    if (result.status === "rejected") {
+      throw result.reason;
+    }
+
+    return result.value;
+  }) as TItem[];
+
   return {
-    items: await Promise.all(listRows.map((row) => mapRow(row))),
+    items,
     total: totalRows[0]?.total ?? 0,
   };
 }

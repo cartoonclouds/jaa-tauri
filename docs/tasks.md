@@ -44,3 +44,10 @@ Fix stages
 Add advanced search so that when opening the search modal it's display a search builder across Applications, Contacts, Companies and Locations.
 
 How to reduce the file size of the final build?
+
+terminal
+
+During build this warning is shown, fix:
+[10:27:53 pm] WARN "file:///C:/Users/tudho/Documents/jaa-tauri/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js" is imported by "virtual:#nitro-internal-virtual/storage", but could not be resolved – treating it as an external dependency.
+
+Where Promise.all is used instead use Promise.allSettled showing an error toast for the failed promise

@@ -40,7 +40,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         return null;
       }
 
-      const filesWithMetadata = await Promise.all(
+      const filesWithMetadataResults = await Promise.allSettled(
         logFiles.map(async (entry) => {
           const filePath = await join(logDirectory, entry.name);
           const fileInfo = await stat(filePath);
@@ -52,6 +52,28 @@ export default defineNuxtPlugin((nuxtApp) => {
           };
         }),
       );
+
+      const filesWithMetadata = filesWithMetadataResults
+        .map((result) => {
+          if (result.status === "rejected") {
+            logError("Failed to read log file metadata:", result.reason);
+            return null;
+          }
+
+          return result.value;
+        })
+        .filter(
+          (
+            entry,
+          ): entry is {
+            filePath: string;
+            modifiedAt: number;
+          } => entry !== null,
+        );
+
+      if (filesWithMetadata.length === 0) {
+        return null;
+      }
 
       filesWithMetadata.sort(
         (left, right) => right.modifiedAt - left.modifiedAt,

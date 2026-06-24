@@ -6,7 +6,9 @@
   } from "@modules/companies/types";
 
   import { useCompany } from "@modules/companies";
+  import { showFailedPromiseToast } from "@shared/utils/toast";
   import { formatNullableDisplayDateTime } from "@shared/utils/toDate";
+  import { useToast } from "primevue/usetoast";
   import { computed, ref, watch } from "vue";
 
   import ConfirmActionDialog from "@/components/ui/ConfirmActionDialog.vue";
@@ -30,6 +32,7 @@
   }>();
 
   const { service: companyService } = useCompany();
+  const toast = useToast();
   const associatedContacts = ref<CompanyAssociatedContact[]>([]);
   const associatedApplications = ref<CompanyAssociatedApplication[]>([]);
   const isLoadingAssociations = ref(false);
@@ -74,13 +77,41 @@
       associationsError.value = null;
 
       try {
-        const [contacts, applications] = await Promise.all([
+        const [contactsResult, applicationsResult] = await Promise.allSettled([
           companyService.listAssociatedContacts(companyId),
           companyService.listAssociatedApplications(companyId),
         ]);
 
-        associatedContacts.value = contacts;
-        associatedApplications.value = applications;
+        associatedContacts.value =
+          contactsResult.status === "fulfilled" ? contactsResult.value : [];
+        associatedApplications.value =
+          applicationsResult.status === "fulfilled"
+            ? applicationsResult.value
+            : [];
+
+        if (contactsResult.status === "rejected") {
+          showFailedPromiseToast(
+            toast,
+            "Company contacts associations",
+            contactsResult.reason,
+          );
+        }
+
+        if (applicationsResult.status === "rejected") {
+          showFailedPromiseToast(
+            toast,
+            "Company applications associations",
+            applicationsResult.reason,
+          );
+        }
+
+        if (
+          contactsResult.status === "rejected" &&
+          applicationsResult.status === "rejected"
+        ) {
+          associationsError.value =
+            "Unable to load company associations right now.";
+        }
       } catch (error: unknown) {
         associatedContacts.value = [];
         associatedApplications.value = [];
@@ -216,7 +247,8 @@
                 <template #body="slotProps">
                   {{
                     formatNullableDisplayDateTime(
-                      (slotProps.data as CompanyAssociatedApplication).appliedAt,
+                      (slotProps.data as CompanyAssociatedApplication)
+                        .appliedAt,
                     )
                   }}
                 </template>

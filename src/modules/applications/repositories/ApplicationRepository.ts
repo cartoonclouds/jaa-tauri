@@ -205,9 +205,28 @@ export class ApplicationRepository implements IApplicationRepository {
        ORDER BY ${DEFAULT_CREATED_AT_ORDER_BY}`,
     );
 
-    return Promise.all(
+    const mappedRows = await Promise.allSettled(
       rows.map(async (row) => this.withTags(mapApplicationRowToEntity(row))),
     );
+
+    const failures = mappedRows.filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to map applications list rows: ${failures
+          .map((failure) => String(failure.reason))
+          .join("; ")}`,
+      );
+    }
+
+    return mappedRows.map((result) => {
+      if (result.status === "rejected") {
+        throw result.reason;
+      }
+
+      return result.value;
+    });
   }
 
   async listPage(
@@ -284,11 +303,18 @@ export class ApplicationRepository implements IApplicationRepository {
         );
 
     return {
-      items: await Promise.all(
-        listRows.map(async (row) =>
-          this.withTags(mapApplicationRowToEntity(row)),
-        ),
-      ),
+      items: (
+        await Promise.allSettled(
+          listRows.map(async (row) =>
+            this.withTags(mapApplicationRowToEntity(row)),
+          ),
+        )
+      ).map((result) => {
+        if (result.status === "rejected") {
+          throw result.reason;
+        }
+        return result.value;
+      }),
       total: totalRows[0]?.total ?? 0,
     };
   }

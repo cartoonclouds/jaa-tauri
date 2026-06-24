@@ -124,9 +124,28 @@ export class ContactRepository implements IContactRepository {
         orderByClause: DEFAULT_CREATED_AT_ORDER_BY,
       }),
     );
-    return Promise.all(
+    const mappedRows = await Promise.allSettled(
       rows.map(async (row) => this.withTags(mapContactRowToEntity(row))),
     );
+
+    const failures = mappedRows.filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to map contacts list rows: ${failures
+          .map((failure) => String(failure.reason))
+          .join("; ")}`,
+      );
+    }
+
+    return mappedRows.map((result) => {
+      if (result.status === "rejected") {
+        throw result.reason;
+      }
+
+      return result.value;
+    });
   }
 
   async listPage(

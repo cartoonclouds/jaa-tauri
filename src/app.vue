@@ -12,7 +12,9 @@
   } from "@modules/settings";
   import SettingsDialog from "@modules/settings/presentation/components/dialogs/SettingsDialog.vue";
   import { withTimeout } from "@shared/utils/promiseUtils";
+  import { showFailedPromiseToast } from "@shared/utils/toast";
   import { invoke, isTauri } from "@tauri-apps/api/core";
+  import { useToast } from "primevue/usetoast";
   import { nextTick, onMounted, ref, watch } from "vue";
 
   import { NuxtLayout, NuxtPage, Toast } from "#components";
@@ -35,6 +37,7 @@
   const { isGlobalSearchDialogVisible } = useGlobalSearchDialog();
   const { isSettingsDialogVisible } = useSettingsDialog();
   const { service: profileService } = useProfile();
+  const toast = useToast();
   const STARTUP_TIMEOUT_MS = 15000;
   const initialApplicationId = ref<string | null>(null);
   const initialCompanyId = ref<string | null>(null);
@@ -121,8 +124,8 @@
     }
 
     try {
-      const [onboardingCompleted, profiles] = await withTimeout(
-        Promise.all([
+      const startupResults = await withTimeout(
+        Promise.allSettled([
           timeStartupTask("getOnboardingCompleted", () =>
             getOnboardingCompleted(),
           ),
@@ -133,6 +136,42 @@
           timeoutMs: STARTUP_TIMEOUT_MS,
         },
       );
+      const [onboardingCompletedResult, profilesResult] = startupResults;
+      const failedResults = [
+        {
+          label: "Onboarding state",
+          result: onboardingCompletedResult,
+        },
+        {
+          label: "Profiles",
+          result: profilesResult,
+        },
+      ].filter(
+        (entry): entry is { label: string; result: PromiseRejectedResult } =>
+          entry.result.status === "rejected",
+      );
+
+      for (const failed of failedResults) {
+        showFailedPromiseToast(toast, failed.label, failed.result.reason);
+      }
+
+      if (failedResults.length > 0) {
+        throw new Error(
+          `Failed startup initialization tasks: ${failedResults
+            .map((failed) => String(failed.result.reason))
+            .join("; ")}`,
+        );
+      }
+
+      if (
+        onboardingCompletedResult.status !== "fulfilled" ||
+        profilesResult.status !== "fulfilled"
+      ) {
+        throw new Error("Startup initialization did not complete successfully");
+      }
+
+      const onboardingCompleted = onboardingCompletedResult.value;
+      const profiles = profilesResult.value;
       const profileExists = profiles.length > 0;
 
       logStartupTiming(

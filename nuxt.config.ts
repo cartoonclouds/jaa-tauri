@@ -57,6 +57,11 @@ const appDatabaseUrl =
 const config: NuxtConfig = {
   srcDir: "src/",
 
+  devServer: {
+    host: "127.0.0.1",
+    port: 3000,
+  },
+
   app: {
     head: {
       title: appName,
@@ -262,6 +267,7 @@ const config: NuxtConfig = {
       ],
     },
     server: {
+      strictPort: true,
       forwardConsole: {
         unhandledErrors: true,
         logLevels: ["error", "warn", "info", "log", "debug"],

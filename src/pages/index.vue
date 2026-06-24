@@ -21,7 +21,7 @@
    * Type alias for top section view.
    */
   type TopSectionView = "overview" | "map";
-  
+
   /**
    * Defines top section option.
    */
@@ -35,10 +35,13 @@
   const { openCompaniesDialog } = useCompaniesDialog();
   const { subscribe } = usePubSub();
 
-  const profile = await profileService.getProfile();
-  const profileName = profile.fullName
-    ? formatProfileName(profile.fullName)
-    : "there";
+  const profile = (await profileService.getProfile()) as
+    | { fullName?: unknown }
+    | null
+    | undefined;
+  const fullName =
+    typeof profile?.fullName === "string" ? profile.fullName : "";
+  const profileName = formatProfileName(fullName);
   const showOverview = ref(await getSetting("showOverview"));
 
   const topView = ref<TopSectionView>("overview");

@@ -8,6 +8,8 @@
   import { zodResolver } from "@primevue/forms/resolvers/zod";
   import { CONSTANT_MODULE_SOURCES } from "@shared/constants/persistedConstants";
   import { SETTINGS_REFRESHED_TOPIC } from "@shared/constants/pubsubTopics";
+  import { showFailedPromiseToast } from "@shared/utils/toast";
+  import { useToast } from "primevue/usetoast";
   import { computed, reactive, ref, watch } from "vue";
   import { z } from "zod";
 
@@ -60,6 +62,7 @@
 
   const { service: settingService } = useSettingsService();
   const { publish } = usePubSub();
+  const toast = useToast();
 
   /**
    * Returns whether an exported constant value can be persisted.
@@ -220,17 +223,52 @@
     isBusy.value = true;
 
     try {
-      const [loadedSettings, constantRowsByGroup] = await Promise.all([
-        settingService.list(),
-        Promise.all(
-          constantGroups.value.map(async (group) => ({
-            rows: await settingService.listConstantRows(group.type, {
-              includeHidden: true,
-            }),
-            type: group.type,
-          })),
-        ),
-      ]);
+      const [loadedSettingsResult, constantRowsByGroupResult] =
+        await Promise.allSettled([
+          settingService.list(),
+          Promise.allSettled(
+            constantGroups.value.map(async (group) => ({
+              rows: await settingService.listConstantRows(group.type, {
+                includeHidden: true,
+              }),
+              type: group.type,
+            })),
+          ),
+        ]);
+
+      if (loadedSettingsResult.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Settings data",
+          loadedSettingsResult.reason,
+        );
+      }
+
+      if (constantRowsByGroupResult.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Constant groups",
+          constantRowsByGroupResult.reason,
+        );
+      }
+
+      if (
+        loadedSettingsResult.status === "rejected" &&
+        constantRowsByGroupResult.status === "rejected"
+      ) {
+        throw new Error(
+          `Failed loading settings dialog state: ${String(loadedSettingsResult.reason)}; ${String(constantRowsByGroupResult.reason)}`,
+        );
+      }
+
+      const loadedSettings =
+        loadedSettingsResult.status === "fulfilled"
+          ? loadedSettingsResult.value
+          : [];
+      const constantRowsByGroup =
+        constantRowsByGroupResult.status === "fulfilled"
+          ? constantRowsByGroupResult.value
+          : [];
       const settings = loadedSettings as unknown as Record<string, unknown>[];
 
       const currentRecord = settings[0] ?? {};
@@ -275,7 +313,17 @@
         constantRowsByType[group.type] = [];
       }
 
-      for (const groupRows of constantRowsByGroup) {
+      for (const groupRowsResult of constantRowsByGroup) {
+        if (groupRowsResult.status === "rejected") {
+          showFailedPromiseToast(
+            toast,
+            "Constant group rows",
+            groupRowsResult.reason,
+          );
+          continue;
+        }
+
+        const groupRows = groupRowsResult.value;
         constantRowsByType[groupRows.type] = groupRows.rows.map((row) => ({
           isNew: false,
           isVisible: row.isVisible,

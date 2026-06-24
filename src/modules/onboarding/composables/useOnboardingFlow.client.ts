@@ -11,10 +11,12 @@ import {
 import { useProfile } from "@modules/profile";
 import { toErrorMessage } from "@shared/utils/error";
 import { temporalNowEpochMilliseconds } from "@shared/utils/temporal";
+import { showFailedPromiseToast } from "@shared/utils/toast";
 import { invoke } from "@tauri-apps/api/core";
 import { appLocalDataDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useStepper } from "@vueuse/core";
+import { useToast } from "primevue/usetoast";
 import { computed, ref } from "vue";
 
 import { useFileSystem } from "@/composables/useFileSystem";
@@ -102,6 +104,7 @@ function createOnboardingFlowComposable() {
   const { sanitizeFileName, writeBrowserFileToAppLocalData } = useFileSystem({
     ensureDirectoryExists: true,
   });
+  const toast = useToast();
 
   const profile = ref<UserProfile>(defaultProfile());
   const saving = ref(false);
@@ -126,14 +129,37 @@ function createOnboardingFlowComposable() {
     try {
       hydrating.value = true;
 
-      const [profiles, documents] = await Promise.all([
+      const [profilesResult, documentsResult] = await Promise.allSettled([
         profileService.list(),
         documentService.list(),
       ]);
 
-      const existingProfile = profiles[0];
+      if (profilesResult.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Profile hydration",
+          profilesResult.reason,
+        );
+      }
 
-      profile.value = mapProfileToUserProfile(existingProfile);
+      if (documentsResult.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Document hydration",
+          documentsResult.reason,
+        );
+      }
+
+      const profiles =
+        profilesResult.status === "fulfilled" ? profilesResult.value : [];
+      const documents =
+        documentsResult.status === "fulfilled" ? documentsResult.value : [];
+
+      if (profiles.length > 0) {
+        profile.value = mapProfileToUserProfile(profiles[0]);
+      } else {
+        profile.value = defaultProfile();
+      }
 
       const latestResume = documents.find(
         (document) => document.kind === "resume",

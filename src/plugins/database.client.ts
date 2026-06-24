@@ -124,42 +124,26 @@ export default defineNuxtPlugin(async () => {
     );
   }
 
-  console.info(
+  console.warn(
     `[database] bootstrap start: url=${databaseConfig.configuredUrl}`,
   );
 
-  try {
-    const database = await connectWithDevRecovery(databaseConfig.configuredUrl);
-    console.info("[database] connection established");
+  // Opening sqlite creates the file if it does not exist yet.
+  const database = await connectWithDevRecovery(databaseConfig.configuredUrl);
+  console.warn("[database] sqlite file ensured and connection established");
 
-    await ensureMigrationsAppliedOnFirstRun(database);
-    console.info("[database] migration schema checks complete");
+  await ensureMigrationsAppliedOnFirstRun(database);
+  console.warn("[database] migration schema checks complete");
 
-    await seedProductionBootstrapOnFirstRun(database);
-    console.info("[database] production bootstrap seeding complete");
+  await seedProductionBootstrapOnFirstRun(database);
+  console.warn("[database] production bootstrap seeding complete");
 
-    await seedConstantsOnFirstRun(database);
-    console.info("[database] constants seeding complete");
+  await seedConstantsOnFirstRun(database);
+  console.warn("[database] constants seeding complete");
 
-    return {
-      provide: {
-        database,
-      },
-    };
-  } catch (error) {
-    if (!import.meta.dev) {
-      throw error;
-    }
-
-    console.error(
-      "[database] dev bootstrap failed; falling back to browser no-op database driver",
-      error,
-    );
-
-    return {
-      provide: {
-        database: createBrowserNoopDatabaseDriver(),
-      },
-    };
-  }
+  return {
+    provide: {
+      database,
+    },
+  };
 });

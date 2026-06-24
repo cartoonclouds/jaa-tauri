@@ -448,23 +448,64 @@ async function seedSemanticIndexOnFirstRun(
     settingsRows[0]?.semantic_enable_sqlite_vec,
   );
 
-  const [applications, contacts, companies] = await Promise.all([
-    database.select<ApplicationSemanticSourceRow>(
-      `SELECT
-         id,
-         title,
-         status,
-         event_flow_status,
-         location_text,
-         description,
-         interview_process,
-         benefits,
-         company_id
+  const [applicationsResult, contactsResult, companiesResult] =
+    await Promise.allSettled([
+      database.select<ApplicationSemanticSourceRow>(
+        `SELECT
+         applications.id,
+         applications.title,
+         CASE
+           WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
+           WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
+           WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
+           WHEN latest_event.type = 'Interview/Technical Interview' THEN 'technical'
+           WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
+           WHEN latest_event.type = 'Screening/Phone Screen' THEN 'phone-screening'
+           WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
+           WHEN latest_event.type = 'Application/Saved' THEN 'saved'
+           WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
+           ELSE 'saved'
+         END AS status,
+         CASE
+           WHEN latest_event.type = 'Decision/Rejected' THEN 'rejected'
+           WHEN latest_event.type = 'Decision/Accepted' THEN 'offer'
+           WHEN latest_event.type LIKE 'Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Negotiation/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Post-Offer/%' THEN 'offer'
+           WHEN latest_event.type LIKE 'Interview/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Assessment/%' THEN 'interview'
+           WHEN latest_event.type LIKE 'Screening/%' THEN 'applied'
+           WHEN latest_event.type = 'Application/Saved' THEN 'saved'
+           WHEN latest_event.type LIKE 'Application/%' THEN 'applied'
+           ELSE 'applied'
+         END AS event_flow_status,
+         applications.location_text,
+         applications.description,
+         applications.interview_process,
+         applications.benefits,
+         applications.company_id
        FROM applications
-       WHERE deleted_at IS NULL`,
-    ),
-    database.select<ContactSemanticSourceRow>(
-      `SELECT
+       LEFT JOIN (
+         SELECT
+           ae.application_id,
+           e.type,
+           ROW_NUMBER() OVER (
+             PARTITION BY ae.application_id
+             ORDER BY ae.sort_order DESC
+           ) AS rn
+         FROM application_events ae
+         INNER JOIN events e ON e.id = ae.event_id
+         WHERE ae.event_at IS NOT NULL
+       ) latest_event
+         ON latest_event.application_id = applications.id
+        AND latest_event.rn = 1
+       WHERE applications.deleted_at IS NULL`,
+      ),
+      database.select<ContactSemanticSourceRow>(
+        `SELECT
          id,
          full_name,
          type,
@@ -474,9 +515,9 @@ async function seedSemanticIndexOnFirstRun(
          location_text,
          notes
        FROM contacts`,
-    ),
-    database.select<CompanySemanticSourceRow>(
-      `SELECT
+      ),
+      database.select<CompanySemanticSourceRow>(
+        `SELECT
          id,
          name,
          industry,
@@ -486,8 +527,31 @@ async function seedSemanticIndexOnFirstRun(
          location_text,
          notes
        FROM companies`,
-    ),
-  ]);
+      ),
+    ]);
+
+  const failures = [applicationsResult, contactsResult, companiesResult].filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  if (failures.length > 0) {
+    throw new Error(
+      `Failed loading semantic seed source datasets: ${failures
+        .map((failure) => String(failure.reason))
+        .join("; ")}`,
+    );
+  }
+
+  if (
+    applicationsResult.status !== "fulfilled" ||
+    contactsResult.status !== "fulfilled" ||
+    companiesResult.status !== "fulfilled"
+  ) {
+    throw new Error("Semantic seed source datasets were not fully resolved");
+  }
+
+  const applications = applicationsResult.value;
+  const contacts = contactsResult.value;
+  const companies = companiesResult.value;
 
   const companyNameById = new Map(
     companies.map((company) => [company.id, company.name]),

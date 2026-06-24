@@ -6,6 +6,8 @@
   import { useApplication } from "@modules/applications";
   import { useContact } from "@modules/contacts";
   import { createEntityLocationsLeafletManager } from "@shared/utils/entityLocationsLeaflet";
+  import { showFailedPromiseToast } from "@shared/utils/toast";
+  import { useToast } from "primevue/usetoast";
   import {
     computed,
     nextTick,
@@ -41,6 +43,7 @@
 
   const { service: contactService } = useContact();
   const { service: applicationService } = useApplication();
+  const toast = useToast();
   const mapManager = createEntityLocationsLeafletManager({
     onError: (message) => {
       loadingError.value = message;
@@ -136,13 +139,40 @@
     loadingError.value = null;
 
     try {
-      const [contactsResult, applicationsResult] = await Promise.all([
+      const [contactsResult, applicationsResult] = await Promise.allSettled([
         contactService.list(),
         applicationService.list(),
       ]);
 
-      contacts.value = contactsResult;
-      applications.value = applicationsResult;
+      contacts.value =
+        contactsResult.status === "fulfilled" ? contactsResult.value : [];
+      applications.value =
+        applicationsResult.status === "fulfilled"
+          ? applicationsResult.value
+          : [];
+
+      if (contactsResult.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Contacts map data",
+          contactsResult.reason,
+        );
+      }
+
+      if (applicationsResult.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Applications map data",
+          applicationsResult.reason,
+        );
+      }
+
+      if (
+        contactsResult.status === "rejected" &&
+        applicationsResult.status === "rejected"
+      ) {
+        loadingError.value = "Unable to load map data right now.";
+      }
     } catch {
       loadingError.value = "Unable to load map data right now.";
     } finally {

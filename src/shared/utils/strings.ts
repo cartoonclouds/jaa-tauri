@@ -8,9 +8,22 @@
 export function formatProfileName(name: string): string {
   const formattedName = name
     .split(" ")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
 
-  return formattedName[0] + " " + formattedName[1].slice(0, 1) + ".";
+  const firstName = formattedName[0];
+  const lastName = formattedName[1];
+
+  if (!firstName) {
+    return "there";
+  }
+
+  if (!lastName) {
+    return firstName;
+  }
+
+  return `${firstName} ${lastName.slice(0, 1)}.`;
 }
 
 /**

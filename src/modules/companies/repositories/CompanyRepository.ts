@@ -44,9 +44,28 @@ export class CompanyRepository implements ICompanyRepository {
       }),
     );
 
-    return Promise.all(
+    const mappedRows = await Promise.allSettled(
       rows.map(async (row) => this.withTags(mapCompanyRowToEntity(row))),
     );
+
+    const failures = mappedRows.filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to map companies list rows: ${failures
+          .map((failure) => String(failure.reason))
+          .join("; ")}`,
+      );
+    }
+
+    return mappedRows.map((result) => {
+      if (result.status === "rejected") {
+        throw result.reason;
+      }
+
+      return result.value;
+    });
   }
 
   async listPage(

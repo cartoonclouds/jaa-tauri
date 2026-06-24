@@ -21,6 +21,8 @@ import {
   joinSearchContent,
   toSearchText,
 } from "@modules/search/utils/searchUtils";
+import { showFailedPromiseToast } from "@shared/utils/toast";
+import { useToast } from "primevue/usetoast";
 
 import { ucwords } from "@/shared/utils/strings";
 
@@ -38,13 +40,46 @@ export function useGlobalSearchService(): GlobalSearchServiceContract {
   const { service: contactService } = useContact();
   const { service: companyService } = useCompany();
   const semanticSearchService = useSemanticSearchService();
+  const toast = useToast();
 
   async function fetchSearchDataset(): Promise<GlobalSearchDataset> {
-    const [applications, contacts, companies] = await Promise.all([
-      applicationService.list(),
-      contactService.list(),
-      companyService.list(),
-    ]);
+    const [applicationsResult, contactsResult, companiesResult] =
+      await Promise.allSettled([
+        applicationService.list(),
+        contactService.list(),
+        companyService.list(),
+      ]);
+
+    if (applicationsResult.status === "rejected") {
+      showFailedPromiseToast(
+        toast,
+        "Application search dataset",
+        applicationsResult.reason,
+      );
+    }
+
+    if (contactsResult.status === "rejected") {
+      showFailedPromiseToast(
+        toast,
+        "Contact search dataset",
+        contactsResult.reason,
+      );
+    }
+
+    if (companiesResult.status === "rejected") {
+      showFailedPromiseToast(
+        toast,
+        "Company search dataset",
+        companiesResult.reason,
+      );
+    }
+
+    const applications =
+      applicationsResult.status === "fulfilled" ? applicationsResult.value : [];
+    const contacts =
+      contactsResult.status === "fulfilled" ? contactsResult.value : [];
+    const companies =
+      companiesResult.status === "fulfilled" ? companiesResult.value : [];
 
     const locations = buildLocationRecords({
       applications,
@@ -268,12 +303,44 @@ export function useGlobalSearchService(): GlobalSearchServiceContract {
         contactMatches,
         companyMatches,
         locationMatches,
-      ] = await Promise.all([
+      ] = await Promise.allSettled([
         searchScope("applications", "application", queryByScope.applications),
         searchScope("contacts", "contact", queryByScope.contacts),
         searchScope("companies", "company", queryByScope.companies),
         searchScope("locations", "location", queryByScope.locations),
       ]);
+
+      if (applicationMatches.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Application semantic search",
+          applicationMatches.reason,
+        );
+      }
+
+      if (contactMatches.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Contact semantic search",
+          contactMatches.reason,
+        );
+      }
+
+      if (companyMatches.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Company semantic search",
+          companyMatches.reason,
+        );
+      }
+
+      if (locationMatches.status === "rejected") {
+        showFailedPromiseToast(
+          toast,
+          "Location semantic search",
+          locationMatches.reason,
+        );
+      }
 
       const applicationsById = new Map(
         dataset.applications.map((application) => [
@@ -292,25 +359,27 @@ export function useGlobalSearchService(): GlobalSearchServiceContract {
       );
 
       const applications = mapSemanticMatchesToResults(
-        applicationMatches,
+        applicationMatches.status === "fulfilled"
+          ? applicationMatches.value
+          : [],
         applicationsById,
         mapApplicationResult,
       );
 
       const contacts = mapSemanticMatchesToResults(
-        contactMatches,
+        contactMatches.status === "fulfilled" ? contactMatches.value : [],
         contactsById,
         mapContactResult,
       );
 
       const companies = mapSemanticMatchesToResults(
-        companyMatches,
+        companyMatches.status === "fulfilled" ? companyMatches.value : [],
         companiesById,
         mapCompanyResult,
       );
 
       const locations = mapSemanticMatchesToResults(
-        locationMatches,
+        locationMatches.status === "fulfilled" ? locationMatches.value : [],
         locationsById,
         mapLocationResult,
       );

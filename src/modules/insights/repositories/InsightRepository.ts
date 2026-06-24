@@ -88,7 +88,19 @@ export class InsightRepository implements IInsightRepository {
       (MetricClass) => new MetricClass(this.db),
     );
 
-    await Promise.all(metrics.map(async (metric) => await metric.execute()));
+    const metricExecutionResults = await Promise.allSettled(
+      metrics.map(async (metric) => await metric.execute()),
+    );
+    const failures = metricExecutionResults.filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to compute overview insight metrics: ${failures
+          .map((failure) => String(failure.reason))
+          .join("; ")}`,
+      );
+    }
 
     return metrics;
   }

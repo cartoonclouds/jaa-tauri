@@ -34,10 +34,21 @@ async function writeToTauri(
   }
 
   try {
-    const [{ isTauri }, pluginLog] = await Promise.all([
+    const [coreResult, pluginLogResult] = await Promise.allSettled([
       import("@tauri-apps/api/core"),
       import("@tauri-apps/plugin-log"),
     ]);
+
+    if (coreResult.status === "rejected") {
+      return false;
+    }
+
+    if (pluginLogResult.status === "rejected") {
+      return false;
+    }
+
+    const { isTauri } = coreResult.value;
+    const pluginLog = pluginLogResult.value;
 
     if (!isTauri()) {
       return false;
