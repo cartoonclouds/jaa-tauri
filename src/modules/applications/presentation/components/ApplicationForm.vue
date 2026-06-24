@@ -126,7 +126,7 @@
       companyId: props.initialValues.companyId ?? null,
       title: props.initialValues.title ?? "",
       status: props.initialValues.status ?? ApplicationStatusEnum.Saved,
-      sourceUrl: props.initialValues.sourceUrl ?? "",
+      url: props.initialValues.url ?? "",
       appliedAt: props.initialValues.appliedAt ?? "",
       locationText: props.initialValues.locationText ?? "",
       locationLat: props.initialValues.locationLat ?? null,
@@ -200,7 +200,7 @@
       companyId: (values.companyId as string) || null,
       title: (values.title as string).trim(),
       status: values.status as ApplicationStatus,
-      sourceUrl: values.sourceUrl ? (values.sourceUrl as string).trim() : null,
+      url: values.url ? (values.url as string).trim() : null,
       appliedAt: values.appliedAt ? (values.appliedAt as string) : null,
       locationText: values.locationText
         ? (values.locationText as string).trim()
@@ -312,24 +312,24 @@
 
         <div class="space-y-1">
           <label
-            for="application-source-url"
+            for="application-url"
             class="text-sm font-medium text-surface-700"
           >
-            Source URL
+            URL
           </label>
           <InputText
-            name="sourceUrl"
+            name="url"
             placeholder="https://company.com/jobs/role"
             fluid
-            :invalid="$form.sourceUrl?.invalid"
+            :invalid="$form.url?.invalid"
           />
           <Message
-            v-if="$form.sourceUrl?.invalid"
+            v-if="$form.url?.invalid"
             severity="error"
             size="small"
             variant="simple"
           >
-            {{ $form.sourceUrl?.error?.message }}
+            {{ $form.url?.error?.message }}
           </Message>
         </div>
 

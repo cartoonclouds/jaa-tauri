@@ -39,7 +39,7 @@ export function mapApplicationRowToEntity(
         row.event_flow_status,
         ApplicationEventFlowStatus,
       ) ?? ApplicationEventFlowStatus.Saved,
-    sourceUrl: toNullableString(row.source_url),
+    url: toNullableString(row.url),
     appliedAt: mapOptionalRowDate(row.applied_at),
     locationText: toNullableString(row.location_text),
     locationLat: (row.location_lat as number | null) ?? null,

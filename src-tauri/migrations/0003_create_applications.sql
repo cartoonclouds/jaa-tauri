@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS applications (
   id TEXT PRIMARY KEY NOT NULL,
   company_id TEXT,
   title TEXT NOT NULL,
-  source_url TEXT,
+  url TEXT,
   applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   location_text TEXT,
   location_lat REAL,

@@ -10,7 +10,7 @@ export function createEmptyApplicationFormValues(): ApplicationFormValues {
     companyId: null,
     title: "",
     status: ApplicationStatus.Saved,
-    sourceUrl: "",
+    url: "",
     appliedAt: "",
     locationText: "",
     locationLat: null,

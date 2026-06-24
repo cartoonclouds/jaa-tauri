@@ -10,7 +10,7 @@ export interface ApplicationRow {
   id: string;
   company_id: string;
   title: string;
-  source_url: string | null;
+  url: string | null;
   applied_at: string;
   location_text: string | null;
   location_lat: number | null;
@@ -96,7 +96,7 @@ export function createApplicationRows(
         id: faker.string.uuid(),
         company_id: companyId,
         title: faker.person.jobTitle(),
-        source_url: faker.internet.url(),
+        url: faker.internet.url(),
         applied_at: createdAt.toISOString(),
         location_text: location.locationText,
         location_lat: location.locationLat,

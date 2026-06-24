@@ -69,15 +69,15 @@
       </p>
     </ApplicationDetailsCard>
 
-    <ApplicationDetailsCard title="Source URL">
+    <ApplicationDetailsCard title="URL">
       <a
-        v-if="application.sourceUrl"
-        :href="application.sourceUrl"
+        v-if="application.url"
+        :href="application.url"
         target="_blank"
         rel="noreferrer"
         class="text-sm font-medium text-primary-600 hover:underline"
       >
-        {{ application.sourceUrl }}
+        {{ application.url }}
       </a>
       <p v-else class="text-sm">-</p>
     </ApplicationDetailsCard>

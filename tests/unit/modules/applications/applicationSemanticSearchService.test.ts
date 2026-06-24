@@ -15,7 +15,7 @@ function createApplication(overrides: Partial<Application>): Application {
     id: "app-1",
     companyId: "company-1",
     title: "Frontend Engineer",
-    sourceUrl: null,
+    url: null,
     appliedAt: now,
     locationText: "London",
     locationLat: null,

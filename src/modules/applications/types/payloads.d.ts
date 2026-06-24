@@ -11,8 +11,8 @@ import {
  * Shared field set used by application payloads and form values.
  */
 interface ApplicationPayloadOptionalFields {
-  /** Optional source URL where the application was found. */
-  sourceUrl?: string | null;
+  /** Optional URL where the application was found. */
+  url?: string | null;
   /** Optional date the application was submitted. */
   appliedAt?: string | null;
   /** Preferred attendance mode, if known. */
@@ -35,7 +35,7 @@ interface ApplicationPayloadOptionalFields {
 
 export type ApplicationBasePayload = Omit<
   ApplicationBase,
-  | "sourceUrl"
+  | "url"
   | "appliedAt"
   | "attendanceType"
   | "employmentType"

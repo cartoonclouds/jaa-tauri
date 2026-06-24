@@ -47,7 +47,7 @@ export function buildApplicationUpdatePayload(
     companyId: null,
     title: "Frontend Engineer",
     status: ApplicationStatus.Applied,
-    sourceUrl: null,
+    url: null,
     appliedAt: null,
     locationText: null,
     locationLat: null,
@@ -78,8 +78,8 @@ export function buildApplicationRow(
     company_id: null,
     title: "Frontend Engineer",
     status: "applied",
+    url: null,
     event_flow_status: "offer",
-    source_url: null,
     applied_at: now,
     location_text: null,
     location_lat: null,
@@ -509,4 +509,3 @@ export function buildTagCreatePayload(
     ...overrides,
   };
 }
-

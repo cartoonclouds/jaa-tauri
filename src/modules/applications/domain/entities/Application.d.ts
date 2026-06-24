@@ -16,8 +16,8 @@ export interface ApplicationBase extends LocationFields {
   companyId: string | null;
   /** Application title. */
   title: string;
-  /** Source URL where the application was discovered, when available. */
-  sourceUrl: string | null;
+  /** URL where the application was discovered, when available. */
+  url: string | null;
   /** Application submission date, when available. */
   appliedAt: TemporalDateTime | null;
   /** Preferred attendance mode, when known. */
